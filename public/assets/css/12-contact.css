@@ -1,0 +1,632 @@
+/* ========================================
+   12. CONTACT PAGE - کامل
+   ======================================== */
+
+.contact-page,
+.contact-page * {
+    font-family: 'Vazirmatn', 'IRANSans', Tahoma, sans-serif !important;
+}
+
+/* ========================================
+   MAIN CONTAINER
+   ======================================== */
+.contact-page {
+    min-height: 70vh;
+    padding: 40px 0 20px;
+    background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+}
+
+.contact-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+.contact-header {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.contact-badge {
+    display: inline-block;
+    background: #eef2ff;
+    color: #2563eb;
+    padding: 6px 20px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.contact-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.contact-title span {
+    color: #2563eb;
+    position: relative;
+}
+
+.contact-title span::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(135deg, #2563eb, #60a5fa);
+    border-radius: 4px;
+}
+
+.contact-subtitle {
+    font-size: 15px;
+    color: #64748b;
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.9;
+}
+
+/* ========================================
+   ALERTS
+   ======================================== */
+.contact-alert {
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    border: 1px solid transparent;
+    animation: slideDown 0.4s ease;
+}
+
+.contact-alert i {
+    font-size: 20px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.contact-alert-success {
+    background: #d1fae5;
+    color: #16a34a;
+    border-color: #86efac;
+}
+
+.contact-alert-danger {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fca5a5;
+}
+
+.contact-alert-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fcd34d;
+}
+
+.contact-alert-warning a {
+    color: #2563eb !important;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.contact-alert-warning a:hover {
+    color: #1d4ed8 !important;
+}
+
+.contact-alert ul {
+    list-style: disc;
+    padding-right: 20px;
+    margin: 0;
+}
+
+.contact-alert ul li {
+    margin-bottom: 2px;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   FORM WRAPPER
+   ======================================== */
+.contact-form-wrapper {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   FORM CARD
+   ======================================== */
+.contact-form-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 36px 40px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e8edf5;
+    transition: all 0.3s ease;
+}
+
+.contact-form-card:hover {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+}
+
+.form-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.form-title i {
+    color: #2563eb;
+    font-size: 24px;
+}
+
+/* Form Rows */
+.contact-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.contact-form .form-group {
+    margin-bottom: 18px;
+}
+
+.contact-form .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Labels */
+.contact-form label {
+    display: block;
+    font-weight: 500;
+    font-size: 14px;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+.contact-form label i {
+    color: #2563eb;
+    margin-left: 8px;
+    width: 20px;
+    text-align: center;
+}
+
+.contact-form label .optional {
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 12px;
+}
+
+/* Input Wrapper */
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper input,
+.input-wrapper textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: 'Vazirmatn', 'IRANSans', Tahoma, sans-serif;
+    transition: all 0.3s ease;
+    background: #fafbfc;
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+.input-wrapper input::placeholder,
+.input-wrapper textarea::placeholder {
+    color: #b0b8c4;
+    font-weight: 300;
+}
+
+.input-wrapper input:focus,
+.input-wrapper textarea:focus {
+    border-color: #2563eb;
+    outline: none;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+
+.input-wrapper textarea {
+    resize: vertical;
+    min-height: 140px;
+}
+
+/* Focus Border Effect */
+.input-focus-border {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #2563eb, #60a5fa);
+    border-radius: 0 0 12px 12px;
+    transition: width 0.4s ease;
+}
+
+.input-wrapper input:focus ~ .input-focus-border,
+.input-wrapper textarea:focus ~ .input-focus-border {
+    width: 100%;
+}
+
+/* Input Error */
+.input-error {
+    display: block;
+    font-size: 12px;
+    color: #ef4444;
+    margin-top: 4px;
+    min-height: 20px;
+}
+
+.input-wrapper input.error,
+.input-wrapper textarea.error {
+    border-color: #ef4444 !important;
+}
+
+.input-wrapper input.error:focus,
+.input-wrapper textarea.error:focus {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Character Counter */
+.char-counter {
+    text-align: left;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 6px;
+    direction: ltr;
+}
+
+.char-counter #charCount {
+    color: #94a3b8;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+/* ========================================
+   SUBMIT BUTTON
+   ======================================== */
+.btn-submit {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 600;
+    font-family: 'Vazirmatn', 'IRANSans', Tahoma, sans-serif;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+}
+
+/* Glass effect */
+.btn-submit::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent 50%);
+    pointer-events: none;
+    border-radius: 12px;
+}
+
+/* Ripple effect */
+.btn-submit::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn-submit:hover::after {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(37, 99, 235, 0.4);
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.btn-submit:active {
+    transform: translateY(0px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.btn-submit:disabled:hover {
+    transform: none !important;
+}
+
+.btn-submit i {
+    font-size: 20px;
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-submit span {
+    position: relative;
+    z-index: 1;
+}
+
+.btn-submit:hover i {
+    transform: translateX(-4px) scale(1.1);
+}
+
+.btn-submit .fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ========================================
+   USER MESSAGES
+   ======================================== */
+.user-messages-section {
+    margin-top: 40px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 32px 36px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e8edf5;
+}
+
+.messages-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.messages-title i {
+    color: #2563eb;
+}
+
+.messages-count {
+    background: #eef2ff;
+    color: #2563eb;
+    padding: 2px 12px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: auto;
+}
+
+.messages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.message-item {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 18px 22px;
+    border-right: 4px solid #2563eb;
+    transition: all 0.3s ease;
+}
+
+.message-item:hover {
+    background: #f1f5f9;
+}
+
+.message-item.message-unread {
+    border-right-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.message-subject {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.message-subject i {
+    color: #2563eb;
+    font-size: 16px;
+}
+
+.message-status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 16px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.message-status.status-replied {
+    background: #d1fae5;
+    color: #16a34a;
+}
+
+.message-status.status-unread {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.message-status.status-read {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.message-body p {
+    margin: 6px 0 10px 0;
+    color: #334155;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.message-date {
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.message-date i {
+    font-size: 13px;
+}
+
+/* Replies */
+.message-replies {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.reply-item {
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-top: 10px;
+    border-right: 3px solid #22c55e;
+}
+
+.reply-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.reply-header i {
+    color: #22c55e;
+}
+
+.reply-date {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.reply-item p {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    color: #1e293b;
+    line-height: 1.7;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+    .contact-page {
+        padding: 24px 0 16px;
+    }
+    
+    .contact-title {
+        font-size: 26px;
+    }
+    
+    .contact-form .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    
+    .contact-form-card {
+        padding: 24px 20px;
+    }
+    
+    .user-messages-section {
+        padding: 20px 16px;
+    }
+    
+    .message-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-title {
+        font-size: 22px;
+    }
+    
+    .contact-form-card {
+        padding: 16px 14px;
+    }
+    
+    .btn-submit {
+        font-size: 15px;
+        padding: 14px 16px;
+    }
+    
+    .message-item {
+        padding: 14px 16px;
+    }
+}

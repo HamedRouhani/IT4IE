@@ -1,0 +1,22 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # If the request is for a real file or directory, serve it directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+    
+    # If the request is for test_db.php, serve it directly
+    RewriteCond %{REQUEST_URI} !^/test_db\.php$
+    
+    # Route all other requests to index.php
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>
+
+AddDefaultCharset UTF-8
+
+# Allow access to all files in public
+<FilesMatch "\.(css|js|jpg|jpeg|png|gif|svg|ico|woff|woff2|ttf|eot|php)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>

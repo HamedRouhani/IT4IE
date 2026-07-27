@@ -1,0 +1,156 @@
+/* ========================================
+   6. POSTS SECTION
+   ======================================== */
+.posts-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.view-all {
+    color: var(--primary);
+    font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    transition: var(--transition);
+}
+
+.view-all:hover {
+    color: var(--primary-dark);
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.post-card {
+    background: var(--gray-lighter);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    transition: all 0.3s ease;
+}
+
+.post-card:hover {
+    background: #e8edf5;
+    transform: translateX(-4px);
+}
+
+.post-image {
+    width: 100%;
+    height: 200px;
+    background: var(--gray-light);
+    overflow: hidden;
+    border-radius: var(--radius) var(--radius) 0 0;
+    margin: -16px -20px 16px -20px;
+}
+
+.post-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.post-card:hover .post-image img {
+    transform: scale(1.03);
+}
+
+.post-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.post-title a {
+    color: var(--dark);
+    text-decoration: none;
+}
+
+.post-title a:hover {
+    color: var(--primary);
+}
+
+.post-meta {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.post-meta i {
+    margin-left: 4px;
+}
+
+.post-meta a {
+    color: var(--primary);
+}
+
+/* Post Summary - Fixed line-clamp */
+.post-summary {
+    color: var(--gray-dark);
+    font-size: 14px;
+    margin-bottom: 10px;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    display: -moz-box;
+    -moz-line-clamp: 2;
+    -moz-box-orient: vertical;
+    display: box;
+    line-clamp: 2;
+    box-orient: vertical;
+    max-height: 3.2em;
+    word-wrap: break-word;
+}
+
+.read-more {
+    color: var(--primary);
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition);
+}
+
+.read-more:hover {
+    color: var(--primary-dark);
+    gap: 10px;
+}
+
+.read-more i {
+    transition: var(--transition);
+}
+
+.read-more:hover i {
+    transform: translateX(-4px);
+}
+
+.no-posts {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--gray);
+    grid-column: 1 / -1;
+}
