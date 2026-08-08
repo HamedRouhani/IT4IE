@@ -1,4 +1,3 @@
-<!-- Sidebar - Categories -->
 <aside class="sidebar">
     <div class="sidebar-card">
         <h3 class="sidebar-title">
@@ -7,13 +6,9 @@
         </h3>
         <ul class="sidebar-menu">
             <?php foreach ($categories as $category): ?>
-                <li class="sidebar-item">
+                <li class="sidebar-item <?php echo isset($category['children']) && !empty($category['children']) ? 'has-submenu' : ''; ?>">
                     <a href="/category/<?php echo $category['slug']; ?>" class="sidebar-link">
-                        <?php if ($category['icon']): ?>
-                            <i class="<?php echo $category['icon']; ?>"></i>
-                        <?php else: ?>
-                            <i class="fas fa-folder"></i>
-                        <?php endif; ?>
+                        <i class="<?php echo $category['icon'] ?? 'fas fa-folder'; ?>"></i>
                         <span><?php echo $category['name']; ?></span>
                         <?php if (isset($category['children']) && !empty($category['children'])): ?>
                             <i class="fas fa-chevron-left sidebar-arrow"></i>
@@ -37,7 +32,7 @@
         </ul>
     </div>
     
-    <!-- Additional sidebar widget (برترین مطالب) -->
+    <!-- Widget برترین مطالب -->
     <div class="sidebar-card">
         <h3 class="sidebar-title">
             <i class="fas fa-star"></i>

@@ -72,6 +72,7 @@ require_once APP_PATH . '/models/Category.php';
 require_once APP_PATH . '/models/Setting.php';
 require_once APP_PATH . '/models/Message.php';
 require_once APP_PATH . '/models/User.php';
+require_once APP_PATH . '/models/Software.php'; // ← اضافه شد
 
 // ============================================
 // ROUTING

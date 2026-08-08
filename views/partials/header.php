@@ -3,10 +3,7 @@
         <div class="header-wrapper">
             <!-- Logo -->
             <div class="logo">
-                <a href="/">
-                    <span class="logo-icon">IT</span>
-                    <span class="logo-text">4IE</span>
-                </a>
+                <a href="/"><span>IT4IE</span></a>
             </div>
             
             <!-- Navigation -->
@@ -42,7 +39,7 @@
                 </ul>
             </nav>
             
-            <!-- Header Actions - دکمه‌های ورود و ثبت‌نام -->
+            <!-- Header Actions -->
             <div class="header-actions">
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <div class="user-menu">
@@ -69,14 +66,8 @@
                         </div>
                     </div>
                 <?php else: ?>
-                    <a href="/login" class="btn-login">
-                        <i class="fas fa-sign-in-alt"></i> 
-                        <span>ورود</span>
-                    </a>
-                    <a href="/register" class="btn-register">
-                        <i class="fas fa-user-plus"></i> 
-                        <span>ثبت‌نام</span>
-                    </a>
+                    <a href="/login" class="btn-login">ورود</a>
+                    <a href="/register" class="btn-register">ثبت‌نام</a>
                 <?php endif; ?>
             </div>
             

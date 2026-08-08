@@ -1,5 +1,5 @@
 /* ========================================
-   1. RESET & BASE
+   1. RESET & BASE - تم بنفش
    ======================================== */
 * {
     margin: 0;
@@ -8,115 +8,106 @@
 }
 
 :root {
-    /* Primary Colors */
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --primary-light: #60a5fa;
-    --primary-rgb: 37, 99, 235;
+    /* رنگ‌های بنفش */
+    --primary: #6C3CE1;
+    --primary-dark: #5A2FD4;
+    --primary-light: #8B6FE8;
+    --primary-rgb: 108, 60, 225;
+    --primary-gradient: linear-gradient(135deg, #6C3CE1, #8B6FE8);
     
-    /* Secondary Colors */
-    --secondary: #f59e0b;
-    --secondary-dark: #d97706;
-    --secondary-light: #fcd34d;
+    --secondary: #F59E0B;
+    --success: #22C55E;
+    --danger: #EF4444;
+    --warning: #F59E0B;
     
-    /* Status Colors */
-    --success: #22c55e;
-    --success-dark: #16a34a;
-    --danger: #ef4444;
-    --danger-dark: #dc2626;
-    --warning: #f59e0b;
-    --warning-dark: #d97706;
-    --info: #06b6d4;
-    --info-dark: #0891b2;
-    
-    /* Neutral Colors */
-    --dark: #1e293b;
-    --dark-light: #334155;
-    --gray: #94a3b8;
-    --gray-light: #e2e8f0;
-    --gray-lighter: #f1f5f9;
+    --dark: #1E293B;
+    --gray: #94A3B8;
+    --gray-light: #E2E8F0;
+    --gray-lighter: #F8FAFC;
     --gray-dark: #475569;
-    --white: #ffffff;
-    --black: #000000;
+    --white: #FFFFFF;
     
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 6px 10px -2px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --shadow: 0 4px 24px rgba(108, 60, 225, 0.08);
+    --shadow-lg: 0 8px 40px rgba(108, 60, 225, 0.12);
+    --shadow-xl: 0 12px 56px rgba(108, 60, 225, 0.16);
     
-    /* Border Radius */
-    --radius-sm: 4px;
-    --radius: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 24px;
+    --radius: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
     --radius-full: 9999px;
     
-    /* Transitions */
-    --transition-fast: 150ms ease;
-    --transition: 300ms ease;
-    --transition-slow: 500ms ease;
-    
-    /* Spacing */
-    --spacing-1: 4px;
-    --spacing-2: 8px;
-    --spacing-3: 12px;
-    --spacing-4: 16px;
-    --spacing-5: 20px;
-    --spacing-6: 24px;
-    --spacing-8: 32px;
-    --spacing-10: 40px;
-    --spacing-12: 48px;
-    --spacing-16: 64px;
-    --spacing-20: 80px;
-    
-    /* Container */
-    --container-max: 1200px;
-    
-    /* Font */
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --font-family: 'Vazirmatn', 'IRANSans', Tahoma, sans-serif;
+    
+    /* فواصل خطوط */
+    --line-height-normal: 1.8;
+    --line-height-reading: 2;
+    --line-height-heading: 1.4;
+    
+    /* فاصله بین پاراگراف‌ها */
+    --paragraph-gap: 1.2rem;
 }
 
 html {
     scroll-behavior: smooth;
+    font-size: 16px;
 }
 
 body {
     font-family: var(--font-family);
-    background: #f8fafc;
+    background: #FAFAFE;
     color: var(--dark);
-    line-height: 1.7;
+    line-height: var(--line-height-normal);
     direction: rtl;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Typography */
+/* ========================================
+   تایپوگرافی
+   ======================================== */
 h1, h2, h3, h4, h5, h6,
 p, a, span, div, button, input, textarea, select,
 label, li, ul, ol, table, th, td {
     font-family: var(--font-family) !important;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-weight: 700;
-    line-height: 1.25;
-    margin-bottom: var(--spacing-4);
+h1 {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 800;
+    line-height: var(--line-height-heading);
+    margin-bottom: 0.5rem;
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
-h5 { font-size: 1.125rem; }
-h6 { font-size: 1rem; }
+h2 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700;
+    line-height: var(--line-height-heading);
+    margin-bottom: 0.5rem;
+}
+
+h3 {
+    font-size: clamp(1.2rem, 2vw, 1.6rem);
+    font-weight: 600;
+    line-height: var(--line-height-heading);
+    margin-bottom: 0.4rem;
+}
+
+h4 {
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    font-weight: 600;
+    line-height: var(--line-height-heading);
+    margin-bottom: 0.3rem;
+}
 
 p {
-    margin-bottom: var(--spacing-4);
+    font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+    line-height: var(--line-height-reading);
+    margin-bottom: var(--paragraph-gap);
+    color: var(--gray-dark);
 }
 
 a {
@@ -137,3 +128,29 @@ img {
     max-width: 100%;
     height: auto;
 }
+
+/* ========================================
+   کلاس‌های کمکی برای فاصله‌گذاری
+   ======================================== */
+.text-sm { font-size: 0.875rem; }
+.text-base { font-size: 1rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+
+.leading-normal { line-height: 1.8; }
+.leading-relaxed { line-height: 2; }
+.leading-loose { line-height: 2.2; }
+
+.space-y-1 { margin-bottom: 0.5rem; }
+.space-y-2 { margin-bottom: 1rem; }
+.space-y-3 { margin-bottom: 1.5rem; }
+.space-y-4 { margin-bottom: 2rem; }
+
+/* ========================================
+   کلاس‌های کمکی برای تم بنفش
+   ======================================== */
+.bg-purple { background: var(--primary); }
+.bg-purple-gradient { background: var(--primary-gradient); }
+.text-purple { color: var(--primary); }
+.border-purple { border-color: var(--primary); }

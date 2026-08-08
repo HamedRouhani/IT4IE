@@ -107,4 +107,15 @@ return [
         'controller' => 'AdminController',
         'action' => 'settings'
     ],
+    // Software routes
+    [
+        'pattern' => 'software',
+        'controller' => 'SoftwareController',
+        'action' => 'index'
+    ],
+    [
+        'pattern' => 'software/{slug}',
+        'controller' => 'SoftwareController',
+        'action' => 'detail'
+    ],
 ];

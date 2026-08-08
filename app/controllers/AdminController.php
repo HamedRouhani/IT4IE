@@ -69,10 +69,12 @@ class AdminController extends Controller
             $category_id = $_POST['category_id'] ?? null;
             $status = $_POST['status'] ?? 'draft';
             
+            // اگر slug خالی بود، از عنوان تولید کن
             if (empty($slug)) {
                 $slug = $this->generateSlug($title);
             }
             
+            // Validate
             $errors = [];
             if (strlen($title) < 5) {
                 $errors[] = 'عنوان باید حداقل ۵ کاراکتر باشد.';
@@ -81,6 +83,7 @@ class AdminController extends Controller
                 $errors[] = 'محتوا نمی‌تواند خالی باشد.';
             }
             
+            // Check if slug exists
             $postModel = new Post();
             $existingPost = $postModel->findBySlug($slug);
             if ($existingPost) {
@@ -96,7 +99,8 @@ class AdminController extends Controller
                     'category_id' => $category_id,
                     'author_id' => $_SESSION['user_id'],
                     'status' => $status,
-                    'published_at' => $status === 'published' ? date('Y-m-d H:i:s') : null
+                    'published_at' => $status === 'published' ? date('Y-m-d H:i:s') : null,
+                    'created_at' => date('Y-m-d H:i:s')
                 ];
                 
                 $result = $postModel->create($data);
@@ -111,7 +115,7 @@ class AdminController extends Controller
         }
         
         $this->renderAdmin('admin/post_form', [
-            'title' => 'ایجاد پست جدید - IT4IE',
+            'title' => 'ایجاد پست جدید',
             'categories' => $categories,
             'errors' => $errors ?? null,
             'post' => null
@@ -180,7 +184,7 @@ class AdminController extends Controller
         }
         
         $this->renderAdmin('admin/post_form', [
-            'title' => 'ویرایش پست - IT4IE',
+            'title' => 'ویرایش پست',
             'post' => $post,
             'categories' => $categories,
             'errors' => $errors ?? null
@@ -266,9 +270,33 @@ class AdminController extends Controller
     
     private function generateSlug($string)
     {
-        $string = trim($string);
-        $string = preg_replace('/[^a-zA-Z0-9_\u0600-\u06FF]/', '-', $string);
-        $string = preg_replace('/-+/', '-', $string);
-        return strtolower(trim($string, '-'));
+        // اگر ورودی null یا خالی بود، یک slug پیش‌فرض برگردان
+        if (empty($string)) {
+            return 'post-' . time();
+        }
+        
+        // تبدیل به حروف کوچک
+        $slug = mb_strtolower(trim($string), 'UTF-8');
+        
+        // جایگزینی کاراکترهای فارسی با معادل انگلیسی
+        $persian = ['آ', 'ا', 'ب', 'پ', 'ت', 'ث', 'ج', 'چ', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'ژ', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ', 'ع', 'غ', 'ف', 'ق', 'ک', 'گ', 'ل', 'م', 'ن', 'و', 'ه', 'ی'];
+        $english = ['a', 'a', 'b', 'p', 't', 's', 'j', 'ch', 'h', 'kh', 'd', 'z', 'r', 'z', 'zh', 's', 'sh', 's', 'z', 't', 'z', 'a', 'gh', 'f', 'gh', 'k', 'g', 'l', 'm', 'n', 'o', 'h', 'y'];
+        $slug = str_replace($persian, $english, $slug);
+        
+        // جایگزینی فاصله و کاراکترهای خاص با خط تیره
+        $slug = preg_replace('/[^a-zA-Z0-9\-_]/', '-', $slug);
+        
+        // حذف خط تیره‌های تکراری
+        $slug = preg_replace('/-+/', '-', $slug);
+        
+        // حذف خط تیره از ابتدا و انتها
+        $slug = trim($slug, '-');
+        
+        // اگر خالی شد، یک slug پیش‌فرض برگردان
+        if (empty($slug)) {
+            $slug = 'post-' . time();
+        }
+        
+        return $slug;
     }
 }

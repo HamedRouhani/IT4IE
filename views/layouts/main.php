@@ -23,23 +23,17 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
+            <!-- محتوا با سایدبار -->
             <div class="content-wrapper">
-                <!-- Main Content Area (چپ در دسکتاپ - چون RTL است) -->
+                <!-- Sidebar - در سمت راست (RTL) -->
+                <?php if (!isset($hideSidebar) || !$hideSidebar): ?>
+                    <?php include VIEWS_PATH . '/partials/sidebar.php'; ?>
+                <?php endif; ?>
+                
+                <!-- Main Content Area -->
                 <div class="content-main">
-                    <!-- Hero Section -->
-                    <div class="hero-section">
-                        <div class="hero-content">
-                            <h1 class="hero-title"><?php echo $settings['site_name'] ?? 'IT4IE - مشاوره بین‌رشته‌ای'; ?></h1>
-                            <p class="hero-description"><?php echo $settings['site_description'] ?? 'لنگرگاه دیجیتال برای مشاوره و اجرای پروژه‌های بین‌رشته‌ای'; ?></p>
-                        </div>
-                    </div>
-                    
-                    <!-- Page Content -->
                     <?php echo $content ?? ''; ?>
                 </div>
-                
-                <!-- Sidebar (راست در دسکتاپ - چون RTL است) -->
-                <?php include VIEWS_PATH . '/partials/sidebar.php'; ?>
             </div>
         </div>
     </main>

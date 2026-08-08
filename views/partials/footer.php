@@ -3,7 +3,7 @@
         <div class="footer-grid">
             <div>
                 <h4>IT4IE</h4>
-                <p>لنگرگاه دیجیتال برای مشاوره و اجرای پروژه‌های بین‌رشته‌ای</p>
+                <p><?php echo $settings['site_description'] ?? 'لنگرگاه دیجیتال برای مشاوره و اجرای پروژه‌های بین‌رشته‌ای'; ?></p>
             </div>
             <div>
                 <h4>لینک‌های سریع</h4>
@@ -24,7 +24,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 IT4IE. تمامی حقوق محفوظ است.</p>
+            <p>&copy; <?php echo date('Y'); ?> IT4IE. تمامی حقوق محفوظ است.</p>
         </div>
     </div>
 </footer>

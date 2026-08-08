@@ -10,27 +10,44 @@ class Post extends Model
     
     public function getPublished()
     {
-        try {
-            $sql = "SELECT * FROM {$this->table} WHERE status = 'published' ORDER BY created_at DESC LIMIT 10";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            return $stmt->fetchAll();
-        } catch (\Exception $e) {
-            // Return empty array if table doesn't exist yet
-            return [];
-        }
+        $sql = "SELECT p.*, 
+                    c.name as category_name, 
+                    c.slug as category_slug,
+                    u.name as author_name
+                FROM {$this->table} p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN users u ON p.author_id = u.id
+                WHERE p.status = 'published' 
+                AND p.published_at <= NOW()
+                ORDER BY p.published_at DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
     
     public function getBySlug($slug)
     {
-        try {
-            $sql = "SELECT * FROM {$this->table} WHERE slug = :slug AND status = 'published' LIMIT 1";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['slug' => $slug]);
-            return $stmt->fetch();
-        } catch (\Exception $e) {
-            return null;
-        }
+        $sql = "SELECT p.*, 
+                       c.name as category_name, 
+                       c.slug as category_slug,
+                       u.name as author_name
+                FROM {$this->table} p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN users u ON p.author_id = u.id
+                WHERE p.slug = :slug 
+                AND p.status = 'published' 
+                LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['slug' => $slug]);
+        return $stmt->fetch();
+    }
+
+    public function findBySlug($slug)
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE slug = :slug LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['slug' => $slug]);
+        return $stmt->fetch();
     }
     
     public function incrementView($postId)

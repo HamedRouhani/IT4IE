@@ -15,12 +15,12 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-<body class="auth-page">
+<body>
     
-    <!-- Header (ساده) -->
+    <!-- Header -->
     <?php include VIEWS_PATH . '/partials/header.php'; ?>
     
-    <!-- Main Content - فقط محتوای Auth -->
+    <!-- Main Content - فقط محتوای صفحه (بدون سایدبار و فوتر) -->
     <main class="auth-main">
         <div class="container">
             <?php echo $content ?? ''; ?>

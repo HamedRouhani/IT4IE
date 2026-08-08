@@ -1,0 +1,507 @@
+/* ========================================
+   13. ABOUT PAGE - بهبود فواصل
+   ======================================== */
+.about-page {
+    padding: 40px 0 60px;
+    background: #FAFAFE;
+    min-height: 70vh;
+}
+
+.about-container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ========================================
+   HERO
+   ======================================== */
+.about-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: clamp(32px, 5vw, 56px) clamp(24px, 4vw, 44px);
+    margin-bottom: 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(108, 60, 225, 0.15);
+}
+
+.about-hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), rgba(255,255,255,0.6), rgba(255,255,255,0.3), transparent);
+}
+
+.about-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.about-hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(4px);
+    color: rgba(255,255,255,0.9);
+    padding: 6px 22px;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.about-hero-title {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--white);
+    margin-bottom: 12px;
+}
+
+.about-hero-title .highlight {
+    background: linear-gradient(135deg, #FFFFFF, #E8D5FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.about-hero-title small {
+    font-size: clamp(1rem, 2vw, 1.6rem);
+    font-weight: 400;
+    color: rgba(255,255,255,0.7);
+    display: block;
+}
+
+.about-hero-text {
+    font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+    color: rgba(255,255,255,0.85);
+    max-width: 600px;
+    margin: 0 auto 30px;
+    line-height: 2;
+}
+
+.about-hero-text strong {
+    color: var(--white);
+}
+
+/* ========================================
+   STATS
+   ======================================== */
+.about-hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: clamp(24px, 5vw, 50px);
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 800;
+    color: var(--white);
+}
+
+.stat-label {
+    font-size: clamp(0.8rem, 0.9vw, 0.95rem);
+    color: rgba(255,255,255,0.7);
+    font-weight: 500;
+}
+
+/* ========================================
+   MISSION
+   ======================================== */
+.about-mission {
+    margin-bottom: 50px;
+}
+
+.mission-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.mission-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: clamp(24px, 3vw, 36px) clamp(20px, 2.5vw, 32px);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(108, 60, 225, 0.04);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.mission-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    border-color: rgba(108, 60, 225, 0.10);
+}
+
+.mission-icon {
+    width: clamp(56px, 6vw, 72px);
+    height: clamp(56px, 6vw, 72px);
+    background: rgba(108, 60, 225, 0.08);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+    color: var(--primary);
+}
+
+.mission-card h3 {
+    font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.mission-card p {
+    font-size: clamp(0.9rem, 1vw, 1rem);
+    line-height: 2;
+    color: var(--gray-dark);
+}
+
+.mission-card ul {
+    list-style: none;
+    padding: 0;
+    text-align: right;
+}
+
+.mission-card ul li {
+    padding: 6px 0;
+    color: var(--gray-dark);
+    font-size: clamp(0.9rem, 1vw, 1rem);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mission-card ul li i {
+    color: var(--success);
+}
+
+/* ========================================
+   SERVICES
+   ======================================== */
+.about-services {
+    margin-bottom: 50px;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.section-header h2 {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.section-header p {
+    font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+    color: var(--gray-dark);
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.service-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: clamp(20px, 2vw, 28px) clamp(16px, 1.8vw, 24px);
+    border: 1px solid rgba(108, 60, 225, 0.04);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.service-card:hover {
+    border-color: rgba(108, 60, 225, 0.12);
+    transform: translateY(-6px);
+    box-shadow: var(--shadow);
+}
+
+.service-icon {
+    width: clamp(48px, 4.5vw, 56px);
+    height: clamp(48px, 4.5vw, 56px);
+    background: rgba(108, 60, 225, 0.08);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+    color: var(--primary);
+}
+
+.service-card h4 {
+    font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.service-card p {
+    font-size: clamp(0.85rem, 1vw, 0.95rem);
+    line-height: 1.9;
+    color: var(--gray-dark);
+}
+
+/* ========================================
+   RESUME
+   ======================================== */
+.about-resume {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: clamp(24px, 4vw, 48px) clamp(20px, 3.5vw, 44px);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(108, 60, 225, 0.04);
+}
+
+.resume-header {
+    display: flex;
+    align-items: center;
+    gap: clamp(16px, 3vw, 28px);
+    padding-bottom: 28px;
+    border-bottom: 2px solid rgba(108, 60, 225, 0.06);
+    margin-bottom: 32px;
+}
+
+.resume-avatar {
+    width: clamp(64px, 7vw, 88px);
+    height: clamp(64px, 7vw, 88px);
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700;
+    color: var(--white);
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(108, 60, 225, 0.25);
+}
+
+.resume-title h2 {
+    font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+    font-weight: 800;
+    margin: 0 0 2px 0;
+}
+
+.resume-subtitle {
+    font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+    color: var(--gray-dark);
+}
+
+.resume-social {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.resume-social a {
+    width: clamp(36px, 3.5vw, 44px);
+    height: clamp(36px, 3.5vw, 44px);
+    border-radius: 50%;
+    background: rgba(108, 60, 225, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-dark);
+    transition: var(--transition);
+    font-size: clamp(0.95rem, 1.2vw, 1.2rem);
+}
+
+.resume-social a:hover {
+    background: var(--primary);
+    color: var(--white);
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(108, 60, 225, 0.25);
+}
+
+/* ========================================
+   RESUME BIO
+   ======================================== */
+.resume-bio p {
+    font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+    line-height: 2.2;
+    color: var(--gray-dark);
+    background: rgba(108, 60, 225, 0.03);
+    padding: clamp(16px, 2vw, 24px) clamp(18px, 2.5vw, 28px);
+    border-radius: var(--radius-lg);
+    border-right: 4px solid var(--primary);
+    margin: 0 0 28px 0;
+}
+
+.resume-bio strong {
+    color: var(--dark);
+}
+
+/* ========================================
+   RESUME GRID
+   ======================================== */
+.resume-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.resume-block h4 {
+    font-size: clamp(1rem, 1.3vw, 1.2rem);
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.resume-block h4 i {
+    color: var(--primary);
+}
+
+.resume-block ul {
+    list-style: none;
+    padding: 0;
+}
+
+.resume-block ul li {
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(108, 60, 225, 0.04);
+}
+
+.resume-block ul li:last-child {
+    border-bottom: none;
+}
+
+.resume-block ul li strong {
+    display: block;
+    font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+    color: var(--dark);
+}
+
+.resume-date {
+    display: inline-block;
+    font-size: 0.8rem;
+    color: var(--gray);
+    background: rgba(108, 60, 225, 0.06);
+    padding: 2px 14px;
+    border-radius: var(--radius-full);
+    margin: 4px 0 6px;
+}
+
+.resume-block ul li p {
+    font-size: clamp(0.85rem, 1vw, 0.95rem);
+    line-height: 2;
+    color: var(--gray-dark);
+    margin: 4px 0 0 0;
+}
+
+/* ========================================
+   CERTIFICATES
+   ======================================== */
+.cert-list li {
+    border-bottom: none !important;
+    padding: 8px 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--gray-dark);
+    font-size: clamp(0.85rem, 1vw, 0.95rem);
+}
+
+.cert-list li i {
+    color: var(--success);
+}
+
+/* ========================================
+   SKILLS
+   ======================================== */
+.resume-skills {
+    margin-top: 16px;
+}
+
+.resume-skills h4 {
+    font-size: clamp(1rem, 1.3vw, 1.2rem);
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.resume-skills h4 i {
+    color: var(--primary);
+}
+
+.skills-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.skill-tag {
+    background: rgba(108, 60, 225, 0.06);
+    color: var(--dark);
+    padding: 6px 20px;
+    border-radius: var(--radius-full);
+    font-size: clamp(0.8rem, 0.9vw, 0.9rem);
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.skill-tag:hover {
+    background: var(--primary);
+    color: var(--white);
+    transform: translateY(-3px);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 992px) {
+    .mission-grid { grid-template-columns: repeat(2, 1fr); }
+    .services-grid { grid-template-columns: repeat(2, 1fr); }
+    .resume-grid { grid-template-columns: 1fr; gap: 24px; }
+}
+
+@media (max-width: 768px) {
+    .about-page { padding: 24px 0 40px; }
+    
+    .about-hero { padding: 32px 20px; border-radius: var(--radius-lg); }
+    .about-hero-title { font-size: 1.8rem; }
+    .about-hero-title small { font-size: 1rem; }
+    .about-hero-stats { gap: 20px; flex-wrap: wrap; justify-content: center; }
+    .stat-number { font-size: 1.6rem; }
+    
+    .mission-grid { grid-template-columns: 1fr; }
+    .services-grid { grid-template-columns: 1fr; }
+    
+    .about-resume { padding: 20px 16px; }
+    .resume-header { flex-direction: column; text-align: center; }
+    .resume-social { justify-content: center; }
+}
+
+@media (max-width: 480px) {
+    .about-hero { padding: 24px 16px; border-radius: var(--radius-lg); }
+    .about-hero-title { font-size: 1.5rem; }
+    .about-hero-title small { font-size: 0.9rem; }
+    .about-hero-stats { flex-direction: column; gap: 12px; }
+    .stat-number { font-size: 1.4rem; }
+    
+    .mission-card { padding: 20px 16px; }
+    .service-card { padding: 16px 14px; }
+    
+    .about-resume { padding: 16px 12px; }
+    .resume-avatar { width: 56px; height: 56px; font-size: 1.4rem; }
+    .resume-title h2 { font-size: 1.2rem; }
+}

@@ -19,63 +19,47 @@
         <?php endif; ?>
         
         <form method="POST" action="/login" class="auth-form">
-            <!-- Email -->
             <div class="form-group">
                 <label for="email">ایمیل</label>
                 <div class="input-group">
-                    <span class="input-icon">
-                        <i class="fas fa-envelope"></i>
-                    </span>
+                    <span class="input-icon"><i class="fas fa-envelope"></i></span>
                     <input type="email" id="email" name="email" required 
                            placeholder="example@email.com" 
                            value="<?php echo $_POST['email'] ?? ''; ?>">
                 </div>
             </div>
             
-            <!-- Password -->
             <div class="form-group">
                 <label for="password">رمز عبور</label>
                 <div class="input-group">
-                    <span class="input-icon">
-                        <i class="fas fa-lock"></i>
-                    </span>
+                    <span class="input-icon"><i class="fas fa-lock"></i></span>
                     <input type="password" id="password" name="password" required 
                            placeholder="********">
-                    <button type="button" class="toggle-password" aria-label="نمایش رمز عبور">
+                    <button type="button" class="toggle-password">
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
             </div>
             
-            <!-- Captcha -->
             <div class="form-group captcha-group">
                 <label for="captcha">کد امنیتی</label>
                 <div class="captcha-container">
                     <div class="captcha-image">
-                        <img src="/refresh_captcha.php?<?php echo time(); ?>" 
-                            alt="کد امنیتی" 
-                            id="captcha-img">
-                        <button type="button" class="refresh-captcha" title="بارگذاری مجدد">
+                        <img src="/refresh_captcha.php" alt="کد امنیتی" id="captcha-img">
+                        <button type="button" class="refresh-captcha">
                             <i class="fas fa-sync-alt"></i>
                         </button>
                     </div>
                     <div class="captcha-input">
                         <div class="input-group">
-                            <span class="input-icon">
-                                <i class="fas fa-shield-alt"></i>
-                            </span>
+                            <span class="input-icon"><i class="fas fa-shield-alt"></i></span>
                             <input type="text" id="captcha" name="captcha" required 
-                                placeholder="۴ رقم" 
-                                maxlength="4" 
-                                autocomplete="off"
-                                inputmode="numeric"
-                                pattern="[0-9]*">
+                                   placeholder="۴ رقم" maxlength="4">
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Options -->
             <div class="form-options">
                 <label class="checkbox-label">
                     <input type="checkbox" name="remember" value="1">
@@ -84,10 +68,8 @@
                 <a href="/forgot-password" class="forgot-link">رمز عبور را فراموش کرده‌اید؟</a>
             </div>
             
-            <!-- Submit -->
             <button type="submit" class="btn-auth">
-                <i class="fas fa-sign-in-alt"></i>
-                ورود
+                <i class="fas fa-sign-in-alt"></i> ورود
             </button>
         </form>
         

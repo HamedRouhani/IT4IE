@@ -10,16 +10,13 @@ class PageController extends Controller
 {
     public function about()
     {
-        $categoryModel = new Category();
         $settingModel = new Setting();
-        
-        $categories = $categoryModel->getTree();
         $settings = $settingModel->getAll();
         
-        $this->render('pages/about', [
+        $this->renderAuth('pages/about', [
             'title' => 'درباره ما - IT4IE',
-            'categories' => $categories,
-            'settings' => $settings
+            'settings' => $settings,
+            'hideSidebar' => true  // مخفی کردن سایدبار
         ]);
     }
     
@@ -30,27 +27,19 @@ class PageController extends Controller
         
         $settings = $settingModel->getAll();
         
-        // ============================================
-        // بررسی لاگین بودن کاربر برای ارسال پیام
-        // ============================================
+        $userMessages = [];
+        if (isset($_SESSION['user_id'])) {
+            $userMessages = $messageModel->getUserMessages($_SESSION['user_id']);
+        }
+        
+        $errors = [];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // اگر کاربر لاگین نبود، به صفحه ورود هدایت کن
-            if (!isset($_SESSION['user_id'])) {
-                $_SESSION['redirect_after_login'] = '/contact';
-                $_SESSION['error'] = 'برای ارسال پیام لطفاً ابتدا وارد حساب کاربری خود شوید.';
-                $this->redirect('/login');
-                return;
-            }
-            
             $name = trim($_POST['name'] ?? '');
             $email = trim($_POST['email'] ?? '');
             $phone = trim($_POST['phone'] ?? '');
             $subject = trim($_POST['subject'] ?? '');
             $message = trim($_POST['message'] ?? '');
             
-            $errors = [];
-            
-            // اعتبارسنجی سمت سرور
             if (strlen($name) < 3) {
                 $errors[] = 'نام باید حداقل ۳ کاراکتر باشد.';
             }
@@ -71,12 +60,13 @@ class PageController extends Controller
                     'phone' => $phone,
                     'subject' => $subject,
                     'message' => $message,
-                    'user_id' => $_SESSION['user_id'],
+                    'user_id' => $_SESSION['user_id'] ?? null,
                     'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
                     'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
                     'status' => 'unread'
                 ];
                 
+                $messageModel = new Message();
                 $result = $messageModel->create($data);
                 
                 if ($result) {
@@ -88,17 +78,12 @@ class PageController extends Controller
             }
         }
         
-        // دریافت پیام‌های کاربر در صورت لاگین بودن
-        $userMessages = [];
-        if (isset($_SESSION['user_id'])) {
-            $userMessages = $messageModel->getUserMessages($_SESSION['user_id']);
-        }
-        
         $this->renderAuth('pages/contact', [
             'title' => 'تماس با ما - IT4IE',
             'settings' => $settings,
             'errors' => $errors ?? null,
-            'userMessages' => $userMessages
+            'userMessages' => $userMessages,
+            'hideSidebar' => true
         ]);
     }
 }

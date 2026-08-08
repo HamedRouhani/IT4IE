@@ -1,6 +1,8 @@
 <?php
 namespace App\Core;
 
+use App\Models\Category;
+
 abstract class Controller
 {
     protected $data = [];
@@ -8,7 +10,10 @@ abstract class Controller
     
     public function render($view, $data = [])
     {
-        $this->data = array_merge($this->data, $data);
+        $categoryModel = new Category();
+        $categories = $categoryModel->getTree();
+        
+        $this->data = array_merge($this->data, $data, ['categories' => $categories]);
         extract($this->data);
         
         ob_start();
@@ -28,12 +33,12 @@ abstract class Controller
         }
     }
     
-    /**
-     * Render auth pages (without sidebar and footer)
-     */
     public function renderAuth($view, $data = [])
     {
-        $this->data = array_merge($this->data, $data);
+        $categoryModel = new Category();
+        $categories = $categoryModel->getTree();
+        
+        $this->data = array_merge($this->data, $data, ['categories' => $categories]);
         extract($this->data);
         
         ob_start();
@@ -45,6 +50,7 @@ abstract class Controller
         }
         $content = ob_get_clean();
         
+        // استفاده از لایه auth (بدون سایدبار و فوتر)
         $layoutFile = VIEWS_PATH . '/layouts/auth.php';
         if (file_exists($layoutFile)) {
             include $layoutFile;
@@ -53,12 +59,12 @@ abstract class Controller
         }
     }
     
-    /**
-     * Render admin pages (only header)
-     */
     public function renderAdmin($view, $data = [])
     {
-        $this->data = array_merge($this->data, $data);
+        $categoryModel = new Category();
+        $categories = $categoryModel->getTree();
+        
+        $this->data = array_merge($this->data, $data, ['categories' => $categories]);
         extract($this->data);
         
         ob_start();

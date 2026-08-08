@@ -1,36 +1,17 @@
 <div class="contact-page">
     <div class="contact-container">
         
-        <!-- ============================================
-             HEADER
-             ============================================ -->
+        <!-- Header -->
         <div class="contact-header">
-            <h2 class="contact-title">📬تماس با <span>IT4IE</span></h2>
+            <span class="contact-badge">📬 ارتباط با ما</span>
+            <h1 class="contact-title">تماس با <span>IT4IE</span></h1>
             <p class="contact-subtitle">
                 ما همیشه آماده شنیدن نظرات، پیشنهادات و سوالات شما هستیم.
                 فرم زیر را پر کنید تا در اسرع وقت با شما تماس بگیریم.
             </p>
         </div>
         
-        <!-- ============================================
-             هشدار عدم ورود
-             ============================================ -->
-        <?php if (!isset($_SESSION['user_id'])): ?>
-            <div class="contact-alert contact-alert-warning">
-                <i class="fas fa-exclamation-triangle"></i>
-                <div>
-                    <strong>برای ارسال پیام باید وارد حساب کاربری خود شوید.</strong>
-                    <br>
-                    <a href="/login">وارد شوید</a>
-                    یا
-                    <a href="/register">ثبت‌نام کنید</a>
-                </div>
-            </div>
-        <?php endif; ?>
-        
-        <!-- ============================================
-             ALERTS
-             ============================================ -->
+        <!-- Alerts -->
         <?php if (isset($_SESSION['message'])): ?>
             <div class="contact-alert contact-alert-success">
                 <i class="fas fa-check-circle"></i>
@@ -49,24 +30,18 @@
             </div>
         <?php endif; ?>
         
-        <!-- ============================================
-             FORM
-             ============================================ -->
+        <!-- Form -->
         <div class="contact-form-wrapper">
             <div class="contact-form-card">
-                <h3 class="form-title">
+                <h2 class="form-title">
                     <i class="fas fa-pen-fancy"></i>
                     ارسال پیام جدید
-                </h3>
+                </h2>
                 
                 <form method="POST" action="/contact" class="contact-form" id="contactForm" novalidate>
-                    <!-- ردیف اول: نام و ایمیل -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="name">
-                                <i class="fas fa-user-circle"></i>
-                                نام و نام خانوادگی
-                            </label>
+                            <label for="name"><i class="fas fa-user-circle"></i> نام و نام خانوادگی</label>
                             <div class="input-wrapper">
                                 <input type="text" id="name" name="name" required 
                                        placeholder="نام کامل خود را وارد کنید"
@@ -76,10 +51,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="email">
-                                <i class="fas fa-envelope"></i>
-                                آدرس ایمیل
-                            </label>
+                            <label for="email"><i class="fas fa-envelope"></i> آدرس ایمیل</label>
                             <div class="input-wrapper">
                                 <input type="email" id="email" name="email" required 
                                        placeholder="example@email.com"
@@ -90,25 +62,16 @@
                         </div>
                     </div>
                     
-                    <!-- ردیف دوم: تلفن و موضوع -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="phone">
-                                <i class="fas fa-phone-alt"></i>
-                                شماره تماس
-                                <span class="optional">(اختیاری)</span>
-                            </label>
+                            <label for="phone"><i class="fas fa-phone-alt"></i> شماره تماس <span class="optional">(اختیاری)</span></label>
                             <div class="input-wrapper">
-                                <input type="text" id="phone" name="phone" 
-                                       placeholder="۰۹۱۲۳۴۵۶۷۸۹">
+                                <input type="text" id="phone" name="phone" placeholder="۰۹۱۲۳۴۵۶۷۸۹">
                                 <span class="input-focus-border"></span>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="subject">
-                                <i class="fas fa-tag"></i>
-                                موضوع پیام
-                            </label>
+                            <label for="subject"><i class="fas fa-tag"></i> موضوع پیام</label>
                             <div class="input-wrapper">
                                 <input type="text" id="subject" name="subject" required 
                                        placeholder="موضوع پیام خود را وارد کنید">
@@ -118,12 +81,8 @@
                         </div>
                     </div>
                     
-                    <!-- ردیف سوم: پیام -->
                     <div class="form-group full-width">
-                        <label for="message">
-                            <i class="fas fa-comment-dots"></i>
-                            متن پیام
-                        </label>
+                        <label for="message"><i class="fas fa-comment-dots"></i> متن پیام</label>
                         <div class="input-wrapper">
                             <textarea id="message" name="message" rows="6" required 
                                       placeholder="پیام خود را به طور کامل وارد کنید..."></textarea>
@@ -135,27 +94,15 @@
                         </div>
                     </div>
                     
-                    <!-- دکمه ارسال -->
-                    <button type="submit" class="btn-submit" id="submitBtn" 
-                            <?php echo !isset($_SESSION['user_id']) ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : ''; ?>>
+                    <button type="submit" class="btn-submit" id="submitBtn">
                         <i class="fas fa-paper-plane"></i>
-                        <span><?php echo isset($_SESSION['user_id']) ? 'ارسال پیام' : 'برای ارسال پیام وارد شوید'; ?></span>
+                        <span>ارسال پیام</span>
                     </button>
-                    
-                    <?php if (!isset($_SESSION['user_id'])): ?>
-                        <div style="text-align: center; margin-top: 12px; font-size: 14px; color: #94a3b8;">
-                            <a href="/login" style="color: #2563eb; font-weight: 500;">وارد شوید</a>
-                            یا
-                            <a href="/register" style="color: #2563eb; font-weight: 500;">ثبت‌نام کنید</a>
-                        </div>
-                    <?php endif; ?>
                 </form>
             </div>
         </div>
         
-        <!-- ============================================
-             USER MESSAGES
-             ============================================ -->
+        <!-- User Messages -->
         <?php if (isset($_SESSION['user_id']) && !empty($userMessages)): ?>
             <div class="user-messages-section">
                 <h2 class="messages-title">
@@ -182,7 +129,6 @@
                                     <?php endif; ?>
                                 </span>
                             </div>
-                            
                             <div class="message-body">
                                 <p><?php echo nl2br(htmlspecialchars($msg['message'])); ?></p>
                                 <span class="message-date">
@@ -221,47 +167,31 @@
     </div>
 </div>
 
-<!-- ============================================
-     SCRIPT
-     ============================================ -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('contactForm');
-    const submitBtn = document.getElementById('submitBtn');
     const messageField = document.getElementById('message');
     const charCount = document.getElementById('charCount');
     const charMax = document.getElementById('charMax');
     const maxLength = 500;
     
-    // ============================================
-    // Character Counter
-    // ============================================
     if (messageField) {
         charMax.textContent = maxLength;
-        
         messageField.addEventListener('input', function() {
             const currentLength = this.value.length;
             charCount.textContent = currentLength;
-            
             if (currentLength > maxLength) {
                 this.value = this.value.substring(0, maxLength);
                 charCount.textContent = maxLength;
             }
-            
-            if (currentLength > maxLength * 0.8) {
-                charCount.style.color = '#f59e0b';
-            } else {
-                charCount.style.color = '#94a3b8';
-            }
+            charCount.style.color = currentLength > maxLength * 0.8 ? '#f59e0b' : '#94a3b8';
         });
     }
     
-    // ============================================
-    // Client-side Validation
-    // ============================================
+    const form = document.getElementById('contactForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
     if (form) {
         form.addEventListener('submit', function(e) {
-            // اگر کاربر لاگین نبود، ارسال نشود
             <?php if (!isset($_SESSION['user_id'])): ?>
                 e.preventDefault();
                 alert('برای ارسال پیام لطفاً ابتدا وارد حساب کاربری خود شوید.');
@@ -292,7 +222,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            // بررسی ایمیل
             const emailInput = document.getElementById('email');
             const emailError = document.getElementById('email-error');
             if (emailInput && emailInput.value.trim()) {

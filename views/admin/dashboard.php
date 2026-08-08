@@ -1,5 +1,6 @@
 <div class="admin-container">
-    <div class="admin-sidebar">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
         <div class="admin-brand">
             <h3>📊 مدیریت</h3>
             <span>پنل مدیریت IT4IE</span>
@@ -11,14 +12,16 @@
             <li><a href="/admin/settings"><i class="fas fa-cog"></i> تنظیمات</a></li>
             <li><a href="/"><i class="fas fa-home"></i> بازگشت به سایت</a></li>
         </ul>
-    </div>
+    </aside>
     
+    <!-- Content -->
     <div class="admin-content">
         <div class="admin-header">
             <h1>📊 داشبورد</h1>
             <span><?php echo $_SESSION['user_name'] ?? 'مدیر'; ?> عزیز خوش آمدید</span>
         </div>
         
+        <!-- Stats -->
         <div class="admin-stats">
             <div class="stat-card">
                 <div class="stat-icon blue"><i class="fas fa-file-alt"></i></div>
@@ -43,42 +46,47 @@
             </div>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: var(--shadow);">
-                <h3>📝 آخرین پست‌ها</h3>
+        <!-- Widgets -->
+        <div class="admin-widgets">
+            <!-- Recent Posts -->
+            <div class="admin-widget">
+                <h3><i class="fas fa-file-alt"></i> آخرین پست‌ها</h3>
                 <?php if (empty($recentPosts)): ?>
-                    <p style="color: var(--gray);">هیچ پستی وجود ندارد.</p>
+                    <div class="empty-state">
+                        <i class="fas fa-file-alt"></i>
+                        <p>هیچ پستی وجود ندارد.</p>
+                    </div>
                 <?php else: ?>
-                    <ul style="list-style: none; padding: 0;">
+                    <ul>
                         <?php foreach ($recentPosts as $post): ?>
-                            <li style="padding: 8px 0; border-bottom: 1px solid var(--gray-light);">
-                                <a href="/admin/posts/edit/<?php echo $post['id']; ?>">
-                                    <?php echo $post['title']; ?>
+                            <li>
+                                <a href="/admin/posts/edit/<?php echo $post['id']; ?>" style="color: var(--dark);">
+                                    <?php echo htmlspecialchars($post['title']); ?>
                                 </a>
-                                <span style="font-size: 12px; color: var(--gray);">
-                                    <?php echo jdate($post['created_at']); ?>
-                                </span>
+                                <span class="widget-date"><?php echo jdate($post['created_at']); ?></span>
                             </li>
                         <?php endforeach; ?>
                     </ul>
                 <?php endif; ?>
             </div>
             
-            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: var(--shadow);">
-                <h3>✉️ آخرین پیام‌ها</h3>
+            <!-- Recent Messages -->
+            <div class="admin-widget">
+                <h3><i class="fas fa-envelope"></i> آخرین پیام‌ها</h3>
                 <?php if (empty($recentMessages)): ?>
-                    <p style="color: var(--gray);">هیچ پیامی وجود ندارد.</p>
+                    <div class="empty-state">
+                        <i class="fas fa-envelope"></i>
+                        <p>هیچ پیامی وجود ندارد.</p>
+                    </div>
                 <?php else: ?>
-                    <ul style="list-style: none; padding: 0;">
+                    <ul>
                         <?php foreach ($recentMessages as $message): ?>
-                            <li style="padding: 8px 0; border-bottom: 1px solid var(--gray-light);">
-                                <strong><?php echo $message['name']; ?></strong>
-                                <span style="font-size: 12px; color: var(--gray);">
-                                    <?php echo $message['subject']; ?>
+                            <li>
+                                <span>
+                                    <strong><?php echo htmlspecialchars($message['name']); ?></strong>
+                                    <span style="color: var(--gray); font-size: 0.8rem;"> - <?php echo htmlspecialchars($message['subject']); ?></span>
                                 </span>
-                                <span style="font-size: 12px; color: var(--gray);">
-                                    <?php echo jdate($message['created_at']); ?>
-                                </span>
+                                <span class="widget-date"><?php echo jdate($message['created_at']); ?></span>
                             </li>
                         <?php endforeach; ?>
                     </ul>

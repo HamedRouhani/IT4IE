@@ -2,8 +2,8 @@
    8. FOOTER
    ======================================== */
 .footer {
-    background: var(--dark);
-    color: var(--white);
+    background: var(--white);
+    border-top: 1px solid var(--gray-light);
     padding: 40px 0 20px;
     margin-top: auto;
 }
@@ -16,86 +16,28 @@
 }
 
 .footer h4 {
-    color: var(--white);
     font-size: 16px;
+    color: var(--dark);
     margin-bottom: 12px;
-    position: relative;
-    padding-bottom: var(--spacing-3);
 }
 
-.footer h4::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 40px;
-    height: 3px;
-    background: var(--primary);
-    border-radius: var(--radius-full);
-}
-
-.footer p {
-    color: var(--gray);
+.footer p, .footer ul li {
+    color: var(--gray-dark);
     font-size: 14px;
-}
-
-.footer ul {
-    list-style: none;
-    padding: 0;
-}
-
-.footer ul li {
-    margin-bottom: 6px;
 }
 
 .footer ul li a {
-    color: var(--gray);
-    text-decoration: none;
-    transition: color 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    font-size: 14px;
-}
-
-.footer ul li a:hover {
-    color: var(--white);
-    padding-right: var(--spacing-2);
-}
-
-.footer ul li a i {
-    width: 18px;
-    font-size: 14px;
-}
-
-.footer .social-links {
-    display: flex;
-    gap: var(--spacing-3);
-    margin-top: var(--spacing-2);
-}
-
-.footer .social-links a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-full);
-    color: var(--white);
+    color: var(--gray-dark);
     transition: var(--transition);
-    font-size: 18px;
 }
-
-.footer .social-links a:hover {
-    background: var(--primary);
-    transform: translateY(-2px);
+.footer ul li a:hover {
+    color: var(--primary);
 }
 
 .footer-bottom {
     text-align: center;
-    padding-top: var(--spacing-6);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+    border-top: 1px solid var(--gray-light);
     color: var(--gray);
     font-size: 13px;
 }
