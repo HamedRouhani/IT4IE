@@ -473,4 +473,47 @@
     .software-card {
         padding: 18px 16px;
     }
+
+    /* ========================================
+    LAUNCH BUTTON - دکمه ورود به نرم‌افزار
+    ======================================== */
+    .btn-launch-software {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        padding: 14px 20px;
+        background: var(--primary-gradient);
+        color: var(--white);
+        border: none;
+        border-radius: var(--radius-full);
+        font-size: 1rem;
+        font-weight: 600;
+        font-family: var(--font-family);
+        text-decoration: none;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 20px rgba(108, 60, 225, 0.25);
+        margin-bottom: 12px;
+    }
+
+    .btn-launch-software:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 36px rgba(108, 60, 225, 0.35);
+        color: var(--white);
+    }
+
+    .btn-launch-software i {
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .btn-launch-software:hover i {
+        transform: translateX(-4px) scale(1.1);
+    }
+
+    .btn-launch-software:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(108, 60, 225, 0.2);
+    }
 }

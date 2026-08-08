@@ -1,5 +1,5 @@
 <?php
-namespace App\Models;
+namespace App\Models; // Namespace با حرف M بزرگ
 
 use App\Core\Model;
 
