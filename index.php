@@ -1,64 +1,101 @@
 <?php
+/**
+ * ==========================================================
+ * BOOTSTRAP - ورودی یکپارچه و ماژولار IT4IE
+ * مسیر: public/index.php
+ * ==========================================================
+ */
+
 // ==========================================================
-// BOOTSTRAP - ورودی یکپارچه و ماژولار (نسخه نهایی)
+// ۱. شروع Session
 // ==========================================================
-
-// تنظیمات اولیه و مسیرها
-define('ROOT_PATH', __DIR__);
-define('APP_PATH', ROOT_PATH . '/app');
-define('VIEWS_PATH', ROOT_PATH . '/views');
-define('PUBLIC_PATH', ROOT_PATH . '/public');
-
-// فعال‌سازی نمایش خطاها
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// شروع نشست
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 // ==========================================================
-// بارگذاری فایل .env اصلی
+// ۲. تنظیمات مسیرها (اصلاح شده برای ساختار public/)
 // ==========================================================
-$envFile = ROOT_PATH . '/.env';
-if (file_exists($envFile)) {
-    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos($line, '=') !== false && strpos($line, '#') !== 0) {
-            list($key, $value) = explode('=', $line, 2);
-            putenv("$key=$value");
-            $_ENV[$key] = $value;
-        }
+// __DIR__ = /home/itieir/public_html/public
+// ROOT_PATH = /home/itieir/public_html (یک سطح بالاتر)
+define('ROOT_PATH', dirname(__DIR__));
+define('APP_PATH', ROOT_PATH . '/app');
+define('VIEWS_PATH', ROOT_PATH . '/views');
+define('PUBLIC_PATH', __DIR__);
+define('CONFIG_PATH', ROOT_PATH . '/app/config');
+
+// حالت توسعه (برای نمایش خطاهای دقیق)
+define('APP_DEBUG', true);
+if (APP_DEBUG) {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+} else {
+    error_reporting(0);
+    ini_set('display_errors', 0);
+}
+
+// ==========================================================
+// ۳. بارگذاری فایل‌های Core (ضروری)
+// ==========================================================
+$coreFiles = [
+    '/core/Database.php',
+    '/core/Model.php',
+    '/core/Controller.php',
+];
+
+foreach ($coreFiles as $file) {
+    $path = APP_PATH . $file;
+    if (file_exists($path)) {
+        require_once $path;
+    } else {
+        die("فایل اصلی یافت نشد: {$file}");
     }
 }
 
 // ==========================================================
-// اتولودر ماژولار (تمام کلاس‌های App\ را در هر دو مسیر جستجو می‌کند)
+// ۴. بارگذاری مدل‌های عمومی (در صورت وجود)
+// ==========================================================
+$commonModels = [
+    'Software', 'Post', 'Category', 'Setting', 
+    'Message', 'User', 'SoftwareActivityLog', 'SoftwareUsageLimit'
+];
+
+foreach ($commonModels as $model) {
+    $modelFile = APP_PATH . '/models/' . $model . '.php';
+    if (file_exists($modelFile)) {
+        require_once $modelFile;
+    }
+}
+
+// ==========================================================
+// ۵. Autoloader ماژولار (PSR-4 Like)
 // ==========================================================
 spl_autoload_register(function ($class) {
     $prefix = 'App\\';
-    $len = strlen($prefix);
+    $prefixLen = strlen($prefix);
     
-    // اگر کلاس با App\ شروع نشد، ادامه نده
-    if (strncmp($prefix, $class, $len) !== 0) {
+    // فقط کلاس‌های با پیشوند App\ را پردازش کن
+    if (strncmp($prefix, $class, $prefixLen) !== 0) {
         return false;
     }
     
-    // ۱. تبدیل Namespace به مسیر فایل
-    $relative_class = substr($class, $len);
-    $classPath = str_replace('\\', '/', $relative_class) . '.php';
+    $relativeClass = substr($class, $prefixLen);
+    $classPath = str_replace('\\', '/', $relativeClass) . '.php';
     
-    // ۲. ابتدا در پوشه اصلی سایت جستجو کن
+    // ۱. جستجو در app/ اصلی IT4IE
     $mainFile = APP_PATH . '/' . $classPath;
     if (file_exists($mainFile)) {
         require $mainFile;
         return true;
     }
     
-    // ۳. اگر در پوشه نرم‌افزار ماژولار هستیم، در آنجا جستجو کن
-    if (defined('MODULAR_APP_PATH') && !empty(MODULAR_APP_PATH)) {
-        $moduleFile = MODULAR_APP_PATH . '/app/' . $classPath;
+    // ۲. جستجو در ماژول‌های نرم‌افزاری
+    // الگو: App\Software\Babok\Controllers\X → app/software/babok/app/Controllers/X.php
+    if (preg_match('/^Software\/([^\/]+)\/(.+)$/', $relativeClass, $matches)) {
+        $moduleName = strtolower($matches[1]);
+        $moduleClassPath = $matches[2];
+        $moduleFile = APP_PATH . '/software/' . $moduleName . '/app/' . $moduleClassPath . '.php';
+        
         if (file_exists($moduleFile)) {
             require $moduleFile;
             return true;
@@ -69,213 +106,296 @@ spl_autoload_register(function ($class) {
 });
 
 // ==========================================================
-// بارگذاری فایل‌های اصلی (Core و مدل‌های عمومی)
+// ۶. Mapping بین slug و نام پوشه فیزیکی
 // ==========================================================
-require_once APP_PATH . '/core/Controller.php';
-require_once APP_PATH . '/core/Model.php';
-require_once APP_PATH . '/core/Database.php';
-require_once APP_PATH . '/models/Software.php';
-require_once APP_PATH . '/models/Post.php';
-require_once APP_PATH . '/models/Category.php';
-require_once APP_PATH . '/models/Setting.php';
-require_once APP_PATH . '/models/Message.php';
-require_once APP_PATH . '/models/User.php';
+// این نگاشت برای حل مشکل تفاوت slug (babok-analyzer) و نام پوشه (babok)
+$moduleSlugs = [
+    'babok-analyzer' => 'babok',
+    'pmbok-analyzer' => 'pmbok',
+    // می‌توانید نرم‌افزارهای بعدی را اینجا اضافه کنید
+];
 
 // ==========================================================
-// سیستم مسیریابی (Router)
+// ۷. دریافت URL و پردازش اولیه
 // ==========================================================
 $url = isset($_GET['url']) ? rtrim($_GET['url'], '/') : '';
+$url = trim($url, '/');
 
-// اگر درخواست خالی بود، به صفحه اصلی برو
-if ($url === '') {
-    require_once APP_PATH . '/controllers/HomeController.php';
-    $controller = new App\Controllers\HomeController();
-    $controller->index();
-    exit;
+// تابع کمکی برای لود سریع کنترلرها
+function loadController($controllerName) {
+    $file = APP_PATH . '/controllers/' . $controllerName . '.php';
+    if (file_exists($file)) {
+        require_once $file;
+        return true;
+    }
+    return false;
 }
 
 // ==========================================================
-// ۱. مسیریابی نرم‌افزارهای ماژولار (اولویت اول)
+// ۸. سیستم مسیریابی (Router)
 // ==========================================================
-if (strpos($url, 'software/') === 0) {
-    // استخراج نام اسلاگ (مثلاً software/babok-analyzer/public)
-    $segments = explode('/', $url);
-    $slug = $segments[1] ?? null;
-    
-    if ($slug) {
-        // اگر نام پوشه با اسلاگ فرق داشت، اینجا اصلاح کن
-        $folderName = $slug;
-        if ($slug === 'babok-analyzer') {
-            $folderName = 'babok';
-        }
 
-        // مسیر فیزیکی پوشه نرم‌افزار
-        $softwareDir = ROOT_PATH . '/softwares/' . $folderName;
+// ----------------------------------------
+// ۸.۱ صفحه اصلی
+// ----------------------------------------
+if ($url === '' || $url === 'home') {
+    if (loadController('HomeController')) {
+        $controller = new App\Controllers\HomeController();
+        $controller->index();
+        exit;
+    }
+}
+
+// ----------------------------------------
+// ۸.۲ صفحات استاتیک
+// ----------------------------------------
+if ($url === 'about') {
+    if (loadController('PageController')) {
+        $controller = new App\Controllers\PageController();
+        $controller->about();
+        exit;
+    }
+}
+
+if ($url === 'contact') {
+    if (loadController('PageController')) {
+        $controller = new App\Controllers\PageController();
+        $controller->contact();
+        exit;
+    }
+}
+
+// ----------------------------------------
+// ۸.۳ احراز هویت
+// ----------------------------------------
+if (in_array($url, ['login', 'register', 'logout'])) {
+    if (loadController('AuthController')) {
+        $controller = new App\Controllers\AuthController();
+        $controller->$url();
+        exit;
+    }
+}
+
+// ----------------------------------------
+// ۸.۴ صفحه لیست نرم‌افزارها
+// ----------------------------------------
+if ($url === 'software') {
+    if (loadController('SoftwareController')) {
+        $controller = new App\Controllers\SoftwareController();
+        $controller->index();
+        exit;
+    }
+}
+
+// ----------------------------------------
+// ۸.۵ جزئیات نرم‌افزار
+// ----------------------------------------
+if (preg_match('/^software\/detail\/([a-z0-9\-]+)$/', $url, $matches)) {
+    if (loadController('SoftwareController')) {
+        $controller = new App\Controllers\SoftwareController();
+        $controller->detail($matches[1]);
+        exit;
+    }
+}
+
+// ----------------------------------------
+// ۸.۶ اجرای نرم‌افزار (Run)
+// ----------------------------------------
+if (preg_match('/^software\/run\/([a-z0-9\-]+)$/', $url, $matches)) {
+    if (loadController('SoftwareController')) {
+        $controller = new App\Controllers\SoftwareController();
+        $controller->run($matches[1]);
+        exit;
+    }
+}
+
+// ----------------------------------------
+// ۸.۷ خروج از نرم‌افزار
+// ----------------------------------------
+if ($url === 'software/exit') {
+    if (loadController('SoftwareController')) {
+        $controller = new App\Controllers\SoftwareController();
+        $controller->exitSoftware();
+        exit;
+    }
+}
+
+// ----------------------------------------
+// ۸.۸ 🎯 اجرای ماژول نرم‌افزاری
+// ----------------------------------------
+if (preg_match('/^software\/([a-z0-9\-]+)(\/.*)?$/', $url, $matches)) {
+    $slugOrModule = strtolower($matches[1]);
+    
+    // Route های رزرو شده (قبلاً هندل شده‌اند)
+    $reservedRoutes = ['detail', 'run', 'exit'];
+    
+    if (!in_array($slugOrModule, $reservedRoutes)) {
+        // تبدیل slug به نام پوشه فیزیکی
+        $moduleName = $moduleSlugs[$slugOrModule] ?? $slugOrModule;
+        $modulePath = APP_PATH . '/software/' . $moduleName;
         
-        if (is_dir($softwareDir)) {
-            // تعریف مسیر برای اتولودر
-            define('MODULAR_APP_PATH', $softwareDir);
-            
-            // استخراج زیرمسیر (بقیه آدرس بعد از اسلاگ)
-            $remainingPath = substr($url, strlen('software/' . $slug));
-            $remainingPath = ltrim($remainingPath, '/');
-            
-            // اگر زیرمسیر خالی است (فقط به روت نرم‌افزار رفته‌اند)
-            if (empty($remainingPath)) {
-                $entryFile = $softwareDir . '/index.php';
-                if (file_exists($entryFile)) {
-                    require_once $entryFile;
-                    exit;
-                } else {
-                    // اگر index.php در روت نیست، به public/index.php هدایت کن
-                    $publicFile = $softwareDir . '/public/index.php';
-                    if (file_exists($publicFile)) {
-                        require_once $publicFile;
-                        exit;
+        // 🐛 دیباگ - فقط در حالت توسعه
+        if (APP_DEBUG && isset($_GET['debug'])) {
+            echo "<h3>🔍 Debug Module</h3>";
+            echo "<strong>URL:</strong> " . htmlspecialchars($url) . "<br>";
+            echo "<strong>Slug/Module:</strong> {$slugOrModule}<br>";
+            echo "<strong>Resolved Name:</strong> {$moduleName}<br>";
+            echo "<strong>Module Path:</strong> {$modulePath}<br>";
+            echo "<strong>Exists:</strong> " . (is_dir($modulePath) ? '✅ YES' : '❌ NO') . "<br>";
+            echo "<strong>ROOT_PATH:</strong> " . ROOT_PATH . "<br>";
+            echo "<strong>APP_PATH:</strong> " . APP_PATH . "<br>";
+            echo "<hr>";
+            echo "<strong>محتویات app/software/:</strong><br>";
+            if (is_dir(APP_PATH . '/software')) {
+                echo "<ul>";
+                foreach (scandir(APP_PATH . '/software') as $item) {
+                    if ($item !== '.' && $item !== '..') {
+                        echo "<li>{$item}</li>";
                     }
                 }
-            } 
-            // اگر زیرمسیر وجود دارد (مثلاً public, assets, css)
-            else {
-                $targetPath = $softwareDir . '/' . $remainingPath;
-                
-                if (file_exists($targetPath)) {
-                    // اگر فایل است (مثلاً public/index.php یا یک فایل CSS)
-                    if (is_file($targetPath)) {
-                        require_once $targetPath;
-                        exit;
-                    }
-                    // اگر پوشه است و index.php دارد
-                    elseif (is_dir($targetPath) && file_exists($targetPath . '/index.php')) {
-                        require_once $targetPath . '/index.php';
-                        exit;
-                    }
-                    // فایل‌های استاتیک مثل تصاویر و CSS
-                    else {
-                        http_response_code(200);
-                        exit;
-                    }
-                } else {
-                    http_response_code(404);
-                    echo "فایل درخواستی در نرم‌افزار یافت نشد.";
-                    exit;
-                }
+                echo "</ul>";
+            } else {
+                echo "❌ پوشه app/software/ وجود ندارد!";
+            }
+            exit;
+        }
+        
+        if (is_dir($modulePath)) {
+            // تعریف ثابت‌های ماژول
+            if (!defined('MODULAR_APP_PATH')) {
+                define('MODULAR_APP_PATH', $modulePath);
+            }
+            if (!defined('CURRENT_MODULE')) {
+                define('CURRENT_MODULE', $moduleName);
+            }
+            if (!defined('CURRENT_MODULE_URL')) {
+                define('CURRENT_MODULE_URL', '/software/' . $slugOrModule . '/');
+            }
+            
+            // لود فایل entry point ماژول
+            $moduleEntry = $modulePath . '/index.php';
+            if (file_exists($moduleEntry)) {
+                require $moduleEntry;
+                exit;
+            } else {
+                http_response_code(500);
+                echo "❌ فایل index.php ماژول {$moduleName} یافت نشد.";
+                exit;
             }
         } else {
+            // ماژول یافت نشد
             http_response_code(404);
-            echo "نرم‌افزار درخواستی یافت نشد.";
+            if (file_exists(VIEWS_PATH . '/errors/404.php')) {
+                require_once VIEWS_PATH . '/errors/404.php';
+            } else {
+                echo "<h1>404 - ماژول {$slugOrModule} یافت نشد</h1>";
+                echo "<p><a href='/software'>بازگشت به لیست نرم‌افزارها</a></p>";
+            }
+            exit;
+        }
+    }
+}
+
+// ----------------------------------------
+// ۸.۹ مسیرهای پنل مدیریت
+// ----------------------------------------
+if (strpos($url, 'admin') === 0) {
+    if (loadController('AdminController')) {
+        $controller = new App\Controllers\AdminController();
+        $adminUrl = ltrim(substr($url, 5), '/'); // حذف 'admin' از ابتدا
+        
+        // جدول مسیریابی ادمین
+        $adminRoutes = [
+            '' => 'dashboard',
+            'posts' => 'posts',
+            'posts/create' => 'createPost',
+            'messages' => 'messages',
+            'settings' => 'settings',
+            'software-usage' => 'softwareUsage',
+            'software-limits' => 'softwareLimits',
+            'software-activity' => 'softwareActivity',
+        ];
+        
+        if (isset($adminRoutes[$adminUrl])) {
+            $method = $adminRoutes[$adminUrl];
+            if (method_exists($controller, $method)) {
+                $controller->$method();
+                exit;
+            }
+        }
+        
+        // مسیرهای با پارامتر (posts/edit/X و posts/delete/X)
+        if (preg_match('/^posts\/edit\/(\d+)$/', $adminUrl, $m)) {
+            $controller->editPost($m[1]);
+            exit;
+        }
+        
+        if (preg_match('/^posts\/delete\/(\d+)$/', $adminUrl, $m)) {
+            $controller->deletePost($m[1]);
+            exit;
+        }
+        
+        // مسیر ناشناخته در ادمین
+        http_response_code(404);
+        echo "<h1>404 - صفحه ادمین یافت نشد</h1>";
+        echo "<p>مسیر: " . htmlspecialchars($adminUrl) . "</p>";
+        echo "<p><a href='/admin'>بازگشت به داشبورد</a></p>";
+        exit;
+    }
+}
+
+// ----------------------------------------
+// ۸.۱۰ مسیرهای دسته‌بندی و پست‌ها (در صورت وجود)
+// ----------------------------------------
+if (preg_match('/^category\/([a-z0-9\-]+)$/', $url, $matches)) {
+    if (loadController('CategoryController')) {
+        $controller = new App\Controllers\CategoryController();
+        if (method_exists($controller, 'show')) {
+            $controller->show($matches[1]);
+            exit;
+        }
+    }
+}
+
+if (preg_match('/^post\/([a-z0-9\-]+)$/', $url, $matches)) {
+    if (loadController('PostController')) {
+        $controller = new App\Controllers\PostController();
+        if (method_exists($controller, 'show')) {
+            $controller->show($matches[1]);
             exit;
         }
     }
 }
 
 // ==========================================================
-// ۲. مسیریابی صفحات معمولی سایت (غیر از نرم‌افزارها)
-// ==========================================================
-
-// Static pages
-if ($url === 'about') {
-    require_once APP_PATH . '/controllers/PageController.php';
-    $controller = new App\Controllers\PageController();
-    $controller->about();
-    exit;
-}
-
-if ($url === 'contact') {
-    require_once APP_PATH . '/controllers/PageController.php';
-    $controller = new App\Controllers\PageController();
-    $controller->contact();
-    exit;
-}
-
-// Auth
-if ($url === 'login') {
-    require_once APP_PATH . '/controllers/AuthController.php';
-    $controller = new App\Controllers\AuthController();
-    $controller->login();
-    exit;
-}
-
-if ($url === 'register') {
-    require_once APP_PATH . '/controllers/AuthController.php';
-    $controller = new App\Controllers\AuthController();
-    $controller->register();
-    exit;
-}
-
-if ($url === 'logout') {
-    require_once APP_PATH . '/controllers/AuthController.php';
-    $controller = new App\Controllers\AuthController();
-    $controller->logout();
-    exit;
-}
-
-if (strpos($url, 'reset-password/') === 0) {
-    $token = substr($url, strlen('reset-password/'));
-    require_once APP_PATH . '/controllers/AuthController.php';
-    $controller = new App\Controllers\AuthController();
-    $controller->reset($token);
-    exit;
-}
-
-// Posts & Categories
-if (strpos($url, 'post/') === 0) {
-    $slug = substr($url, strlen('post/'));
-    require_once APP_PATH . '/controllers/HomeController.php';
-    $controller = new App\Controllers\HomeController();
-    $controller->post($slug);
-    exit;
-}
-
-if (strpos($url, 'category/') === 0) {
-    $slug = substr($url, strlen('category/'));
-    require_once APP_PATH . '/controllers/HomeController.php';
-    $controller = new App\Controllers\HomeController();
-    $controller->category($slug);
-    exit;
-}
-
-// Software List
-if ($url === 'software') {
-    require_once APP_PATH . '/controllers/SoftwareController.php';
-    $controller = new App\Controllers\SoftwareController();
-    $controller->index();
-    exit;
-}
-
-// Admin Routes
-if (strpos($url, 'admin') === 0) {
-    require_once APP_PATH . '/controllers/AdminController.php';
-    $controller = new App\Controllers\AdminController();
-    
-    $adminUrl = substr($url, strlen('admin'));
-    $adminUrl = ltrim($adminUrl, '/');
-    
-    if ($adminUrl === '') {
-        $controller->dashboard();
-    } elseif ($adminUrl === 'posts') {
-        $controller->posts();
-    } elseif ($adminUrl === 'posts/create') {
-        $controller->createPost();
-    } elseif (strpos($adminUrl, 'posts/edit/') === 0) {
-        $id = substr($adminUrl, strlen('posts/edit/'));
-        $controller->editPost($id);
-    } elseif (strpos($adminUrl, 'posts/delete/') === 0) {
-        $id = substr($adminUrl, strlen('posts/delete/'));
-        $controller->deletePost($id);
-    } elseif ($adminUrl === 'messages') {
-        $controller->messages();
-    } elseif ($adminUrl === 'settings') {
-        $controller->settings();
-    } else {
-        http_response_code(404);
-        echo "404 Not Found - Admin";
-    }
-    exit;
-}
-
-// ==========================================================
-// ۴. اگر هیچ مسیری پیدا نشد
+// ۹. صفحه 404 (پایان خط)
 // ==========================================================
 http_response_code(404);
-echo "404 Not Found - URL: " . htmlspecialchars($url);
+if (file_exists(VIEWS_PATH . '/errors/404.php')) {
+    require_once VIEWS_PATH . '/errors/404.php';
+} else {
+    echo "<!DOCTYPE html>
+    <html lang='fa' dir='rtl'>
+    <head>
+        <meta charset='UTF-8'>
+        <title>404 - صفحه یافت نشد</title>
+        <style>
+            body { font-family: Tahoma, sans-serif; text-align: center; padding: 50px; background: #f4f7f9; }
+            .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            h1 { font-size: 4rem; color: #e74c3c; margin: 0; }
+            p { color: #666; font-size: 1.1rem; }
+            a { color: #3498db; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <h1>404</h1>
+            <h2>صفحه مورد نظر یافت نشد</h2>
+            <p>مسیر درخواستی: <code>" . htmlspecialchars($url) . "</code></p>
+            <p><a href='/'>🏠 بازگشت به صفحه اصلی</a> | <a href='/software'>💻 لیست نرم‌افزارها</a></p>
+        </div>
+    </body>
+    </html>";
+}
+exit;

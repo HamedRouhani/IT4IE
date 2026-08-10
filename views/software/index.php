@@ -88,7 +88,7 @@
                     </div>
                     
                     <div style="margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a href="/software/<?php echo $software['slug']; ?>" class="btn-babok-primary" style="flex: 1; justify-content: center; box-sizing: border-box; padding: 10px 20px;">
+                        <a href="/software/babok/" class="btn-babok-primary">
                             <i class="fas fa-arrow-left"></i> ورود و اجرا
                         </a>
                         <?php if (!empty($software['demo_url'])): ?>

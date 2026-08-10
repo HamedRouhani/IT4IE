@@ -564,3 +564,49 @@
         padding: 14px 12px;
     }
 }
+
+/* ========================================
+   VISITS CHART - نمودار بازدید
+   ======================================== */
+.visits-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 180px;
+    padding-top: 10px;
+}
+
+.chart-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    gap: 6px;
+}
+
+.chart-bar {
+    width: 100%;
+    max-width: 36px;
+    min-height: 4px;
+    background: var(--primary-gradient);
+    border-radius: 6px 6px 0 0;
+    transition: var(--transition);
+}
+
+.chart-bar:hover {
+    opacity: 0.75;
+}
+
+.chart-label {
+    font-size: 0.65rem;
+    color: var(--gray);
+}
+
+@media (max-width: 576px) {
+    .visits-chart {
+        gap: 4px;
+        height: 140px;
+    }
+}

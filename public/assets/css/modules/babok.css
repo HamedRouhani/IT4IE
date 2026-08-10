@@ -1,0 +1,503 @@
+/* ================================================================
+   استایل‌های اختصاصی ماژول BABOK Analyzer
+   مسیر: public/assets/css/modules/babok.css
+   ================================================================ */
+
+/* ========== رنگ‌بندی اختصاصی BABOK ========== */
+.babok-module {
+    --babok-primary: #2c3e50;
+    --babok-secondary: #3498db;
+    --babok-success: #27ae60;
+    --babok-warning: #f39c12;
+    --babok-danger: #e74c3c;
+}
+
+/* ========== آیکون و عنوان BABOK ========== */
+.babok-module .software-sidebar-header h3 i {
+    color: #3498db;
+}
+
+/* ========== استایل‌های خاص داشبورد BABOK ========== */
+.babok-module .stats-grid .card {
+    border-right: 5px solid var(--babok-secondary);
+    text-align: center;
+}
+
+.babok-module .stats-grid .card:nth-child(2) {
+    border-right-color: var(--babok-success);
+}
+
+.babok-module .stats-grid .card:nth-child(3) {
+    border-right-color: var(--babok-warning);
+}
+
+.babok-module .stats-grid .card:nth-child(4) {
+    border-right-color: var(--babok-danger);
+}
+
+.babok-module .stats-grid .card .stat-icon {
+    font-size: 2rem;
+    opacity: 0.7;
+    margin-bottom: 8px;
+}
+
+.babok-module .stats-grid .card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 5px 0;
+}
+
+.babok-module .stats-grid .card .stat-label {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+/* ========== لیست حوزه‌های دانشی ========== */
+.babok-module .knowledge-area-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.babok-module .knowledge-area-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.babok-module .knowledge-area-list li:last-child {
+    border-bottom: none;
+}
+
+.babok-module .knowledge-area-list .ka-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.babok-module .knowledge-area-list .ka-name i {
+    color: var(--babok-secondary);
+}
+
+/* ========== فعالیت‌های اخیر ========== */
+.babok-module .activity-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.babok-module .activity-item:last-child {
+    border-bottom: none;
+}
+
+.babok-module .activity-item .activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--soft-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 15px;
+    color: var(--babok-secondary);
+    flex-shrink: 0;
+}
+
+.babok-module .activity-item .activity-info {
+    flex: 1;
+}
+
+.babok-module .activity-item .activity-title {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.babok-module .activity-item .activity-time {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    margin-top: 3px;
+}
+
+/* ========== فرم‌های BABOK ========== */
+.babok-module .form-group {
+    margin-bottom: 18px;
+}
+
+.babok-module .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--babok-primary);
+}
+
+.babok-module .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+/* ========== وضعیت وظایف ========== */
+.babok-module .status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.babok-module .status-not-started {
+    background: #ecf0f1;
+    color: #7f8c8d;
+}
+
+.babok-module .status-in-progress {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.babok-module .status-completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.babok-module .status-deferred {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* ========== متدولوژی ========== */
+.babok-module .methodology-agile {
+    background: #d4edda;
+    color: #155724;
+}
+
+.babok-module .methodology-waterfall {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.babok-module .methodology-hybrid {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* ========== دسته‌بندی تکنیک‌ها ========== */
+.babok-module .category-collaborative { background: #d1ecf1; color: #0c5460; }
+.babok-module .category-research { background: #d4edda; color: #155724; }
+.babok-module .category-experimental { background: #fff3cd; color: #856404; }
+.babok-module .category-management { background: #e2e3e5; color: #383d41; }
+.babok-module .category-strategic { background: #f8d7da; color: #721c24; }
+.babok-module .category-modeling { background: #d6d8db; color: #1b1e21; }
+
+/* ========== صفحه تحلیل نیازمندی ========== */
+.babok-module .requirement-analyzer {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: var(--soft-radius);
+    padding: 30px;
+    color: #fff;
+    margin-bottom: 25px;
+}
+
+.babok-module .requirement-analyzer h2 {
+    margin: 0 0 10px 0;
+    font-size: 1.5rem;
+}
+
+.babok-module .requirement-analyzer p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.babok-module .requirement-textarea {
+    min-height: 200px;
+    resize: vertical;
+}
+
+.babok-module .voice-recorder {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.babok-module .voice-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: var(--soft-transition);
+}
+
+.babok-module .voice-btn:hover {
+    transform: scale(1.1);
+}
+
+.babok-module .voice-btn.recording {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* ========== نتایج تحلیل ========== */
+.babok-module .requirement-result {
+    background: #fff;
+    border-radius: var(--soft-radius);
+    padding: 25px;
+    box-shadow: var(--soft-shadow);
+}
+
+.babok-module .requirement-item {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.babok-module .requirement-item.functional {
+    border-right: 4px solid var(--babok-secondary);
+}
+
+.babok-module .requirement-item.non-functional {
+    border-right: 4px solid var(--babok-warning);
+}
+
+.babok-module .requirement-item h4 {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    color: var(--babok-primary);
+}
+
+.babok-module .requirement-item p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+.babok-module .requirement-meta {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: #999;
+}
+
+/* ========== تکنیک‌های پیشنهادی ========== */
+.babok-module .technique-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: var(--soft-transition);
+}
+
+.babok-module .technique-card:hover {
+    border-color: var(--babok-secondary);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+}
+
+.babok-module .technique-card h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.05rem;
+    color: var(--babok-primary);
+}
+
+.babok-module .technique-card .technique-category {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.babok-module .technique-card .technique-score {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 8px;
+}
+
+.babok-module .technique-card .technique-reason {
+    font-size: 0.82rem;
+    color: #888;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+/* ========== ریسپانسیو BABOK ========== */
+@media (max-width: 768px) {
+    .babok-module .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .babok-module .requirement-analyzer {
+        padding: 20px;
+    }
+
+    .babok-module .voice-recorder {
+        flex-direction: column;
+    }
+}
+
+/* ================================================================
+   ضبط صدا - طراحی جدید (نسخه 2.0)
+   ================================================================ */
+.voice-recorder {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa, #eef2f7);
+    border: 2px dashed #d5dce6;
+    border-radius: 14px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+/* دکمه‌های بزرگ و زیبا */
+.voice-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 140px;
+    height: 56px;
+    padding: 0 26px;
+    border: none;
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.voice-btn i { font-size: 1.2rem; }
+
+.voice-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* دکمه شروع ضبط (قرمز) */
+.voice-start {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(231, 76, 60, 0.35);
+}
+
+.voice-start:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 24px rgba(231, 76, 60, 0.45);
+}
+
+/* دکمه توقف (تیره + پالس) */
+.voice-stop {
+    background: linear-gradient(135deg, #2c3e50, #1a252f);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(44, 62, 80, 0.35);
+    animation: stopPulse 1.6s infinite;
+}
+
+.voice-stop:hover {
+    transform: translateY(-2px) scale(1.03);
+}
+
+@keyframes stopPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.5); }
+    50%      { box-shadow: 0 0 0 14px rgba(231, 76, 60, 0); }
+}
+
+/* اطلاعات ضبط */
+.voice-info { flex: 1; min-width: 220px; }
+
+.voice-title {
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.voice-title i { color: #e74c3c; }
+
+.voice-status {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    line-height: 1.6;
+}
+
+/* تایمر */
+.voice-timer {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #e74c3c;
+    background: #fff;
+    border: 2px solid #e74c3c;
+    border-radius: 12px;
+    padding: 8px 16px;
+    min-width: 95px;
+    text-align: center;
+    display: none;
+}
+
+.voice-timer.active { display: block; }
+
+/* انیمیشن موج صدا */
+.voice-wave {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 36px;
+    margin-top: 14px;
+}
+
+.voice-wave.active { display: flex; }
+
+.voice-wave span {
+    width: 5px;
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #e74c3c, #f39c12);
+    animation: wave 1s ease-in-out infinite;
+}
+
+.voice-wave span:nth-child(2) { animation-delay: 0.1s; }
+.voice-wave span:nth-child(3) { animation-delay: 0.2s; }
+.voice-wave span:nth-child(4) { animation-delay: 0.3s; }
+.voice-wave span:nth-child(5) { animation-delay: 0.4s; }
+.voice-wave span:nth-child(6) { animation-delay: 0.5s; }
+.voice-wave span:nth-child(7) { animation-delay: 0.6s; }
+
+@keyframes wave {
+    0%, 100% { height: 20%; }
+    50%      { height: 100%; }
+}
+
+/* موبایل */
+@media (max-width: 576px) {
+    .voice-recorder {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    .voice-btn { width: 100%; }
+    .voice-title { justify-content: center; }
+}

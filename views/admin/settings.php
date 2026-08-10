@@ -1,17 +1,6 @@
 <div class="admin-container">
-    <div class="admin-sidebar">
-        <div class="admin-brand">
-            <h3>📊 مدیریت</h3>
-            <span>پنل مدیریت IT4IE</span>
-        </div>
-        <ul>
-            <li><a href="/admin"><i class="fas fa-tachometer-alt"></i> داشبورد</a></li>
-            <li><a href="/admin/posts"><i class="fas fa-file-alt"></i> پست‌ها</a></li>
-            <li><a href="/admin/messages"><i class="fas fa-envelope"></i> پیام‌ها</a></li>
-            <li><a href="/admin/settings" class="active"><i class="fas fa-cog"></i> تنظیمات</a></li>
-            <li><a href="/"><i class="fas fa-home"></i> بازگشت به سایت</a></li>
-        </ul>
-    </div>
+    
+    <?php include VIEWS_PATH . '/admin/partials/sidebar.php'; ?>
     
     <div class="admin-content">
         <div class="admin-header">

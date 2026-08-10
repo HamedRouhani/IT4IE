@@ -52,4 +52,13 @@ class Category extends Model
         }
         return $tree;
     }
+
+    /**
+     * یافتن دسته‌بندی بر اساس اسلاگ
+     */
+    public function findBySlug($slug)
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE slug = ? LIMIT 1";
+        return $this->queryOne($sql, [$slug]);
+    }
 }

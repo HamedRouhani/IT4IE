@@ -1,27 +1,29 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\Software;
 use App\Models\Category;
 use App\Models\Setting;
+use App\Models\SoftwareActivityLog;
 
 class SoftwareController extends Controller
 {
+    /**
+     * لیست نرم‌افزارها
+     */
     public function index()
     {
         $softwareModel = new Software();
         $categoryModel = new Category();
         $settingModel = new Setting();
-        
         $softwareList = $softwareModel->getActiveSoftware();
         $categories = $categoryModel->getTree();
         $settings = $settingModel->getAll();
-        
         $totalSoftware = count($softwareList);
         $totalDownloads = $softwareModel->getTotalDownloads();
-        
-        // تغییر کلیدی: استفاده از render و سپس لود کردن دستی ویو با main_layout
+
         $this->render('software/index', [
             'title' => 'نرم‌افزارهای تخصصی - IT4IE',
             'softwareList' => $softwareList,
@@ -31,24 +33,26 @@ class SoftwareController extends Controller
             'totalDownloads' => $totalDownloads
         ]);
     }
-    
+
+    /**
+     * جزئیات یک نرم‌افزار
+     */
     public function detail($slug)
     {
         $softwareModel = new Software();
         $categoryModel = new Category();
         $settingModel = new Setting();
-        
         $software = $softwareModel->getBySlug($slug);
-        
+
         if (!$software) {
             http_response_code(404);
             echo "404 Not Found";
             exit;
         }
-        
+
         $categories = $categoryModel->getTree();
         $settings = $settingModel->getAll();
-        
+
         $this->render('software/detail', [
             'title' => $software['name'] . ' - IT4IE',
             'software' => $software,
@@ -58,62 +62,74 @@ class SoftwareController extends Controller
     }
 
     /**
-     * اجرای نرم‌افزارهای مستقل ماژولار
-     * پارامترها: {slug} نام نرم‌افزار (مثلاً babok-analyzer) و {params} ادامه مسیر (مثلاً public)
+     * 🆕 اجرای یک نرم‌افزار ماژولار
      */
-    public function execute($slug, $params = '')
+    public function run($slug)
     {
-        // ۱. نام پوشه نرم‌افزار را مشخص کن
-        $folderName = $slug;
-        if ($slug === 'babok-analyzer') {
-            $folderName = 'babok';
+        $softwareModel = new Software();
+        $software = $softwareModel->getBySlug($slug);
+
+        if (!$software) {
+            $_SESSION['error'] = 'نرم‌افزار مورد نظر یافت نشد.';
+            $this->redirect('/software');
+            return;
         }
 
-        // ۲. مسیر فیزیکی پوشه
-        $softwareDir = ROOT_PATH . '/softwares/' . $folderName;
-
-        // ۳. اگر پوشه وجود ندارد، خطا بده
-        if (!is_dir($softwareDir)) {
-            http_response_code(404);
-            echo "نرم‌افزار درخواستی یافت نشد.";
-            exit;
+        if (!$software['is_active']) {
+            $_SESSION['error'] = 'این نرم‌افزار در حال حاضر غیرفعال است.';
+            $this->redirect('/software');
+            return;
         }
 
-        // ۴. تنظیم مسیر برای اتولودر اصلی (مهم‌ترین خط)
-        if (!defined('MODULAR_APP_PATH')) {
-            define('MODULAR_APP_PATH', $softwareDir);
-        }
+        // ذخیره اطلاعات نرم‌افزار در session
+        $_SESSION['current_software'] = [
+            'id' => $software['id'],
+            'slug' => $software['slug'],
+            'name' => $software['name']
+        ];
 
-        // ۵. اگر پارامتر params خالی است، به روت نرم‌افزار برو
-        if (empty($params)) {
-            $entryFile = $softwareDir . '/index.php';
-            if (file_exists($entryFile)) {
-                require_once $entryFile;
-                exit;
-            } else {
-                http_response_code(404);
-                echo "فایل ورودی نرم‌افزار یافت نشد.";
-                exit;
-            }
-        }
+        // ثبت لاگ ورود به نرم‌افزار
+        $this->logActivity($software['slug'], 'enter', 'software', $software['id']);
 
-        // ۶. اگر پارامتر params وجود دارد
-        $targetPath = $softwareDir . '/' . $params;
-        if (file_exists($targetPath)) {
-            if (is_file($targetPath)) {
-                require_once $targetPath;
-                exit;
-            } elseif (is_dir($targetPath) && file_exists($targetPath . '/index.php')) {
-                require_once $targetPath . '/index.php';
-                exit;
-            } else {
-                http_response_code(200);
-                exit;
-            }
-        } else {
-            http_response_code(404);
-            echo "فایل یا پوشه درخواستی در نرم‌افزار یافت نشد.";
-            exit;
+        // ریدایرکت به entry point ماژول
+        $entryPoint = '/software/' . $slug . '/';
+        $this->redirect($entryPoint);
+    }
+
+    /**
+     * 🆕 خروج از نرم‌افزار
+     */
+    public function exitSoftware()
+    {
+        if (isset($_SESSION['current_software'])) {
+            $this->logActivity(
+                $_SESSION['current_software']['slug'],
+                'exit',
+                'software',
+                $_SESSION['current_software']['id']
+            );
+            unset($_SESSION['current_software']);
+        }
+        $this->redirect('/software');
+    }
+
+    /**
+     * ثبت لاگ فعالیت در نرم‌افزار
+     */
+    private function logActivity($softwareSlug, $action, $recordType = null, $recordId = null, $oldValue = null, $newValue = null)
+    {
+        try {
+            $logModel = new SoftwareActivityLog();
+            $logModel->log([
+                'software_slug' => $softwareSlug,
+                'action' => $action,
+                'record_type' => $recordType,
+                'record_id' => $recordId,
+                'old_value' => $oldValue,
+                'new_value' => $newValue
+            ]);
+        } catch (\Exception $e) {
+            error_log("Failed to log software activity: " . $e->getMessage());
         }
     }
 }

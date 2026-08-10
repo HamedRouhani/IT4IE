@@ -1,0 +1,502 @@
+/* ================================================================
+   صفحه پروفایل کاربر - 16-profile.css
+   ================================================================ */
+
+/* کانتینر اصلی پروفایل */
+.profile-container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+/* هدر پروفایل */
+.profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 30px;
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    color: #fff;
+}
+
+.profile-avatar img,
+.profile-avatar .avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid rgba(255,255,255,0.3);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.avatar-placeholder {
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h1 {
+    margin: 0 0 5px 0;
+    font-size: 2rem;
+    color: #fff;
+}
+
+.profile-info .email {
+    margin: 0 0 10px 0;
+    opacity: 0.9;
+}
+
+.profile-info .company {
+    margin: 0 0 15px 0;
+    opacity: 0.9;
+}
+
+.profile-info .company i {
+    margin-left: 5px;
+}
+
+.profile-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.profile-badges .badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    color: #fff;
+}
+
+.profile-badges .badge-success {
+    background: rgba(39, 174, 96, 0.8);
+}
+
+.profile-badges .badge-admin { background: rgba(231, 76, 60, 0.8); }
+.profile-badges .badge-editor { background: rgba(52, 152, 219, 0.8); }
+.profile-badges .badge-client { background: rgba(243, 156, 18, 0.8); }
+.profile-badges .badge-user { background: rgba(149, 165, 166, 0.8); }
+
+.profile-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* محتوای پروفایل */
+.profile-content {
+    display: grid;
+    gap: 20px;
+}
+
+.profile-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.profile-card h2 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 1.3rem;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.profile-card h2 i {
+    color: #3498db;
+    margin-left: 8px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.info-item label {
+    display: block;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.info-item p {
+    margin: 0;
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.bio-text {
+    line-height: 1.8;
+    color: #555;
+}
+
+/* ================================================================
+   صفحه ویرایش پروفایل
+   ================================================================ */
+
+.profile-edit-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.profile-edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #ecf0f1;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.profile-edit-header h1 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.6rem;
+}
+
+.profile-edit-header h1 i {
+    color: #3498db;
+    margin-left: 8px;
+}
+
+.profile-edit-content {
+    display: grid;
+    gap: 25px;
+}
+
+.edit-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.edit-card h2 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 1.2rem;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.edit-card h2 i {
+    color: #3498db;
+    margin-left: 8px;
+}
+
+.avatar-upload {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.current-avatar img,
+.current-avatar .avatar-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #3498db;
+}
+
+.current-avatar .avatar-placeholder {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.upload-controls {
+    flex: 1;
+    min-width: 200px;
+}
+
+.upload-controls .form-control {
+    margin-bottom: 5px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.3s;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-text {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+/* دکمه‌ها */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-primary {
+    background: #3498db;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: #fff;
+}
+
+.btn-warning:hover {
+    background: #d68910;
+}
+
+.btn-secondary {
+    background: #ecf0f1;
+    color: #2c3e50;
+}
+
+.btn-secondary:hover {
+    background: #d5d8dc;
+}
+
+.btn-danger {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+/* ================================================================
+   ریسپانسیو
+   ================================================================ */
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .profile-info h1 {
+        font-size: 1.5rem;
+    }
+    
+    .profile-badges {
+        justify-content: center;
+    }
+    
+    .profile-actions {
+        justify-content: center;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .avatar-upload {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .current-avatar {
+        text-align: center;
+    }
+    
+    .profile-edit-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .profile-edit-header .btn {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-container,
+    .profile-edit-container {
+        padding: 0 10px;
+    }
+    
+    .profile-header {
+        padding: 20px;
+    }
+    
+    .profile-card,
+    .edit-card {
+        padding: 18px;
+    }
+    
+    .profile-avatar img,
+    .profile-avatar .avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+    }
+}
+
+/* ================================================================
+   حالت صفحه پروفایل (بدون سایدبار و فوتر)
+   ================================================================ */
+
+body.profile-page {
+    background: #f4f7f9;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* محتوای اصلی پروفایل با عرض کامل */
+.profile-main {
+    flex: 1;
+    width: 100%;
+    padding: 20px 0 60px 0;
+}
+
+/* اطمینان از تمام‌عرض بودن در صورت وجود کلاس‌های قدیمی */
+body.profile-page .main-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+body.profile-page .sidebar,
+body.profile-page .content-wrapper > .sidebar {
+    display: none !important;
+}
+
+body.profile-page .footer {
+    display: none !important;
+}
+
+/* ================================================================
+   سفیدسازی تمام نوشته‌های کارت هدر پروفایل (خوانا روی پس‌زمینه بنفش)
+   نکته: چون این فایل قبل از style.css لود می‌شود،
+   برای غلبه بر استایل‌های سراسری از !important استفاده شده است
+   ================================================================ */
+.profile-header,
+.profile-header h1,
+.profile-header h2,
+.profile-header h3,
+.profile-header h4,
+.profile-header p,
+.profile-header span,
+.profile-header small,
+.profile-header i,
+.profile-header a,
+.profile-header .email,
+.profile-header .company,
+.profile-header .profile-badges .badge,
+.profile-header .profile-badges .badge i {
+    color: #ffffff !important;
+}
+
+/* متن‌های ثانویه (ایمیل و شرکت) سفید با شفافیت کم */
+.profile-header .email,
+.profile-header .company {
+    opacity: 0.92;
+}
+
+/* دکمه ویرایش پروفایل: خوانا روی پس‌زمینه بنفش */
+.profile-header .btn {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.18);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+}
+
+.profile-header .btn:hover {
+    background: #ffffff;
+    color: #667eea !important;
+    border-color: #ffffff;
+}
+
+/* آواتار پیش‌فرض (حرف اول نام) سفید بماند */
+.profile-header .avatar-placeholder {
+    color: #ffffff !important;
+}

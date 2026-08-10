@@ -31,26 +31,4 @@
             <?php endforeach; ?>
         </ul>
     </div>
-    
-    <!-- Widget برترین مطالب -->
-    <div class="sidebar-card">
-        <h3 class="sidebar-title">
-            <i class="fas fa-star"></i>
-            برترین مطالب
-        </h3>
-        <ul class="sidebar-menu">
-            <li class="sidebar-item">
-                <a href="#" class="sidebar-link">
-                    <i class="fas fa-angle-left"></i>
-                    <span>مطلب نمونه ۱</span>
-                </a>
-            </li>
-            <li class="sidebar-item">
-                <a href="#" class="sidebar-link">
-                    <i class="fas fa-angle-left"></i>
-                    <span>مطلب نمونه ۲</span>
-                </a>
-            </li>
-        </ul>
-    </div>
 </aside>

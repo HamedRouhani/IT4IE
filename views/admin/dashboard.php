@@ -1,18 +1,6 @@
 <div class="admin-container">
     <!-- Sidebar -->
-    <aside class="admin-sidebar">
-        <div class="admin-brand">
-            <h3>📊 مدیریت</h3>
-            <span>پنل مدیریت IT4IE</span>
-        </div>
-        <ul>
-            <li><a href="/admin" class="active"><i class="fas fa-tachometer-alt"></i> داشبورد</a></li>
-            <li><a href="/admin/posts"><i class="fas fa-file-alt"></i> پست‌ها</a></li>
-            <li><a href="/admin/messages"><i class="fas fa-envelope"></i> پیام‌ها</a></li>
-            <li><a href="/admin/settings"><i class="fas fa-cog"></i> تنظیمات</a></li>
-            <li><a href="/"><i class="fas fa-home"></i> بازگشت به سایت</a></li>
-        </ul>
-    </aside>
+    <?php include VIEWS_PATH . '/admin/partials/sidebar.php'; ?>
     
     <!-- Content -->
     <div class="admin-content">
@@ -44,6 +32,26 @@
                     <p>کاربران فعال</p>
                 </div>
             </div>
+            
+            <a href="/admin/visits" style="text-decoration: none;">
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-info">
+                        <h3><?php echo number_format($todayVisits ?? 0); ?></h3>
+                        <p>بازدید امروز</p>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="/admin/visits" style="text-decoration: none;">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-eye"></i></div>
+                    <div class="stat-info">
+                        <h3><?php echo number_format($totalVisits ?? 0); ?></h3>
+                        <p>کل بازدیدها</p>
+                    </div>
+                </div>
+            </a>
         </div>
         
         <!-- Widgets -->
