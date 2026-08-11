@@ -1,11 +1,11 @@
 <?php
 /**
- * سایدبار نرم‌افزار - نسخه پویا و توسعه‌پذیر (اصلاح شده)
+ * سایدبار نرم‌افزار - نسخه پویا و توسعه‌پذیر
  * در دسکتاپ عمودی / در موبایل افقی
  * 
  * برای اضافه کردن ماژول جدید:
  * 1. یک entry جدید به آرایه $moduleMenus اضافه کنید
- * 2. کلید باید همان moduleName باشد
+ * 2. کلید باید همان moduleName باشد (مثلاً 'qms')
  */
 
 // دریافت route فعلی (پشتیبانی از هر دو الگو: route و controller)
@@ -53,6 +53,23 @@ $moduleMenus = [
             ['route' => 'technique',     'icon' => 'fas fa-tools',               'label' => 'تکنیک‌ها'],
             ['route' => 'risk',          'icon' => 'fas fa-exclamation-triangle','label' => 'ریسک‌ها'],
             ['route' => 'report',        'icon' => 'fas fa-chart-bar',           'label' => 'گزارش‌ها'],
+        ]
+    ],
+
+    // -------- QMS Analyzer (ISO 9001:2015) --------
+    'qms' => [
+        'name' => 'QMS Analyzer',
+        'icon' => 'fas fa-shield-alt',
+        'param' => 'controller',  // پارامتر URL
+        'menus' => [
+            ['route' => 'dashboard',       'icon' => 'fas fa-home',                'label' => 'داشبورد'],
+            ['route' => 'isoclauses',      'icon' => 'fas fa-book',                'label' => 'بندهای استاندارد'],
+            ['route' => 'auditplans',      'icon' => 'fas fa-clipboard-list',      'label' => 'برنامه‌های ممیزی'],
+            ['route' => 'auditsessions',   'icon' => 'fas fa-clipboard-check',     'label' => 'جلسات ممیزی'],
+            ['route' => 'nonconformities', 'icon' => 'fas fa-exclamation-triangle','label' => 'عدم انطباق‌ها'],
+            ['route' => 'car',             'icon' => 'fas fa-tasks',               'label' => 'اقدامات اصلاحی (CAR)'],
+            ['route' => 'reports',         'icon' => 'fas fa-chart-bar',           'label' => 'گزارش‌ها و داشبورد مدیریت'],
+            ['route' => 'managementreviews', 'icon' => 'fas fa-users-cog',         'label' => 'بازنگری مدیریت'],
         ]
     ],
     
