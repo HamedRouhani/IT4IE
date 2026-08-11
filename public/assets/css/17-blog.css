@@ -1,0 +1,292 @@
+/* ================================================================
+   17. صفحه لیست مطالب (Blog) - هماهنگ با صفحه اصلی
+   ================================================================ */
+
+/* ========== Breadcrumb ========== */
+.blog-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--gray, #7f8c8d);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.blog-breadcrumb a {
+    color: var(--primary, #6C3CE1);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.blog-breadcrumb a:hover {
+    color: var(--primary-dark, #5a2db8);
+}
+
+.blog-breadcrumb .sep {
+    color: var(--gray-light, #ccc);
+}
+
+/* ========== هدر صفحه Blog ========== */
+.blog-header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--gray-light, #ecf0f1);
+}
+
+.blog-header h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--dark, #2c3e50);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 8px;
+}
+
+.blog-header h1 i {
+    color: var(--primary, #6C3CE1);
+}
+
+.blog-subtitle {
+    color: var(--gray, #7f8c8d);
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* ========== Layout دو ستونه ========== */
+.blog-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/* ========== سایدبار فیلتر ========== */
+.blog-sidebar {
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+
+.blog-filter-card {
+    background: var(--white, #fff);
+    border-radius: var(--radius-lg, 16px);
+    padding: 20px;
+    box-shadow: var(--shadow, 0 2px 10px rgba(0,0,0,0.06));
+    border: 1px solid rgba(108, 60, 225, 0.04);
+}
+
+.blog-filter-card h3 {
+    font-size: 1rem;
+    color: var(--dark, #2c3e50);
+    margin: 0 0 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-light, #ecf0f1);
+}
+
+.blog-filter-card h3 i {
+    color: var(--primary, #6C3CE1);
+}
+
+.blog-filter-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.blog-filter-list li {
+    margin-bottom: 4px;
+}
+
+.blog-filter-list a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius, 10px);
+    color: var(--gray-dark, #555);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.25s;
+}
+
+.blog-filter-list a:hover {
+    background: rgba(108, 60, 225, 0.06);
+    color: var(--primary, #6C3CE1);
+}
+
+.blog-filter-list a.active {
+    background: rgba(108, 60, 225, 0.10);
+    color: var(--primary, #6C3CE1);
+    font-weight: 600;
+}
+
+.blog-filter-list a i {
+    width: 18px;
+    text-align: center;
+    opacity: 0.7;
+}
+
+.blog-filter-list .count {
+    margin-right: auto;
+    background: var(--gray-light, #ecf0f1);
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gray-dark, #555);
+}
+
+.blog-filter-list a.active .count {
+    background: var(--primary, #6C3CE1);
+    color: #fff;
+}
+
+/* ========== حالت خالی ========== */
+.blog-empty {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--white, #fff);
+    border-radius: var(--radius-lg, 16px);
+    box-shadow: var(--shadow, 0 2px 10px rgba(0,0,0,0.06));
+    border: 1px solid rgba(108, 60, 225, 0.04);
+}
+
+.blog-empty i {
+    font-size: 3rem;
+    color: #d5d8dc;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.blog-empty h3 {
+    color: var(--dark, #2c3e50);
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+}
+
+.blog-empty p {
+    color: var(--gray, #7f8c8d);
+    margin: 0 0 20px;
+}
+
+.blog-empty .btn-primary {
+    display: inline-block;
+    padding: 10px 24px;
+    background: var(--primary, #6C3CE1);
+    color: #fff;
+    border-radius: var(--radius-full, 999px);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.25s;
+}
+
+.blog-empty .btn-primary:hover {
+    background: var(--primary-dark, #5a2db8);
+    transform: translateY(-2px);
+}
+
+/* ========== صفحه‌بندی ========== */
+.blog-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+    padding: 20px 0;
+}
+
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: var(--radius, 10px);
+    background: var(--white, #fff);
+    color: var(--dark, #2c3e50);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: all 0.25s;
+    border: 1px solid var(--gray-light, #ecf0f1);
+}
+
+.page-btn:hover {
+    background: var(--primary, #6C3CE1);
+    color: #fff;
+    border-color: var(--primary, #6C3CE1);
+    transform: translateY(-2px);
+}
+
+.page-btn.active {
+    background: var(--primary, #6C3CE1);
+    color: #fff;
+    border-color: var(--primary, #6C3CE1);
+}
+
+.page-btn:disabled,
+.page-btn.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ========== ریسپانسیو ========== */
+@media (max-width: 992px) {
+    .blog-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .blog-sidebar {
+        position: static;
+        order: -1;
+    }
+
+    .blog-filter-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .blog-filter-list li {
+        margin: 0;
+    }
+
+    .blog-filter-list a {
+        padding: 8px 14px;
+        font-size: 0.82rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .blog-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .blog-pagination {
+        gap: 6px;
+    }
+
+    .page-btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .blog-filter-list {
+        flex-direction: column;
+    }
+
+    .blog-filter-list a {
+        justify-content: space-between;
+    }
+}

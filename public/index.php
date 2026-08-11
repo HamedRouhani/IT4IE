@@ -347,6 +347,15 @@ if (preg_match('/^software\/([a-z0-9\-]+)(\/.*)?$/', $url, $m)) {
 }
 
 // ============================================
+// 📝 لیست همه مطالب (Blog/Posts)
+// ============================================
+if ($url === 'posts' || $url === 'blog') {
+    require_once APP_PATH . '/controllers/BlogController.php';
+    (new App\Controllers\BlogController())->index();
+    exit;
+}
+
+// ============================================
 // ️ ADMIN ROUTES (کامل)
 // ============================================
 if (strpos($url, 'admin') === 0) {
