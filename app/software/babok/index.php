@@ -128,6 +128,21 @@ if (in_array($route, $writeRoutes) && !isset($_SESSION['user_id'])) {
     }
 }
 
+// مسیرهایی که حتماً نیاز به ورود دارند
+$authRequiredRoutes = [
+    'projects', 'projects_create', 'projects_store', 'projects_view',
+    'projects_edit', 'projects_update', 'projects_delete',
+    'planning', 'planning_add_task', 'planning_remove_task',
+    'planning_update_status', 'planning_recommended',
+];
+
+if (in_array($route, $authRequiredRoutes) && !isset($_SESSION['user_id'])) {
+    $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+    $_SESSION['auth_message'] = 'برای مدیریت پروژه‌ها لطفاً وارد شوید.';
+    header('Location: /login');
+    exit;
+}
+
 // ============================================================
 // Router اصلی ماژول BABOK
 // ============================================================

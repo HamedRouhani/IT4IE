@@ -178,8 +178,22 @@ class AuthController extends Controller
                 $userId = $userModel->create($userData);
                 
                 if ($userId) {
-                    $_SESSION['message'] = 'ثبت‌نام با موفقیت انجام شد. لطفاً ایمیل خود را تأیید کنید.';
-                    $this->redirect('/login');
+                    // ارسال ایمیل تأیید
+                    $emailSent = sendVerificationEmail($email, $name, $verificationToken);
+                    
+                    // ذخیره اطلاعات در session برای صفحه انتظار
+                    $_SESSION['pending_email'] = $email;
+                    $_SESSION['pending_name'] = $name;
+                    $_SESSION['email_sent'] = $emailSent;
+                    
+                    if ($emailSent) {
+                        $_SESSION['message'] = '✅ ثبت‌نام با موفقیت انجام شد. لطفاً ایمیل خود را بررسی کنید و روی لینک تأیید کلیک نمایید.';
+                    } else {
+                        $_SESSION['error'] = '⚠️ ثبت‌نام انجام شد اما ارسال ایمیل با مشکل مواجه شد. لطفاً با پشتیبانی تماس بگیرید.';
+                    }
+                    
+                    // ریدایرکت به صفحه انتظار ایمیل
+                    $this->redirect('/verify-email-needed');
                 } else {
                     $errors[] = 'خطا در ثبت‌نام. لطفاً مجدداً تلاش کنید.';
                 }
@@ -360,5 +374,85 @@ class AuthController extends Controller
         }
         
         $this->redirect('/login');
+    }
+
+    /**
+     * 🆕 صفحه "ایمیل خود را تأیید کنید"
+     */
+    public function verifyEmailNeeded()
+    {
+        // اگر کاربر قبلاً لاگین کرده، به صفحه اصلی برود
+        if (isset($_SESSION['user_id'])) {
+            $this->redirect('/');
+            return;
+        }
+
+        $email = $_SESSION['pending_email'] ?? '';
+        $name = $_SESSION['pending_name'] ?? 'کاربر گرامی';
+
+        // اگر ایمیلی در سشن نبود (مثلاً سشن پاک شده)، به صفحه ورود برگرد
+        if (empty($email)) {
+            $this->redirect('/login');
+            return;
+        }
+
+        // رندر ویو با حداقل وابستگی برای جلوگیری از خطاهای احتمالی
+        $this->renderAuth('auth/verify-email-needed', [
+            'title' => 'تأیید ایمیل - IT4IE',
+            'email' => $email,
+            'name' => $name,
+            'emailSent' => $_SESSION['email_sent'] ?? true,
+        ]);
+    }
+
+    /**
+     * 🆕 ارسال مجدد ایمیل تأیید
+     */
+    public function resendVerification()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/verify-email-needed');
+            return;
+        }
+        
+        $email = trim($_POST['email'] ?? '');
+        
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['resend_error'] = 'ایمیل معتبر نیست.';
+            $this->redirect('/verify-email-needed');
+            return;
+        }
+        
+        $userModel = new User();
+        $user = $userModel->findByEmail($email);
+        
+        if (!$user) {
+            $_SESSION['resend_error'] = 'کاربری با این ایمیل یافت نشد.';
+            $this->redirect('/verify-email-needed');
+            return;
+        }
+        
+        if ($user['email_verified']) {
+            $_SESSION['resend_error'] = 'این ایمیل قبلاً تأیید شده است.';
+            $this->redirect('/login');
+            return;
+        }
+        
+        // تولید توکن جدید
+        $newToken = bin2hex(random_bytes(32));
+        $userModel->update($user['id'], [
+            'verification_token' => $newToken,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+        
+        $sent = sendVerificationEmail($email, $user['name'], $newToken);
+        
+        if ($sent) {
+            $_SESSION['resend_message'] = '✅ ایمیل تأیید مجدداً ارسال شد. Inbox و پوشه Spam را بررسی کنید.';
+        } else {
+            $_SESSION['resend_error'] = '❌ خطا در ارسال ایمیل. لطفاً با پشتیبانی تماس بگیرید.';
+        }
+        
+        $this->redirect('/verify-email-needed');
     }
 }

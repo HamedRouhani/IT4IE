@@ -501,3 +501,50 @@
     .voice-btn { width: 100%; }
     .voice-title { justify-content: center; }
 }
+
+/* ========== کارت‌های آمار داشبورد ========== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.stats-grid .card {
+    margin-bottom: 0;
+    transition: all 0.3s ease;
+}
+
+.stats-grid .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stats-grid .stat-icon {
+    display: block;
+}
+
+.stats-grid .stat-value {
+    display: block;
+}
+
+.stats-grid .stat-label {
+    display: block;
+    font-size: 0.95rem;
+    color: #718096;
+    margin-top: 8px;
+    font-weight: 600;
+}
+
+/* ========== واکنش‌گرا ========== */
+@media (max-width: 992px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

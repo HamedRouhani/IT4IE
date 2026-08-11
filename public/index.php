@@ -152,7 +152,7 @@ if ($url === 'contact') {
 }
 
 // ============================================
-// AUTH ROUTES
+// AUTH ROUTES (اصلاح شده و کامل)
 // ============================================
 if ($url === 'login') {
     require_once APP_PATH . '/controllers/AuthController.php';
@@ -174,6 +174,21 @@ if ($url === 'forgot-password') {
     (new App\Controllers\AuthController())->forgot();
     exit;
 }
+
+// 🆕 صفحه "ایمیل خود را تأیید کنید"
+if ($url === 'verify-email-needed') {
+    require_once APP_PATH . '/controllers/AuthController.php';
+    (new App\Controllers\AuthController())->verifyEmailNeeded();
+    exit;
+}
+
+// 🆕 ارسال مجدد ایمیل تأیید
+if ($url === 'auth/resend-verification' || $url === 'resend-verification') {
+    require_once APP_PATH . '/controllers/AuthController.php';
+    (new App\Controllers\AuthController())->resendVerification();
+    exit;
+}
+
 if (strpos($url, 'reset-password/') === 0) {
     $token = substr($url, strlen('reset-password/'));
     require_once APP_PATH . '/controllers/AuthController.php';

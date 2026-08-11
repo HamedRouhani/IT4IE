@@ -7,38 +7,54 @@ $pageTitle = 'داشبورد - BABOK Analyzer';
 $activePage = 'home';
 ?>
 
-<!-- کارت‌های آمار -->
+<!-- ✅ کارت‌های آمار - با عناوین کامل -->
 <div class="stats-grid">
-    <div class="card" style="border-right: 5px solid var(--soft-secondary); text-align: center;">
-        <div class="stat-icon" style="color: var(--soft-secondary);">
+    <div class="card stat-card-full" style="border-right: 5px solid var(--soft-secondary, #764ba2); text-align: center; padding: 25px 20px;">
+        <div class="stat-icon" style="color: var(--soft-secondary, #764ba2); font-size: 1.9rem; margin-bottom: 12px;">
             <i class="fas fa-sitemap"></i>
         </div>
-        <div class="stat-value"><?= count($knowledgeAreas ?? []) ?></div>
-        <div class="stat-label">حوزه‌های دانشی</div>
+        <div class="stat-value" style="font-size: 2rem; font-weight: 800; color: #2D3748; line-height: 1.2;">
+            <?= count($knowledgeAreas ?? []) ?>
+        </div>
+        <div class="stat-label" style="font-size: 0.95rem; color: #718096; margin-top: 8px; font-weight: 600;">
+            حوزه‌های دانشی
+        </div>
     </div>
     
-    <div class="card" style="border-right: 5px solid var(--soft-success); text-align: center;">
-        <div class="stat-icon" style="color: var(--soft-success);">
+    <div class="card stat-card-full" style="border-right: 5px solid var(--soft-success, #48bb78); text-align: center; padding: 25px 20px;">
+        <div class="stat-icon" style="color: var(--soft-success, #48bb78); font-size: 1.9rem; margin-bottom: 12px;">
             <i class="fas fa-tasks"></i>
         </div>
-        <div class="stat-value"><?= $totalTasks ?? 0 ?></div>
-        <div class="stat-label">وظایف BABOK</div>
+        <div class="stat-value" style="font-size: 2rem; font-weight: 800; color: #2D3748; line-height: 1.2;">
+            <?= $totalTasks ?? 0 ?>
+        </div>
+        <div class="stat-label" style="font-size: 0.95rem; color: #718096; margin-top: 8px; font-weight: 600;">
+            وظایف BABOK
+        </div>
     </div>
     
-    <div class="card" style="border-right: 5px solid var(--soft-warning); text-align: center;">
-        <div class="stat-icon" style="color: var(--soft-warning);">
+    <div class="card stat-card-full" style="border-right: 5px solid var(--soft-warning, #ed8936); text-align: center; padding: 25px 20px;">
+        <div class="stat-icon" style="color: var(--soft-warning, #ed8936); font-size: 1.9rem; margin-bottom: 12px;">
             <i class="fas fa-microchip"></i>
         </div>
-        <div class="stat-value"><?= $totalTechniques ?? 0 ?></div>
-        <div class="stat-label">تکنیک‌های استاندارد</div>
+        <div class="stat-value" style="font-size: 2rem; font-weight: 800; color: #2D3748; line-height: 1.2;">
+            <?= $totalTechniques ?? 0 ?>
+        </div>
+        <div class="stat-label" style="font-size: 0.95rem; color: #718096; margin-top: 8px; font-weight: 600;">
+            تکنیک‌های استاندارد
+        </div>
     </div>
     
-    <div class="card" style="border-right: 5px solid var(--soft-danger); text-align: center;">
-        <div class="stat-icon" style="color: var(--soft-danger);">
+    <div class="card stat-card-full" style="border-right: 5px solid var(--soft-danger, #f56565); text-align: center; padding: 25px 20px;">
+        <div class="stat-icon" style="color: var(--soft-danger, #f56565); font-size: 1.9rem; margin-bottom: 12px;">
             <i class="fas fa-rocket"></i>
         </div>
-        <div class="stat-value"><?= $activeProjectsCount ?? 0 ?></div>
-        <div class="stat-label">پروژه‌های فعال</div>
+        <div class="stat-value" style="font-size: 2rem; font-weight: 800; color: #2D3748; line-height: 1.2;">
+            <?= $activeProjectsCount ?? 0 ?>
+        </div>
+        <div class="stat-label" style="font-size: 0.95rem; color: #718096; margin-top: 8px; font-weight: 600;">
+            پروژه‌های فعال
+        </div>
     </div>
 </div>
 

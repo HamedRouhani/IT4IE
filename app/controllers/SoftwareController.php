@@ -88,7 +88,7 @@ class SoftwareController extends Controller
             'name' => $software['name']
         ];
 
-        // ثبت لاگ ورود به نرم‌افزار
+        // ✅ ثبت لاگ ورود به نرم‌افزار (اصلاح شده)
         $this->logActivity($software['slug'], 'enter', 'software', $software['id']);
 
         // ریدایرکت به entry point ماژول
@@ -102,6 +102,7 @@ class SoftwareController extends Controller
     public function exitSoftware()
     {
         if (isset($_SESSION['current_software'])) {
+            // ✅ ثبت لاگ خروج (اصلاح شده)
             $this->logActivity(
                 $_SESSION['current_software']['slug'],
                 'exit',
@@ -114,20 +115,25 @@ class SoftwareController extends Controller
     }
 
     /**
-     * ثبت لاگ فعالیت در نرم‌افزار
+     * ✅ ثبت لاگ فعالیت در نرم‌افزار
+     * 
+     * امضای متد log() در SoftwareActivityLog:
+     * log($softwareSlug, $action, $recordType = null, $recordId = null, $oldValue = null, $newValue = null)
      */
     private function logActivity($softwareSlug, $action, $recordType = null, $recordId = null, $oldValue = null, $newValue = null)
     {
         try {
             $logModel = new SoftwareActivityLog();
-            $logModel->log([
-                'software_slug' => $softwareSlug,
-                'action' => $action,
-                'record_type' => $recordType,
-                'record_id' => $recordId,
-                'old_value' => $oldValue,
-                'new_value' => $newValue
-            ]);
+            
+            // ✅ ارسال آرگومان‌ها به صورت جداگانه (نه آرایه)
+            $logModel->log(
+                $softwareSlug,
+                $action,
+                $recordType,
+                $recordId,
+                $oldValue,
+                $newValue
+            );
         } catch (\Exception $e) {
             error_log("Failed to log software activity: " . $e->getMessage());
         }

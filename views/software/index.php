@@ -10,19 +10,13 @@
         </p>
     </div>
 
+    <!-- آمار (فقط تعداد نرم‌افزارهای فعال) -->
     <div class="babok-stats" style="margin-bottom: 40px;">
-        <div class="stat-card">
+        <div class="stat-card" style="max-width: 280px; margin: 0 auto;">
             <div class="stat-icon purple"><i class="fas fa-cubes"></i></div>
             <div class="stat-info">
                 <h3><?php echo $totalSoftware ?? 0; ?></h3>
                 <p>نرم‌افزار فعال</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon blue"><i class="fas fa-download"></i></div>
-            <div class="stat-info">
-                <h3><?php echo number_format($totalDownloads ?? 0); ?></h3>
-                <p>کل دانلودها</p>
             </div>
         </div>
     </div>
@@ -33,12 +27,38 @@
                 <?php 
                 $features = json_decode($software['features'] ?? '[]', true);
                 $techStack = json_decode($software['tech_stack'] ?? '[]', true);
+                
+                // آیکون پویا بر اساس نام نرم‌افزار
                 $iconClass = 'fas fa-cubes';
-                if (stripos($software['name'], 'babok') !== false) $iconClass = 'fas fa-robot';
-                if (stripos($software['name'], 'pmbok') !== false) $iconClass = 'fas fa-chart-line';
+                $iconColor = 'var(--primary)';
+                $nameLower = strtolower($software['name'] ?? '');
+                $slugLower = strtolower($software['slug'] ?? '');
+                
+                if (stripos($nameLower, 'babok') !== false || stripos($slugLower, 'babok') !== false) {
+                    $iconClass = 'fas fa-robot';
+                    $iconColor = '#667eea';
+                } elseif (stripos($nameLower, 'pmbok') !== false || stripos($slugLower, 'pmbok') !== false) {
+                    $iconClass = 'fas fa-project-diagram';
+                    $iconColor = '#ed8936';
+                } elseif (stripos($nameLower, 'itil') !== false || stripos($slugLower, 'itil') !== false) {
+                    $iconClass = 'fas fa-server';
+                    $iconColor = '#10B981';
+                } elseif (stripos($nameLower, 'togaf') !== false || stripos($slugLower, 'togaf') !== false) {
+                    $iconClass = 'fas fa-network-wired';
+                    $iconColor = '#3B82F6';
+                }
+                
+                // رنگ خاص هر ماژول برای دکمه
+                $primaryBtnGradient = 'linear-gradient(135deg, #667eea, #764ba2)';
+                if (stripos($nameLower, 'pmbok') !== false || stripos($slugLower, 'pmbok') !== false) {
+                    $primaryBtnGradient = 'linear-gradient(135deg, #ed8936, #dd6b20)';
+                } elseif (stripos($nameLower, 'itil') !== false) {
+                    $primaryBtnGradient = 'linear-gradient(135deg, #10B981, #059669)';
+                }
                 ?>
                 <div class="project-card" style="padding: 25px; transition: all 0.3s ease; position: relative; display: flex; flex-direction: column; justify-content: space-between;">
                     
+                    <!-- Badge وضعیت -->
                     <div style="position: absolute; top: 15px; right: 15px;">
                         <?php 
                         $statusColors = [
@@ -55,7 +75,7 @@
                     <div>
                         <div class="project-card-header" style="margin-bottom: 12px;">
                             <h3 style="font-size: 1.4rem; margin: 0; display: flex; align-items: center; gap: 10px;">
-                                <i class="<?php echo $iconClass; ?>" style="color: var(--primary); font-size: 1.8rem;"></i>
+                                <i class="<?php echo $iconClass; ?>" style="color: <?php echo $iconColor; ?>; font-size: 1.8rem;"></i>
                                 <?php echo htmlspecialchars($software['name']); ?>
                             </h3>
                             <span style="font-size: 0.85rem; color: var(--gray); margin-top: 4px; display: block;">
@@ -63,7 +83,7 @@
                             </span>
                         </div>
                         <p class="project-description" style="color: var(--gray-dark); line-height: 1.7; margin-bottom: 15px;">
-                            <?php echo htmlspecialchars($software['description']); ?>
+                            <?php echo htmlspecialchars($software['description'] ?? ''); ?>
                         </p>
                         <?php if (!empty($techStack)): ?>
                         <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 15px;">
@@ -87,17 +107,89 @@
                         <?php endif; ?>
                     </div>
                     
-                    <div style="margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a href="/software/babok/" class="btn-babok-primary">
-                            <i class="fas fa-arrow-left"></i> ورود و اجرا
-                        </a>
+                    <!-- دکمه‌ها -->
+                    <div style="margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch;">
+                        
+                        <!-- دکمه اصلی: ورود و اجرا (فرم برای POST و امنیت بیشتر) -->
+                        <form method="POST" action="/software/run/<?php echo urlencode($software['slug']); ?>" style="flex: 1; min-width: 140px;">
+                            <button type="submit" 
+                                    class="btn-run-software"
+                                    style="
+                                        width: 100%;
+                                        height: 44px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        gap: 8px;
+                                        background: <?php echo $primaryBtnGradient; ?>;
+                                        color: white;
+                                        border: none;
+                                        border-radius: 10px;
+                                        padding: 0 18px;
+                                        font-size: 0.95rem;
+                                        font-weight: 600;
+                                        font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+                                        cursor: pointer;
+                                        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+                                        transition: all 0.3s ease;
+                                    "
+                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)';"
+                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.25)';">
+                                <i class="fas fa-play-circle"></i>
+                                <span>ورود و اجرا</span>
+                            </button>
+                        </form>
+
+                        <!-- دکمه دمو (اختیاری) -->
                         <?php if (!empty($software['demo_url'])): ?>
-                            <a href="<?php echo htmlspecialchars($software['demo_url']); ?>" target="_blank" class="btn-babok-secondary" style="background: var(--gray-lighter); color: var(--dark); border: 1px solid var(--gray-light);">
-                                <i class="fas fa-eye"></i> دمو
+                            <a href="<?php echo htmlspecialchars($software['demo_url']); ?>" 
+                               target="_blank" 
+                               class="btn-babok-secondary" 
+                               style="
+                                   display: flex;
+                                   align-items: center;
+                                   justify-content: center;
+                                   gap: 6px;
+                                   height: 44px;
+                                   padding: 0 16px;
+                                   background: var(--gray-lighter, #f1f5f9);
+                                   color: var(--dark, #333);
+                                   border: 1px solid var(--gray-light, #e2e8f0);
+                                   border-radius: 10px;
+                                   text-decoration: none;
+                                   font-size: 0.9rem;
+                                   font-weight: 500;
+                                   transition: all 0.3s ease;
+                               "
+                               onmouseover="this.style.background='#e2e8f0'; this.style.transform='translateY(-2px)';"
+                               onmouseout="this.style.background='var(--gray-lighter, #f1f5f9)'; this.style.transform='translateY(0)';">
+                                <i class="fas fa-eye"></i>
+                                <span>دمو</span>
                             </a>
                         <?php endif; ?>
+                        
+                        <!-- دکمه گیت‌هاب (آیکونی) -->
                         <?php if (!empty($software['github_url'])): ?>
-                            <a href="<?php echo htmlspecialchars($software['github_url']); ?>" target="_blank" class="btn-babok-secondary" style="background: transparent; color: #333; border: 1px solid var(--gray-light); padding: 10px 16px;">
+                            <a href="<?php echo htmlspecialchars($software['github_url']); ?>" 
+                               target="_blank" 
+                               class="btn-babok-secondary" 
+                               style="
+                                   display: flex;
+                                   align-items: center;
+                                   justify-content: center;
+                                   width: 44px;
+                                   height: 44px;
+                                   background: transparent;
+                                   color: #333;
+                                   border: 1px solid var(--gray-light, #e2e8f0);
+                                   border-radius: 10px;
+                                   text-decoration: none;
+                                   font-size: 1.2rem;
+                                   transition: all 0.3s ease;
+                               "
+                               onmouseover="this.style.background='#f1f5f9'; this.style.transform='translateY(-2px)';"
+                               onmouseout="this.style.background='transparent'; this.style.transform='translateY(0)';"
+                               title="مشاهده در گیت‌هاب">
                                 <i class="fab fa-github"></i>
                             </a>
                         <?php endif; ?>
