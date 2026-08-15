@@ -154,3 +154,47 @@ if (!function_exists('qms_progress_color')) {
         return '#EF4444';
     }
 }
+
+/**
+ * تبدیل اعداد فارسی/عربی به انگلیسی
+ * برای استفاده در تاریخ‌ها و اعداد دیتابیس
+ */
+if (!function_exists('toEnglishDigits')) {
+    function toEnglishDigits($str)
+    {
+        if (empty($str)) return $str;
+        
+        $persianNumbers = ['', '۱', '۲', '', '۴', '۵', '', '۷', '۸', ''];
+        $arabicNumbers  = ['٠', '١', '', '٣', '٤', '', '٦', '٧', '', '٩'];
+        $englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        
+        $str = str_replace($persianNumbers, $englishNumbers, $str);
+        $str = str_replace($arabicNumbers, $englishNumbers, $str);
+        
+        return $str;
+    }
+}
+
+/**
+ * تبدیل تاریخ به فرمت استاندارد MySQL (Y-m-d)
+ * اعداد فارسی را به انگلیسی تبدیل می‌کند
+ */
+if (!function_exists('toMysqlDate')) {
+    function toMysqlDate($date)
+    {
+        if (empty($date)) return null;
+        
+        // تبدیل اعداد فارسی به انگلیسی
+        $date = toEnglishDigits($date);
+        
+        // تبدیل جداکننده‌ها (مثل / به -)
+        $date = str_replace('/', '-', $date);
+        
+        // اعتبارسنجی فرمت
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return $date;
+        }
+        
+        return null;
+    }
+}

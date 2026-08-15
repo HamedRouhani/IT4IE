@@ -249,6 +249,39 @@ $findingTypeLabels = [
                         <i class="fas fa-check"></i> به‌روزرسانی وضعیت
                     </button>
                 </form>
+
+                <!-- دکمه ویرایش جلسه -->
+                <a href="?controller=auditsessions&action=edit&id=<?= $session['id'] ?>" 
+                style="display: block; background: #F59E0B; color: white; padding: 10px; border-radius: 8px; text-align: center; text-decoration: none; margin-top: 10px; font-weight: 600;">
+                    <i class="fas fa-edit"></i> ویرایش اطلاعات جلسه
+                </a>
+            </div>
+
+            <!-- دکمه افزودن ممیزی‌شونده -->
+            <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <h4 style="margin: 0 0 15px 0; color: #2D3748; border-bottom: 2px solid #E2E8F0; padding-bottom: 10px;">
+                    <i class="fas fa-user-plus" style="color: #6C3CE1;"></i>
+                    افزودن ممیزی‌شونده
+                </h4>
+                
+                <form method="POST" action="?controller=auditsessions&action=addAuditee">
+                    <input type="hidden" name="plan_item_id" value="<?= $session['plan_item_id'] ?>">
+                    <input type="hidden" name="session_id" value="<?= $session['id'] ?>">
+                    
+                    <div style="margin-bottom: 10px;">
+                        <input type="text" name="full_name" placeholder="نام و نام خانوادگی *" required
+                            style="width: 100%; padding: 8px; border: 2px solid #E2E8F0; border-radius: 8px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 10px;">
+                        <input type="text" name="position" placeholder="سمت (اختیاری)"
+                            style="width: 100%; padding: 8px; border: 2px solid #E2E8F0; border-radius: 8px;">
+                    </div>
+                    
+                    <button type="submit" style="width: 100%; background: #10B981; color: white; padding: 8px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                        <i class="fas fa-plus"></i> افزودن ممیزی‌شونده
+                    </button>
+                </form>
             </div>
 
             <!-- ممیزی‌شوندگان -->

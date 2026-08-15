@@ -51,9 +51,9 @@ class AuditPlanController extends Controller
     }
 
     /**
-     * ذخیره برنامه ممیزی جدید
+     * ذخیره برنامه ممیزی
      */
-    public function store()
+        public function store()
     {
         $this->requireAuth();
 
@@ -62,57 +62,93 @@ class AuditPlanController extends Controller
             return;
         }
 
+        // دریافت مقادیر
         $title = trim($_POST['title'] ?? '');
+        $startDateRaw = $_POST['start_date'] ?? '';
+        $endDateRaw = $_POST['end_date'] ?? '';
+
+        // تبدیل اعداد فارسی به انگلیسی و استانداردسازی تاریخ
+        $startDate = $this->normalizeDate($startDateRaw);
+        $endDate = $this->normalizeDate($endDateRaw);
+
+        // دیباگ: لاگ مقادیر دریافتی
+        error_log("QMS Audit Plan - Title: {$title}, Start: {$startDateRaw} -> {$startDate}, End: {$endDateRaw} -> {$endDate}");
+
+        // اعتبارسنجی
         if (empty($title)) {
-            $this->flashError('عنوان برنامه ممیزی الزامی است.');
+            $this->flashError('عنوان برنامه الزامی است.');
             $this->redirect('auditplans&action=create');
             return;
         }
 
-        $startDate = $_POST['start_date'] ?? date('Y-m-d');
-        $endDate = $_POST['end_date'] ?? date('Y-m-d');
-        
-        if (strtotime($endDate) < strtotime($startDate)) {
-            $this->flashError('تاریخ پایان نمی‌تواند قبل از تاریخ شروع باشد.');
+        if (empty($startDate) || empty($endDate)) {
+            $this->flashError('تاریخ شروع و پایان الزامی است. لطفاً از تقویم شمسی استفاده کنید.');
             $this->redirect('auditplans&action=create');
             return;
         }
 
-        $leadAuditorId = $_POST['lead_auditor_id'] ?? null;
-        if (empty($leadAuditorId)) {
-            $this->flashError('انتخاب سرممیز الزامی است.');
+        if (strtotime($startDate) > strtotime($endDate)) {
+            $this->flashError('تاریخ شروع نمی‌تواند بعد از تاریخ پایان باشد.');
             $this->redirect('auditplans&action=create');
             return;
         }
 
-        $departmentsJson = isset($_POST['departments']) && is_array($_POST['departments']) 
-            ? json_encode($_POST['departments']) 
-            : '[]';
-
+        // ذخیره در دیتابیس
         $stmt = $this->db->prepare("
             INSERT INTO {$this->prefix}audit_plans 
-            (user_id, title, audit_type, scope, objectives, criteria, start_date, end_date, lead_auditor_id, departments, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', NOW())
+            (user_id, title, audit_type, scope, objectives, criteria, start_date, end_date, 
+             status, priority, lead_auditor_id, departments, notes, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ");
         
-        $stmt->execute([
+        $result = $stmt->execute([
             $this->currentUserId,
             $title,
             $_POST['audit_type'] ?? 'internal',
-            $_POST['scope'] ?? '',
-            $_POST['objectives'] ?? '',
-            $_POST['criteria'] ?? 'ISO 9001:2015',
+            trim($_POST['scope'] ?? ''),
+            trim($_POST['objectives'] ?? ''),
+            trim($_POST['criteria'] ?? ''),
             $startDate,
             $endDate,
-            $leadAuditorId,
-            $departmentsJson
+            $_POST['status'] ?? 'draft',
+            $_POST['priority'] ?? 'medium',
+            !empty($_POST['lead_auditor_id']) ? (int)$_POST['lead_auditor_id'] : null,
+            json_encode($_POST['departments'] ?? []),
+            trim($_POST['notes'] ?? '')
         ]);
 
-        $newId = $this->db->lastInsertId();
-        $this->logActivity('create_audit_plan', 'audit_plan', $newId);
+        if ($result) {
+            $planId = $this->db->lastInsertId();
+            $this->logActivity('create_audit_plan', 'audit_plan', $planId);
+            $this->flashSuccess('برنامه ممیزی با موفقیت ایجاد شد.');
+            $this->redirect('auditplans&action=show&id=' . $planId);
+        } else {
+            $this->flashError('خطا در ایجاد برنامه ممیزی.');
+            $this->redirect('auditplans&action=create');
+        }
+    }
+
+    /**
+     * تبدیل تاریخ به فرمت استاندارد MySQL
+     */
+    private function normalizeDate($date)
+    {
+        if (empty($date)) return null;
         
-        $this->flashSuccess('برنامه ممیزی با موفقیت ایجاد شد.');
-        $this->redirect('auditplans&action=show&id=' . $newId);
+        // تبدیل اعداد فارسی به انگلیسی
+        $persian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+        $english = ['0','1','2','3','4','5','6','7','8','9'];
+        $date = str_replace($persian, $english, $date);
+        
+        // تبدیل / به -
+        $date = str_replace('/', '-', $date);
+        
+        // اعتبارسنجی فرمت
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return $date;
+        }
+        
+        return null;
     }
 
     /**

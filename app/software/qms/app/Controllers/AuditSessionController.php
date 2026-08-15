@@ -263,4 +263,260 @@ class AuditSessionController extends Controller
 
         $this->redirect('auditsessions&action=show&id=' . $sessionId);
     }
+
+    /**
+     * نمایش فرم ایجاد جلسه جدید
+     */
+    public function create()
+    {
+        $this->requireAuth();
+        
+        $planId = $_GET['plan_id'] ?? null;
+        
+        if (!$planId) {
+            $this->flashError('شناسه برنامه ممیزی مشخص نشده است.');
+            $this->redirect('auditplans');
+            return;
+        }
+        
+        // دریافت اطلاعات برنامه
+        $stmt = $this->db->prepare("SELECT * FROM {$this->prefix}audit_plans WHERE id = ?");
+        $stmt->execute([$planId]);
+        $plan = $stmt->fetch();
+        
+        if (!$plan) {
+            $this->flashError('برنامه ممیزی یافت نشد.');
+            $this->redirect('auditplans');
+            return;
+        }
+        
+        // دریافت واحدهای انتخاب شده در برنامه
+        $departments = json_decode($plan['departments'] ?? '[]', true);
+        $deptList = [];
+        if (!empty($departments)) {
+            $placeholders = implode(',', array_fill(0, count($departments), '?'));
+            $stmt = $this->db->prepare("SELECT id, name_fa FROM {$this->prefix}departments WHERE id IN ($placeholders)");
+            $stmt->execute($departments);
+            $deptList = $stmt->fetchAll();
+        }
+        
+        // دریافت ممیزان
+        $auditors = $this->db->query("SELECT id, full_name FROM {$this->prefix}auditors WHERE is_active = 1 ORDER BY full_name")->fetchAll();
+        
+        $this->view('audit-sessions/create', [
+            'pageTitle' => 'ایجاد جلسه ممیزی',
+            'currentPage' => 'auditsessions',
+            'plan' => $plan,
+            'departments' => $deptList,
+            'auditors' => $auditors
+        ]);
+    }
+
+    /**
+     * ذخیره جلسه جدید
+     */
+    public function store()
+    {
+        $this->requireAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('auditsessions');
+            return;
+        }
+
+        $planId = $_POST['audit_plan_id'] ?? null;
+        $departmentId = $_POST['department_id'] ?? null;
+        $auditDate = $_POST['audit_date'] ?? null;
+        
+        if (!$planId || !$departmentId || !$auditDate) {
+            $this->flashError('اطلاعات لازم کامل نیست.');
+            $this->redirect('auditsessions&action=create&plan_id=' . $planId);
+            return;
+        }
+
+        // تبدیل اعداد فارسی به انگلیسی
+        $auditDate = str_replace(['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'], ['0','1','2','3','4','5','6','7','8','9'], $auditDate);
+        $auditDate = str_replace('/', '-', $auditDate);
+
+        try {
+            $this->db->beginTransaction();
+            
+            // دریافت شماره آیتم
+            $stmtNum = $this->db->prepare("SELECT COUNT(*) as cnt FROM {$this->prefix}audit_plan_items WHERE audit_plan_id = ?");
+            $stmtNum->execute([$planId]);
+            $itemNumber = ($stmtNum->fetch()['cnt'] ?? 0) + 1;
+            
+            // ایجاد Plan Item
+            $stmt = $this->db->prepare("
+                INSERT INTO {$this->prefix}audit_plan_items 
+                (audit_plan_id, item_number, department_id, audit_date, assigned_auditor_id, status, created_at)
+                VALUES (?, ?, ?, ?, ?, 'pending', NOW())
+            ");
+            $stmt->execute([
+                $planId,
+                $itemNumber,
+                $departmentId,
+                $auditDate,
+                $_POST['assigned_auditor_id'] ?? null
+            ]);
+            $planItemId = $this->db->lastInsertId();
+            
+            // ایجاد Session
+            $stmt = $this->db->prepare("
+                INSERT INTO {$this->prefix}audit_sessions 
+                (plan_item_id, session_number, actual_date, overall_status, created_at)
+                VALUES (?, ?, ?, 'not_started', NOW())
+            ");
+            $stmt->execute([$planItemId, $itemNumber, $auditDate]);
+            $sessionId = $this->db->lastInsertId();
+            
+            $this->db->commit();
+            
+            $this->logActivity('create_audit_session', 'audit_session', $sessionId);
+            $this->flashSuccess('جلسه ممیزی با موفقیت ایجاد شد.');
+            $this->redirect('auditsessions&action=show&id=' . $sessionId);
+            
+        } catch (\Exception $e) {
+            $this->db->rollback();
+            $this->flashError('خطا در ایجاد جلسه: ' . $e->getMessage());
+            $this->redirect('auditsessions&action=create&plan_id=' . $planId);
+        }
+    }
+
+    /**
+     * نمایش فرم ویرایش جلسه
+     */
+    public function edit($id)
+    {
+        $this->requireAuth();
+        
+        $stmt = $this->db->prepare("
+            SELECT s.*, pi.audit_plan_id, pi.department_id, pi.assigned_auditor_id, pi.audit_date,
+                   ap.title as plan_title, d.name_fa as department_name, a.full_name as auditor_name
+            FROM {$this->prefix}audit_sessions s
+            JOIN {$this->prefix}audit_plan_items pi ON s.plan_item_id = pi.id
+            JOIN {$this->prefix}audit_plans ap ON pi.audit_plan_id = ap.id
+            LEFT JOIN {$this->prefix}departments d ON pi.department_id = d.id
+            LEFT JOIN {$this->prefix}auditors a ON pi.assigned_auditor_id = a.id
+            WHERE s.id = ?
+        ");
+        $stmt->execute([$id]);
+        $session = $stmt->fetch();
+        
+        if (!$session) {
+            $this->flashError('جلسه یافت نشد.');
+            $this->redirect('auditsessions');
+            return;
+        }
+        
+        $auditors = $this->db->query("SELECT id, full_name FROM {$this->prefix}auditors WHERE is_active = 1 ORDER BY full_name")->fetchAll();
+        
+        $this->view('audit-sessions/edit', [
+            'pageTitle' => 'ویرایش جلسه ممیزی',
+            'currentPage' => 'auditsessions',
+            'session' => $session,
+            'auditors' => $auditors
+        ]);
+    }
+
+    /**
+     * به‌روزرسانی جلسه
+     */
+    public function update($id)
+    {
+        $this->requireAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('auditsessions');
+            return;
+        }
+
+        $auditDate = $_POST['audit_date'] ?? null;
+        $actualDate = $_POST['actual_date'] ?? null;
+        
+        if (!$auditDate) {
+            $this->flashError('تاریخ ممیزی الزامی است.');
+            $this->redirect('auditsessions&action=edit&id=' . $id);
+            return;
+        }
+
+        // تبدیل اعداد فارسی به انگلیسی
+        $auditDate = str_replace(['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'], ['0','1','2','3','4','5','6','7','8','9'], $auditDate);
+        $auditDate = str_replace('/', '-', $auditDate);
+        
+        if ($actualDate) {
+            $actualDate = str_replace(['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'], ['0','1','2','3','4','5','6','7','8','9'], $actualDate);
+            $actualDate = str_replace('/', '-', $actualDate);
+        }
+
+        try {
+            // به‌روزرسانی session
+            $stmt = $this->db->prepare("
+                UPDATE {$this->prefix}audit_sessions 
+                SET actual_date = ?, overall_status = ?, auditor_notes = ?, updated_at = NOW()
+                WHERE id = ?
+            ");
+            $stmt->execute([
+                $actualDate ?: null,
+                $_POST['overall_status'] ?? 'not_started',
+                $_POST['auditor_notes'] ?? '',
+                $id
+            ]);
+            
+            // به‌روزرسانی plan item
+            $stmt = $this->db->prepare("
+                UPDATE {$this->prefix}audit_plan_items 
+                SET audit_date = ?, assigned_auditor_id = ?, updated_at = NOW()
+                WHERE id = (SELECT plan_item_id FROM {$this->prefix}audit_sessions WHERE id = ?)
+            ");
+            $stmt->execute([
+                $auditDate,
+                $_POST['assigned_auditor_id'] ?? null,
+                $id
+            ]);
+            
+            $this->logActivity('update_audit_session', 'audit_session', $id);
+            $this->flashSuccess('جلسه با موفقیت به‌روزرسانی شد.');
+            $this->redirect('auditsessions&action=show&id=' . $id);
+            
+        } catch (\Exception $e) {
+            $this->flashError('خطا در به‌روزرسانی جلسه: ' . $e->getMessage());
+            $this->redirect('auditsessions&action=edit&id=' . $id);
+        }
+    }
+
+    /**
+     * حذف جلسه
+     */
+    public function delete($id)
+    {
+        $this->requireAuth();
+        
+        if ($_SESSION['user_role'] !== 'admin') {
+            $this->flashError('فقط مدیران می‌توانند جلسه حذف کنند.');
+            $this->redirect('auditsessions');
+            return;
+        }
+        
+        $stmt = $this->db->prepare("SELECT plan_item_id FROM {$this->prefix}audit_sessions WHERE id = ?");
+        $stmt->execute([$id]);
+        $session = $stmt->fetch();
+        
+        if ($session) {
+            // حذف session
+            $stmt = $this->db->prepare("DELETE FROM {$this->prefix}audit_sessions WHERE id = ?");
+            $stmt->execute([$id]);
+            
+            // حذف plan item
+            $stmt = $this->db->prepare("DELETE FROM {$this->prefix}audit_plan_items WHERE id = ?");
+            $stmt->execute([$session['plan_item_id']]);
+            
+            $this->logActivity('delete_audit_session', 'audit_session', $id);
+            $this->flashSuccess('جلسه با موفقیت حذف شد.');
+        } else {
+            $this->flashError('جلسه یافت نشد.');
+        }
+        
+        $this->redirect('auditsessions');
+    }
 }
