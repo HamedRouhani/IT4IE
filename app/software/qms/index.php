@@ -127,6 +127,7 @@ $controllerMap = [
     'departments'       => 'DepartmentController',
     'auditors'          => 'AuditorController',
     'auditplans'        => 'AuditPlanController',
+    'auditprograms'     => 'AuditProgramController',
     'auditsessions'     => 'AuditSessionController',
     'nonconformities'   => 'NonconformityController',
     'car'               => 'CarController',

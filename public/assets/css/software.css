@@ -366,77 +366,112 @@ body.software-mode .sidebar { display: none !important; }
 .software-content .flex-wrap { flex-wrap: wrap; }
 
 /* ================================================================
-   📱 RESPONSIVE - تبلت و موبایل: سایدبار به بالای محتوا می‌رود
+   📱 RESPONSIVE - تبلت و موبایل: سایدبار در بالا با Wrap
    ================================================================ */
 @media (max-width: 991px) {
     .software-wrapper {
         flex-direction: column;
     }
 
-    /* سایدبار تبدیل به نوار افقی بالا می‌شود */
+    /* سایدبار در بالای صفحه با ارتفاع خودکار */
     .software-sidebar {
         width: 100%;
         position: static;
         height: auto;
-        overflow: visible;
+        max-height: none;
+        overflow: visible; /* حذف اسکرول داخلی */
         box-shadow: 0 2px 10px rgba(0,0,0,0.15);
     }
 
     .software-sidebar-header {
-        padding: 12px 20px;
+        padding: 12px 16px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
-    .software-sidebar-header h3 { font-size: 1rem; }
-    .software-sidebar-header .software-subtitle { margin-top: 0; }
+    .software-sidebar-header h3 {
+        font-size: 1rem;
+    }
+    .software-sidebar-header .software-subtitle {
+        margin-top: 0;
+        font-size: 0.72rem;
+    }
 
-    /* منوی افقی با اسکرول */
+    /* ✅ منوی افقی با Wrap در چند خط (بدون اسکرول) */
     .software-nav {
-        flex-direction: row;
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        padding: 0 10px;
-        gap: 0;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;          /* ← کلیدی: wrap به جای اسکرول */
+        justify-content: flex-start;
+        align-items: stretch;
+        overflow: visible !important;        /* ← حذف اسکرول */
+        -webkit-overflow-scrolling: auto;
+        padding: 10px 12px;
+        gap: 6px;                            /* فاصله بین آیتم‌ها */
         scrollbar-width: none;
-        background: rgba(0,0,0,0.2);
+        background: rgba(0,0,0,0.25);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     .software-nav::-webkit-scrollbar { display: none; }
 
     .software-nav a {
-        flex: 0 0 auto;
+        flex: 0 0 auto;                      /* آیتم‌ها کوچک نشوند */
         border-right: none;
-        border-bottom: 3px solid transparent;
-        border-radius: 0;
-        padding: 12px 16px;
-        white-space: nowrap;
+        border-bottom: none;
+        border-radius: 20px;                 /* شکل کپسولی */
+        padding: 8px 14px !important;
+        white-space: nowrap;                 /* متن هر آیتم در یک خط */
+        font-size: 0.82rem;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        margin: 0;
+        transition: all 0.2s ease;
+    }
+
+    .software-nav a:hover {
+        background: rgba(96,165,250,0.2);
+        color: #fff;
+        border-color: rgba(96,165,250,0.4);
+        transform: translateY(-1px);
+    }
+
+    .software-nav a.active {
+        background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+        color: #fff;
+        border-color: #60a5fa;
+        box-shadow: 0 2px 8px rgba(96,165,250,0.35);
+        font-weight: 600;
+    }
+
+    .software-nav a i {
         font-size: 0.85rem;
     }
 
-    .software-nav a:hover,
-    .software-nav a.active {
-        border-right: none;
-        border-bottom-color: #60a5fa;
-    }
-
-    /* فوتر افقی */
+    /* فوتر به صورت افقی و جمع‌وجور */
     .software-sidebar-footer {
         flex-direction: row;
         justify-content: center;
+        gap: 8px;
         padding: 10px 15px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        flex-wrap: wrap;
     }
 
     .btn-exit-software,
     .btn-login-software {
-        padding: 8px 14px;
-        font-size: 0.8rem;
+        padding: 7px 14px;
+        font-size: 0.78rem;
+        border-radius: 16px;
     }
 
-    .software-main { padding: 20px 15px; }
+    .software-main {
+        padding: 20px 15px;
+        width: 100%;
+    }
     .software-content .main-grid { grid-template-columns: 1fr; }
 }
 
@@ -448,13 +483,34 @@ body.software-mode .sidebar { display: none !important; }
     .software-content .table { font-size: 0.8rem; }
     .software-content .table th,
     .software-content .table td { padding: 8px 10px; }
-    .software-nav a { padding: 10px 12px; font-size: 0.8rem; }
+    
+    /* آیتم‌های منو کمی کوچک‌تر */
+    .software-nav {
+        padding: 8px 10px;
+        gap: 5px;
+    }
+    .software-nav a {
+        padding: 6px 12px !important;
+        font-size: 0.78rem;
+    }
+    .software-nav a i { font-size: 0.8rem; }
 }
 
 @media (max-width: 479px) {
     .software-content .stats-grid { grid-template-columns: 1fr; }
     .software-content .row { grid-template-columns: 1fr; }
     .software-sidebar-header h3 { font-size: 0.95rem; }
+    
+    /* در موبایل خیلی کوچک: آیکون‌ها فشرده‌تر */
+    .software-nav {
+        padding: 6px 8px;
+        gap: 4px;
+    }
+    .software-nav a {
+        padding: 5px 10px !important;
+        font-size: 0.72rem;
+        border-radius: 16px;
+    }
 }
 
 /* ================================================================

@@ -64,6 +64,19 @@ $endDateShamsi = miladiToShamsi($oldEndDate);
 
     <div class="card" style="background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); padding: 30px;">
         <form method="POST" action="?controller=auditplans&action=store" id="auditPlanForm">
+
+            <!-- برنامه سالانه مرتبط -->
+            <div class="col-md-6">
+                <label class="form-label">برنامه سالانه مادر</label>
+                <select name="audit_program_id" class="form-select">
+                    <option value="">-- بدون اتصال --</option>
+                    <?php foreach ($programs as $pr): ?>
+                        <option value="<?= $pr['id'] ?>" <?= (int)($plan['audit_program_id'] ?? 0) === (int)$pr['id'] ? 'selected' : '' ?>>
+                            <?= qms_e($pr['title']) ?> (<?= fa_digits($pr['year']) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
             
             <!-- ردیف ۱: عنوان و نوع ممیزی -->
             <div class="row" style="display: flex; gap: 20px; margin-bottom: 20px;">
@@ -81,6 +94,21 @@ $endDateShamsi = miladiToShamsi($oldEndDate);
                                required
                                style="width: 100%; padding: 10px 15px; border: 2px solid #E2E8F0; border-radius: 8px; font-family: inherit;">
                     </div>
+                </div>
+                <?php $prioByRisk = [0 => '', 1 => 'low', 2 => 'medium', 3 => 'high', 4 => 'critical']; ?>
+                <div class="col-md-6">
+                    <label class="form-label">برنامه سالانه مادر (اختیاری)</label>
+                    <select name="audit_program_id" id="audit_program_id" class="form-select">
+                        <option value="">-- بدون اتصال به برنامه سالانه --</option>
+                        <?php foreach ($programs as $pr): ?>
+                            <option value="<?= $pr['id'] ?>" 
+                                    data-priority="<?= $prioByRisk[(int)$pr['max_risk']] ?>"
+                                    <?= (int)($preProgramId ?? 0) === (int)$pr['id'] ? 'selected' : '' ?>>
+                                <?= qms_e($pr['title']) ?> (<?= fa_digits($pr['year']) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="text-muted">با انتخاب برنامه سالانه، اولویت به‌صورت خودکار از روی بالاترین ریسک پیشنهاد می‌شود.</small>
                 </div>
                 <div class="col-md-4" style="flex: 1;">
                     <div class="form-group">
@@ -344,5 +372,19 @@ $(document).ready(function() {
             return false;
         }
     });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var sel  = document.getElementById('audit_program_id');
+    var prio = document.querySelector('select[name="priority"]');
+    if (!sel || !prio) return;
+    function sync() {
+        var p = sel.options[sel.selectedIndex].dataset.priority || '';
+        if (p) prio.value = p;
+    }
+    sel.addEventListener('change', sync);
+    if (sel.value) sync(); // حالت ورود از دکمه «برنامه ممیزی از این برنامه سالانه»
 });
 </script>

@@ -198,3 +198,80 @@ if (!function_exists('toMysqlDate')) {
         return null;
     }
 }
+
+/* ---------------------------------------------------------------
+ * توابع تاریخ شمسی (Jalali) - افزوده‌شده برای ماژول QMS
+ * --------------------------------------------------------------- */
+
+if (!function_exists('gregorian_to_jalali')) {
+    function gregorian_to_jalali($gy, $gm, $gd)
+    {
+        $g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        $gy2 = ($gm > 2) ? ($gy + 1) : $gy;
+        $days = 355666 + (365 * $gy) + ((int)(($gy2 + 3) / 4))
+              - ((int)(($gy2 + 99) / 100)) + ((int)(($gy2 + 399) / 400))
+              + $gd + $g_d_m[$gm - 1];
+        $jy = -1595 + (33 * ((int)($days / 12053)));
+        $days %= 12053;
+        $jy += 4 * ((int)($days / 1461));
+        $days %= 1461;
+        if ($days > 365) {
+            $jy += (int)(($days - 1) / 365);
+            $days = ($days - 1) % 365;
+        }
+        if ($days < 186) {
+            $jm = 1 + (int)($days / 31);
+            $jd = 1 + ($days % 31);
+        } else {
+            $jm = 7 + (int)(($days - 186) / 30);
+            $jd = 1 + (($days - 186) % 30);
+        }
+        return [$jy, $jm, $jd];
+    }
+}
+
+if (!function_exists('fa_digits')) {
+    /** تبدیل ارقام انگلیسی به فارسی */
+    function fa_digits($value)
+    {
+        return str_replace(
+            ['0','1','2','3','4','5','6','7','8','9'],
+            ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'],
+            (string)$value
+        );
+    }
+}
+
+if (!function_exists('fa_current_jyear')) {
+    /** سال شمسی جاری */
+    function fa_current_jyear()
+    {
+        $j = gregorian_to_jalali((int)date('Y'), (int)date('n'), (int)date('j'));
+        return $j[0];
+    }
+}
+
+if (!function_exists('fa_jdate')) {
+    /**
+     * نمایش شمسی یک تاریخ ذخیره‌شده
+     * اگر سال شمسی باشد فقط فارسی‌سازی می‌کند، وگرنه از میلادی تبدیل می‌کند
+     */
+    function fa_jdate($date)
+    {
+        if (empty($date)) return '-';
+        $normalized = toEnglishDigits((string)$date);
+        $normalized = str_replace('/', '-', trim($normalized));
+        $parts = explode('-', substr($normalized, 0, 10));
+        if (count($parts) !== 3) return fa_digits($date);
+
+        [$y, $m, $d] = array_map('intval', $parts);
+
+        // تاریخ شمسی ذخیره‌شده → فقط فارسی‌سازی
+        if ($y >= 1400 && $y <= 1499) {
+            return fa_digits(sprintf('%04d/%02d/%02d', $y, $m, $d));
+        }
+        // تاریخ میلادی → تبدیل به شمسی
+        $j = gregorian_to_jalali($y, $m, $d);
+        return fa_digits(sprintf('%04d/%02d/%02d', $j[0], $j[1], $j[2]));
+    }
+}

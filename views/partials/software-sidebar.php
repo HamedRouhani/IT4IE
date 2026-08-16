@@ -63,6 +63,7 @@ $moduleMenus = [
         'param' => 'controller',  // پارامتر URL
         'menus' => [
             ['route' => 'dashboard',       'icon' => 'fas fa-home',                'label' => 'داشبورد'],
+            ['route' => 'auditprograms',     'icon' => 'fas fa-calendar-alt',        'label' => 'برنامه سالانه ممیزی'], 
             ['route' => 'isoclauses',      'icon' => 'fas fa-book',                'label' => 'بندهای استاندارد'],
             ['route' => 'auditplans',      'icon' => 'fas fa-clipboard-list',      'label' => 'برنامه‌های ممیزی'],
             ['route' => 'auditsessions',   'icon' => 'fas fa-clipboard-check',     'label' => 'جلسات ممیزی'],
