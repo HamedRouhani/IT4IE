@@ -35,7 +35,6 @@ if (file_exists($envFile)) {
 $moduleSlugs = [
     'babok-analyzer' => 'babok',
     'pmbok-analyzer' => 'pmbok',
-    'qms-analyzer'   => 'qms',
 ];
 
 // ============================================
