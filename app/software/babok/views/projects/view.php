@@ -156,3 +156,53 @@ $progressPercentage = $progress['completion_percentage'] ?? 0;
         </div>
     <?php endif; ?>
 </div>
+
+<?php if (!empty($qualityStats) && $qualityStats['total_tasks'] > 0): ?>
+<div class="babok-quality-dashboard" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <h4 style="margin-top: 0; margin-bottom: 20px; color: #1e293b; font-size: 1.1rem; border-bottom: 2px solid #6C3CE1; padding-bottom: 10px; display: inline-block;">
+        📊 داشبورد هوشمند کیفیت نیازمندی‌ها
+    </h4>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+        <!-- میانگین امتیاز -->
+        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #e2e8f0;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #6C3CE1;"><?= $qualityStats['avg_score'] ?? 0 ?></div>
+            <div style="font-size: 0.85rem; color: #64748b; margin-top: 5px;">میانگین کیفیت</div>
+        </div>
+        
+        <!-- عالی -->
+        <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #bbf7d0;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #16a34a;"><?= $qualityStats['excellent_count'] ?? 0 ?></div>
+            <div style="font-size: 0.85rem; color: #15803d; margin-top: 5px;">عالی (≥80)</div>
+        </div>
+        
+        <!-- قابل قبول -->
+        <div style="background: #fffbeb; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #fde68a;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #d97706;"><?= $qualityStats['good_count'] ?? 0 ?></div>
+            <div style="font-size: 0.85rem; color: #b45309; margin-top: 5px;">قابل قبول (60-79)</div>
+        </div>
+        
+        <!-- نیاز به بازنگری -->
+        <div style="background: #fef2f2; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #fecaca;">
+            <div style="font-size: 1.8rem; font-weight: 800; color: #dc2626;"><?= $qualityStats['needs_improvement_count'] ?? 0 ?></div>
+            <div style="font-size: 0.85rem; color: #b91c1c; margin-top: 5px;">نیاز به بازنگری (<60)</div>
+        </div>
+    </div>
+
+    <!-- نوار پیشرفت کلی -->
+    <?php 
+        $total = $qualityStats['total_tasks'];
+        $excellent = $qualityStats['excellent_count'];
+        $progressPercent = $total > 0 ? round(($excellent / $total) * 100) : 0;
+    ?>
+    <div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; color: #475569;">
+            <span>درصد نیازمندی‌های با کیفیت عالی</span>
+            <span style="font-weight: bold;"><?= $progressPercent ?>%</span>
+        </div>
+        <div style="width: 100%; background-color: #e2e8f0; border-radius: 9999px; height: 10px; overflow: hidden;">
+            <div style="width: <?= $progressPercent ?>%; background-color: #16a34a; height: 100%; border-radius: 9999px; transition: width 0.5s ease;"></div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>

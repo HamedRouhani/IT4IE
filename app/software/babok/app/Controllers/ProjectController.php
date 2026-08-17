@@ -69,6 +69,22 @@ class ProjectController extends Controller
             'completed' => $this->countUserProjects(['phase' => 'evaluation']),
         ];
 
+        // 🌟 آمار هوشمند کیفیت نیازمندی‌ها (Dashboard Analytics)
+        $qualityStatsStmt = $this->db->prepare("
+            SELECT 
+                ROUND(AVG(pt.quality_score), 1) as avg_quality,
+                SUM(CASE WHEN pt.quality_score >= 80 THEN 1 ELSE 0 END) as excellent_count,
+                SUM(CASE WHEN pt.quality_score BETWEEN 60 AND 79 THEN 1 ELSE 0 END) as good_count,
+                SUM(CASE WHEN pt.quality_score < 60 AND pt.quality_score > 0 THEN 1 ELSE 0 END) as needs_improvement_count
+            FROM {$this->prefix}project_tasks pt
+            INNER JOIN {$this->prefix}projects p ON pt.project_id = p.id
+            WHERE p.user_id = ?
+        ");
+        $qualityStatsStmt->execute([$this->userId]);
+        $stats['quality'] = $qualityStatsStmt->fetch() ?: [
+            'avg_quality' => 0, 'excellent_count' => 0, 'good_count' => 0, 'needs_improvement_count' => 0
+        ];
+
         $this->view('projects/index', [
             'title' => 'پروژه‌های من - BABOK Analyzer',
             'activePage' => 'projects',
@@ -107,7 +123,7 @@ class ProjectController extends Controller
         }
 
         $data = [
-            'user_id' => $this->userId,  // 🔒 ثبت مالک
+            'user_id' => $this->userId,
             'name' => trim($_POST['name'] ?? ''),
             'description' => trim($_POST['description'] ?? ''),
             'phase' => $_POST['phase'] ?? 'initiation',
@@ -115,26 +131,22 @@ class ProjectController extends Controller
             'stakeholder_count' => (int) ($_POST['stakeholder_count'] ?? 0)
         ];
 
-        // اعتبارسنجی نام
         if (empty($data['name'])) {
             $this->flashError('لطفاً نام پروژه را وارد کنید.');
             $this->redirect('projects_create');
             return;
         }
 
-        // اعتبارسنجی فاز
         $validPhases = ['initiation', 'planning', 'analysis', 'design', 'implementation', 'evaluation'];
         if (!in_array($data['phase'], $validPhases)) {
             $data['phase'] = 'initiation';
         }
 
-        // اعتبارسنجی متدولوژی
         $validMethodologies = ['waterfall', 'agile', 'hybrid'];
         if (!in_array($data['methodology'], $validMethodologies)) {
             $data['methodology'] = 'hybrid';
         }
 
-        // ایجاد پروژه با user_id
         $stmt = $this->db->prepare("
             INSERT INTO {$this->prefix}projects 
             (user_id, name, description, phase, methodology, stakeholder_count) 
@@ -176,7 +188,6 @@ class ProjectController extends Controller
             return;
         }
 
-        // دریافت وظایف پروژه و پیشرفت
         $tasks = $this->projectModel->getTasks($id);
         $progress = $this->projectModel->getProgress($id);
 
@@ -224,7 +235,6 @@ class ProjectController extends Controller
             return;
         }
 
-        // 🔒 بررسی مالکیت
         $project = $this->getUserProject($id);
         if (!$project) {
             $this->flashError('پروژه مورد نظر یافت نشد یا شما به آن دسترسی ندارید.');
@@ -240,26 +250,22 @@ class ProjectController extends Controller
             'stakeholder_count' => (int) ($_POST['stakeholder_count'] ?? 0)
         ];
 
-        // اعتبارسنجی نام
         if (empty($data['name'])) {
             $this->flashError('لطفاً نام پروژه را وارد کنید.');
             $this->redirect('projects_edit&id=' . $id);
             return;
         }
 
-        // اعتبارسنجی فاز
         $validPhases = ['initiation', 'planning', 'analysis', 'design', 'implementation', 'evaluation'];
         if (!in_array($data['phase'], $validPhases)) {
             $data['phase'] = 'initiation';
         }
 
-        // اعتبارسنجی متدولوژی
         $validMethodologies = ['waterfall', 'agile', 'hybrid'];
         if (!in_array($data['methodology'], $validMethodologies)) {
             $data['methodology'] = 'hybrid';
         }
 
-        // 🔒 به‌روزرسانی فقط اگر مالک باشد
         $stmt = $this->db->prepare("
             UPDATE {$this->prefix}projects 
             SET name = :name, description = :description, phase = :phase, 
@@ -295,7 +301,6 @@ class ProjectController extends Controller
     {
         $this->requireAuth();
 
-        // 🔒 بررسی مالکیت
         $project = $this->getUserProject($id);
         if (!$project) {
             $this->flashError('پروژه مورد نظر یافت نشد یا شما به آن دسترسی ندارید.');
@@ -303,7 +308,6 @@ class ProjectController extends Controller
             return;
         }
 
-        // 🔒 حذف وظایف مرتبط (فقط متعلق به خود کاربر)
         try {
             $stmt = $this->db->prepare("
                 DELETE FROM {$this->prefix}project_tasks 
@@ -314,7 +318,6 @@ class ProjectController extends Controller
             error_log("Error deleting project tasks: " . $e->getMessage());
         }
 
-        // 🔒 حذف پروژه فقط اگر مالک باشد
         $stmt = $this->db->prepare("
             DELETE FROM {$this->prefix}projects 
             WHERE id = ? AND user_id = ?
@@ -331,52 +334,74 @@ class ProjectController extends Controller
         $this->redirect('projects');
     }
 
+    // ============================================================
+    // 🌟 متدهای جدید برای هوشمندسازی و مدیریت وظایف
+    // ============================================================
+
     /**
-     * دریافت لیست پروژه‌ها به صورت JSON
-     * 🔒 فقط پروژه‌های کاربر فعلی
+     * 🌟 به‌روزرسانی یادداشت و امتیاز کیفیت یک وظیفه پروژه (AJAX/Form)
+     * 🔒 بررسی دقیق مالکیت پروژه قبل از ذخیره
      */
-    public function getProjectsJson()
+    public function updateTaskQuality()
     {
-        if (!$this->userId) {
-            return $this->json(['error' => 'ورود الزامی است.']);
+        $this->requireAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return $this->json(['error' => 'روش درخواست مجاز نیست.'], 405);
         }
 
-        $stmt = $this->db->prepare("
-            SELECT * FROM {$this->prefix}projects 
-            WHERE user_id = ? 
-            ORDER BY updated_at DESC
+        $projectTaskId = (int) ($_POST['project_task_id'] ?? 0);
+        $notes = trim($_POST['notes'] ?? '');
+        $qualityScore = (int) ($_POST['quality_score'] ?? 0);
+        $status = $_POST['status'] ?? 'not_started';
+
+        if (!$projectTaskId) {
+            return $this->json(['error' => 'شناسه وظیفه نامعتبر است.']);
+        }
+
+        // 🔒 بررسی مالکیت: آیا این task متعلق به پروژه‌ای است که user_id آن برابر با کاربر فعلی است؟
+        $checkStmt = $this->db->prepare("
+            SELECT pt.id, p.user_id 
+            FROM {$this->prefix}project_tasks pt
+            INNER JOIN {$this->prefix}projects p ON pt.project_id = p.id
+            WHERE pt.id = ?
         ");
-        $stmt->execute([$this->userId]);
-        $projects = $stmt->fetchAll();
+        $checkStmt->execute([$projectTaskId]);
+        $task = $checkStmt->fetch();
 
-        return $this->json($projects);
-    }
-
-    /**
-     * دریافت اطلاعات یک پروژه به صورت JSON
-     * 🔒 فقط اگر مالک باشد
-     */
-    public function getProjectJson($id)
-    {
-        $project = $this->getUserProject($id);
-        if (!$project) {
-            return $this->json(['error' => 'پروژه یافت نشد یا دسترسی ندارید.']);
+        if (!$task || $task['user_id'] != $this->userId) {
+            return $this->json(['error' => 'شما مجاز به ویرایش این وظیفه نیستید.'], 403);
         }
-        return $this->json($project);
-    }
 
-    /**
-     * دریافت وضعیت پیشرفت پروژه به صورت JSON
-     * 🔒 فقط اگر مالک باشد
-     */
-    public function getProgressJson($id)
-    {
-        $project = $this->getUserProject($id);
-        if (!$project) {
-            return $this->json(['error' => 'پروژه یافت نشد یا دسترسی ندارید.']);
+        // ذخیره‌سازی
+        $updateStmt = $this->db->prepare("
+            UPDATE {$this->prefix}project_tasks 
+            SET notes = :notes, 
+                quality_score = :quality_score, 
+                status = :status
+            WHERE id = :id
+        ");
+        
+        $result = $updateStmt->execute([
+            'notes' => $notes,
+            'quality_score' => $qualityScore,
+            'status' => $status,
+            'id' => $projectTaskId
+        ]);
+
+        if ($result) {
+            $this->logActivity('update_task_quality', 'project_task', $projectTaskId, null, [
+                'quality_score' => $qualityScore,
+                'status' => $status
+            ]);
+            return $this->json([
+                'success' => true, 
+                'message' => 'یادداشت و امتیاز کیفیت با موفقیت ذخیره شد.',
+                'score' => $qualityScore
+            ]);
         }
-        $progress = $this->projectModel->getProgress($id);
-        return $this->json($progress);
+
+        return $this->json(['error' => 'خطا در ذخیره‌سازی اطلاعات.']);
     }
 
     // ============================================================
@@ -385,8 +410,6 @@ class ProjectController extends Controller
 
     /**
      * 🔒 دریافت پروژه فقط اگر متعلق به کاربر فعلی باشد
-     * @param int $id
-     * @return array|false
      */
     private function getUserProject($id)
     {
@@ -404,8 +427,6 @@ class ProjectController extends Controller
 
     /**
      * شمارش پروژه‌های کاربر با فیلترهای اختیاری
-     * @param array $filters
-     * @return int
      */
     private function countUserProjects($filters = [])
     {

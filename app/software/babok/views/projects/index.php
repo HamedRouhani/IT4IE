@@ -7,6 +7,46 @@ $pageTitle = 'مدیریت پروژه‌ها - BABOK Analyzer';
 $activePage = 'projects';
 ?>
 
+<?php if (isset($stats['quality']) && $stats['quality']['avg_quality'] > 0): ?>
+<div class="card mb-4 border-0 shadow-sm" style="border-right: 4px solid #6C3CE1 !important;">
+    <div class="card-body">
+        <h5 class="card-title mb-3" style="color: #1e293b;">
+            <i class="fas fa-chart-line text-primary"></i> داشبورد هوشمند کیفیت نیازمندی‌ها
+        </h5>
+        <div class="row text-center">
+            <!-- میانگین کیفیت -->
+            <div class="col-md-3 col-6 mb-3">
+                <div class="p-3 rounded bg-light border">
+                    <div class="display-6 fw-bold text-primary"><?= $stats['quality']['avg_quality'] ?></div>
+                    <small class="text-muted">میانگین امتیاز کیفیت</small>
+                </div>
+            </div>
+            <!-- عالی -->
+            <div class="col-md-3 col-6 mb-3">
+                <div class="p-3 rounded" style="background: #f0fdf4; border: 1px solid #bbf7d0;">
+                    <div class="display-6 fw-bold text-success"><?= $stats['quality']['excellent_count'] ?></div>
+                    <small class="text-success">عالی (≥80)</small>
+                </div>
+            </div>
+            <!-- قابل قبول -->
+            <div class="col-md-3 col-6 mb-3">
+                <div class="p-3 rounded" style="background: #fffbeb; border: 1px solid #fde68a;">
+                    <div class="display-6 fw-bold text-warning"><?= $stats['quality']['good_count'] ?></div>
+                    <small class="text-warning">قابل قبول (60-79)</small>
+                </div>
+            </div>
+            <!-- نیاز به بهبود -->
+            <div class="col-md-3 col-6 mb-3">
+                <div class="p-3 rounded" style="background: #fef2f2; border: 1px solid #fecaca;">
+                    <div class="display-6 fw-bold text-danger"><?= $stats['quality']['needs_improvement_count'] ?></div>
+                    <small class="text-danger">نیاز به بازنگری (<60)</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <div class="card">
     <div class="card-header">
         <div class="card-title">

@@ -1009,4 +1009,69 @@ class RequirementService
         }
 
         return implode(' | ', array_slice($reasons, 0, 3));
-    }}
+    }
+
+    /**
+     * اعتبارسنجی هوشمند کیفیت نیازمندی بر اساس معیارهای INVEST و SMART
+     * 
+     * @param string $text متن نیازمندی
+     * @param string $methodology متدولوژی پروژه (agile, waterfall, hybrid)
+     * @return array شامل امتیاز کیفیت و پیشنهادات اصلاحی
+     */
+    public function validateRequirementQuality(string $text, string $methodology = 'hybrid'): array
+    {
+        $score = 100;
+        $issues = [];
+        $suggestions = [];
+
+        // ۱. بررسی وجود فعل الزام‌آور (باید، می‌بایست، خواهد شد)
+        if (!preg_match('/(باید|می‌بایست|خواهد شد|الزامی است|موظف است)/u', $text)) {
+            $score -= 20;
+            $issues[] = 'عدم قطعیت';
+            $suggestions[] = 'از افعال الزام‌آور صریح (مانند "باید" یا "می‌بایست") استفاده کنید تا ابهام برطرف شود.';
+        }
+
+        // ۲. بررسی معیار پذیرش (Acceptance Criteria) برای نیازمندی‌های پیچیده
+        if (mb_strlen($text) > 60 && !preg_match('/(معیار پذیرش|شرایط پذیرش|تست|پذیرش|به گونه‌ای که)/u', $text)) {
+            $score -= 15;
+            $issues[] = 'فقدان معیار پذیرش';
+            $suggestions[] = 'برای نیازمندی‌های پیچیده، حتماً "معیار پذیرش" (Acceptance Criteria) را مشخص کنید.';
+        }
+
+        // ۳. بررسی معیار INVEST (مخصوص متدولوژی چابک)
+        if ($methodology === 'agile' || $methodology === 'hybrid') {
+            if (mb_strlen($text) > 150) {
+                $score -= 10;
+                $issues[] = 'نقص در کوچکی (Small)';
+                $suggestions[] = 'نیازمندی بیش از حد طولانی است. آن را به داستان‌های کاربری (User Stories) کوچک‌تر و مستقل تقسیم کنید.';
+            }
+            if (!preg_match('/(به عنوان|می‌خواهم|تا بتوانم)/u', $text) && preg_match('/(کاربر|سیستم|مدیر)/u', $text)) {
+                $score -= 10;
+                $issues[] = 'نقص در قالب داستان کاربری';
+                $suggestions[] = 'برای رویکرد چابک، بهتر است از قالب استاندارد "به عنوان [نقش]، می‌خواهم [هدف]، تا بتوانم [منفعت]" استفاده کنید.';
+            }
+        }
+
+        // ۴. بررسی کلمات مبهم و غیرقابل اندازه‌گیری
+        $vagueWords = ['شاید', 'احتمالاً', 'تقریباً', 'بهتر است', 'در صورت امکان', 'سریع', 'خوب', 'مناسب'];
+        foreach ($vagueWords as $word) {
+            if (mb_stripos($text, $word) !== false) {
+                $score -= 10;
+                $issues[] = 'استفاده از کلمات مبهم';
+                $suggestions[] = "از کلمات کیفی و مبهم مانند '{$word}' پرهیز کنید و به جای آن معیارهای کمی و قابل اندازه‌گیری قرار دهید.";
+                break; // فقط یک بار جریمه شود
+            }
+        }
+
+        $score = max(0, $score);
+        $grade = $score >= 80 ? 'عالی' : ($score >= 60 ? 'قابل قبول' : 'نیاز به بازنگری');
+
+        return [
+            'score' => $score,
+            'grade' => $grade,
+            'issues' => $issues,
+            'suggestions' => $suggestions,
+            'is_valid' => $score >= 60
+        ];
+    }
+}

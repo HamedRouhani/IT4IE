@@ -99,4 +99,63 @@ class RequirementController extends Controller
         }
         exit;
     }
+
+    /**
+     * اندپوینت AJAX برای اعتبارسنجی آنی نیازمندی
+     */
+    public function validateAjax()
+    {
+        // فقط درخواست‌های POST را بپذیر
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method Not Allowed']);
+            return;
+        }
+
+        // دریافت و پاکسازی ورودی‌ها
+        $text = trim($_POST['text'] ?? '');
+        $methodology = $_POST['methodology'] ?? 'hybrid';
+
+        if (empty($text)) {
+            echo json_encode(['score' => 0, 'issues' => [], 'suggestions' => []]);
+            return;
+        }
+
+        // فراخوانی سرویس
+        $service = new RequirementService();
+        $result = $service->validateRequirementQuality($text, $methodology);
+
+        // بازگرداندن پاسخ JSON
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($result, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * اعتبارسنجی آنی کیفیت نیازمندی (AJAX Endpoint)
+     */
+    public function validateQualityAjax()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return $this->json(['error' => 'Method Not Allowed'], 405);
+        }
+
+        $text = trim($_POST['text'] ?? '');
+        $methodology = $_POST['methodology'] ?? 'hybrid';
+
+        if (empty($text)) {
+            return $this->json([
+                'score' => 0,
+                'grade' => 'خالی',
+                'issues' => [],
+                'suggestions' => [],
+                'is_valid' => false
+            ]);
+        }
+
+        // فراخوانی سرویسی که قبلاً ساختیم
+        $service = new \App\Software\Babok\Services\RequirementService();
+        $result = $service->validateRequirementQuality($text, $methodology);
+
+        return $this->json($result);
+    }
 }

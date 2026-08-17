@@ -102,4 +102,47 @@ class Task extends Model
         $sql = "SELECT * FROM babok_tasks WHERE code = ? LIMIT 1";
         return $this->queryOne($sql, [$code]);
     }
+
+    /**
+     * جستجوی معنایی (Full-Text Search) در وظایف و تکنیک‌های BABOK
+     * 
+     * @param string $query عبارت جستجو به زبان طبیعی
+     * @return array نتایج جستجو
+     */
+    public function semanticSearch(string $query): array
+    {
+        $db = \App\Core\Database::getInstance()->getConnection(); // تنظیم بر اساس کلاس دیتابیس شما
+        
+        // پاکسازی ورودی برای جلوگیری از خطای سینتکس MySQL در AGAINST
+        $cleanQuery = preg_replace('/[+\-><\(\)~*\"@]+/', ' ', $query);
+        
+        // جستجو در وظایف
+        $sql = "SELECT id, code, name, description, knowledge_area_id, 
+                MATCH(name, description, inputs, outputs) AGAINST(:query IN NATURAL LANGUAGE MODE) as relevance_score
+                FROM babok_tasks 
+                WHERE MATCH(name, description, inputs, outputs) AGAINST(:query IN NATURAL LANGUAGE MODE)
+                ORDER BY relevance_score DESC
+                LIMIT 5";
+                
+        $stmt = $db->prepare($sql);
+        $stmt->execute(['query' => $cleanQuery]);
+        $tasks = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        // جستجو در تکنیک‌ها
+        $sqlTech = "SELECT id, name, description, category,
+                    MATCH(name, description, purpose) AGAINST(:query IN NATURAL LANGUAGE MODE) as relevance_score
+                    FROM babok_techniques 
+                    WHERE MATCH(name, description, purpose) AGAINST(:query IN NATURAL LANGUAGE MODE)
+                    ORDER BY relevance_score DESC
+                    LIMIT 5";
+                    
+        $stmtTech = $db->prepare($sqlTech);
+        $stmtTech->execute(['query' => $cleanQuery]);
+        $techniques = $stmtTech->fetchAll(\PDO::FETCH_ASSOC);
+
+        return [
+            'tasks' => $tasks,
+            'techniques' => $techniques
+        ];
+    }
 }

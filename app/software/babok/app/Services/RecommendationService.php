@@ -326,4 +326,62 @@ class RecommendationService
 
         return implode(' | ', array_slice($reasons, 0, 2));
     }
+
+    /**
+     * پیشنهاد هوشمند ردیابی (Traceability) بین وظایف پروژه
+     * بر اساس تطابق خروجی (Output) یک وظیفه با ورودی (Input) وظیفه دیگر
+     * 
+     * @param int $projectId شناسه پروژه
+     * @return array لیست پیشنهادات ردیابی
+     */
+    public function getTraceabilitySuggestions($projectId)
+    {
+        $projectTasks = $this->projectTaskModel->getByProject($projectId);
+        $suggestions = [];
+
+        // دریافت جزئیات تمام وظایف استاندارد BABOK
+        $allTasks = $this->taskModel->getAll();
+        $taskDetails = [];
+        foreach ($allTasks as $task) {
+            $taskDetails[$task['id']] = $task;
+        }
+
+        // وظایف تکمیل شده یا در حال انجام
+        $activeProjectTasks = array_filter($projectTasks, function($pt) {
+            return in_array($pt['status'], ['completed', 'in_progress']);
+        });
+
+        foreach ($activeProjectTasks as $pt) {
+            $currentTask = $taskDetails[$pt['task_id']] ?? null;
+            if (!$currentTask || empty($currentTask['outputs'])) continue;
+
+            // فرض بر این است که خروجی‌ها با ویرگول فارسی یا انگلیسی جدا شده‌اند
+            $outputs = preg_split('/[،,]/', $currentTask['outputs']);
+            
+            // جستجو برای وظایف بعدی که هنوز شروع نشده‌اند
+            foreach ($projectTasks as $nextPt) {
+                if ($nextPt['status'] === 'not_started') {
+                    $nextTask = $taskDetails[$nextPt['task_id']] ?? null;
+                    if (!$nextTask || empty($nextTask['inputs'])) continue;
+
+                    $inputs = preg_split('/[،,]/', $nextTask['inputs']);
+                    
+                    // بررسی اشتراک بین خروجی‌ها و ورودی‌ها
+                    $matches = array_intersect(array_map('trim', $outputs), array_map('trim', $inputs));
+                    if (!empty($matches)) {
+                        $suggestions[] = [
+                            'source_task_code' => $currentTask['code'],
+                            'source_task_name' => $currentTask['name'],
+                            'target_task_code' => $nextTask['code'],
+                            'target_task_name' => $nextTask['name'],
+                            'shared_artifact' => trim($matches[0]),
+                            'recommendation' => "خروجی «{$currentTask['name']}» می‌تواند به عنوان ورودی مستقیم برای «{$nextTask['name']}» استفاده شود. پیشنهاد می‌شود این ارتباط در ماتریس ردیابی ثبت شود."
+                        ];
+                    }
+                }
+            }
+        }
+
+        return $suggestions;
+    }
 }

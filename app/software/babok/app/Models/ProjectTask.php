@@ -113,4 +113,47 @@ class ProjectTask extends Model
         $result = $this->queryOne($sql, [$projectId, $taskId]);
         return $result['count'] > 0;
     }
+
+    /**
+     * به‌روزرسانی یادداشت و امتیاز کیفیت یک وظیفه پروژه
+     */
+    public function updateQuality($id, $notes, $qualityScore, $status = null)
+    {
+        $sql = "UPDATE {$this->table} SET notes = :notes, quality_score = :quality_score";
+        $params = [
+            ':notes' => $notes,
+            ':quality_score' => $qualityScore,
+            ':id' => $id
+        ];
+
+        if ($status !== null) {
+            $sql .= ", status = :status";
+            $params[':status'] = $status;
+        }
+
+        $sql .= " WHERE id = :id";
+        
+        return $this->db->execute($sql, $params); // یا $this->query بسته به Core Model شما
+    }
+
+    /**
+     * دریافت آمار کیفیت پروژه (برای داشبورد)
+     */
+    public function getQualityStats($projectId)
+    {
+        $sql = "SELECT 
+                    COUNT(*) as total_tasks,
+                    AVG(quality_score) as avg_quality,
+                    MIN(quality_score) as min_quality,
+                    MAX(quality_score) as max_quality,
+                    SUM(CASE WHEN quality_score >= 80 THEN 1 ELSE 0 END) as excellent_count,
+                    SUM(CASE WHEN quality_score BETWEEN 60 AND 79 THEN 1 ELSE 0 END) as good_count,
+                    SUM(CASE WHEN quality_score < 60 THEN 1 ELSE 0 END) as needs_improvement_count
+                FROM babok_project_tasks 
+                WHERE project_id = :project_id";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':project_id' => $projectId]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
 }
