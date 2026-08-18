@@ -88,3 +88,45 @@ $cssVersion = '2.0'; // برای شکستن کش مرورگر
     <script src="/assets/js/script.js"></script>
 </body>
 </html>
+
+<?php if (isset($_SESSION['user_id']) && ($moduleName ?? '') === 'babok'): ?>
+<script>
+// به‌روزرسانی خودکار bell icon هر ۶۰ ثانیه
+setInterval(function() {
+    fetch('?route=notifications_ajax')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateBellIcon(data.unread_count);
+            }
+        })
+        .catch(error => console.error('Notification refresh error:', error));
+}, 60000);
+
+function updateBellIcon(count) {
+    const badge = document.querySelector('.notification-badge');
+    if (!badge) {
+        // اگر badge وجود ندارد ولی count > 0 است، آن را بساز
+        if (count > 0) {
+            const bell = document.querySelector('a[title="اعلان‌ها"] i');
+            if (bell && bell.parentElement) {
+                const newBadge = document.createElement('span');
+                newBadge.className = 'notification-badge';
+                newBadge.textContent = count > 99 ? '99+' : count;
+                newBadge.style.cssText = 'position:absolute;top:-6px;right:-8px;background:#ef4444;color:white;font-size:0.65rem;font-weight:700;padding:2px 5px;border-radius:99px;min-width:16px;text-align:center;line-height:1;';
+                bell.parentElement.style.position = 'relative';
+                bell.parentElement.appendChild(newBadge);
+            }
+        }
+        return;
+    }
+    
+    if (count > 0) {
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+</script>
+<?php endif; ?>

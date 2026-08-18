@@ -4,6 +4,7 @@ namespace App\Software\Babok\Controllers;
 
 use App\Software\Babok\Core\Controller;
 use App\Software\Babok\Models\Project;
+use App\Software\Babok\Models\ProjectTask;
 
 /**
  * کنترلر مدیریت پروژه‌های BABOK
@@ -12,6 +13,7 @@ use App\Software\Babok\Models\Project;
 class ProjectController extends Controller
 {
     private $projectModel;
+    private $projectTaskModel;
     private $db;
     private $prefix = 'babok_';
     private $userId;
@@ -19,6 +21,7 @@ class ProjectController extends Controller
     public function __construct()
     {
         $this->projectModel = new Project();
+        $this->projectTaskModel = new ProjectTask();
         $this->db = \App\Core\Database::getInstance();
         $this->userId = $_SESSION['user_id'] ?? null;
     }
@@ -176,7 +179,7 @@ class ProjectController extends Controller
     /**
      * نمایش جزئیات یک پروژه
      * 🔒 فقط مالک می‌تواند ببیند
-     */
+    */
     public function show($id)
     {
         $this->requireAuth();
@@ -190,13 +193,30 @@ class ProjectController extends Controller
 
         $tasks = $this->projectModel->getTasks($id);
         $progress = $this->projectModel->getProgress($id);
+        
+        // ۱. دریافت آمار کیفیت (از مرحله قبل)
+        $qualityStats = $this->projectTaskModel->getQualityStats($id);
+        
+        // 🌟 آمار تحلیلی پیشرفته (مرحله جدید)
+        $advancedAnalytics = $this->projectTaskModel->getAdvancedAnalytics($id);
+
+        // ۲. دریافت پیشنهادات ردیابی هوشمند
+        $recommendationService = new \App\Software\Babok\Services\RecommendationService();
+        $traceabilitySuggestions = $recommendationService->getTraceabilitySuggestions($id);
+
+        // ۳. 🌟 دریافت تکنیک‌های پیشنهادی هوشمند (مرحله ۴)
+        $smartTechniques = $recommendationService->getSmartRecommendations($id);
 
         $this->view('projects/view', [
             'title' => $project['name'] . ' - BABOK Analyzer',
             'activePage' => 'projects',
             'project' => $project,
             'tasks' => $tasks,
-            'progress' => $progress
+            'progress' => $progress,
+            'qualityStats' => $qualityStats,
+            'advancedAnalytics' => $advancedAnalytics, 
+            'traceabilitySuggestions' => $traceabilitySuggestions,
+            'smartTechniques' => $smartTechniques
         ]);
     }
 
@@ -453,5 +473,56 @@ class ProjectController extends Controller
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         return (int) $stmt->fetchColumn();
+    }
+
+        /**
+     * 🌟 ذخیره آنی امتیاز کیفیت و یادداشت (AJAX Endpoint)
+     */
+    public function updateTaskQualityAjax()
+    {
+        $this->requireAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return $this->json(['error' => 'روش درخواست مجاز نیست.'], 405);
+        }
+
+        $projectTaskId = (int) ($_POST['project_task_id'] ?? 0);
+        $notes = trim($_POST['notes'] ?? '');
+        $qualityScore = (int) ($_POST['quality_score'] ?? 0);
+        $status = $_POST['status'] ?? 'not_started';
+
+        if (!$projectTaskId) {
+            return $this->json(['error' => 'شناسه وظیفه نامعتبر است.']);
+        }
+
+        // 🔒 بررسی مالکیت: اطمینان از اینکه این task متعلق به پروژه کاربر است
+        $checkStmt = $this->db->prepare("
+            SELECT pt.id, p.user_id 
+            FROM babok_project_tasks pt
+            INNER JOIN babok_projects p ON pt.project_id = p.id
+            WHERE pt.id = ?
+        ");
+        $checkStmt->execute([$projectTaskId]);
+        $task = $checkStmt->fetch();
+
+        if (!$task || $task['user_id'] != $this->userId) {
+            return $this->json(['error' => 'شما مجاز به ویرایش این وظیفه نیستید.'], 403);
+        }
+
+        $projectTaskModel = new \App\Software\Babok\Models\ProjectTask();
+        $result = $projectTaskModel->updateTaskQuality($projectTaskId, $notes, $qualityScore, $status);
+
+        if ($result) {
+            $this->logActivity('update_task_quality', 'project_task', $projectTaskId, null, [
+                'quality_score' => $qualityScore
+            ]);
+            return $this->json([
+                'success' => true, 
+                'message' => 'یادداشت و امتیاز کیفیت با موفقیت ذخیره شد.',
+                'score' => $qualityScore
+            ]);
+        }
+
+        return $this->json(['error' => 'خطا در ذخیره‌سازی اطلاعات.']);
     }
 }

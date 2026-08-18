@@ -7,12 +7,6 @@
  * 
  * این فایل از طریق index.php اصلی IT4IE فراخوانی می‌شود
  * وقتی URL به صورت /software/babok/ باشد
- * 
- * ثابت‌های مورد نیاز (از index.php اصلی تنظیم می‌شوند):
- * - MODULAR_APP_PATH: مسیر ماژول
- * - CURRENT_MODULE: نام ماژول (babok)
- * - CURRENT_MODULE_URL: URL پایه ماژول (/software/babok/)
- * - APP_PATH, VIEWS_PATH, PUBLIC_PATH: مسیرهای اصلی IT4IE
  * ============================================================
  */
 
@@ -55,13 +49,8 @@ spl_autoload_register(function ($class) {
     
     if (strncmp($legacyPrefix, $class, $legacyLen) === 0) {
         $relative = substr($class, $legacyLen);
-        
-        // تبدیل App\Controllers\X به App\Software\Babok\Controllers\X
-        // تبدیل App\Models\X به App\Software\Babok\Models\X
-        // تبدیل App\Services\X به App\Software\Babok\Services\X
-        // تبدیل App\Core\X به App\Software\Babok\Core\X
-        
         $parts = explode('\\', $relative);
+        
         if (count($parts) >= 2) {
             $type = $parts[0]; // Controllers, Models, Services, Core
             
@@ -102,6 +91,7 @@ $writeRoutes = [
     'projects_store',
     'projects_update',
     'projects_delete',
+    'projects_update_task_quality_ajax', // ✅ اضافه شد
     'planning_add_task',
     'planning_remove_task',
     'planning_update_status',
@@ -134,6 +124,8 @@ $authRequiredRoutes = [
     'projects_edit', 'projects_update', 'projects_delete',
     'planning', 'planning_add_task', 'planning_remove_task',
     'planning_update_status', 'planning_recommended',
+    'reports', 'reports_project', 'reports_export_tasks', 'reports_export_traceability',
+    'notifications', 'notifications_mark_all_read',
 ];
 
 if (in_array($route, $authRequiredRoutes) && !isset($_SESSION['user_id'])) {
@@ -213,6 +205,18 @@ try {
                 $controller->delete($id);
             } else {
                 throw new \Exception('شناسه پروژه مشخص نشده است.');
+            }
+            break;
+
+        // ✅ مسیر جدید برای به‌روزرسانی کیفیت وظیفه (AJAX)
+        case 'projects_update_task_quality_ajax':
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller = new \App\Software\Babok\Controllers\ProjectController();
+                $controller->updateTaskQualityAjax();
+            } else {
+                header('Content-Type: application/json');
+                http_response_code(405);
+                echo json_encode(['error' => 'روش درخواست مجاز نیست.'], JSON_UNESCAPED_UNICODE);
             }
             break;
         
@@ -423,6 +427,18 @@ try {
                 }
             }
             break;
+
+        // ✅ مسیر جدید برای اعتبارسنجی آنی کیفیت نیازمندی (AJAX)
+        case 'requirement_validate_quality_ajax':
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $controller = new \App\Software\Babok\Controllers\RequirementController();
+                $controller->validateQualityAjax();
+            } else {
+                header('Content-Type: application/json');
+                http_response_code(405);
+                echo json_encode(['error' => 'روش درخواست مجاز نیست.'], JSON_UNESCAPED_UNICODE);
+            }
+            break;
         
         // ==========================================
         // خروج از نرم‌افزار
@@ -433,6 +449,87 @@ try {
             }
             header('Location: /software');
             exit;
+
+        // ==========================================
+        // جستجوی معنایی (Semantic Search)
+        // ==========================================
+        case 'search':
+            $controller = new \App\Software\Babok\Controllers\SearchController();
+            $controller->index();
+            break;
+
+        case 'search_results':
+            $controller = new \App\Software\Babok\Controllers\SearchController();
+            $controller->search();
+            break;
+
+        case 'search_ajax':
+            $controller = new \App\Software\Babok\Controllers\SearchController();
+            $controller->ajax();
+            break;
+
+        // ==========================================
+        // 📊 گزارش‌گیری هوشمند
+        // ==========================================
+        case 'reports':
+            $controller = new \App\Software\Babok\Controllers\ReportController();
+            $controller->index();
+            break;
+        
+        case 'reports_project':
+            if ($id) {
+                $controller = new \App\Software\Babok\Controllers\ReportController();
+                $controller->projectReport($id);
+            } else {
+                throw new \Exception('شناسه پروژه مشخص نشده است.');
+            }
+            break;
+        
+        case 'reports_export_tasks':
+            if ($id) {
+                $controller = new \App\Software\Babok\Controllers\ReportController();
+                $controller->exportTasksCsv($id);
+            } else {
+                throw new \Exception('شناسه پروژه مشخص نشده است.');
+            }
+            break;
+        
+        case 'reports_export_traceability':
+            if ($id) {
+                $controller = new \App\Software\Babok\Controllers\ReportController();
+                $controller->exportTraceabilityCsv($id);
+            } else {
+                throw new \Exception('شناسه پروژه مشخص نشده است.');
+            }
+            break;
+
+        // ==========================================
+        // 🔔 اعلان‌ها و یادآوری‌ها
+        // ==========================================
+        case 'notifications':
+            $controller = new \App\Software\Babok\Controllers\NotificationController();
+            $controller->index();
+            break;
+        
+        case 'notifications_ajax':
+            $controller = new \App\Software\Babok\Controllers\NotificationController();
+            $controller->ajax();
+            break;
+        
+        case 'notifications_mark_read':
+            $controller = new \App\Software\Babok\Controllers\NotificationController();
+            $controller->markAsRead();
+            break;
+        
+        case 'notifications_mark_all_read':
+            $controller = new \App\Software\Babok\Controllers\NotificationController();
+            $controller->markAllAsRead();
+            break;
+        
+        case 'notifications_delete':
+            $controller = new \App\Software\Babok\Controllers\NotificationController();
+            $controller->delete();
+            break;
         
         // ==========================================
         // مسیر 404

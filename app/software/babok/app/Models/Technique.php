@@ -70,4 +70,35 @@ class Technique extends Model
                 ORDER BY t.code";
         return $this->query($sql, [$techniqueId]);
     }
+
+    /**
+     * جستجوی معنایی در تکنیک‌های BABOK
+     */
+    public function semanticSearch($query, $limit = 10)
+    {
+        $cleanQuery = preg_replace('/[+\-><\(\)~*\"@]+/', ' ', $query);
+        $cleanQuery = trim($cleanQuery);
+        
+        if (empty($cleanQuery)) {
+            return [];
+        }
+
+        $limit = (int)$limit;
+
+        $sql = "SELECT id, name, description, purpose, category,
+                MATCH(name, description, purpose, advantages, usage_considerations) 
+                AGAINST(:query1 IN NATURAL LANGUAGE MODE) as relevance_score
+                FROM babok_techniques 
+                WHERE MATCH(name, description, purpose, advantages, usage_considerations) 
+                AGAINST(:query2 IN NATURAL LANGUAGE MODE)
+                ORDER BY relevance_score DESC
+                LIMIT {$limit}";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':query1', $cleanQuery, \PDO::PARAM_STR);
+        $stmt->bindValue(':query2', $cleanQuery, \PDO::PARAM_STR);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

@@ -61,4 +61,35 @@ class KnowledgeArea extends Model
         $sql = "SELECT * FROM babok_knowledge_areas WHERE code = ? LIMIT 1";
         return $this->queryOne($sql, [$code]);
     }
+
+    /**
+     * جستجوی معنایی در حوزه‌های دانشی
+     */
+    public function semanticSearch($query, $limit = 10)
+    {
+        $cleanQuery = preg_replace('/[+\-><\(\)~*\"@]+/', ' ', $query);
+        $cleanQuery = trim($cleanQuery);
+        
+        if (empty($cleanQuery)) {
+            return [];
+        }
+
+        $limit = (int)$limit;
+
+        $sql = "SELECT id, code, name, description,
+                MATCH(code, name, description) 
+                AGAINST(:query1 IN NATURAL LANGUAGE MODE) as relevance_score
+                FROM babok_knowledge_areas 
+                WHERE MATCH(code, name, description) 
+                AGAINST(:query2 IN NATURAL LANGUAGE MODE)
+                ORDER BY relevance_score DESC
+                LIMIT {$limit}";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':query1', $cleanQuery, \PDO::PARAM_STR);
+        $stmt->bindValue(':query2', $cleanQuery, \PDO::PARAM_STR);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

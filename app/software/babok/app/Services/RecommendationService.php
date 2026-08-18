@@ -9,14 +9,13 @@ use App\Software\Babok\Models\Project;
 use App\Software\Babok\Models\ProjectTask;
 
 /**
- * سرویس پیشنهاد هوشمند تکنیک‌های BABOK
+ * سرویس پیشنهاد هوشمند تکنیک‌های BABOK و تحلیل ردیابی
  * 
- * این سرویس بر اساس:
- * - تکنیک‌های استاندارد مرتبط با هر وظیفه (از جدول task_techniques)
- * - متدولوژی پروژه (waterfall, agile, hybrid)
- * - فاز فعلی پروژه
- * - تعداد ذی‌نفعان
- * تکنیک‌های مناسب را پیشنهاد می‌دهد.
+ * این سرویس بر اساس موارد زیر امتیازدهی و پیشنهاد می‌دهد:
+ * ۱. تکنیک‌های استاندارد مرتبط با هر وظیفه (از جدول task_techniques)
+ * ۲. متدولوژی پروژه (waterfall, agile, hybrid)
+ * ۳. فاز فعلی پروژه (initiation, planning, analysis, ...)
+ * ۴. تعداد ذی‌نفعان و تکرار تکنیک در وظایف مختلف
  */
 class RecommendationService
 {
@@ -29,80 +28,44 @@ class RecommendationService
     // ضرایب وزنی بر اساس متدولوژی
     private $methodologyWeights = [
         'waterfall' => [
-            'collaborative' => 0.8,
-            'research' => 1.2,
-            'experimental' => 0.7,
-            'management' => 1.3,
-            'strategic' => 1.1,
-            'modeling' => 1.2
+            'collaborative' => 0.8, 'research' => 1.2, 'experimental' => 0.7,
+            'management' => 1.3, 'strategic' => 1.1, 'modeling' => 1.2
         ],
         'agile' => [
-            'collaborative' => 1.4,
-            'research' => 0.9,
-            'experimental' => 1.3,
-            'management' => 0.9,
-            'strategic' => 0.8,
-            'modeling' => 1.0
+            'collaborative' => 1.4, 'research' => 0.9, 'experimental' => 1.3,
+            'management' => 0.9, 'strategic' => 0.8, 'modeling' => 1.0
         ],
         'hybrid' => [
-            'collaborative' => 1.1,
-            'research' => 1.1,
-            'experimental' => 1.0,
-            'management' => 1.1,
-            'strategic' => 1.0,
-            'modeling' => 1.1
+            'collaborative' => 1.1, 'research' => 1.1, 'experimental' => 1.0,
+            'management' => 1.1, 'strategic' => 1.0, 'modeling' => 1.1
         ]
     ];
 
     // ضرایب وزنی بر اساس فاز پروژه
     private $phaseWeights = [
         'initiation' => [
-            'collaborative' => 1.3,
-            'research' => 1.1,
-            'experimental' => 0.7,
-            'management' => 1.0,
-            'strategic' => 1.4,
-            'modeling' => 0.8
+            'collaborative' => 1.3, 'research' => 1.1, 'experimental' => 0.7,
+            'management' => 1.0, 'strategic' => 1.4, 'modeling' => 0.8
         ],
         'planning' => [
-            'collaborative' => 1.1,
-            'research' => 1.0,
-            'experimental' => 0.8,
-            'management' => 1.4,
-            'strategic' => 1.1,
-            'modeling' => 1.1
+            'collaborative' => 1.1, 'research' => 1.0, 'experimental' => 0.8,
+            'management' => 1.4, 'strategic' => 1.1, 'modeling' => 1.1
         ],
         'analysis' => [
-            'collaborative' => 1.2,
-            'research' => 1.4,
-            'experimental' => 1.0,
-            'management' => 1.0,
-            'strategic' => 0.9,
-            'modeling' => 1.3
+            'collaborative' => 1.2, 'research' => 1.4, 'experimental' => 1.0,
+            'management' => 1.0, 'strategic' => 0.9, 'modeling' => 1.3
         ],
         'design' => [
-            'collaborative' => 1.0,
-            'research' => 1.0,
-            'experimental' => 1.4,
-            'management' => 0.9,
-            'strategic' => 0.8,
-            'modeling' => 1.4
+            'collaborative' => 1.0, 'research' => 1.0, 'experimental' => 1.4,
+            'management' => 0.9, 'strategic' => 0.8, 'modeling' => 1.4
         ],
         'implementation' => [
-            'collaborative' => 1.1,
-            'research' => 0.8,
-            'experimental' => 1.2,
-            'management' => 1.3,
-            'strategic' => 0.7,
-            'modeling' => 1.0
+            'collaborative' => 1.1, 'research' => 0.8, 'experimental' => 1.2,
+            'management' => 1.3, 'strategic' => 0.7, 'modeling' => 1.0
         ],
         'evaluation' => [
-            'collaborative' => 1.0,
-            'research' => 1.3,
-            'experimental' => 1.0,
-            'management' => 1.3,
-            'strategic' => 1.1,
-            'modeling' => 0.9
+            'collaborative' => 1.0, 'research' => 1.3, 'experimental' => 1.0,
+            'management' => 1.3, 'strategic' => 1.1, 'modeling' => 0.9
         ]
     ];
 
@@ -116,11 +79,27 @@ class RecommendationService
     }
 
     /**
-     * پیشنهاد تکنیک برای یک وظیفه خاص
+     * 🌟 متد اصلی برای دریافت پیشنهادات هوشمند در صفحه جزئیات پروژه
      * 
-     * @param int $taskId شناسه وظیفه
-     * @param array $context شامل methodology, phase, stakeholder_count
-     * @return array لیست تکنیک‌های پیشنهادی با امتیاز
+     * @param int $projectId شناسه پروژه
+     * @return array لیست ۵ تکنیک برتر پیشنهادی
+     */
+    public function getSmartRecommendations($projectId)
+    {
+        $project = $this->projectModel->find($projectId);
+        if (!$project) {
+            return [];
+        }
+
+        // دریافت پیشنهادات تجمیع‌شده برای کل پروژه
+        $allRecommendations = $this->recommendForProject($projectId);
+
+        // بازگرداندن ۵ مورد برتر برای نمایش در داشبورد
+        return array_slice($allRecommendations, 0, 5);
+    }
+
+    /**
+     * پیشنهاد تکنیک برای یک وظیفه خاص
      */
     public function recommendForTask($taskId, $context = [])
     {
@@ -129,9 +108,7 @@ class RecommendationService
             return [];
         }
 
-        // دریافت تکنیک‌های استاندارد مرتبط با وظیفه
         $standardTechniques = $this->taskTechniqueModel->getTechniquesByTask($taskId);
-
         $methodology = $context['methodology'] ?? 'hybrid';
         $phase = $context['phase'] ?? 'analysis';
         $stakeholderCount = $context['stakeholder_count'] ?? 0;
@@ -150,7 +127,6 @@ class RecommendationService
             ];
         }
 
-        // مرتب‌سازی بر اساس امتیاز (نزولی)
         usort($ranked, function ($a, $b) {
             return $b['score'] <=> $a['score'];
         });
@@ -159,10 +135,7 @@ class RecommendationService
     }
 
     /**
-     * پیشنهاد تکنیک برای کل پروژه
-     * 
-     * @param int $projectId شناسه پروژه
-     * @return array لیست تکنیک‌های پیشنهادی برای تمام وظایف پروژه
+     * پیشنهاد تکنیک برای کل پروژه (تجمیع امتیازات)
      */
     public function recommendForProject($projectId)
     {
@@ -177,10 +150,7 @@ class RecommendationService
             'stakeholder_count' => $project['stakeholder_count']
         ];
 
-        // دریافت وظایف پروژه
         $projectTasks = $this->projectTaskModel->getByProject($projectId);
-        
-        $allRecommendations = [];
         $techniqueScores = [];
 
         // جمع‌آوری امتیازات تکنیک‌ها برای تمام وظایف پروژه
@@ -205,10 +175,13 @@ class RecommendationService
             }
         }
 
+        $allRecommendations = [];
+
         // محاسبه امتیاز نهایی و مرتب‌سازی
         foreach ($techniqueScores as $techId => $data) {
             $avgScore = $data['task_count'] > 0 ? $data['total_score'] / $data['task_count'] : 0;
-            $frequencyBonus = min(20, $data['task_count'] * 3); // امتیاز برای تکرار در وظایف متعدد
+            // پاداش فرکانس: اگر یک تکنیک برای چندین وظیفه پیشنهاد شود، امتیاز بیشتری می‌گیرد
+            $frequencyBonus = min(20, $data['task_count'] * 3); 
             
             $allRecommendations[] = [
                 'technique' => $data['technique'],
@@ -218,27 +191,11 @@ class RecommendationService
             ];
         }
 
-        // مرتب‌سازی بر اساس امتیاز (نزولی)
         usort($allRecommendations, function ($a, $b) {
             return $b['score'] <=> $a['score'];
         });
 
-        return array_slice($allRecommendations, 0, 10);
-    }
-
-    /**
-     * پیشنهاد بر اساس تحلیل متن نیازمندی
-     * 
-     * @param string $requirementText متن نیازمندی
-     * @return array لیست تکنیک‌های پیشنهادی
-     */
-    public function recommendForRequirements($requirementText)
-    {
-        // استفاده از RequirementService برای تحلیل متن
-        $requirementService = new RequirementService();
-        $analysis = $requirementService->process($requirementText);
-        
-        return $analysis['techniques'] ?? [];
+        return $allRecommendations;
     }
 
     /**
@@ -249,27 +206,25 @@ class RecommendationService
         $score = 50; // امتیاز پایه
         $category = $technique['category'] ?? 'collaborative';
 
-        // اعمال وزن متدولوژی
+        // ۱. اعمال وزن متدولوژی
         $methodologyWeight = $this->methodologyWeights[$methodology][$category] ?? 1.0;
         $score *= $methodologyWeight;
 
-        // اعمال وزن فاز
+        // ۲. اعمال وزن فاز
         $phaseWeight = $this->phaseWeights[$phase][$category] ?? 1.0;
         $score *= $phaseWeight;
 
-        // امتیاز بر اساس تعداد ذی‌نفعان
+        // ۳. امتیاز بر اساس تعداد ذی‌نفعان
         if ($stakeholderCount > 0) {
-            // تکنیک‌های همکاری برای پروژه‌های با ذی‌نفعان زیاد مناسب‌ترند
             if ($category === 'collaborative') {
                 $score += min(15, $stakeholderCount * 1.5);
             }
-            // تکنیک‌های مدیریتی برای پروژه‌های بزرگ مناسب‌ترند
             if ($category === 'management' && $stakeholderCount > 5) {
                 $score += 10;
             }
         }
 
-        // امتیاز برای تکنیک‌های پرکاربرد
+        // ۴. امتیاز برای تکنیک‌های پرکاربرد و کلیدی
         $popularTechniques = ['Interviews', 'Workshops', 'Brainstorming', 'Document Analysis', 'Prototyping'];
         if (in_array($technique['name'], $popularTechniques)) {
             $score += 5;
@@ -279,7 +234,7 @@ class RecommendationService
     }
 
     /**
-     * تولید دلیل پیشنهاد یک تکنیک
+     * تولید دلیل پیشنهاد یک تکنیک به زبان فارسی
      */
     private function generateReason($technique, $methodology, $phase)
     {
@@ -299,7 +254,6 @@ class RecommendationService
             $reasons[] = $categoryNames[$category];
         }
 
-        // دلیل بر اساس متدولوژی
         $methodologyReasons = [
             'waterfall' => 'سازگار با رویکرد آبشاری و مستندسازی کامل',
             'agile' => 'سازگار با رویکرد چابک و تکرارپذیری',
@@ -310,29 +264,11 @@ class RecommendationService
             $reasons[] = $methodologyReasons[$methodology];
         }
 
-        // دلیل بر اساس فاز
-        $phaseReasons = [
-            'initiation' => 'مناسب برای فاز شروع و تعریف پروژه',
-            'planning' => 'مناسب برای فاز برنامه‌ریزی',
-            'analysis' => 'مناسب برای فاز تحلیل نیازمندی‌ها',
-            'design' => 'مناسب برای فاز طراحی راه‌حل',
-            'implementation' => 'مناسب برای فاز پیاده‌سازی',
-            'evaluation' => 'مناسب برای فاز ارزیابی و بهبود'
-        ];
-
-        if (isset($phaseReasons[$phase])) {
-            $reasons[] = $phaseReasons[$phase];
-        }
-
         return implode(' | ', array_slice($reasons, 0, 2));
     }
 
     /**
-     * پیشنهاد هوشمند ردیابی (Traceability) بین وظایف پروژه
-     * بر اساس تطابق خروجی (Output) یک وظیفه با ورودی (Input) وظیفه دیگر
-     * 
-     * @param int $projectId شناسه پروژه
-     * @return array لیست پیشنهادات ردیابی
+     * 🌟 پیشنهاد هوشمند ردیابی (Traceability) بین وظایف پروژه
      */
     public function getTraceabilitySuggestions($projectId)
     {
@@ -346,36 +282,56 @@ class RecommendationService
             $taskDetails[$task['id']] = $task;
         }
 
-        // وظایف تکمیل شده یا در حال انجام
+        // وظایف تکمیل شده یا در حال انجام (منبع)
         $activeProjectTasks = array_filter($projectTasks, function($pt) {
             return in_array($pt['status'], ['completed', 'in_progress']);
         });
 
         foreach ($activeProjectTasks as $pt) {
             $currentTask = $taskDetails[$pt['task_id']] ?? null;
-            if (!$currentTask || empty($currentTask['outputs'])) continue;
+            if (!$currentTask || empty(trim($currentTask['outputs'] ?? ''))) continue;
 
-            // فرض بر این است که خروجی‌ها با ویرگول فارسی یا انگلیسی جدا شده‌اند
-            $outputs = preg_split('/[،,]/', $currentTask['outputs']);
+            // 🌟 تبدیل encoding به UTF-8 قبل از پردازش
+            $outputsRaw = mb_convert_encoding($currentTask['outputs'], 'UTF-8', 'auto');
             
-            // جستجو برای وظایف بعدی که هنوز شروع نشده‌اند
+            // ۱. پاک‌سازی و تبدیل خروجی‌ها به آرایه تمیز (با modifier /u برای UTF-8)
+            $outputs = preg_split('/[،,]/u', $outputsRaw);
+            $outputs = array_map(function($val) {
+                return trim(mb_convert_encoding($val, 'UTF-8', 'auto'));
+            }, $outputs);
+            $outputs = array_filter($outputs, fn($val) => mb_strlen($val, 'UTF-8') > 2);
+
+            // جستجو برای وظایف بعدی که هنوز شروع نشده‌اند (هدف)
             foreach ($projectTasks as $nextPt) {
                 if ($nextPt['status'] === 'not_started') {
                     $nextTask = $taskDetails[$nextPt['task_id']] ?? null;
-                    if (!$nextTask || empty($nextTask['inputs'])) continue;
+                    if (!$nextTask || empty(trim($nextTask['inputs'] ?? ''))) continue;
 
-                    $inputs = preg_split('/[،,]/', $nextTask['inputs']);
+                    // 🌟 تبدیل encoding به UTF-8 قبل از پردازش
+                    $inputsRaw = mb_convert_encoding($nextTask['inputs'], 'UTF-8', 'auto');
                     
-                    // بررسی اشتراک بین خروجی‌ها و ورودی‌ها
-                    $matches = array_intersect(array_map('trim', $outputs), array_map('trim', $inputs));
+                    // ۲. پاک‌سازی و تبدیل ورودی‌ها به آرایه تمیز
+                    $inputs = preg_split('/[،,]/u', $inputsRaw);
+                    $inputs = array_map(function($val) {
+                        return trim(mb_convert_encoding($val, 'UTF-8', 'auto'));
+                    }, $inputs);
+                    $inputs = array_filter($inputs, fn($val) => mb_strlen($val, 'UTF-8') > 2);
+                    
+                    // ۳. یافتن اشتراک دقیق بین ورودی‌ها و خروجی‌ها
+                    $matches = array_intersect($outputs, $inputs);
+
                     if (!empty($matches)) {
+                        // حذف مقادیر تکراری و ساخت رشته نهایی
+                        $sharedArtifacts = implode('، ', array_unique($matches));
+                        
+                        // 🌟 اطمینان از UTF-8 بودن خروجی نهایی
+                        $sharedArtifacts = mb_convert_encoding($sharedArtifacts, 'UTF-8', 'auto');
+                        
                         $suggestions[] = [
-                            'source_task_code' => $currentTask['code'],
-                            'source_task_name' => $currentTask['name'],
-                            'target_task_code' => $nextTask['code'],
-                            'target_task_name' => $nextTask['name'],
-                            'shared_artifact' => trim($matches[0]),
-                            'recommendation' => "خروجی «{$currentTask['name']}» می‌تواند به عنوان ورودی مستقیم برای «{$nextTask['name']}» استفاده شود. پیشنهاد می‌شود این ارتباط در ماتریس ردیابی ثبت شود."
+                            'source_task_name' => mb_convert_encoding($currentTask['name'], 'UTF-8', 'auto'),
+                            'target_task_name' => mb_convert_encoding($nextTask['name'], 'UTF-8', 'auto'),
+                            'shared_artifacts' => trim($sharedArtifacts) !== '' ? trim($sharedArtifacts) : 'نیاز به بررسی دستی',
+                            'recommendation' => "خروجی «{$currentTask['name']}» می‌تواند به عنوان ورودی مستقیم برای «{$nextTask['name']}» استفاده شود."
                         ];
                     }
                 }

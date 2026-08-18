@@ -33,6 +33,8 @@ $moduleMenus = [
             ['route' => 'techniques',      'icon' => 'fas fa-tools',      'label' => 'تکنیک‌ها'],
             ['route' => 'knowledge_areas', 'icon' => 'fas fa-sitemap',    'label' => 'حوزه‌های دانشی'],
             ['route' => 'requirement',     'icon' => 'fas fa-robot',      'label' => 'استخراج و تحلیل'],
+            ['route' => 'search',          'icon' => 'fas fa-search',     'label' => 'جستجوی هوشمند'],
+            ['route' => 'reports',         'icon' => 'fas fa-chart-bar', 'label' => 'گزارش‌های هوشمند'],
         ]
     ],
     
@@ -96,6 +98,46 @@ $isActiveRoute = in_array($currentRoute, $activeRoutes);
         <?php if (isset($_SESSION['user_name'])): ?>
             <i class="fas fa-user-circle"></i>
             <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+            
+            <!-- 🔔 آیکون اعلان‌ها (فقط برای ماژول babok) -->
+            <?php if (($moduleName ?? '') === 'babok'): ?>
+                <?php
+                // دریافت تعداد اعلان‌های خوانده‌نشده
+                $notifCount = 0;
+                if (isset($_SESSION['user_id'])) {
+                    try {
+                        $db = \App\Core\Database::getInstance();
+                        $stmt = $db->prepare("SELECT COUNT(*) FROM babok_notifications WHERE user_id = ? AND is_read = 0");
+                        $stmt->execute([$_SESSION['user_id']]);
+                        $notifCount = (int)$stmt->fetchColumn();
+                    } catch (\Exception $e) {
+                        $notifCount = 0;
+                    }
+                }
+                ?>
+                <a href="?route=notifications" style="position: relative; margin-right: 10px; color: inherit; text-decoration: none;" title="اعلان‌ها">
+                    <i class="fas fa-bell" style="font-size: 1.1rem;"></i>
+                    <?php if ($notifCount > 0): ?>
+                        <span class="notification-badge" style="
+                            position: absolute;
+                            top: -6px;
+                            right: -8px;
+                            background: #ef4444;
+                            color: white;
+                            font-size: 0.65rem;
+                            font-weight: 700;
+                            padding: 2px 5px;
+                            border-radius: 99px;
+                            min-width: 16px;
+                            text-align: center;
+                            line-height: 1;
+                            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+                        ">
+                            <?= $notifCount > 99 ? '99+' : $notifCount ?>
+                        </span>
+                    <?php endif; ?>
+                </a>
+            <?php endif; ?>
         <?php else: ?>
             <i class="fas fa-eye"></i>
             <span>حالت مهمان</span>

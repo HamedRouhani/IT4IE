@@ -57,7 +57,7 @@ class ProjectPlanningController extends Controller
      */
     public function addTask()
     {
-        // بررسی احراز هویت
+        // بررسی احراز هویت (این متد تضمین می‌کند که $_SESSION['user_id'] وجود دارد)
         $this->requireAuth();
 
         // بررسی متد درخواست
@@ -68,10 +68,13 @@ class ProjectPlanningController extends Controller
 
         $projectId = (int) ($_POST['project_id'] ?? 0);
         $taskId = (int) ($_POST['task_id'] ?? 0);
+        
+        // 🌟 دریافت user_id از Session
+        $userId = $_SESSION['user_id'] ?? null;
 
         // اعتبارسنجی
-        if (!$projectId || !$taskId) {
-            $this->flashError('اطلاعات ناقص است.');
+        if (!$projectId || !$taskId || !$userId) {
+            $this->flashError('اطلاعات ناقص است یا جلسه کاربر منقضی شده است.');
             $this->redirect('planning&id=' . $projectId);
             return;
         }
@@ -92,12 +95,12 @@ class ProjectPlanningController extends Controller
             return;
         }
 
-        // افزودن وظیفه به پروژه
-        $result = $this->projectTaskModel->addTask($projectId, $taskId);
-
+        // 🌟 ارسال user_id به مدل برای درج در دیتابیس
+        $result = $this->projectTaskModel->addTask($projectId, $taskId, $this->userId);
         if ($result) {
             // ثبت لاگ فعالیت
             $this->logActivity('add_task_to_project', 'project_task', $projectId, null, [
+                'user_id' => $this->userId,
                 'project_id' => $projectId,
                 'task_id' => $taskId,
                 'task_name' => $task['name']
