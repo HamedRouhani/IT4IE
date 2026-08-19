@@ -30,19 +30,9 @@ class ProjectController extends Controller
                 WHERE p.user_id = ?";
         $params = [$this->currentUserId];
         
-        if (!empty($phase)) {
-            $sql .= " AND p.phase = ?";
-            $params[] = $phase;
-        }
-        if (!empty($methodology)) {
-            $sql .= " AND p.methodology = ?";
-            $params[] = $methodology;
-        }
-        if (!empty($search)) {
-            $sql .= " AND (p.name LIKE ? OR p.description LIKE ?)";
-            $params[] = "%{$search}%";
-            $params[] = "%{$search}%";
-        }
+        if (!empty($phase)) { $sql .= " AND p.phase = ?"; $params[] = $phase; }
+        if (!empty($methodology)) { $sql .= " AND p.methodology = ?"; $params[] = $methodology; }
+        if (!empty($search)) { $sql .= " AND (p.name LIKE ? OR p.description LIKE ?)"; $params[] = "%{$search}%"; $params[] = "%{$search}%"; }
         
         $sql .= " ORDER BY p.created_at DESC";
         
@@ -50,25 +40,16 @@ class ProjectController extends Controller
         $stmt->execute($params);
         $projects = $stmt->fetchAll();
         
-        $stats = [
-            'total' => count($projects),
-            'all_projects' => $this->getUserProjectCount(),
-            'active' => $this->getUserProjectCount(['phase' => ['execution', 'planning']]),
-            'completed' => $this->getUserProjectCount(['phase' => ['closure']]),
-        ];
-        
         $this->view('project/index', [
             'pageTitle' => 'پروژه‌های من',
             'currentPage' => 'project',
             'projects' => $projects,
-            'stats' => $stats,
             'phase' => $phase,
             'methodology' => $methodology,
             'search' => $search,
         ]);
     }
     
-    // ✅ تغییر نام از view به show
     public function show($id = null)
     {
         if (!$id) { $this->redirect('controller=project'); return; }
@@ -80,22 +61,18 @@ class ProjectController extends Controller
             return;
         }
         
-        // تحویل‌دادنی‌ها
         $stmt = $this->db->prepare("SELECT * FROM {$this->prefix}deliverables WHERE project_id = ? AND user_id = ? ORDER BY created_at DESC");
         $stmt->execute([$id, $this->currentUserId]);
         $deliverables = $stmt->fetchAll();
         
-        // ریسک‌ها
         $stmt = $this->db->prepare("SELECT * FROM {$this->prefix}risks WHERE project_id = ? AND user_id = ? ORDER BY risk_score DESC");
         $stmt->execute([$id, $this->currentUserId]);
         $risks = $stmt->fetchAll();
         
-        // ذی‌نفعان
         $stmt = $this->db->prepare("SELECT * FROM {$this->prefix}project_stakeholders WHERE project_id = ? AND user_id = ? ORDER BY influence DESC, interest DESC");
         $stmt->execute([$id, $this->currentUserId]);
         $stakeholders = $stmt->fetchAll();
         
-        // تسک‌های پروژه
         $stmt = $this->db->prepare("
             SELECT pt.*, t.name as task_name, t.code as task_code, ka.name as ka_name
             FROM {$this->prefix}project_tasks pt
@@ -107,7 +84,6 @@ class ProjectController extends Controller
         $stmt->execute([$id, $this->currentUserId]);
         $projectTasks = $stmt->fetchAll();
         
-        // همه تسک‌ها (عمومی)
         $allTasks = $this->db->query("
             SELECT t.*, ka.name as ka_name 
             FROM {$this->prefix}tasks t 
@@ -130,12 +106,13 @@ class ProjectController extends Controller
     public function create()
     {
         $this->requireAuth();
-        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name'] ?? '');
             $description = trim($_POST['description'] ?? '');
             $phase = trim($_POST['phase'] ?? 'initiation');
             $methodology = trim($_POST['methodology'] ?? 'hybrid');
+            $industry = trim($_POST['industry'] ?? 'services');
+            $stakeholder_count = intval($_POST['stakeholder_count'] ?? 5);
             
             if (empty($name)) {
                 $this->flashError('نام پروژه الزامی است.');
@@ -144,34 +121,56 @@ class ProjectController extends Controller
             }
             
             $stmt = $this->db->prepare("
-                INSERT INTO {$this->prefix}projects (user_id, name, description, phase, methodology, created_at, updated_at) 
-                VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+                INSERT INTO {$this->prefix}projects (user_id, name, description, phase, methodology, industry, stakeholder_count, created_at, updated_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
             ");
-            $stmt->execute([$this->currentUserId, $name, $description, $phase, $methodology]);
+            $stmt->execute([$this->currentUserId, $name, $description, $phase, $methodology, $industry, $stakeholder_count]);
             
-            $this->logActivity('create', 'project', $this->db->lastInsertId());
-            $this->flashSuccess('پروژه با موفقیت ایجاد شد. ✅');
-            $this->redirect('controller=project');
+            $projectId = $this->db->lastInsertId();
+            $this->applyIndustryTemplate($projectId, $industry);
+            
+            $this->logActivity('create', 'project', $projectId);
+            $this->flashSuccess('پروژه با موفقیت ایجاد شد و فرآیندهای پیشنهادی صنعت اضافه گردید. ✅');
+            $this->redirect('controller=project&action=show&id=' . $projectId);
             return;
         }
         
-        $this->view('project/create', [
-            'pageTitle' => 'ایجاد پروژه جدید',
-            'currentPage' => 'project',
-        ]);
+        $this->view('project/create', ['pageTitle' => 'ایجاد پروژه جدید', 'currentPage' => 'project']);
     }
-    
+
+    private function applyIndustryTemplate($projectId, $industry)
+    {
+        $templates = [
+            'manufacturing' => ['tasks' => [1, 11, 24, 25, 26], 'risks' => ['خرابی تجهیزات خط تولید', 'تأخیر در تأمین مواد اولیه']],
+            'oil_gas' => ['tasks' => [1, 6, 36, 37, 43], 'risks' => ['نشت مواد خطرناک و حوادث HSE', 'تأخیر در مجوزهای رگولاتوری']],
+            'steel' => ['tasks' => [11, 24, 27, 37], 'risks' => ['مصرف بالای انرژی و قطعی برق', 'آلودگی محیط زیست']],
+            'fmcg' => ['tasks' => [2, 5, 12, 24], 'risks' => ['تغییر ناگهانی سلیقه مشتری', 'فساد محصولات در زنجیره سرد']],
+            'services' => ['tasks' => [2, 9, 33, 46], 'risks' => ['کمبود نیروی انسانی متخصص', 'چرخش بالای مشتریان']]
+        ];
+
+        $template = $templates[$industry] ?? $templates['services'];
+
+        foreach ($template['tasks'] as $taskId) {
+            $check = $this->db->prepare("SELECT id FROM {$this->prefix}project_tasks WHERE project_id = ? AND task_id = ? AND user_id = ?");
+            $check->execute([$projectId, $taskId, $this->currentUserId]);
+            if (!$check->fetch()) {
+                $this->db->prepare("INSERT INTO {$this->prefix}project_tasks (user_id, project_id, task_id, status) VALUES (?, ?, ?, 'not_started')")
+                     ->execute([$this->currentUserId, $projectId, $taskId]);
+            }
+        }
+
+        foreach ($template['risks'] as $riskTitle) {
+            $this->db->prepare("INSERT INTO {$this->prefix}risks (user_id, project_id, title, probability, impact, risk_score, status, created_at, updated_at) VALUES (?, ?, ?, 'medium', 'medium', 9, 'identified', NOW(), NOW())")
+                 ->execute([$this->currentUserId, $projectId, $riskTitle]);
+        }
+    }
+
     public function edit($id = null)
     {
         $this->requireAuth();
         if (!$id) { $this->redirect('controller=project'); return; }
-        
         $project = $this->getUserProject($id);
-        if (!$project) {
-            $this->flashError('پروژه یافت نشد یا دسترسی ندارید.');
-            $this->redirect('controller=project');
-            return;
-        }
+        if (!$project) { $this->redirect('controller=project'); return; }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name'] ?? '');
@@ -179,92 +178,170 @@ class ProjectController extends Controller
             $phase = trim($_POST['phase'] ?? 'initiation');
             $methodology = trim($_POST['methodology'] ?? 'hybrid');
             
-            if (empty($name)) {
-                $this->flashError('نام پروژه الزامی است.');
-                $this->redirect('controller=project&action=edit&id=' . $id);
-                return;
-            }
+            $this->db->prepare("UPDATE {$this->prefix}projects SET name = ?, description = ?, phase = ?, methodology = ?, updated_at = NOW() WHERE id = ? AND user_id = ?")
+                 ->execute([$name, $description, $phase, $methodology, $id, $this->currentUserId]);
             
-            $stmt = $this->db->prepare("
-                UPDATE {$this->prefix}projects 
-                SET name = ?, description = ?, phase = ?, methodology = ?, updated_at = NOW()
-                WHERE id = ? AND user_id = ?
-            ");
-            $stmt->execute([$name, $description, $phase, $methodology, $id, $this->currentUserId]);
-            
-            $this->logActivity('update', 'project', $id);
             $this->flashSuccess('پروژه با موفقیت بروزرسانی شد. ✅');
             $this->redirect('controller=project&action=show&id=' . $id);
-            return;
         }
         
-        $this->view('project/edit', [
-            'pageTitle' => 'ویرایش پروژه',
-            'currentPage' => 'project',
-            'project' => $project,
-        ]);
+        $this->view('project/edit', ['pageTitle' => 'ویرایش پروژه', 'currentPage' => 'project', 'project' => $project]);
     }
-    
-    public function delete($id = null)
-    {
-        $this->requireAuth();
-        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { $this->redirect('controller=project'); return; }
-        
-        $project = $this->getUserProject($id);
-        if (!$project) {
-            $this->flashError('پروژه یافت نشد یا دسترسی ندارید.');
-            $this->redirect('controller=project');
-            return;
-        }
-        
-        $this->db->prepare("DELETE FROM {$this->prefix}deliverables WHERE project_id = ? AND user_id = ?")->execute([$id, $this->currentUserId]);
-        $this->db->prepare("DELETE FROM {$this->prefix}risks WHERE project_id = ? AND user_id = ?")->execute([$id, $this->currentUserId]);
-        $this->db->prepare("DELETE FROM {$this->prefix}project_stakeholders WHERE project_id = ? AND user_id = ?")->execute([$id, $this->currentUserId]);
-        $this->db->prepare("DELETE FROM {$this->prefix}project_tasks WHERE project_id = ? AND user_id = ?")->execute([$id, $this->currentUserId]);
-        $this->db->prepare("DELETE FROM {$this->prefix}projects WHERE id = ? AND user_id = ?")->execute([$id, $this->currentUserId]);
-        
-        $this->logActivity('delete', 'project', $id);
-        $this->flashSuccess('پروژه با موفقیت حذف شد. 🗑️');
-        $this->redirect('controller=project');
-    }
-    
+
+    // =========================================================================
+    // مدیریت تحویل‌دادنی‌ها (Deliverables) - ✅ اصلاح شده
+    // =========================================================================
     public function addDeliverable($id = null)
     {
-        $this->requireAuth();
-        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { $this->redirect('controller=project'); return; }
-        
+        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { $this->redirect('controller=project&action=show&id=' . $id); return; }
         $project = $this->getUserProject($id);
-        if (!$project) { $this->flashError('دسترسی ندارید.'); $this->redirect('controller=project'); return; }
+        if (!$project) { $this->redirect('controller=project'); return; }
         
         $name = trim($_POST['deliverable_name'] ?? '');
         $description = trim($_POST['deliverable_description'] ?? '');
         $status = trim($_POST['deliverable_status'] ?? 'pending');
-        $planned_date = trim($_POST['deliverable_planned_date'] ?? '');
-        
-        if (empty($name)) {
-            $this->flashError('نام تحویل‌دادنی الزامی است.');
-            $this->redirect('controller=project&action=show&id=' . $id);
-            return;
+        $planned_date = !empty($_POST['deliverable_planned_date']) ? $_POST['deliverable_planned_date'] : null;
+
+        if (empty($name)) { 
+            $this->flashError('نام تحویل‌دادنی الزامی است.'); 
+            $this->redirect('controller=project&action=show&id=' . $id . '&tab=deliverables'); 
+            return; 
         }
         
-        $stmt = $this->db->prepare("
-            INSERT INTO {$this->prefix}deliverables (user_id, project_id, name, description, status, planned_date, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, NOW())
-        ");
-        $stmt->execute([$this->currentUserId, $id, $name, $description, $status, $planned_date]);
+        $this->db->prepare("INSERT INTO {$this->prefix}deliverables (user_id, project_id, name, description, status, planned_date, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())")
+             ->execute([$this->currentUserId, $id, $name, $description, $status, $planned_date]);
         
-        $this->logActivity('create', 'deliverable', $this->db->lastInsertId());
         $this->flashSuccess('تحویل‌دادنی با موفقیت اضافه شد. ✅');
-        $this->redirect('controller=project&action=show&id=' . $id);
+        $this->redirect('controller=project&action=show&id=' . $id . '&tab=deliverables');
     }
-    
+
+    public function updateDeliverable()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['id'])) { 
+            $this->redirect('controller=project'); 
+            return; 
+        }
+        $id = (int)$_POST['id'];
+        $projectId = (int)($_POST['project_id'] ?? 0);
+        
+        $name = trim($_POST['name'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $status = trim($_POST['status'] ?? 'pending');
+        $planned_date = !empty($_POST['planned_date']) ? $_POST['planned_date'] : null;
+
+        $this->db->prepare("UPDATE {$this->prefix}deliverables SET name=?, description=?, status=?, planned_date=? WHERE id=? AND user_id=?")
+                 ->execute([$name, $description, $status, $planned_date, $id, $this->currentUserId]);
+        
+        $this->flashSuccess('تحویل‌دادنی با موفقیت بروزرسانی شد. ✅');
+        $this->redirect("controller=project&action=show&id={$projectId}&tab=deliverables");
+    }
+
+    public function deleteDeliverable()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['id'])) { 
+            $this->redirect('controller=project'); 
+            return; 
+        }
+        $id = (int)$_POST['id'];
+        $projectId = (int)($_POST['project_id'] ?? 0);
+        
+        $this->db->prepare("DELETE FROM {$this->prefix}deliverables WHERE id = ? AND project_id = ? AND user_id = ?")
+                 ->execute([$id, $projectId, $this->currentUserId]);
+        
+        $this->flashSuccess('تحویل‌دادنی حذف شد.');
+        $this->redirect("controller=project&action=show&id={$projectId}&tab=deliverables");
+    }
+
+    // =========================================================================
+    // مدیریت ریسک‌ها (Risks) - ✅ اصلاح شده
+    // =========================================================================
+    public function addRisk($id = null)
+    {
+        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { 
+            $this->redirect('controller=project&action=show&id=' . $id . '&tab=risks'); 
+            return; 
+        }
+        $project = $this->getUserProject($id);
+        if (!$project) { 
+            $this->redirect('controller=project'); 
+            return; 
+        }
+        
+        $title = trim($_POST['risk_title'] ?? '');
+        $probability = trim($_POST['risk_probability'] ?? 'medium');
+        $impact = trim($_POST['risk_impact'] ?? 'medium');
+        
+        if (empty($title)) { 
+            $this->flashError('عنوان ریسک الزامی است.'); 
+            $this->redirect('controller=project&action=show&id=' . $id . '&tab=risks'); 
+            return; 
+        }
+        
+        $risk_score = \App\Software\Pmbok\Models\Risk::calculateRiskScore($probability, $impact);
+        $this->db->prepare("INSERT INTO {$this->prefix}risks (user_id, project_id, title, probability, impact, risk_score, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'identified', NOW(), NOW())")
+             ->execute([$this->currentUserId, $id, $title, $probability, $impact, $risk_score]);
+        
+        $this->flashSuccess('ریسک ثبت شد. امتیاز: ' . $risk_score . ' ⚠️');
+        $this->redirect('controller=project&action=show&id=' . $id . '&tab=risks');
+    }
+
+    public function updateRisk()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['id'])) { 
+            $this->redirect('controller=project'); 
+            return; 
+        }
+
+        $id = (int)$_POST['id'];
+        $projectId = (int)($_POST['project_id'] ?? 0);
+        $title = trim($_POST['title'] ?? '');
+        $probability = $_POST['probability'] ?? 'medium';
+        $impact = $_POST['impact'] ?? 'medium';
+
+        if (empty($title)) {
+            $this->flashError('عنوان ریسک الزامی است.');
+            $this->redirect("controller=project&action=show&id={$projectId}&tab=risks");
+            return;
+        }
+
+        $risk_score = \App\Software\Pmbok\Models\Risk::calculateRiskScore($probability, $impact);
+        $this->db->prepare("UPDATE {$this->prefix}risks SET title=?, probability=?, impact=?, risk_score=?, updated_at=NOW() WHERE id=? AND project_id=? AND user_id=?")
+                 ->execute([$title, $probability, $impact, $risk_score, $id, $projectId, $this->currentUserId]);
+
+        $this->flashSuccess('ریسک با موفقیت بروزرسانی شد. ✅');
+        $this->redirect("controller=project&action=show&id={$projectId}&tab=risks");
+    }
+
+    public function deleteRisk()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['risk_id'])) { 
+            $this->redirect('controller=project'); 
+            return; 
+        }
+        $id = (int)$_POST['risk_id'];
+        $projectId = (int)($_POST['project_id'] ?? 0);
+        
+        $this->db->prepare("DELETE FROM {$this->prefix}risks WHERE id = ? AND project_id = ? AND user_id = ?")
+                 ->execute([$id, $projectId, $this->currentUserId]);
+        
+        $this->flashSuccess('ریسک حذف شد.');
+        $this->redirect("controller=project&action=show&id={$projectId}&tab=risks");
+    }
+
+    // =========================================================================
+    // مدیریت ذی‌نفعان (Stakeholders) - ✅ اصلاح شده
+    // =========================================================================
     public function addStakeholder($id = null)
     {
-        $this->requireAuth();
-        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { $this->redirect('controller=project'); return; }
-        
+        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { 
+            $this->redirect('controller=project&action=show&id=' . $id . '&tab=stakeholders'); 
+            return; 
+        }
         $project = $this->getUserProject($id);
-        if (!$project) { $this->flashError('دسترسی ندارید.'); $this->redirect('controller=project'); return; }
+        if (!$project) { 
+            $this->redirect('controller=project'); 
+            return; 
+        }
         
         $name = trim($_POST['stakeholder_name'] ?? '');
         $role = trim($_POST['stakeholder_role'] ?? '');
@@ -273,175 +350,207 @@ class ProjectController extends Controller
         $interest = trim($_POST['stakeholder_interest'] ?? 'medium');
         $engagement = trim($_POST['stakeholder_engagement'] ?? 'neutral');
         
-        if (empty($name) || empty($role)) {
-            $this->flashError('نام و نقش ذی‌نفع الزامی است.');
-            $this->redirect('controller=project&action=show&id=' . $id);
-            return;
+        if (empty($name) || empty($role)) { 
+            $this->flashError('نام و نقش ذی‌نفع الزامی است.'); 
+            $this->redirect('controller=project&action=show&id=' . $id . '&tab=stakeholders'); 
+            return; 
         }
         
-        $stmt = $this->db->prepare("
-            INSERT INTO {$this->prefix}project_stakeholders (user_id, project_id, name, role, email, influence, interest, engagement_status, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-        ");
-        $stmt->execute([$this->currentUserId, $id, $name, $role, $email, $influence, $interest, $engagement]);
-        
-        $count = $this->db->prepare("SELECT COUNT(*) FROM {$this->prefix}project_stakeholders WHERE project_id = ?");
-        $count->execute([$id]);
-        $total = $count->fetchColumn();
-        $this->db->prepare("UPDATE {$this->prefix}projects SET stakeholder_count = ?, updated_at = NOW() WHERE id = ?")->execute([$total, $id]);
+        $this->db->prepare("INSERT INTO {$this->prefix}project_stakeholders (user_id, project_id, name, role, email, influence, interest, engagement_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())")
+             ->execute([$this->currentUserId, $id, $name, $role, $email, $influence, $interest, $engagement]);
         
         $this->flashSuccess('ذی‌نفع با موفقیت اضافه شد. ✅');
-        $this->redirect('controller=project&action=show&id=' . $id);
+        $this->redirect('controller=project&action=show&id=' . $id . '&tab=stakeholders');
     }
-    
-    public function addRisk($id = null)
+
+    public function updateStakeholder()
     {
-        $this->requireAuth();
-        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { $this->redirect('controller=project'); return; }
-        
-        $project = $this->getUserProject($id);
-        if (!$project) { $this->flashError('دسترسی ندارید.'); $this->redirect('controller=project'); return; }
-        
-        $title = trim($_POST['risk_title'] ?? '');
-        $probability = trim($_POST['risk_probability'] ?? 'medium');
-        $impact = trim($_POST['risk_impact'] ?? 'medium');
-        
-        if (empty($title)) {
-            $this->flashError('عنوان ریسک الزامی است.');
-            $this->redirect('controller=project&action=show&id=' . $id);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['id'])) { 
+            $this->redirect('controller=project'); 
+            return; 
+        }
+
+        $id = (int)$_POST['id'];
+        $projectId = (int)($_POST['project_id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $role = trim($_POST['role'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $influence = $_POST['influence'] ?? 'medium';
+        $interest = $_POST['interest'] ?? 'medium';
+
+        if (empty($name) || empty($role)) {
+            $this->flashError('نام و نقش ذی‌نفع الزامی است.');
+            $this->redirect("controller=project&action=show&id={$projectId}&tab=stakeholders");
             return;
         }
-        
-        $risk_score = \App\Software\Pmbok\Models\Risk::calculateRiskScore($probability, $impact);
-        
-        $stmt = $this->db->prepare("
-            INSERT INTO {$this->prefix}risks (user_id, project_id, title, probability, impact, risk_score, status, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, 'identified', NOW(), NOW())
-        ");
-        $stmt->execute([$this->currentUserId, $id, $title, $probability, $impact, $risk_score]);
-        
-        $this->logActivity('create', 'risk', $this->db->lastInsertId());
-        $this->flashSuccess('ریسک ثبت شد. امتیاز: ' . $risk_score . ' ⚠️');
-        $this->redirect('controller=project&action=show&id=' . $id);
+
+        $this->db->prepare("UPDATE {$this->prefix}project_stakeholders SET name=?, role=?, email=?, influence=?, interest=?, updated_at=NOW() WHERE id=? AND project_id=? AND user_id=?")
+                 ->execute([$name, $role, $email, $influence, $interest, $id, $projectId, $this->currentUserId]);
+
+        $this->flashSuccess('ذی‌نفع با موفقیت بروزرسانی شد. ✅');
+        $this->redirect("controller=project&action=show&id={$projectId}&tab=stakeholders");
     }
-    
+
+    public function deleteStakeholder()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['stakeholder_id'])) { 
+            $this->redirect('controller=project'); 
+            return; 
+        }
+        $id = (int)$_POST['stakeholder_id'];
+        $projectId = (int)($_POST['project_id'] ?? 0);
+        
+        $this->db->prepare("DELETE FROM {$this->prefix}project_stakeholders WHERE id = ? AND project_id = ? AND user_id = ?")
+                 ->execute([$id, $projectId, $this->currentUserId]);
+        
+        $this->flashSuccess('ذی‌نفع حذف شد.');
+        $this->redirect("controller=project&action=show&id={$projectId}&tab=stakeholders");
+    }
+
+    // =========================================================================
+    // مدیریت فرآیندها (Project Tasks) - ✅ اصلاح شده
+    // =========================================================================
     public function addTask($id = null)
     {
-        $this->requireAuth();
-        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { $this->redirect('controller=project'); return; }
-        
+        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { 
+            $this->redirect('controller=project&action=show&id=' . $id . '&tab=tasks'); 
+            return; 
+        }
         $project = $this->getUserProject($id);
-        if (!$project) { $this->flashError('دسترسی ندارید.'); $this->redirect('controller=project'); return; }
+        if (!$project) { 
+            $this->redirect('controller=project'); 
+            return; 
+        }
         
         $task_id = intval($_POST['task_id'] ?? 0);
         $status = trim($_POST['task_status'] ?? 'not_started');
         
-        if ($task_id <= 0) {
-            $this->flashError('انتخاب فرآیند الزامی است.');
-            $this->redirect('controller=project&action=show&id=' . $id);
-            return;
+        if ($task_id <= 0) { 
+            $this->flashError('انتخاب فرآیند الزامی است.'); 
+            $this->redirect('controller=project&action=show&id=' . $id . '&tab=tasks'); 
+            return; 
         }
         
         $check = $this->db->prepare("SELECT id FROM {$this->prefix}project_tasks WHERE project_id = ? AND task_id = ? AND user_id = ?");
         $check->execute([$id, $task_id, $this->currentUserId]);
-        if ($check->fetch()) {
-            $this->flashError('این فرآیند قبلاً اضافه شده است.');
-            $this->redirect('controller=project&action=show&id=' . $id);
-            return;
+        if ($check->fetch()) { 
+            $this->flashError('این فرآیند قبلاً اضافه شده است.'); 
+            $this->redirect('controller=project&action=show&id=' . $id . '&tab=tasks'); 
+            return; 
         }
         
-        $stmt = $this->db->prepare("
-            INSERT INTO {$this->prefix}project_tasks (user_id, project_id, task_id, status) 
-            VALUES (?, ?, ?, ?)
-        ");
-        $stmt->execute([$this->currentUserId, $id, $task_id, $status]);
+        $this->db->prepare("INSERT INTO {$this->prefix}project_tasks (user_id, project_id, task_id, status) VALUES (?, ?, ?, ?)")
+             ->execute([$this->currentUserId, $id, $task_id, $status]);
         
         $this->flashSuccess('فرآیند با موفقیت اضافه شد. ✅');
-        $this->redirect('controller=project&action=show&id=' . $id);
+        $this->redirect('controller=project&action=show&id=' . $id . '&tab=tasks');
     }
-    
-    public function deleteDeliverable($id = null)
+
+    public function updateTask()
     {
-        $this->requireAuth();
-        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { $this->redirect('controller=project'); return; }
-        
-        $did = intval($_POST['deliverable_id'] ?? 0);
-        if ($did > 0) {
-            $this->db->prepare("DELETE FROM {$this->prefix}deliverables WHERE id = ? AND project_id = ? AND user_id = ?")->execute([$did, $id, $this->currentUserId]);
-            $this->flashSuccess('تحویل‌دادنی حذف شد.');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['id'])) { 
+            $this->redirect('controller=project'); 
+            return; 
         }
-        $this->redirect('controller=project&action=show&id=' . $id);
+        $id = (int)$_POST['id'];
+        $projectId = (int)($_POST['project_id'] ?? 0);
+        $status = $_POST['status'] ?? 'not_started';
+        
+        $this->db->prepare("UPDATE {$this->prefix}project_tasks SET status=? WHERE id=? AND project_id=? AND user_id=?")
+                 ->execute([$status, $id, $projectId, $this->currentUserId]);
+        
+        $this->flashSuccess('وضعیت فرآیند بروزرسانی شد.');
+        $this->redirect("controller=project&action=show&id={$projectId}&tab=tasks");
     }
-    
-    public function deleteStakeholder($id = null)
+
+    public function updateProcess()
     {
-        $this->requireAuth();
-        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { $this->redirect('controller=project'); return; }
-        
-        $sid = intval($_POST['stakeholder_id'] ?? 0);
-        if ($sid > 0) {
-            $this->db->prepare("DELETE FROM {$this->prefix}project_stakeholders WHERE id = ? AND project_id = ? AND user_id = ?")->execute([$sid, $id, $this->currentUserId]);
-            
-            $count = $this->db->prepare("SELECT COUNT(*) FROM {$this->prefix}project_stakeholders WHERE project_id = ?");
-            $count->execute([$id]);
-            $this->db->prepare("UPDATE {$this->prefix}projects SET stakeholder_count = ?, updated_at = NOW() WHERE id = ?")->execute([$count->fetchColumn(), $id]);
-            
-            $this->flashSuccess('ذی‌نفع حذف شد.');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['id'])) { 
+            $this->redirect('controller=project'); 
+            return; 
         }
-        $this->redirect('controller=project&action=show&id=' . $id);
+
+        $id = (int)$_POST['id'];
+        $projectId = (int)($_POST['project_id'] ?? 0);
+        $status = $_POST['status'] ?? 'not_started';
+        $notes = trim($_POST['notes'] ?? '');
+
+        // منطق مدیریت زمان‌ها بر اساس وضعیت جدید
+        $now = date('Y-m-d H:i:s');
+        $started_at = ($status === 'in_progress' || $status === 'completed') ? $now : null;
+        $completed_at = ($status === 'completed') ? $now : null;
+
+        // حذف updated_at به دلیل عدم وجود در جدول
+        // استفاده از COALESCE برای started_at تا اگر تسک از قبل زمان شروعی دارد، آن را حفظ کند و بازنویسی نشود
+        $sql = "UPDATE {$this->prefix}project_tasks 
+                SET status = ?, 
+                    notes = ?, 
+                    started_at = COALESCE(started_at, ?), 
+                    completed_at = ? 
+                WHERE id = ? AND project_id = ? AND user_id = ?";
+                    
+        $this->db->prepare($sql)
+                ->execute([$status, $notes, $started_at, $completed_at, $id, $projectId, $this->currentUserId]);
+
+        $this->flashSuccess('وضعیت تسک با موفقیت بروزرسانی شد. ✅');
+        $this->redirect("controller=project&action=show&id={$projectId}&tab=tasks");
     }
-    
-    public function deleteRisk($id = null)
+
+    public function deleteTask()
     {
-        $this->requireAuth();
-        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { $this->redirect('controller=project'); return; }
-        
-        $rid = intval($_POST['risk_id'] ?? 0);
-        if ($rid > 0) {
-            $this->db->prepare("DELETE FROM {$this->prefix}risks WHERE id = ? AND project_id = ? AND user_id = ?")->execute([$rid, $id, $this->currentUserId]);
-            $this->flashSuccess('ریسک حذف شد.');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['pt_id'])) { 
+            $this->redirect('controller=project'); 
+            return; 
         }
-        $this->redirect('controller=project&action=show&id=' . $id);
-    }
-    
-    public function deleteTask($id = null)
-    {
-        $this->requireAuth();
-        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') { $this->redirect('controller=project'); return; }
+        $id = (int)$_POST['pt_id'];
+        $projectId = (int)($_POST['project_id'] ?? 0);
         
-        $ptId = intval($_POST['pt_id'] ?? 0);
-        if ($ptId > 0) {
-            $this->db->prepare("DELETE FROM {$this->prefix}project_tasks WHERE id = ? AND project_id = ? AND user_id = ?")->execute([$ptId, $id, $this->currentUserId]);
-            $this->flashSuccess('فرآیند حذف شد.');
-        }
-        $this->redirect('controller=project&action=show&id=' . $id);
+        $this->db->prepare("DELETE FROM {$this->prefix}project_tasks WHERE id = ? AND project_id = ? AND user_id = ?")
+                 ->execute([$id, $projectId, $this->currentUserId]);
+        
+        $this->flashSuccess('فرآیند از پروژه حذف شد.');
+        $this->redirect("controller=project&action=show&id={$projectId}&tab=tasks");
     }
-    
+
     private function getUserProject($id)
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->prefix}projects WHERE id = ? AND user_id = ?");
         $stmt->execute([$id, $this->currentUserId]);
         return $stmt->fetch();
     }
-    
-    private function getUserProjectCount($filters = [])
+
+    public function updateTaskInline()
     {
-        $sql = "SELECT COUNT(*) FROM {$this->prefix}projects WHERE user_id = ?";
-        $params = [$this->currentUserId];
-        
-        if (isset($filters['phase'])) {
-            if (is_array($filters['phase'])) {
-                $placeholders = implode(',', array_fill(0, count($filters['phase']), '?'));
-                $sql .= " AND phase IN ({$placeholders})";
-                $params = array_merge($params, $filters['phase']);
-            } else {
-                $sql .= " AND phase = ?";
-                $params[] = $filters['phase'];
-            }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'درخواست نامعتبر است.']);
+            exit;
         }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $status = trim($_POST['status'] ?? 'not_started');
+        $notes = trim($_POST['notes'] ?? '');
+
+        if (!$id) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'شناسه فرآیند نامعتبر است.']);
+            exit;
+        }
+
+        $stmt = $this->db->prepare("
+            UPDATE {$this->prefix}project_tasks 
+            SET status = ?, notes = ?, updated_at = NOW() 
+            WHERE id = ? AND user_id = ?
+        ");
         
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchColumn();
+        $result = $stmt->execute([$status, $notes, $id, $this->currentUserId]);
+
+        header('Content-Type: application/json');
+        if ($result) {
+            echo json_encode(['success' => true, 'message' => 'تغییرات با موفقیت ذخیره شد. ✅']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'خطا در ذخیره‌سازی تغییرات.']);
+        }
+        exit;
     }
 }
