@@ -1,96 +1,467 @@
 /**
- * استایل‌های اختصاصی ماژول MCDM — تم سبز زیتونی
- * هم‌راستا با کانوشن pmbok.css
+ * استایل‌های اختصاصی ماژول MCDM - تم سبز زیتونی با خوانایی بالا
  */
 :root {
-    --soft-primary:   #6B8E23;  /* زیتونی روشن */
-    --soft-secondary: #556B2F;  /* زیتونی تیره */
-    --soft-success:   #7BA05B;
-    --soft-warning:   #C9A227;  /* طلایی زیتونی */
-    --soft-danger:    #f56565;
-    --soft-info:      #8A9A5B;  /* خزه‌ای */
-    --mcdm-cream:     #F7F8F0;
-    --mcdm-beige:     #F0F2E4;
-    --mcdm-gold:      #C9A227;
+    /* پالت رنگی زیتونی با کنتراست بالا برای متن سفید */
+    --mcdm-olive-900: #2C3A16; /* برای متن روی پس‌زمینه روشن */
+    --mcdm-olive-700: #4A5D23; /* سبز اصلی (تیره enough برای متن سفید) */
+    --mcdm-olive-600: #5A7230; /* سبز هاور */
+    --mcdm-olive-100: #E8EDE0; /* پس‌زمینه روشن جداول و کارت‌ها */
+    --mcdm-olive-50:  #F4F7F0; /* پس‌زمینه کلی صفحه */
+    --mcdm-gold:      #C5A028; /* رنگ تاکیدی طلایی */
+    
+    /* قانون طلایی: متن روی سبز همیشه سفید باشد */
+    --mcdm-text-on-green: #FFFFFF !important;
 }
 
-/* ---------- بازنویسی کامپوننت‌های عمومی با تم زیتونی ---------- */
-.btn-primary { background: linear-gradient(135deg, #6B8E23, #556B2F); color: #fff; }
-.btn-success { background: linear-gradient(135deg, #7BA05B, #5F8A45); color: #fff; }
-.btn-warning { background: linear-gradient(135deg, #C9A227, #A98614); color: #fff; }
-.btn-secondary { background: linear-gradient(135deg, #8A9A5B, #6B7A45); color: #fff; }
-
-.form-control:focus, .form-select:focus {
-    border-color: #6B8E23;
-    box-shadow: 0 0 0 3px rgba(107,142,35,.15);
+body {
+    background-color: var(--mcdm-olive-50);
+    color: var(--mcdm-olive-900);
 }
-.card-title { border-bottom: 2px solid var(--mcdm-beige); color: #3D4A1F; }
-.table th { background: var(--mcdm-beige); color: #4A5A28; }
-.table-hover tbody tr:hover { background-color: #F2F5E8; }
 
-.badge-primary { background: #EAF0DA; color: #556B2F; }
-.badge-success { background: #E4EED9; color: #4A6B2A; }
-.badge-warning { background: #F7EDD2; color: #8A6D14; }
-.badge-info    { background: #EDF1E0; color: #66753C; }
+/* ─────────────────────────────────────────────
+   دکمه‌ها (Buttons) - اعمال قانون متن سفید
+   ───────────────────────────────────────────── */
+.btn-primary, .btn-success {
+    background-color: var(--mcdm-olive-700) !important;
+    border-color: var(--mcdm-olive-700) !important;
+    color: var(--mcdm-text-on-green) !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
 
-.tab-btn:hover, .tab-btn.active { color: var(--soft-primary); }
-.tab-btn.active { border-bottom-color: var(--soft-primary); }
+.btn-primary:hover, .btn-success:hover {
+    background-color: var(--mcdm-olive-600) !important;
+    border-color: var(--mcdm-olive-600) !important;
+    color: var(--mcdm-text-on-green) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 93, 35, 0.3);
+}
 
-.page-header h2 i { color: var(--soft-primary); }
-.breadcrumb a { color: var(--soft-primary); }
-.technique-card:hover { border-color: var(--soft-primary); }
-.technique-icon { background: linear-gradient(135deg,#6B8E23,#556B2F); }
-.ka-code { background: var(--mcdm-beige); color: #556B2F; }
-.ka-stat i { color: var(--soft-primary); }
-.stat-card .stat-value { color: #3D4A1F; }
-.stat-card .stat-icon { color: var(--soft-primary); }
+.btn-secondary {
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+    color: #FFFFFF !important;
+}
 
-/* ---------- کامپوننت‌های اختصاصی MCDM ---------- */
+/* ─────────────────────────────────────────────
+   نشان‌ها (Badges) - اعمال قانون متن سفید
+   ───────────────────────────────────────────── */
+.badge.bg-primary, .badge.bg-success {
+    background-color: var(--mcdm-olive-700) !important;
+    color: var(--mcdm-text-on-green) !important;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
 
-/* ماتریس مقایسات زوجی */
-.mcdm-matrix { overflow-x: auto; }
-.mcdm-matrix table { width: 100%; border-collapse: collapse; text-align: center; }
-.mcdm-matrix th, .mcdm-matrix td { border: 1px solid #DDE4C8; padding: 8px; }
-.mcdm-matrix thead th { background: var(--soft-secondary); color: #fff; }
-.mcdm-matrix .diag { background: var(--mcdm-beige); font-weight: 700; color: #556B2F; }
-.mcdm-matrix .mirror { background: #FAFBF5; color: #7A8A55; }
-.mcdm-matrix select { min-width: 70px; }
+.badge.bg-info {
+    background-color: #5A7D3A !important; /* سبز روشن‌تر اما همچنان خوانا با متن سفید */
+    color: var(--mcdm-text-on-green) !important;
+}
 
-/* نوار وزن معیارها */
-.weight-bar { height: 10px; background: var(--mcdm-beige); border-radius: 6px; overflow: hidden; }
-.weight-bar > span { display: block; height: 100%; background: linear-gradient(90deg,#6B8E23,#C9A227); border-radius: 6px; transition: width .6s ease; }
+.badge.bg-warning {
+    background-color: var(--mcdm-gold) !important;
+    color: #2C3A16 !important; /* متن تیره روی طلایی برای خوانایی */
+    font-weight: 700;
+}
 
-/* گیج نرخ ناسازگاری (CR) */
-.cr-gauge { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 10px; }
-.cr-gauge.ok   { background: #E4EED9; color: #3E5A20; }
-.cr-gauge.warn { background: #F7EDD2; color: #8A6D14; }
-.cr-gauge.bad  { background: #FEE2E2; color: #991B1B; }
-.cr-gauge .cr-value { font-size: 1.4rem; font-weight: 800; }
+/* ─────────────────────────────────────────────
+   کارت‌ها (Cards)
+   ───────────────────────────────────────────── */
+.card {
+    border: 1px solid rgba(74, 93, 35, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(44, 58, 22, 0.05);
+    background: #FFFFFF;
+    margin-bottom: 24px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-/* سکوی رتبه‌بندی */
-.rank-podium { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 12px; }
-.rank-card { position: relative; padding: 16px; border-radius: 12px; background: #fff; border: 2px solid var(--mcdm-beige); }
-.rank-card .rank-no { position: absolute; top: -12px; right: 12px; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; background: var(--soft-primary); }
-.rank-card.rank-1 { border-color: var(--mcdm-gold); box-shadow: 0 6px 18px rgba(201,162,39,.25); }
-.rank-card.rank-1 .rank-no { background: var(--mcdm-gold); }
-.rank-card.rank-2 .rank-no { background: #8A9A5B; }
-.rank-card.rank-3 .rank-no { background: #A98614; }
+.card:hover {
+    box-shadow: 0 8px 25px rgba(44, 58, 22, 0.1);
+}
+
+.card-header {
+    background-color: var(--mcdm-olive-700) !important;
+    color: var(--mcdm-text-on-green) !important;
+    font-weight: 700;
+    font-size: 1.05rem;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 16px 20px;
+}
+
+.card-title {
+    color: var(--mcdm-olive-900);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-title i {
+    color: var(--mcdm-olive-700);
+}
+
+/* ─────────────────────────────────────────────
+   جداول (Tables)
+   ───────────────────────────────────────────── */
+.table thead th {
+    background-color: var(--mcdm-olive-100) !important;
+    color: var(--mcdm-olive-900) !important; /* متن تیره روی سبز خیلی روشن */
+    font-weight: 700;
+    border-bottom: 2px solid var(--mcdm-olive-700);
+    padding: 14px 16px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--mcdm-olive-50) !important;
+}
+
+/* ─────────────────────────────────────────────
+   المان‌های اختصاصی MCDM
+   ───────────────────────────────────────────── */
+/* کارت‌های روش‌ها */
+.ka-card, .technique-card {
+    border: 2px solid var(--mcdm-olive-100);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.ka-card:hover, .technique-card:hover {
+    border-color: var(--mcdm-olive-700);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(74, 93, 35, 0.15);
+}
+
+.ka-code {
+    background-color: var(--mcdm-olive-700);
+    color: var(--mcdm-text-on-green) !important;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
 
 /* پنل دستیار هوشمند */
-.ai-panel { border: 2px solid var(--soft-primary); border-radius: 14px; background: linear-gradient(180deg,#FBFCF6,#F2F5E8); }
-.ai-panel .ai-head { display: flex; gap: 10px; align-items: center; padding: 14px 16px; background: var(--soft-secondary); color: #fff; border-radius: 12px 12px 0 0; }
-.ai-insight { margin: 12px 16px; padding: 12px 14px; border-right: 4px solid var(--mcdm-gold); background: #fff; border-radius: 8px; font-size: .92rem; }
-.ai-chip { display: inline-block; margin: 3px; padding: 5px 12px; border-radius: 99px; background: #EAF0DA; color: #556B2F; font-size: .8rem; cursor: pointer; border: 1px solid transparent; }
-.ai-chip:hover { border-color: var(--soft-primary); }
+.ai-panel {
+    border: 2px solid var(--mcdm-olive-700);
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+}
 
-/* برچسب «داده نمونه» */
-.sample-badge { background: var(--mcdm-gold); color: #fff; border-radius: 99px; padding: 3px 10px; font-size: .7rem; font-weight: 700; }
+.ai-head {
+    background: linear-gradient(135deg, var(--mcdm-olive-700), var(--mcdm-olive-600)) !important;
+    color: var(--mcdm-text-on-green) !important;
+    padding: 20px;
+}
 
-/* اسلایدر تحلیل حساسیت */
-.sensitivity-row { display: grid; grid-template-columns: 180px 1fr 70px; gap: 10px; align-items: center; margin-bottom: 8px; }
-.sensitivity-row input[type=range] { accent-color: var(--soft-primary); }
+.ai-insight {
+    border-right: 4px solid var(--mcdm-gold);
+    background-color: var(--mcdm-olive-50);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
 
+.ai-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background-color: var(--mcdm-olive-100);
+    color: var(--mcdm-olive-900);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.ai-chip:hover {
+    background-color: var(--mcdm-olive-700);
+    color: var(--mcdm-text-on-green) !important;
+    border-color: var(--mcdm-olive-700);
+}
+
+/* نوار پیشرفت رتبه‌بندی */
+.weight-bar, .mcdm-result-progress {
+    height: 12px;
+    background-color: var(--mcdm-olive-100);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.weight-bar > span, .mcdm-result-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--mcdm-olive-700), var(--mcdm-gold));
+    border-radius: 6px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ماتریس مقایسات زوجی */
+.mcdm-matrix table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--mcdm-olive-100);
+}
+
+.mcdm-matrix thead th {
+    background-color: var(--mcdm-olive-700) !important;
+    color: var(--mcdm-text-on-green) !important;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.mcdm-matrix .diag {
+    background-color: var(--mcdm-olive-100) !important;
+    color: var(--mcdm-olive-900) !important;
+    font-weight: 700;
+}
+
+/* هدر صفحات */
+.page-header {
+    background: #fff;
+    padding: 24px;
+    border-radius: 12px;
+    border-right: 5px solid var(--mcdm-olive-700);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    margin-bottom: 24px;
+}
+
+.page-header h2 {
+    color: var(--mcdm-olive-900);
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.page-header h2 i {
+    color: var(--mcdm-olive-700);
+}
+
+.breadcrumb a {
+    color: var(--mcdm-olive-600);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumb a:hover {
+    color: var(--mcdm-olive-900);
+    text-decoration: underline;
+}
+
+/* ─────────────────────────────────────────────
+   اصلاح راست‌چین بودن کامل گام‌های اجرایی
+   ───────────────────────────────────────────── */
+
+/* هدر کارت گام‌ها */
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* راست‌چین */
+    gap: 10px;
+    text-align: right;
+    direction: rtl;
+}
+
+.card-header i {
+    margin-left: 8px;
+}
+
+/* لیست گام‌ها */
+.list-group-item {
+    direction: rtl;
+    text-align: right;
+}
+
+/* دایره شماره گام */
+.step-number {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--mcdm-olive-700, #4A5D23), var(--mcdm-olive-600, #5A7230));
+    color: #FFFFFF !important;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(74, 93, 35, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+}
+
+/* محتوای گام */
+.step-content {
+    flex-grow: 1;
+    margin-right: 16px;
+    text-align: right;
+}
+
+.step-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--mcdm-olive-900, #2C3A16);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.step-description {
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 16px;
+    text-align: right;
+}
+
+/* برچسب‌های ورودی/خروجی */
+.step-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+.badge-input {
+    background: #E3F2FD !important;
+    color: #0D47A1 !important;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-output {
+    background: #E8F5E9 !important;
+    color: #1B5E20 !important;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* کد گام (مثل 2.1.1) */
+.step-code {
+    background: var(--mcdm-olive-700, #4A5D23) !important;
+    color: #FFFFFF !important;
+    font-weight: normal;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    vertical-align: middle;
+}
+
+/* ریسپانسیو برای موبایل */
 @media (max-width: 768px) {
-    .sensitivity-row { grid-template-columns: 1fr; }
-    .rank-podium { grid-template-columns: 1fr; }
+    .step-number {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .step-content {
+        margin-right: 12px;
+    }
+    
+    .step-title {
+        font-size: 1rem;
+    }
+}
+
+/* ─────────────────────────────────────────────
+   اصلاح صفحه دستیار هوشمند (Assistant)
+   ───────────────────────────────────────────── */
+
+/* هدر پنل AI - متن سفید روی سبز تیره */
+.ai-head {
+    background: linear-gradient(135deg, var(--mcdm-olive-700, #4A5D23), var(--mcdm-olive-600, #5A7230)) !important;
+    color: #FFFFFF !important;
+}
+
+.ai-head strong {
+    color: #FFFFFF !important;
+}
+
+.ai-head p {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* برچسب‌های Chip - حالت عادی و هاور */
+.ai-chip {
+    background-color: var(--mcdm-olive-100, #E8EDE0) !important;
+    color: var(--mcdm-olive-900, #2C3A16) !important;
+    border: 1px solid var(--mcdm-olive-300, #A3B88F) !important;
+}
+
+.ai-chip:hover {
+    background-color: var(--mcdm-olive-700, #4A5D23) !important;
+    color: #FFFFFF !important;
+    border-color: var(--mcdm-olive-700, #4A5D23) !important;
+}
+
+/* اینسایت‌های AI */
+.ai-insight {
+    background-color: var(--mcdm-olive-50, #F4F7F0) !important;
+    color: var(--mcdm-olive-900, #2C3A16) !important;
+    border-right: 4px solid var(--mcdm-gold, #C5A028) !important;
+}
+
+.ai-insight strong {
+    color: var(--mcdm-olive-900, #2C3A16) !important;
+}
+
+/* دکمه ارسال فرم */
+.btn[type="submit"] {
+    background-color: var(--mcdm-olive-700, #4A5D23) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+}
+
+.btn[type="submit"]:hover {
+    background-color: var(--mcdm-olive-600, #5A7230) !important;
+    color: #FFFFFF !important;
+}
+
+/* برچسب‌های فرم */
+.form-label {
+    color: var(--mcdm-olive-900, #2C3A16) !important;
+    font-weight: 600;
+}
+
+/* ورودی‌های فرم */
+.form-control, .form-select {
+    border: 2px solid var(--mcdm-olive-200, #D5E0C8) !important;
+    color: var(--mcdm-olive-900, #2C3A16) !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--mcdm-olive-600, #5A7230) !important;
+    background-color: #FFFFFF !important;
+    color: var(--mcdm-olive-900, #2C3A16) !important;
+}
+
+/* badgeهای داخل فرم */
+.badge.bg-primary {
+    background-color: var(--mcdm-olive-700, #4A5D23) !important;
+    color: #FFFFFF !important;
+}
+
+/* عنوان‌های بخش‌ها */
+h4 {
+    color: var(--mcdm-olive-900, #2C3A16) !important;
 }
