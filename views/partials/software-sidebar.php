@@ -53,17 +53,22 @@ $moduleMenus = [
             ['route' => 'report',        'icon' => 'fas fa-chart-bar',           'label' => 'گزارش‌ها'],
         ]
     ],
-
     
-    // -------- الگو برای ماژول‌های آینده --------
-    // 'module-name' => [
-    //     'name' => 'Module Name',
-    //     'icon' => 'fas fa-icon',
-    //     'param' => 'controller',
-    //     'menus' => [
-    //         ['route' => 'home',  'icon' => 'fas fa-home', 'label' => 'داشبورد'],
-    //     ]
-    // ],
+    // -------- MCDM Analyzer --------
+    'mcdm' => [
+        'name'  => 'MCDM Analyzer',
+        'icon'  => 'fas fa-balance-scale',
+        'param' => 'controller',
+        'menus' => [
+            ['route' => 'dashboard',     'icon' => 'fas fa-home',              'label' => 'داشبورد'],
+            ['route' => 'project',       'icon' => 'fas fa-folder-open',       'label' => 'پروژه‌های تصمیم‌گیری'],
+            ['route' => 'method',        'icon' => 'fas fa-calculator',        'label' => 'روش‌های MCDM'],
+            ['route' => 'knowledgearea', 'icon' => 'fas fa-sitemap',           'label' => 'حوزه‌های دانشی'],
+            ['route' => 'industry',      'icon' => 'fas fa-industry',          'label' => 'صنایع'],
+            ['route' => 'assistant',     'icon' => 'fas fa-robot',             'label' => 'دستیار هوشمند'],
+            ['route' => 'report',        'icon' => 'fas fa-chart-bar',         'label' => 'گزارش‌ها'],
+        ]
+    ],
 ];
 
 // ============================================================

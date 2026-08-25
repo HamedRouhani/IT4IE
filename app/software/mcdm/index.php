@@ -85,6 +85,8 @@ $controllerMap = [
     'knowledgearea' => 'KnowledgeAreaController',
     'calculator'    => 'CalculatorController',
     'report'        => 'ReportController',
+    'assistant'     => 'AssistantController',
+    'industry'      => 'IndustryController',
 ];
 
 try {

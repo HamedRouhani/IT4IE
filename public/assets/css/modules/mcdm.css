@@ -1,0 +1,96 @@
+/**
+ * استایل‌های اختصاصی ماژول MCDM — تم سبز زیتونی
+ * هم‌راستا با کانوشن pmbok.css
+ */
+:root {
+    --soft-primary:   #6B8E23;  /* زیتونی روشن */
+    --soft-secondary: #556B2F;  /* زیتونی تیره */
+    --soft-success:   #7BA05B;
+    --soft-warning:   #C9A227;  /* طلایی زیتونی */
+    --soft-danger:    #f56565;
+    --soft-info:      #8A9A5B;  /* خزه‌ای */
+    --mcdm-cream:     #F7F8F0;
+    --mcdm-beige:     #F0F2E4;
+    --mcdm-gold:      #C9A227;
+}
+
+/* ---------- بازنویسی کامپوننت‌های عمومی با تم زیتونی ---------- */
+.btn-primary { background: linear-gradient(135deg, #6B8E23, #556B2F); color: #fff; }
+.btn-success { background: linear-gradient(135deg, #7BA05B, #5F8A45); color: #fff; }
+.btn-warning { background: linear-gradient(135deg, #C9A227, #A98614); color: #fff; }
+.btn-secondary { background: linear-gradient(135deg, #8A9A5B, #6B7A45); color: #fff; }
+
+.form-control:focus, .form-select:focus {
+    border-color: #6B8E23;
+    box-shadow: 0 0 0 3px rgba(107,142,35,.15);
+}
+.card-title { border-bottom: 2px solid var(--mcdm-beige); color: #3D4A1F; }
+.table th { background: var(--mcdm-beige); color: #4A5A28; }
+.table-hover tbody tr:hover { background-color: #F2F5E8; }
+
+.badge-primary { background: #EAF0DA; color: #556B2F; }
+.badge-success { background: #E4EED9; color: #4A6B2A; }
+.badge-warning { background: #F7EDD2; color: #8A6D14; }
+.badge-info    { background: #EDF1E0; color: #66753C; }
+
+.tab-btn:hover, .tab-btn.active { color: var(--soft-primary); }
+.tab-btn.active { border-bottom-color: var(--soft-primary); }
+
+.page-header h2 i { color: var(--soft-primary); }
+.breadcrumb a { color: var(--soft-primary); }
+.technique-card:hover { border-color: var(--soft-primary); }
+.technique-icon { background: linear-gradient(135deg,#6B8E23,#556B2F); }
+.ka-code { background: var(--mcdm-beige); color: #556B2F; }
+.ka-stat i { color: var(--soft-primary); }
+.stat-card .stat-value { color: #3D4A1F; }
+.stat-card .stat-icon { color: var(--soft-primary); }
+
+/* ---------- کامپوننت‌های اختصاصی MCDM ---------- */
+
+/* ماتریس مقایسات زوجی */
+.mcdm-matrix { overflow-x: auto; }
+.mcdm-matrix table { width: 100%; border-collapse: collapse; text-align: center; }
+.mcdm-matrix th, .mcdm-matrix td { border: 1px solid #DDE4C8; padding: 8px; }
+.mcdm-matrix thead th { background: var(--soft-secondary); color: #fff; }
+.mcdm-matrix .diag { background: var(--mcdm-beige); font-weight: 700; color: #556B2F; }
+.mcdm-matrix .mirror { background: #FAFBF5; color: #7A8A55; }
+.mcdm-matrix select { min-width: 70px; }
+
+/* نوار وزن معیارها */
+.weight-bar { height: 10px; background: var(--mcdm-beige); border-radius: 6px; overflow: hidden; }
+.weight-bar > span { display: block; height: 100%; background: linear-gradient(90deg,#6B8E23,#C9A227); border-radius: 6px; transition: width .6s ease; }
+
+/* گیج نرخ ناسازگاری (CR) */
+.cr-gauge { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 10px; }
+.cr-gauge.ok   { background: #E4EED9; color: #3E5A20; }
+.cr-gauge.warn { background: #F7EDD2; color: #8A6D14; }
+.cr-gauge.bad  { background: #FEE2E2; color: #991B1B; }
+.cr-gauge .cr-value { font-size: 1.4rem; font-weight: 800; }
+
+/* سکوی رتبه‌بندی */
+.rank-podium { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 12px; }
+.rank-card { position: relative; padding: 16px; border-radius: 12px; background: #fff; border: 2px solid var(--mcdm-beige); }
+.rank-card .rank-no { position: absolute; top: -12px; right: 12px; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; background: var(--soft-primary); }
+.rank-card.rank-1 { border-color: var(--mcdm-gold); box-shadow: 0 6px 18px rgba(201,162,39,.25); }
+.rank-card.rank-1 .rank-no { background: var(--mcdm-gold); }
+.rank-card.rank-2 .rank-no { background: #8A9A5B; }
+.rank-card.rank-3 .rank-no { background: #A98614; }
+
+/* پنل دستیار هوشمند */
+.ai-panel { border: 2px solid var(--soft-primary); border-radius: 14px; background: linear-gradient(180deg,#FBFCF6,#F2F5E8); }
+.ai-panel .ai-head { display: flex; gap: 10px; align-items: center; padding: 14px 16px; background: var(--soft-secondary); color: #fff; border-radius: 12px 12px 0 0; }
+.ai-insight { margin: 12px 16px; padding: 12px 14px; border-right: 4px solid var(--mcdm-gold); background: #fff; border-radius: 8px; font-size: .92rem; }
+.ai-chip { display: inline-block; margin: 3px; padding: 5px 12px; border-radius: 99px; background: #EAF0DA; color: #556B2F; font-size: .8rem; cursor: pointer; border: 1px solid transparent; }
+.ai-chip:hover { border-color: var(--soft-primary); }
+
+/* برچسب «داده نمونه» */
+.sample-badge { background: var(--mcdm-gold); color: #fff; border-radius: 99px; padding: 3px 10px; font-size: .7rem; font-weight: 700; }
+
+/* اسلایدر تحلیل حساسیت */
+.sensitivity-row { display: grid; grid-template-columns: 180px 1fr 70px; gap: 10px; align-items: center; margin-bottom: 8px; }
+.sensitivity-row input[type=range] { accent-color: var(--soft-primary); }
+
+@media (max-width: 768px) {
+    .sensitivity-row { grid-template-columns: 1fr; }
+    .rank-podium { grid-template-columns: 1fr; }
+}
