@@ -9,8 +9,9 @@ class Project extends Model
     public function getWithType($userId = null)
     {
         $t  = $this->getTableName();
-        $pt = $this->tablePrefix . 'problem_types';
+        $pt = $this->tablePrefix . 'problem_types'; // یا 'or_problem_types' بسته به تنظیمات Core
         $m  = $this->tablePrefix . 'methods';
+        
         $sql = "SELECT p.*, pt.name_fa AS problem_type_name, pt.code AS problem_type_code,
                        m.name_fa AS method_name, m.code AS method_code
                 FROM {$t} p
@@ -19,6 +20,29 @@ class Project extends Model
         $params = [];
         if ($userId) { $sql .= " WHERE p.user_id = ?"; $params[] = $userId; }
         $sql .= " ORDER BY p.updated_at DESC";
+        return $this->query($sql, $params);
+    }
+
+    /**
+     * متد جدید مخصوص دریافت پروژه‌های یک نوع خاص (مثل LP برای سیمپلکس)
+     */
+    public function getByProblemTypeCode($code, $userId = null)
+    {
+        $t  = $this->getTableName();
+        $pt = $this->tablePrefix . 'problem_types';
+        
+        $sql = "SELECT p.*, pt.name_fa AS problem_type_name, pt.code AS problem_type_code
+                FROM {$t} p
+                LEFT JOIN {$pt} pt ON p.problem_type_id = pt.id
+                WHERE pt.code = ?";
+        $params = [$code];
+        
+        if ($userId) {
+            $sql .= " AND p.user_id = ?";
+            $params[] = $userId;
+        }
+        $sql .= " ORDER BY p.updated_at DESC";
+        
         return $this->query($sql, $params);
     }
 
