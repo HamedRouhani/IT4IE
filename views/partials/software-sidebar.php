@@ -69,6 +69,24 @@ $moduleMenus = [
             ['route' => 'report',        'icon' => 'fas fa-chart-bar',         'label' => 'گزارش‌ها'],
         ]
     ],
+
+    // -------- OR Analyzer --------
+    'or' => [
+        'name'  => 'OR Analyzer',
+        'icon'  => 'fas fa-square-root-alt',
+        'param' => 'controller',
+        'menus' => [
+            ['route' => 'dashboard',     'icon' => 'fas fa-home',              'label' => 'داشبورد'],
+            ['route' => 'project',       'icon' => 'fas fa-folder-open',       'label' => 'پروژه‌های OR'],
+            ['route' => 'problem_type',  'icon' => 'fas fa-cubes',             'label' => 'انواع مسئله'],
+            ['route' => 'method',        'icon' => 'fas fa-calculator',        'label' => 'روش‌های حل'],
+            ['route' => 'transport',     'icon' => 'fas fa-truck',             'label' => 'حمل و نقل'],
+            ['route' => 'assignment',    'icon' => 'fas fa-users-cog',         'label' => 'تخصیص'],
+            ['route' => 'simplex',       'icon' => 'fas fa-chart-line',        'label' => 'برنامه‌ریزی خطی'],
+            ['route' => 'sensitivity',   'icon' => 'fas fa-sliders-h',         'label' => 'تحلیل حساسیت'],
+            ['route' => 'report',        'icon' => 'fas fa-chart-bar',         'label' => 'گزارش‌ها'],
+        ]
+    ],
 ];
 
 // ============================================================

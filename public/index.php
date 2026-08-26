@@ -36,6 +36,7 @@ $moduleSlugs = [
     'babok-analyzer' => 'babok',
     'pmbok-analyzer' => 'pmbok',
     'mcdm-analyzer'  => 'mcdm',
+    'or-analyzer'    => 'or',
 ];
 
 // ============================================

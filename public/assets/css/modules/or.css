@@ -1,0 +1,375 @@
+/* ============================================================
+   OR Analyzer - استایل اختصاصی ماژول پژوهش عملیاتی
+   ============================================================ */
+
+/* رنگ‌های اصلی ماژول OR */
+:root {
+    --or-primary: #6366f1;      /* Indigo */
+    --or-primary-dark: #4f46e5;
+    --or-primary-light: #a5b4fc;
+    --or-accent: #06b6d4;       /* Cyan */
+    --or-success: #10b981;
+    --or-warning: #f59e0b;
+    --or-danger: #ef4444;
+    --or-bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --or-card-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+}
+
+/* -------- هدر سایدبار OR -------- */
+.or-theme .software-sidebar-header {
+    background: var(--or-bg-gradient);
+    color: white;
+    padding: 1.5rem 1rem;
+    border-radius: 0 0 1rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.or-theme .software-sidebar-header h3 {
+    color: white;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.or-theme .software-sidebar-header .software-subtitle {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.85rem;
+}
+
+/* -------- منوی ناوبری -------- */
+.or-theme .software-nav a {
+    border-right: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.or-theme .software-nav a:hover {
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.1), transparent);
+    border-right-color: var(--or-primary);
+}
+
+.or-theme .software-nav a.active {
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), transparent);
+    border-right-color: var(--or-primary);
+    color: var(--or-primary);
+    font-weight: 600;
+}
+
+/* -------- کارت‌های داشبورد -------- */
+.or-stat-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--or-card-shadow);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.or-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+}
+
+.or-stat-card .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.or-stat-card .stat-icon.indigo  { background: linear-gradient(135deg, #667eea, #764ba2); }
+.or-stat-card .stat-icon.cyan    { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+.or-stat-card .stat-icon.green   { background: linear-gradient(135deg, #10b981, #059669); }
+.or-stat-card .stat-icon.amber   { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+/* -------- ماتریس حمل و نقل / تخصیص -------- */
+.or-matrix {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: var(--or-card-shadow);
+    margin-bottom: 1.5rem;
+}
+
+.or-matrix th {
+    background: var(--or-bg-gradient);
+    color: white;
+    padding: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.or-matrix td {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.or-matrix input[type="number"],
+.or-matrix input[type="text"] {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.5rem;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.or-matrix input:focus {
+    outline: none;
+    border-color: var(--or-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.or-matrix .supply-demand-cell {
+    background: rgba(99, 102, 241, 0.08);
+    font-weight: 600;
+    color: var(--or-primary);
+}
+
+.or-matrix .allocation-cell {
+    background: rgba(16, 185, 129, 0.1);
+    font-weight: 700;
+    color: var(--or-success);
+    font-size: 1.1rem;
+}
+
+.or-matrix .basic-cell {
+    background: rgba(99, 102, 241, 0.08);
+    border: 2px solid var(--or-primary);
+}
+
+.or-matrix .prohibited-cell {
+    background: repeating-linear-gradient(
+        45deg,
+        #fee2e2,
+        #fee2e2 10px,
+        #fecaca 10px,
+        #fecaca 20px
+    );
+    color: var(--or-danger);
+}
+
+/* -------- تابلوی Simplex -------- */
+.or-simplex-tableau {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.or-simplex-tableau th {
+    background: var(--or-primary);
+    color: white;
+    padding: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.or-simplex-tableau td {
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.or-simplex-tableau .pivot-row {
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid var(--or-danger);
+}
+
+.or-simplex-tableau .pivot-col {
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.or-simplex-tableau .pivot-cell {
+    background: rgba(245, 158, 11, 0.2);
+    border: 2px solid var(--or-warning);
+    font-weight: 700;
+}
+
+.or-simplex-tableau .basic-var {
+    background: rgba(16, 185, 129, 0.1);
+    font-weight: 700;
+    color: var(--or-success);
+}
+
+/* -------- دکمه‌های OR -------- */
+.btn-or-primary {
+    background: var(--or-bg-gradient);
+    color: white;
+    border: none;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-or-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-or-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+}
+
+.btn-or-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border: none;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+}
+
+/* -------- کارت‌های فرمول ریاضی (KaTeX) -------- */
+.or-formula-card {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    text-align: center;
+    font-size: 1.2rem;
+    direction: ltr;
+    overflow-x: auto;
+}
+
+/* -------- نمودار Tornado و Spider -------- */
+.or-chart-container {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--or-card-shadow);
+    margin: 1rem 0;
+    min-height: 300px;
+}
+
+/* -------- Badge وضعیت -------- */
+.or-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.or-badge.optimal    { background: #d1fae5; color: #065f46; }
+.or-badge.feasible   { background: #dbeafe; color: #1e40af; }
+.or-badge.infeasible { background: #fee2e2; color: #991b1b; }
+.or-badge.draft      { background: #e5e7eb; color: #374151; }
+.or-badge.solving    { background: #fef3c7; color: #92400e; }
+
+/* -------- گام‌های الگوریتم -------- */
+.or-algorithm-step {
+    background: white;
+    border-right: 4px solid var(--or-primary);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 0 0.5rem 0.5rem 0;
+    box-shadow: var(--or-card-shadow);
+}
+
+.or-algorithm-step .step-number {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    background: var(--or-bg-gradient);
+    color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin-left: 0.75rem;
+}
+
+/* -------- انیمیشن حل -------- */
+@keyframes or-solve-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.or-solving-pulse {
+    animation: or-solve-pulse 1s ease-in-out infinite;
+}
+
+/* -------- حالت تاریک (Dark Mode) -------- */
+.or-theme.dark .or-stat-card,
+.or-theme.dark .or-matrix td,
+.or-theme.dark .or-simplex-tableau td,
+.or-theme.dark .or-algorithm-step {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+/* -------- ریسپانسیو -------- */
+@media (max-width: 768px) {
+    .or-matrix {
+        font-size: 0.75rem;
+    }
+    .or-matrix th, .or-matrix td {
+        padding: 0.25rem;
+    }
+    .or-formula-card {
+        font-size: 0.9rem;
+        padding: 1rem;
+    }
+}
+
+/* -------- Progress Bar حل مسئله -------- */
+.or-progress {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.or-progress-bar {
+    height: 100%;
+    background: var(--or-bg-gradient);
+    border-radius: 9999px;
+    transition: width 0.5s ease;
+}
+
+/* -------- Tooltip مخصوص OR -------- */
+.or-tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.or-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    right: 50%;
+    transform: translateX(50%);
+    background: #1e293b;
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.or-tooltip:hover::after {
+    opacity: 1;
+}
