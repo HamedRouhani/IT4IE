@@ -1,7 +1,9 @@
 <?php
 namespace App\Software\Or\Controllers;
+
 use App\Software\Or\Core\Controller;
 use App\Software\Or\Models\Project;
+use App\Software\Or\Models\ProblemType;
 use App\Software\Or\Helpers\SimplexSolver;
 
 class SimplexController extends Controller
@@ -17,13 +19,11 @@ class SimplexController extends Controller
     public function index()
     {
         $this->requireAuth();
-        // نمایش فقط پروژه‌های نوع LP (برنامه‌ریزی خطی)
         $projects = $this->model->getByProblemTypeCode('LP', $this->currentUserId);
-        
         $this->view('simplex/index', [
-            'pageTitle' => 'برنامه‌ریزی خطی (Simplex)',
+            'pageTitle'   => 'برنامه‌ریزی خطی (Simplex)',
             'currentPage' => 'simplex',
-            'projects' => $projects,
+            'projects'    => $projects,
         ]);
     }
 
@@ -31,7 +31,7 @@ class SimplexController extends Controller
     {
         $this->requireAuth();
         $this->view('simplex/create', [
-            'pageTitle' => 'ایجاد مدل برنامه‌ریزی خطی',
+            'pageTitle'   => 'ایجاد مدل برنامه‌ریزی خطی',
             'currentPage' => 'simplex',
         ]);
     }
@@ -40,119 +40,238 @@ class SimplexController extends Controller
     {
         $this->requireAuth();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->json(['success' => false, 'error' => 'درخواست نامعتبر است'], 405);
+            $this->json(['success' => false, 'error' => 'درخواست نامعتبر'], 405);
+            return;
         }
 
         $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
-        $name = trim($payload['name'] ?? 'مدل LP جدید');
-        $objType = in_array($payload['obj_type'] ?? '', ['maximize', 'minimize']) ? $payload['obj_type'] : 'maximize';
-        
-        // بررسی وجود ستون model_data در دیتابیس (در صورت عدم وجود، خطا می‌دهد)
+        $pt = (new ProblemType())->getByCode('LP');
+
+        $modelData = [
+            'c'     => $payload['c'] ?? [],
+            'A'     => $payload['A'] ?? [],
+            'b'     => $payload['b'] ?? [],
+            'types' => $payload['types'] ?? [],
+        ];
+
         $pid = $this->model->create([
             'user_id'         => $this->currentUserId,
-            'name'            => $name,
+            'name'            => trim($payload['name'] ?? 'مدل برنامه‌ریزی خطی'),
             'description'     => trim($payload['description'] ?? ''),
-            'problem_type_id' => 5, // فرض: ID=5 مربوط به LP است (باید با دیتابیس چک شود)
-            'objective'       => $objType,
+            'problem_type_id' => $pt['id'],
+            'objective'       => $payload['objective'] ?? 'maximize',
             'status'          => 'draft',
-            'model_data'      => json_encode([
-                'c' => $payload['c'], 
-                'A' => $payload['A'], 
-                'b' => $payload['b'], 
-                'types' => $payload['types']
-            ]),
+            'model_data'      => json_encode($modelData, JSON_UNESCAPED_UNICODE),
         ]);
 
         $this->logActivity('create', 'simplex', $pid);
         $this->json(['success' => true, 'project_id' => $pid, 'message' => 'مدل با موفقیت ذخیره شد.']);
     }
 
-    public function solve($id)
+    public function show($id)
     {
         $this->requireAuth();
-        $p = $this->model->getWithDetails((int)$id);
-        
-        if (!$p || $p['user_id'] != $this->currentUserId) {
-            $this->json(['success' => false, 'error' => 'دسترسی مجاز نیست یا پروژه یافت نشد.'], 403);
-            return;
-        }
-
-        $metadata = json_decode($p['model_data'] ?? '[]', true);
-        if (!$metadata || !isset($metadata['c'])) {
-            $this->json(['success' => false, 'error' => 'داده‌های مدل (model_data) یافت نشد.'], 404);
-            return;
-        }
-
-        try {
-            // فراخوانی موتور حل‌کننده سیمپلکس
-            $result = SimplexSolver::solve(
-                $metadata['c'],
-                $metadata['A'],
-                $metadata['b'],
-                $metadata['types'],
-                $p['objective']
-            );
-
-            // نگاشت وضعیت‌های خروجی سیمپلکس به مقادیر مجاز ENUM در دیتابیس
-            $statusMap = [
-                'optimal'          => 'solved',
-                'infeasible'       => 'infeasible',
-                'unbounded'        => 'infeasible', // نامحدود را هم غیرممکن در نظر می‌گیریم
-                'max_iter_reached' => 'solving',
-                'error'            => 'draft',
-            ];
-            $dbStatus = $statusMap[$result['status']] ?? 'draft';
-
-            // به‌روزرسانی دیتابیس
-            $this->model->update($p['id'], [
-                'status'        => $dbStatus,
-                'solution_data' => json_encode($result),
-            ]);
-
-            // بازگرداندن پاسخ به فرانت‌اند
-            $this->json([
-                'success' => true,
-                'result'  => $result
-            ]);
-
-        } catch (\Exception $e) {
-            $this->json([
-                'success' => false,
-                'error'   => 'خطای داخلی در حل مدل: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * نمایش نتایج حل مدل
-     */
-    public function result($id)
-    {
-        $this->requireAuth();
-        
         $project = $this->model->getWithDetails((int)$id);
-
-        if (!$project) {
-            $this->flashError('پروژه یافت نشد.');
+        
+        if (!$project || $project['user_id'] != $this->currentUserId || ($project['problem_type_code'] ?? '') !== 'LP') {
+            $this->flashError('پروژه یافت نشد یا دسترسی مجاز نیست.');
             $this->redirect('controller=simplex');
             return;
         }
 
-        if (!$this->authorizeOwnership($project['user_id'])) {
-            return; // متد authorizeOwnership خودش ریدایرکت و پیام خطا را مدیریت می‌کند
+        $tab = $_GET['tab'] ?? 'info';
+        if (!in_array($tab, ['info', 'nodes', 'matrix', 'solve', 'result'], true)) {
+            $tab = 'info';
         }
 
-        // decode کردن داده‌های حل شده اگر وجود داشته باشد
-        $solutionData = null;
-        if (!empty($project['solution_data'])) {
-            $solutionData = json_decode($project['solution_data'], true);
-        }
-
-        $this->view('simplex/result', [
-            'pageTitle'    => 'نتایج حل مدل: ' . $project['name'],
-            'currentPage'  => 'simplex',
-            'project'      => $project,
-            'solutionData' => $solutionData
+        $this->view('simplex/show', [
+            'pageTitle'   => $project['name'],
+            'currentPage' => 'simplex',
+            'project'     => $project,
+            'tab'         => $tab,
+            'modelData'   => json_decode($project['model_data'] ?? '{}', true),
+            'solution'    => json_decode($project['solution_data'] ?? 'null', true),
         ]);
+    }
+
+    public function edit($id)
+    {
+        $this->requireAuth();
+        $project = $this->model->getWithDetails((int)$id);
+        
+        if (!$project || $project['user_id'] != $this->currentUserId || ($project['problem_type_code'] ?? '') !== 'LP') {
+            $this->flashError('پروژه یافت نشد یا دسترسی مجاز نیست.');
+            $this->redirect('controller=simplex');
+            return;
+        }
+
+        $this->view('simplex/edit', [
+            'pageTitle'   => 'ویرایش مدل برنامه‌ریزی خطی',
+            'currentPage' => 'simplex',
+            'project'     => $project,
+            'modelData'   => json_decode($project['model_data'] ?? '{}', true),
+        ]);
+    }
+
+    public function update($id)
+    {
+        $this->requireAuth();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->json(['success' => false, 'error' => 'درخواست نامعتبر'], 405);
+            return;
+        }
+
+        $project = $this->model->getWithDetails((int)$id);
+        if (!$project || $project['user_id'] != $this->currentUserId) {
+            $this->json(['success' => false, 'error' => 'دسترسی مجاز نیست'], 403);
+            return;
+        }
+
+        try {
+            $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+            $shouldSolve = (bool)($payload['solve_after_update'] ?? false);
+            
+            $modelData = [
+                'c'     => $payload['c'] ?? [],
+                'A'     => $payload['A'] ?? [],
+                'b'     => $payload['b'] ?? [],
+                'types' => $payload['types'] ?? [],
+            ];
+
+            $this->model->update((int)$id, [
+                'name'          => trim($payload['name'] ?? $project['name']),
+                'description'   => trim($payload['description'] ?? ''),
+                'objective'     => $payload['objective'] ?? $project['objective'],
+                'model_data'    => json_encode($modelData, JSON_UNESCAPED_UNICODE),
+                'status'        => 'draft',
+                'solution_data' => null,
+                'optimal_value' => null,
+            ]);
+
+            // ✅ اگر کاربر درخواست حل بعد از ذخیره را داده باشد
+            if ($shouldSolve) {
+                $solveResult = SimplexSolver::solve(
+                    $modelData['c'],
+                    $modelData['A'],
+                    $modelData['b'],
+                    $modelData['types'],
+                    $payload['objective'] ?? $project['objective']
+                );
+
+                if (($solveResult['status'] ?? '') === 'optimal') {
+                    $this->model->update((int)$id, [
+                        'status'        => 'solved',
+                        'solution_data' => json_encode($solveResult, JSON_UNESCAPED_UNICODE),
+                        'optimal_value' => $solveResult['optimal_value'] ?? 0,
+                    ]);
+                    
+                    $this->json([
+                        'success' => true, 
+                        'solved'  => true,
+                        'result'  => $solveResult,
+                        'message' => 'تغییرات ذخیره و مسئله با موفقیت حل شد.',
+                        'redirect' => or_url("controller=simplex&action=show&id={$id}&tab=result")
+                    ]);
+                    return;
+                } else {
+                    $this->model->update((int)$id, ['status' => $solveResult['status'] ?? 'infeasible']);
+                    $this->json([
+                        'success' => true,
+                        'solved'  => false,
+                        'error'   => $solveResult['message'] ?? 'مسئله قابل حل نیست.',
+                        'redirect' => or_url("controller=simplex&action=show&id={$id}")
+                    ]);
+                    return;
+                }
+            }
+
+            $this->logActivity('update', 'simplex', (int)$id);
+            $this->json([
+                'success'  => true, 
+                'solved'   => false,
+                'message'  => 'تغییرات با موفقیت ذخیره شد.',
+                'redirect' => or_url("controller=simplex&action=show&id={$id}")
+            ]);
+
+        } catch (\Exception $e) {
+            error_log("Simplex Update Error: " . $e->getMessage());
+            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function solve($id)
+    {
+        $this->requireAuth();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->json(['success' => false, 'error' => 'فقط POST مجاز است.'], 405);
+            return;
+        }
+
+        $project = $this->model->getWithDetails((int)$id);
+        if (!$project || $project['user_id'] != $this->currentUserId) {
+            $this->json(['success' => false, 'error' => 'دسترسی مجاز نیست.'], 403);
+            return;
+        }
+
+        try {
+            $modelData = json_decode($project['model_data'] ?? '{}', true);
+            if (empty($modelData['c']) || empty($modelData['A'])) {
+                $this->json(['success' => false, 'error' => 'داده‌های مدل ناقص است.'], 400);
+                return;
+            }
+
+            $result = SimplexSolver::solve(
+                $modelData['c'],
+                $modelData['A'],
+                $modelData['b'],
+                $modelData['types'],
+                $project['objective'] ?? 'maximize'
+            );
+
+            if (($result['status'] ?? '') === 'optimal') {
+                $this->model->update((int)$id, [
+                    'status'        => 'solved',
+                    'solution_data' => json_encode($result, JSON_UNESCAPED_UNICODE),
+                    'optimal_value' => $result['optimal_value'] ?? 0,
+                ]);
+                $this->logActivity('solve', 'simplex', (int)$id);
+                $this->json(['success' => true, 'result' => $result, 'message' => 'مسئله با موفقیت حل شد.']);
+            } else {
+                $this->model->update((int)$id, ['status' => $result['status'] ?? 'infeasible']);
+                $this->json(['success' => false, 'error' => $result['message'] ?? 'مسئله قابل حل نیست.']);
+            }
+
+        } catch (\Exception $e) {
+            error_log("Simplex Solve Error: " . $e->getMessage());
+            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * ✅ این متد برای سازگاری با لینک‌های قدیمی result باقی می‌ماند
+     * اما فقط به show با تب result ریدایرکت می‌کند
+     */
+    public function result($id)
+    {
+        $this->requireAuth();
+        $this->redirect('controller=simplex&action=show&id=' . (int)$id . '&tab=result');
+    }
+
+    public function delete($id)
+    {
+        $this->requireAuth();
+        $p = $this->model->getWithDetails((int)$id);
+        
+        if ($p && $p['user_id'] == $this->currentUserId && ($p['problem_type_code'] ?? '') === 'LP') {
+            $this->model->query("DELETE FROM or_project_nodes WHERE project_id=?", [(int)$id]);
+            $this->model->query("DELETE FROM or_project_edges WHERE project_id=?", [(int)$id]);
+            $this->model->delete((int)$id);
+            $this->logActivity('delete', 'simplex', (int)$id);
+            $this->flashSuccess('مدل برنامه‌ریزی خطی حذف شد.');
+        } else {
+            $this->flashError('دسترسی مجاز نیست یا مدل یافت نشد.');
+        }
+        
+        $this->redirect('controller=simplex');
     }
 }

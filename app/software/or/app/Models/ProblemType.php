@@ -4,18 +4,25 @@ use App\Software\Or\Core\Model;
 
 class ProblemType extends Model
 {
-    // اصلاح: نام جدول باید بدون پیشوند "or_" باشد، 
-    // زیرا کلاس پایه Model به صورت خودکار پیشوند را اضافه می‌کند.
+    // نام جدول بدون پیشوند "or_"، زیرا کلاس پایه Model به صورت خودکار پیشوند را مدیریت می‌کند.
     protected $table = 'problem_types';
 
+    /**
+     * دریافت تمام انواع مسئله
+     */
     public function getAll() 
     { 
         return $this->findAll([], 'id ASC'); 
     }
 
+    /**
+     * دریافت نوع مسئله بر اساس کد
+     */
     public function getByCode($code)
     {
-        // استفاده از متد getTableName() که مدیریت پیشوند را به درستی انجام می‌دهد
         return $this->queryOne("SELECT * FROM {$this->getTableName()} WHERE code = ?", [$code]);
     }
+
+    // ✅ متد count() از کلاس پایه Model به ارث برده می‌شود.
+    // نیازی به تعریف مجدد آن نیست. فراخوانی $this->problemTypeModel->count() به درستی کار خواهد کرد.
 }

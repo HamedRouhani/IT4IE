@@ -3,6 +3,24 @@
  * داشبورد ماژول OR Analyzer
  * مسیر: app/software/or/views/dashboard/index.php
  */
+
+// نگاشت کد نوع مسئله به کنترلر اختصاصی
+$controllerMap = [
+    'LP'        => 'simplex',
+    'TRANS'     => 'transport',
+    'ASSIGN'    => 'assignment',
+    'TRANSSHIP' => 'transship',
+    'SHORTEST'  => 'shortest',
+];
+
+// آیکون‌های اختصاصی برای هر نوع مسئله
+$iconMap = [
+    'LP'        => 'fas fa-chart-line text-danger',
+    'TRANS'     => 'fas fa-truck text-primary',
+    'ASSIGN'    => 'fas fa-users-cog text-info',
+    'TRANSSHIP' => 'fas fa-project-diagram text-warning',
+    'SHORTEST'  => 'fas fa-route text-success',
+];
 ?>
 
 <div class="container-fluid py-4">
@@ -20,8 +38,9 @@
                 </ol>
             </nav>
         </div>
-        <a href="<?= or_url('controller=project&action=create') ?>" class="btn btn-primary">
-            <i class="fas fa-plus"></i> پروژه جدید
+        <!-- ✅ حذف دکمه پروژه جدید (چون کنترلر project حذف شده) -->
+        <a href="<?= or_url('controller=problem_type') ?>" class="btn btn-or-primary">
+            <i class="fas fa-cubes"></i> انتخاب نوع مسئله
         </a>
     </div>
 
@@ -98,22 +117,23 @@
     </div>
 
     <div class="row g-4">
-        <!-- آخرین پروژه‌ها -->
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 py-3">
+        <!-- آخرین پروژه‌های حل‌شده -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="fas fa-clock text-muted"></i> آخرین پروژه‌ها
+                        <i class="fas fa-clock text-muted"></i> آخرین پروژه‌های حل‌شده
                     </h5>
+                    <a href="<?= or_url('controller=sensitivity') ?>" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-chart-area"></i> تحلیل حساسیت
+                    </a>
                 </div>
                 <div class="card-body p-0">
                     <?php if (empty($recentProjects)): ?>
                         <div class="text-center py-5">
                             <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">هنوز پروژه‌ای ایجاد نکرده‌اید</p>
-                            <a href="<?= or_url('controller=project&action=create') ?>" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> اولین پروژه
-                            </a>
+                            <p class="text-muted mb-0">هنوز پروژه حل‌شده‌ای ندارید</p>
+                            <small class="text-muted">پس از حل اولین مسئله، نتایج در اینجا نمایش داده می‌شود</small>
                         </div>
                     <?php else: ?>
                         <div class="table-responsive">
@@ -122,39 +142,48 @@
                                     <tr>
                                         <th>نام پروژه</th>
                                         <th>نوع مسئله</th>
-                                        <th>روش حل</th>
-                                        <th>وضعیت</th>
+                                        <th>مقدار بهینه</th>
                                         <th>تاریخ</th>
-                                        <th></th>
+                                        <th class="text-center">عملیات</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($recentProjects as $project): ?>
+                                    <?php foreach ($recentProjects as $project): 
+                                        $problemCode = $project['problem_type_code'] ?? '';
+                                        $targetController = $controllerMap[$problemCode] ?? null;
+                                        $iconClass = $iconMap[$problemCode] ?? 'fas fa-cube text-secondary';
+                                    ?>
                                         <tr>
                                             <td>
-                                                <a href="<?= or_url('controller=project&action=show&id=' . $project['id']) ?>">
-                                                    <strong><?= htmlspecialchars($project['name']) ?></strong>
-                                                </a>
+                                                <strong><?= or_e($project['name']) ?></strong>
                                             </td>
                                             <td>
-                                                <span class="badge bg-secondary">
-                                                    <?= or_getProblemTypeLabel($project['problem_type_code'] ?? '') ?>
+                                                <span class="badge bg-light text-dark border">
+                                                    <i class="<?= $iconClass ?> me-1"></i>
+                                                    <?= or_e($project['problem_type_name'] ?? $problemCode) ?>
                                                 </span>
                                             </td>
-                                            <td><?= htmlspecialchars($project['method_name'] ?? '-') ?></td>
-                                            <td>
-                                                <span class="badge bg-<?= or_getStatusColor($project['status'] ?? 'draft') ?>">
-                                                    <?= or_getStatusLabel($project['status'] ?? 'draft') ?>
-                                                </span>
+                                            <td class="text-success fw-bold">
+                                                <?= number_format($project['optimal_value'] ?? 0, 2) ?>
                                             </td>
                                             <td class="text-muted small">
                                                 <?= or_showDate($project['updated_at'] ?? $project['created_at'] ?? '') ?>
                                             </td>
-                                            <td>
-                                                <a href="<?= or_url('controller=project&action=show&id=' . $project['id']) ?>" 
-                                                   class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
+                                            <td class="text-center">
+                                                <?php if ($targetController): ?>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="<?= or_url('controller=' . $targetController . '&action=show&id=' . $project['id'] . '&tab=result') ?>" 
+                                                           class="btn btn-outline-success" title="مشاهده نتایج">
+                                                            <i class="fas fa-chart-bar"></i>
+                                                        </a>
+                                                        <a href="<?= or_url('controller=sensitivity&action=report&id=' . $project['id']) ?>" 
+                                                           class="btn btn-outline-info" title="تحلیل حساسیت">
+                                                            <i class="fas fa-sliders-h"></i>
+                                                        </a>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <span class="text-muted small">-</span>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -166,8 +195,9 @@
             </div>
         </div>
 
-        <!-- انواع مسائل و شروع سریع -->
-        <div class="col-lg-4">
+        <!-- ستون سمت راست: شروع سریع + انواع مسئله -->
+        <div class="col-lg-5">
+            <!-- شروع سریع -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-0 py-3">
                     <h5 class="mb-0">
@@ -176,36 +206,63 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="<?= or_url('controller=project&action=create&type=TRANS') ?>" 
-                           class="btn btn-outline-primary text-start">
+                        <a href="<?= or_url('controller=simplex&action=create') ?>" class="btn btn-outline-danger text-start">
+                            <i class="fas fa-chart-line"></i> برنامه‌ریزی خطی (Simplex)
+                        </a>
+                        <a href="<?= or_url('controller=transport&action=create') ?>" class="btn btn-outline-primary text-start">
                             <i class="fas fa-truck"></i> مسئله حمل و نقل
                         </a>
-                        <a href="<?= or_url('controller=project&action=create&type=ASSIGN') ?>" 
-                           class="btn btn-outline-info text-start">
-                            <i class="fas fa-users"></i> مسئله تخصیص
+                        <a href="<?= or_url('controller=assignment&action=create') ?>" class="btn btn-outline-info text-start">
+                            <i class="fas fa-users-cog"></i> مسئله تخصیص
+                        </a>
+                        <a href="<?= or_url('controller=transship&action=create') ?>" class="btn btn-outline-warning text-start">
+                            <i class="fas fa-project-diagram"></i> ترانشیپمنت
+                        </a>
+                        <a href="<?= or_url('controller=shortest&action=create') ?>" class="btn btn-outline-success text-start">
+                            <i class="fas fa-route"></i> کوتاه‌ترین مسیر
                         </a>
                     </div>
                 </div>
             </div>
 
+            <!-- انواع مسئله -->
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 py-3">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         <i class="fas fa-cubes text-info"></i> انواع مسئله
                     </h5>
+                    <a href="<?= or_url('controller=problem_type') ?>" class="btn btn-sm btn-outline-secondary">
+                        مشاهده همه
+                    </a>
                 </div>
                 <div class="list-group list-group-flush">
-                    <?php foreach ($problemTypes as $pt): ?>
-                        <a href="<?= or_url('controller=project&action=create&type=' . $pt['code']) ?>" 
+                    <?php foreach ($problemTypes as $pt): 
+                        $code = $pt['code'] ?? '';
+                        $targetController = $controllerMap[$code] ?? null;
+                        $iconClass = $iconMap[$code] ?? 'fas fa-cube text-secondary';
+                        
+                        // فقط مواردی که کنترلر دارند نمایش داده شوند
+                        if ($targetController):
+                    ?>
+                        <a href="<?= or_url('controller=' . $targetController . '&action=create') ?>" 
                            class="list-group-item list-group-item-action">
                             <div class="d-flex justify-content-between align-items-center">
-                                <span><?= htmlspecialchars($pt['name_fa']) ?></span>
-                                <span class="badge bg-light text-dark"><?= $pt['code'] ?></span>
+                                <span>
+                                    <i class="<?= $iconClass ?> me-2"></i>
+                                    <?= htmlspecialchars($pt['name_fa']) ?>
+                                </span>
+                                <span class="badge bg-light text-dark"><?= $code ?></span>
                             </div>
                         </a>
-                    <?php endforeach; ?>
+                    <?php endif; endforeach; ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.04);
+}
+</style>

@@ -1,40 +1,46 @@
 <?php
 namespace App\Software\Or\Controllers;
+
 use App\Software\Or\Core\Controller;
 use App\Software\Or\Models\Project;
 use App\Software\Or\Models\ProblemType;
-use App\Software\Or\Models\Method;
 
 class DashboardController extends Controller
 {
+    private $projectModel;
+    private $problemTypeModel;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->projectModel = new Project();
+        $this->problemTypeModel = new ProblemType();
+    }
+
     public function index()
     {
-        $pm  = new Project();
-        $ptm = new ProblemType();
-        $mm  = new Method();
+        $this->requireAuth();
 
+        // آمار کلی با استفاده از متدهای عمومی مدل
         $stats = [
-            'total_projects'  => $this->isAuthenticated()
-                ? $pm->count(['user_id' => $this->currentUserId])
-                : $pm->count(),
-            'solved_projects' => $this->isAuthenticated()
-                ? $pm->count(['user_id' => $this->currentUserId, 'status' => 'solved'])
-                : $pm->count(['status' => 'solved']),
-            'problem_types'   => $ptm->count(),
-            'methods'         => $mm->count(),
+            'total_projects'  => $this->projectModel->countByUser($this->currentUserId),
+            'solved_projects' => $this->projectModel->countByUserAndStatus($this->currentUserId, 'solved'),
+            'problem_types'   => $this->problemTypeModel->count(),
+            'methods'         => 5, // Simplex, Transportation, Assignment, Transshipment, Shortest Path
         ];
 
-        $recent = $this->isAuthenticated()
-            ? $pm->getWithType($this->currentUserId)
-            : $pm->getWithType();
+        // دریافت آخرین پروژه‌های حل‌شده از طریق متد عمومی مدل
+        $recentProjects = $this->projectModel->getRecentSolvedProjects($this->currentUserId, 5);
+
+        // ✅ اصلاح: استفاده از getAll() به جای all()
+        $problemTypes = $this->problemTypeModel->getAll();
 
         $this->view('dashboard/index', [
             'pageTitle'      => 'داشبورد',
             'currentPage'    => 'dashboard',
             'stats'          => $stats,
-            'recentProjects' => array_slice($recent, 0, 5),
-            'problemTypes'   => $ptm->getAll(),
-            'methods'        => $mm->getWithProblemType(),
+            'recentProjects' => $recentProjects,
+            'problemTypes'   => $problemTypes,
         ]);
     }
 }

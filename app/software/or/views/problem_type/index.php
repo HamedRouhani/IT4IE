@@ -1,15 +1,34 @@
 <?php
 /**
- * لیست انواع مسئله در ماژول OR
+ * لیست انواع مسئله
  * مسیر: app/software/or/views/problem_type/index.php
  */
+
+// نگاشت کد نوع مسئله به کنترلر اختصاصی آن
+$controllerMap = [
+    'LP'        => 'simplex',
+    'TRANS'     => 'transport',
+    'ASSIGN'    => 'assignment',
+    'TRANSSHIP' => 'transship',
+    'SHORTEST'  => 'shortest',
+];
+
+// آیکون‌های اختصاصی برای هر نوع مسئله
+$iconMap = [
+    'LP'        => 'fas fa-chart-line text-danger',
+    'TRANS'     => 'fas fa-truck text-primary',
+    'ASSIGN'    => 'fas fa-users-cog text-info',
+    'TRANSSHIP' => 'fas fa-project-diagram text-warning',
+    'SHORTEST'  => 'fas fa-route text-success',
+];
 ?>
 
 <div class="container-fluid py-4">
+    <!-- هدر صفحه -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="mb-1">
-                <i class="fas fa-cubes text-primary"></i> انواع مسئله (Problem Types)
+                <i class="fas fa-cubes text-primary"></i> انواع مسئله
             </h2>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0">
@@ -20,54 +39,58 @@
         </div>
     </div>
 
+    <div class="alert alert-info mb-4">
+        <i class="fas fa-info-circle"></i> 
+        نوع مسئله مورد نظر خود را انتخاب کنید تا به فرم ایجاد مدل اختصاصی آن هدایت شوید.
+    </div>
+
     <div class="row g-4">
-        <?php if (!empty($problemTypes)): ?>
-            <?php foreach ($problemTypes as $pt): ?>
+        <?php foreach ($problemTypes as $pt): ?>
+            <?php 
+            $code = $pt['code'] ?? '';
+            $targetController = $controllerMap[$code] ?? null;
+            $iconClass = $iconMap[$code] ?? 'fas fa-cube text-secondary';
+            
+            // اگر کنترلر اختصاصی برای این نوع مسئله وجود داشت، آن را نمایش بده
+            if ($targetController): 
+            ?>
                 <div class="col-md-6 col-lg-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="bg-primary bg-opacity-10 rounded-3 p-3 ms-3">
-                                    <i class="fas fa-project-diagram fa-2x text-primary"></i>
+                    <a href="<?= or_url('controller=' . $targetController . '&action=create') ?>" 
+                       class="text-decoration-none">
+                        <div class="card border-0 shadow-sm h-100 hover-card transition-all">
+                            <div class="card-body text-center p-4">
+                                <div class="mb-3">
+                                    <i class="<?= $iconClass ?> fa-3x"></i>
                                 </div>
-                                <div>
-                                    <h5 class="mb-1"><?= htmlspecialchars($pt['name_fa']) ?></h5>
-                                    <span class="badge bg-secondary"><?= htmlspecialchars($pt['code']) ?></span>
+                                <h5 class="card-title mb-2 text-dark">
+                                    <?= or_e($pt['name_fa']) ?>
+                                </h5>
+                                <p class="card-text text-muted small mb-3">
+                                    <?= or_e($pt['description'] ?? 'برای شروع روی این کارت کلیک کنید') ?>
+                                </p>
+                                <span class="badge bg-light text-dark border">
+                                    کد: <?= $code ?>
+                                </span>
+                                <div class="mt-3">
+                                    <span class="btn btn-sm btn-or-primary">
+                                        <i class="fas fa-plus"></i> ایجاد مدل جدید
+                                    </span>
                                 </div>
                             </div>
-                            
-                            <p class="text-muted mb-3" style="min-height: 60px;">
-                                <?= htmlspecialchars($pt['description']) ?>
-                            </p>
-
-                            <?php if (!empty($pt['methods'])): ?>
-                                <h6 class="text-muted small mb-2">روش‌های حل پشتیبانی‌شده:</h6>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <?php foreach ($pt['methods'] as $method): ?>
-                                        <span class="badge bg-light text-dark border">
-                                            <?= htmlspecialchars($method['name_fa']) ?> 
-                                            <small class="text-muted">(<?= $method['code'] ?>)</small>
-                                        </span>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php else: ?>
-                                <span class="badge bg-warning text-dark">هنوز روشی تعریف نشده است</span>
-                            <?php endif; ?>
                         </div>
-                        <div class="card-footer bg-white border-0 pt-0 pb-3">
-                            <a href="<?= or_url('controller=project&action=create&type=' . $pt['code']) ?>" class="btn btn-primary w-100">
-                                <i class="fas fa-plus"></i> ایجاد پروژه جدید در این دسته
-                            </a>
-                        </div>
-                    </div>
+                    </a>
                 </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="col-12">
-                <div class="alert alert-info text-center">
-                    <i class="fas fa-info-circle"></i> هیچ نوع مسئله‌ای در سیستم ثبت نشده است.
-                </div>
-            </div>
-        <?php endif; ?>
+            <?php endif; ?>
+        <?php endforeach; ?>
     </div>
 </div>
+
+<style>
+.hover-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+</style>

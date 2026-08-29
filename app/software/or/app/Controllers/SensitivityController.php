@@ -14,26 +14,50 @@ class SensitivityController extends Controller
         $this->model = new Project();
     }
 
-    public function analyze($id)
+    public function index()
     {
         $this->requireAuth();
-        $p = $this->model->find((int)$id);
-        if (!$p || !$this->authorizeOwnership($p['user_id'])) {
-            $this->json(['success' => false, 'error' => 'دسترسی مجاز نیست.'], 403);
+        $projects = $this->model->getSolvedProjects($this->currentUserId);
+        
+        $this->view('sensitivity/index', [
+            'pageTitle'   => 'تحلیل حساسیت',
+            'currentPage' => 'sensitivity',
+            'projects'    => $projects,
+        ]);
+    }
+
+    public function report($id)
+    {
+        $this->requireAuth();
+        $project = $this->model->getWithDetails((int)$id);
+        
+        if (!$project || $project['user_id'] != $this->currentUserId) {
+            $this->flashError('دسترسی مجاز نیست.');
+            $this->redirect('controller=sensitivity');
+            return;
         }
 
-        if ($p['status'] !== 'solved') {
-            $this->json(['success' => false, 'error' => 'پروژه باید ابتدا حل شود.'], 400);
+        if ($project['status'] !== 'solved') {
+            $this->flashError('این پروژه هنوز حل نشده است.');
+            $this->redirect('controller=sensitivity');
+            return;
         }
 
-        $result = json_decode($p['solution_data'], true);
-        $metadata = json_decode($p['metadata'], true);
+        $solution = json_decode($project['solution_data'] ?? '{}', true);
+        $modelData = json_decode($project['model_data'] ?? '{}', true);
+        $problemType = $project['problem_type_code'] ?? '';
 
-        if (!$result || !$metadata) {
-            $this->json(['success' => false, 'error' => 'داده‌های حل مدل یافت نشد.'], 404);
-        }
+        // تحلیل حساسیت بر اساس نوع مسئله
+        $analysis = SensitivityAnalyzer::analyze($problemType, $solution, $modelData);
 
-        $sensitivity = SensitivityAnalyzer::analyze($result, $metadata['c'], $metadata['b'], $metadata['types'], $p['objective']);
-        $this->json(['success' => true, 'sensitivity' => $sensitivity]);
+        $this->view('sensitivity/report', [
+            'pageTitle'    => 'تحلیل حساسیت: ' . $project['name'],
+            'currentPage'  => 'sensitivity',
+            'project'      => $project,
+            'problemType'  => $problemType,
+            'solution'     => $solution,
+            'modelData'    => $modelData,
+            'analysis'     => $analysis,
+        ]);
     }
 }

@@ -199,13 +199,11 @@ async function submitModel() {
     const modelName = document.getElementById('modelName').value;
     const objType = document.querySelector('input[name="objType"]:checked').value;
 
-    // جمع‌آوری ضرایب تابع هدف
     const c = [];
     document.querySelectorAll('.obj-c').forEach(input => {
         c[input.dataset.j] = parseFloat(input.value) || 0;
     });
 
-    // جمع‌آوری ضرایب محدودیت‌ها
     const A = [];
     document.querySelectorAll('.matrix-a').forEach(input => {
         const i = parseInt(input.dataset.i);
@@ -214,35 +212,33 @@ async function submitModel() {
         A[i][j] = parseFloat(input.value) || 0;
     });
 
-    // جمع‌آوری سمت راست
     const b = [];
     document.querySelectorAll('.vector-b').forEach(input => {
         b[input.dataset.i] = parseFloat(input.value) || 0;
     });
 
-    // جمع‌آوری نوع محدودیت‌ها
     const types = [];
     document.querySelectorAll('.constraint-type').forEach(select => {
         types[select.dataset.i] = select.value;
     });
 
+    // ✅ اصلاح: ارسال 'objective' به جای 'obj_type'
     const payload = {
         name: modelName,
-        obj_type: objType,
+        objective: objType, 
         c: c,
         A: A,
         b: b,
         types: types
     };
 
-    // نمایش لودر
     const btn = event.target;
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال حل...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال پردازش...';
     btn.disabled = true;
 
     try {
-        // ذخیره مدل
+        // ۱. ذخیره مدل
         const saveRes = await fetch('<?= or_url("controller=simplex&action=store") ?>', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -251,23 +247,21 @@ async function submitModel() {
         const saveData = await saveRes.json();
 
         if (!saveData.success) {
-            alert('خطا در ذخیره: ' + (saveData.error || 'خطای ناشناخته'));
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            return;
+            throw new Error('خطا در ذخیره: ' + (saveData.error || 'خطای ناشناخته'));
         }
 
-        // حل مدل
+        // ۲. حل مدل
+        console.log("Sending solve request for ID:", saveData.project_id);
         const solveRes = await fetch(`<?= or_url("controller=simplex&action=solve&id=") ?>${saveData.project_id}`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({})
         });
         const solveData = await solveRes.json();
+        console.log("Solve response:", solveData);
 
         if (solveData.success) {
             if (solveData.result.status === 'optimal') {
-                // انتقال به صفحه نتایج
                 window.location.href = `<?= or_url("controller=simplex&action=result&id=") ?>${saveData.project_id}`;
             } else {
                 alert(`وضعیت: ${solveData.result.status}\nپیام: ${solveData.result.message}`);
@@ -275,12 +269,11 @@ async function submitModel() {
                 btn.disabled = false;
             }
         } else {
-            alert('خطا در حل: ' + (solveData.error || 'خطای ناشناخته'));
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+            throw new Error('خطا در حل: ' + (solveData.error || 'خطای ناشناخته'));
         }
     } catch (error) {
-        alert('خطای شبکه: ' + error.message);
+        console.error("Full Error:", error);
+        alert(error.message);
         btn.innerHTML = originalText;
         btn.disabled = false;
     }

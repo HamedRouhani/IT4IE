@@ -24,11 +24,11 @@ class Project extends Model
     }
 
     /**
-     * متد جدید مخصوص دریافت پروژه‌های یک نوع خاص (مثل LP برای سیمپلکس)
+     * دریافت پروژه‌ها بر اساس کد نوع مسئله (مثل TRANS, ASSIGN, LP)
      */
     public function getByProblemTypeCode($code, $userId = null)
     {
-        $t  = $this->getTableName();
+        $t  = $this->getTableName(); // اینجا مجاز است چون درون کلاس Model هستیم
         $pt = $this->tablePrefix . 'problem_types';
         
         $sql = "SELECT p.*, pt.name_fa AS problem_type_name, pt.code AS problem_type_code
@@ -74,8 +74,9 @@ class Project extends Model
     public function addNode($pid, $type, $name, $capacity, $sortOrder = 0)
     {
         $t = $this->tablePrefix . 'project_nodes';
-        return $this->query("INSERT INTO {$t} (project_id, type, name, capacity, sort_order) VALUES (?,?,?,?,?)",
-            [$pid, $type, $name, $capacity, $sortOrder]);
+        $this->query("INSERT INTO {$t} (project_id, type, name, capacity, sort_order) VALUES (?,?,?,?,?)",
+            [$pid, $type, $name, $capacity, $sortOrder]);        
+        return $this->queryOne("SELECT LAST_INSERT_ID() as id")['id'];
     }
 
     public function deleteNode($nodeId, $pid)
@@ -171,5 +172,62 @@ class Project extends Model
     public function updateBalance($pid, $isBalanced, $totalSupply, $totalDemand)
     {
         return $this->update($pid, ['is_balanced'=>$isBalanced, 'total_supply'=>$totalSupply, 'total_demand'=>$totalDemand]);
+    }
+
+    /**
+     * دریافت تمام پروژه‌های حل‌شده کاربر (برای ماژول تحلیل حساسیت)
+     */
+    public function getSolvedProjects($userId)
+    {
+        $t = $this->getTableName(); // اینجا مجاز است چون درون کلاس Model هستیم
+        $pt = $this->tablePrefix . 'problem_types';
+        
+        return $this->query("SELECT p.*, pt.name_fa AS problem_type_name, pt.code AS problem_type_code
+                 FROM {$t} p
+                 LEFT JOIN {$pt} pt ON p.problem_type_id = pt.id
+                 WHERE p.user_id = ? AND p.status = 'solved'
+                 ORDER BY p.updated_at DESC", [$userId]);
+    }
+
+    /**
+     * شمارش کل پروژه‌های یک کاربر
+     */
+    public function countByUser($userId)
+    {
+        $t = $this->getTableName();
+        $result = $this->query("SELECT COUNT(*) AS cnt FROM {$t} WHERE user_id = ?", [$userId]);
+        return (int)($result[0]['cnt'] ?? 0);
+    }
+
+    /**
+     * شمارش پروژه‌های یک کاربر با وضعیت مشخص
+     */
+    public function countByUserAndStatus($userId, $status)
+    {
+        $t = $this->getTableName();
+        $result = $this->query(
+            "SELECT COUNT(*) AS cnt FROM {$t} WHERE user_id = ? AND status = ?",
+            [$userId, $status]
+        );
+        return (int)($result[0]['cnt'] ?? 0);
+    }
+
+    /**
+     * دریافت آخرین پروژه‌های حل‌شده کاربر با اطلاعات نوع مسئله
+     */
+    public function getRecentSolvedProjects($userId, $limit = 5)
+    {
+        $t = $this->getTableName();
+        $pt = $this->tablePrefix . 'problem_types';
+        
+        return $this->query(
+            "SELECT p.*, pt.name_fa AS problem_type_name, pt.code AS problem_type_code
+             FROM {$t} p
+             LEFT JOIN {$pt} pt ON p.problem_type_id = pt.id
+             WHERE p.user_id = ? AND p.status = 'solved'
+             ORDER BY p.updated_at DESC
+             LIMIT ?",
+            [$userId, (int)$limit]
+        );
     }
 }
