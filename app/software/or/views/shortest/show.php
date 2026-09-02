@@ -182,7 +182,7 @@
                                                     </td>
                                                     <td>
                                                         <span class="badge bg-success">
-                                                            <?= number_format($edge['cost'], 2) ?>
+                                                            <?= number_format($edge['cost'], 4) ?>
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -229,7 +229,7 @@
                                     <div class="col-md-3">
                                         <div class="p-3 bg-light rounded text-center">
                                             <h3 class="mb-0 text-warning">
-                                                <?= number_format(array_sum(array_column($edges, 'cost')), 2) ?>
+                                                <?= number_format(array_sum(array_column($edges, 'cost')), 4) ?>
                                             </h3>
                                             <small class="text-muted">مجموع وزن‌ها</small>
                                         </div>
@@ -316,20 +316,143 @@
                     </div>
                 </div>
             <?php else: ?>
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> مسئله با موفقیت حل شد!
+                <div class="alert alert-success mb-4">
+                    <i class="fas fa-check-circle"></i> 
+                    مسئله با موفقیت حل شد!
+                    <?php if (!empty($solution['method'])): ?>
+                        <span class="ms-2 badge bg-white text-success">
+                            الگوریتم: <?= htmlspecialchars($solution['method']) ?>
+                        </span>
+                    <?php endif; ?>
                 </div>
-                
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-0 py-3">
-                        <h5 class="mb-0"><i class="fas fa-route text-success"></i> مسیر بهینه</h5>
+
+                <!-- ==================== نتایج Dijkstra ==================== -->
+                <?php if (($solution['method'] ?? '') === 'Dijkstra' && !empty($solution['paths'])): ?>
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h5 class="mb-0">
+                                <i class="fas fa-route text-success"></i> 
+                                مسیر بهینه از مبدأ: <strong><?= htmlspecialchars($solution['source'] ?? '') ?></strong>
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>مقصد</th>
+                                            <th>فاصله / هزینه</th>
+                                            <th>مسیر</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($solution['paths'] as $idx => $p): ?>
+                                            <tr>
+                                                <td><?= $idx + 1 ?></td>
+                                                <td><strong><?= htmlspecialchars($p['destination'] ?? '') ?></strong></td>
+                                                <td>
+                                                    <span class="badge bg-success fs-6">
+                                                        <?= number_format($p['distance'] ?? 0, 4) ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        <?= htmlspecialchars($p['path_str'] ?? implode(' → ', $p['path'] ?? [])) ?>
+                                                    </small>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <?php if (isset($solution['total_paths'])): ?>
+                            <div class="card-footer bg-light">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> 
+                                    تعداد کل مسیرهای محاسبه‌شده: <strong><?= $solution['total_paths'] ?></strong>
+                                </small>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                    <div class="card-body">
-                        <p class="text-muted">نتایج حل مسئله در اینجا نمایش داده خواهد شد.</p>
+
+                <!-- ==================== نتایج Floyd-Warshall ==================== -->
+                <?php elseif (($solution['method'] ?? '') === 'Floyd-Warshall' && !empty($solution['paths'])): ?>
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-0 py-3">
+                            <h5 class="mb-0">
+                                <i class="fas fa-project-diagram text-success"></i> 
+                                کوتاه‌ترین مسیر بین تمام جفت‌گره‌ها
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>از (مبدأ)</th>
+                                            <th>به (مقصد)</th>
+                                            <th>فاصله / هزینه</th>
+                                            <th>مسیر</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($solution['paths'] as $idx => $p): ?>
+                                            <tr>
+                                                <td><?= $idx + 1 ?></td>
+                                                <td><span class="badge bg-primary"><?= htmlspecialchars($p['from'] ?? '') ?></span></td>
+                                                <td><span class="badge bg-info"><?= htmlspecialchars($p['to'] ?? '') ?></span></td>
+                                                <td>
+                                                    <span class="badge bg-success fs-6">
+                                                        <?= number_format($p['distance'] ?? 0, 4) ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        <?= htmlspecialchars(implode(' → ', $p['path'] ?? [])) ?>
+                                                    </small>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <?php if (isset($solution['total_paths'])): ?>
+                            <div class="card-footer bg-light">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> 
+                                    تعداد کل مسیرهای محاسبه‌شده: <strong><?= $solution['total_paths'] ?></strong>
+                                </small>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                </div>
+
+                <!-- ==================== حالت ناشناخته ==================== -->
+                <?php else: ?>
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-exclamation-triangle fa-4x text-warning mb-3"></i>
+                            <h4 class="text-muted mb-3">ساختار نتایج ناشناخته است</h4>
+                            <p class="text-muted mb-4">
+                                داده‌های حل در دیتابیس موجود است اما فرمت آن قابل شناسایی نیست.
+                            </p>
+                            <details class="text-start">
+                                <summary class="btn btn-sm btn-outline-secondary mb-3">مشاهده داده‌های خام (JSON)</summary>
+                                <pre class="bg-light p-3 rounded text-start" dir="ltr" style="max-height: 400px; overflow: auto;">
+<?= htmlspecialchars(json_encode($solution, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) ?>
+                                </pre>
+                            </details>
+                            <a href="<?= or_url('controller=shortest&action=show&id=' . $project['id'] . '&tab=solve') ?>" class="btn btn-or-primary mt-3">
+                                <i class="fas fa-redo"></i> حل مجدد مسئله
+                            </a>
+                        </div>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
-        <?php endif; ?>
+        <?php endif; ?> <!-- ✅ این تگ بسته‌ی اصلی بود که جا افتاده بود -->
     </div>
 </div>
 

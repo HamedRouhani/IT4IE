@@ -5,6 +5,8 @@
  */
 $sourcesJson = json_encode($sources);
 $destinationsJson = json_encode($destinations);
+$costMatrixJson = json_encode($costMatrix);
+$prohibitedJson = json_encode($prohibited);
 ?>
 
 <div class="container-fluid py-4">
@@ -48,7 +50,7 @@ $destinationsJson = json_encode($destinations);
                         <label class="form-label">تعداد وظایف</label>
                         <input type="number" id="numTasks" class="form-control" value="<?= count($destinations) ?>" min="1" max="10">
                     </div>
-                    <button type="button" class="btn btn-or-primary w-100" onclick="generateAssignmentMatrix(true)">
+                    <button type="button" class="btn btn-or-primary w-100" onclick="generateAssignmentMatrix(false)">
                         <i class="fas fa-sync-alt"></i> بازسازی ماتریس
                     </button>
                     <small class="text-danger d-block mt-2 text-center">⚠️ بازسازی ماتریس، داده‌های فعلی را پاک می‌کند.</small>
@@ -80,6 +82,8 @@ $destinationsJson = json_encode($destinations);
 <script>
 const initialSources = <?= $sourcesJson ?>;
 const initialDestinations = <?= $destinationsJson ?>;
+const initialCostMatrix = <?= $costMatrixJson ?>;
+const initialProhibited = <?= $prohibitedJson ?>;
 
 function generateAssignmentMatrix(isEdit = false) {
     const numA = parseInt(document.getElementById('numAgents').value) || 3;
@@ -92,7 +96,22 @@ function generateAssignmentMatrix(isEdit = false) {
     for (let i = 1; i <= numA; i++) {
         html += `<tr><th class="supply-demand-cell">عامل ${i}</th>`;
         for (let j = 1; j <= numT; j++) {
-            html += `<td><input type="number" step="any" class="form-control form-control-sm cost-cell" data-i="${i-1}" data-j="${j-1}" placeholder="0"></td>`;
+            const rowIdx = i - 1;
+            const colIdx = j - 1;
+            let val = '';
+            let isProhib = false;
+            
+            // اگر در حالت ویرایش هستیم و داده‌های اولیه وجود دارد، آن‌ها را بارگذاری کن
+            if (isEdit && initialCostMatrix && initialCostMatrix[rowIdx] && initialCostMatrix[rowIdx][colIdx] !== undefined) {
+                val = initialCostMatrix[rowIdx][colIdx] === null ? '' : initialCostMatrix[rowIdx][colIdx];
+                isProhib = initialProhibited[rowIdx][colIdx];
+            }
+
+            const placeholder = isProhib ? 'ممنوع' : '0';
+            const disabledAttr = isProhib ? 'disabled' : '';
+            const bgClass = isProhib ? 'bg-danger bg-opacity-10 text-danger' : '';
+
+            html += `<td><input type="number" step="any" class="form-control form-control-sm cost-cell ${bgClass}" data-i="${rowIdx}" data-j="${colIdx}" value="${val}" placeholder="${placeholder}" ${disabledAttr}></td>`;
         }
         html += '</tr>';
     }

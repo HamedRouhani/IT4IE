@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Software\Or\Models;
+
 use App\Software\Or\Core\Model;
+use PDO; // ✅ اصلاح خطا: وارد کردن کلاس PDO از فضای نام سراسری (Global)
 
 class ProblemType extends Model
 {
@@ -8,11 +11,28 @@ class ProblemType extends Model
     protected $table = 'problem_types';
 
     /**
-     * دریافت تمام انواع مسئله
+     * دریافت تمام انواع مسائل فعال
      */
-    public function getAll() 
-    { 
-        return $this->findAll([], 'id ASC'); 
+    public function getAll()
+    {
+        // ✅ اصلاح: استفاده از getTableName() برای اعمال خودکار پیشوند "or_"
+        $sql = "SELECT * FROM {$this->getTableName()} ORDER BY id DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * یافتن یک نوع مسئله بر اساس ID
+     */
+    public function find($id)
+    {
+        // ✅ اصلاح: یکپارچه‌سازی نام جدول با سایر متدها
+        return $this->db->fetchOne(
+            "SELECT * FROM {$this->getTableName()} WHERE id = ?",
+            [$id]
+        );
     }
 
     /**

@@ -2,16 +2,86 @@
 /**
  * فرم ویرایش پروژه حمل و نقل
  * مسیر: app/software/or/views/transport/edit.php
+ * نسخه اصلاح‌شده: بازسازی ماتریس هزینه + فرمت هوشمند اعداد
  */
-$sourcesJson = json_encode($sources);
-$destinationsJson = json_encode($destinations);
 
-// ساخت ماتریس اولیه از داده‌های edges
-$edgesMatrix = [];
-foreach ($edges as $edge) {
-    // پیدا کردن ایندکس سطر و ستون بر اساس ID گره‌ها (فرض بر این است که sort_order همان ایندکس است)
-    // برای سادگی، در JS بر اساس نام یا ظرفیت مچ می‌کنیم، یا بهتر است از sort_order استفاده کنیم.
+// ─────────────────────────────────────────────
+// تابع فرمت‌بندی هوشمند اعداد
+// ──────────────────────────────────────────────
+if (!function_exists('orFormatNumber')) {
+    function orFormatNumber($value, $maxDecimals = 4) {
+        if ($value === null || $value === '' || $value === '-') return null;
+        $float = (float)$value;
+        // اگر عدد صحیح است، بدون اعشار برگردان
+        if ($float == floor($float)) {
+            return (int)$float;
+        }
+        // در غیر این صورت با حذف صفرهای اضافی
+        $formatted = number_format($float, $maxDecimals, '.', '');
+        $formatted = rtrim($formatted, '0');
+        $formatted = rtrim($formatted, '.');
+        return $formatted;
+    }
 }
+
+// بازسازی ماتریس هزینه از روی داده‌های edges
+$costMatrix = [];
+$numS = count($sources);
+$numD = count($destinations);
+
+// مقداردهی اولیه ماتریس با null
+for ($i = 0; $i < $numS; $i++) {
+    $costMatrix[$i] = array_fill(0, $numD, null);
+}
+
+// پر کردن ماتریس با مقادیر هزینه از آرایه edges
+foreach ($edges as $edge) {
+    $rowIndex = -1;
+    foreach ($sources as $idx => $src) {
+        if ($src['id'] == $edge['source_id']) {
+            $rowIndex = $idx;
+            break;
+        }
+    }
+    
+    $colIndex = -1;
+    foreach ($destinations as $idx => $dst) {
+        if ($dst['id'] == $edge['destination_id']) {
+            $colIndex = $idx;
+            break;
+        }
+    }
+    
+    if ($rowIndex !== -1 && $colIndex !== -1) {
+        // اعمال فرمت هوشمند روی هزینه
+        $costMatrix[$rowIndex][$colIndex] = $edge['is_prohibited'] ? null : orFormatNumber($edge['cost']);
+    }
+}
+
+// اعمال فرمت هوشمند روی ظرفیت مبادی و مقاصد
+$formattedSources = [];
+foreach ($sources as $src) {
+    $formattedSources[] = [
+        'id' => $src['id'],
+        'name' => $src['name'],
+        'capacity' => orFormatNumber($src['capacity']),
+        'sort_order' => $src['sort_order'] ?? 0
+    ];
+}
+
+$formattedDestinations = [];
+foreach ($destinations as $dst) {
+    $formattedDestinations[] = [
+        'id' => $dst['id'],
+        'name' => $dst['name'],
+        'capacity' => orFormatNumber($dst['capacity']),
+        'sort_order' => $dst['sort_order'] ?? 0
+    ];
+}
+
+$sourcesJson = json_encode($formattedSources);
+$destinationsJson = json_encode($formattedDestinations);
+$costMatrixJson = json_encode($costMatrix);
 ?>
 
 <div class="container-fluid py-4">
@@ -42,16 +112,16 @@ foreach ($edges as $edge) {
                     </div>
                     <div class="mb-3">
                         <label class="form-label">تعداد مبادی (عرضه)</label>
-                        <input type="number" id="numSources" class="form-control" value="<?= count($sources) ?>" min="1" max="10">
+                        <input type="number" id="numSources" class="form-control" value="<?= $numS ?>" min="1" max="10">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">تعداد مقاصد (تقاضا)</label>
-                        <input type="number" id="numDestinations" class="form-control" value="<?= count($destinations) ?>" min="1" max="10">
+                        <input type="number" id="numDestinations" class="form-control" value="<?= $numD ?>" min="1" max="10">
                     </div>
                     <button type="button" class="btn btn-or-primary w-100" onclick="generateTransportMatrix(true)">
-                        <i class="fas fa-sync-alt"></i> بازسازی ماتریس با داده‌های جدید
+                        <i class="fas fa-sync-alt"></i> بازسازی ماتریس با ابعاد جدید
                     </button>
-                    <small class="text-danger d-block mt-2 text-center">⚠️ بازسازی ماتریس، داده‌های فعلی را پاک می‌کند.</small>
+                    <small class="text-danger d-block mt-2 text-center">⚠️ تغییر تعداد مبادی/مقاصد، داده‌های ماتریس را بازنشانی می‌کند.</small>
                 </div>
             </div>
             
@@ -88,9 +158,10 @@ foreach ($edges as $edge) {
 </div>
 
 <script>
-// داده‌های اولیه از دیتابیس
+// داده‌های اولیه از دیتابیس (با فرمت هوشمند)
 const initialSources = <?= $sourcesJson ?>;
 const initialDestinations = <?= $destinationsJson ?>;
+const initialCostMatrix = <?= $costMatrixJson ?>;
 
 function generateTransportMatrix(isEdit = false) {
     const numS = parseInt(document.getElementById('numSources').value) || 2;
@@ -105,9 +176,11 @@ function generateTransportMatrix(isEdit = false) {
     for (let i = 1; i <= numS; i++) {
         html += `<tr><th class="supply-demand-cell">مبدأ ${i}</th>`;
         for (let j = 1; j <= numD; j++) {
-            // در حالت ویرایش، اگر داده اولیه وجود داشت، آن را قرار بده
             let val = '';
-            // (برای سادگی، در این نسخه مقادیر ماتریس را ریست می‌کنیم یا می‌توانید منطق مچ کردن را اضافه کنید)
+            // اگر در حالت ویرایش هستیم و داده اولیه برای این خانه وجود دارد، آن را قرار بده
+            if (isEdit && initialCostMatrix && initialCostMatrix[i-1] && initialCostMatrix[i-1][j-1] !== undefined && initialCostMatrix[i-1][j-1] !== null) {
+                val = initialCostMatrix[i-1][j-1];
+            }
             html += `<td><input type="number" step="any" class="form-control form-control-sm cost-cell" data-i="${i-1}" data-j="${j-1}" value="${val}" placeholder="0" oninput="checkBalance()"></td>`;
         }
         const sCap = isEdit && initialSources[i-1] ? initialSources[i-1].capacity : 0;
@@ -139,7 +212,7 @@ function checkBalance() {
     } else if (supply > demand) {
         statusEl.innerHTML = '<span class="badge bg-warning text-dark fs-6">⚠️ عرضه > تقاضا</span>';
     } else {
-        statusEl.innerHTML = '<span class="badge bg-danger fs-6">⚠️ تقاضا > عرضه</span>';
+        statusEl.innerHTML = '<span class="badge bg-danger fs-6">️ تقاضا > عرضه</span>';
     }
 }
 
@@ -193,13 +266,12 @@ async function updateTransportProject(id) {
             alert('❌ خطا: ' + data.error);
         }
     } catch (e) {
-        alert('❌ خطای شبکه');
+        alert('❌ خطای شبکه: ' + e.message);
     } finally {
         btn.innerHTML = '<i class="fas fa-save"></i> ذخیره تغییرات';
         btn.disabled = false;
     }
 }
 
-// بارگذاری اولیه با داده‌های موجود
 document.addEventListener('DOMContentLoaded', () => generateTransportMatrix(true));
 </script>

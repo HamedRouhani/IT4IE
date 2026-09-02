@@ -93,7 +93,9 @@ class ShortestController extends Controller
         }
 
         $tab = $_GET['tab'] ?? 'info';
-        if (!in_array($tab, ['info', 'graph', 'solve'], true)) $tab = 'info';
+        if (!in_array($tab, ['info', 'graph', 'solve', 'result'], true)) $tab = 'info';
+
+        $solution = json_decode($project['solution_data'] ?? 'null', true);
 
         $this->view('shortest/show', [
             'pageTitle'    => $project['name'],
@@ -102,6 +104,7 @@ class ShortestController extends Controller
             'tab'          => $tab,
             'nodes'        => $this->model->getNodes((int)$id),
             'edges'        => $this->model->getEdges((int)$id),
+            'solution'     => $solution,  // ✅ ارسال solution به view
         ]);
     }
 
@@ -116,12 +119,20 @@ class ShortestController extends Controller
             return;
         }
 
+        // دریافت گره‌ها و یال‌ها
+        $nodes = $this->model->getNodes((int)$id);
+        $edges = $this->model->getEdges((int)$id);
+        
+        // دیباگ: بررسی کنید آیا داده‌ها لود می‌شوند؟
+        error_log("Nodes count: " . count($nodes));
+        error_log("Edges count: " . count($edges));
+
         $this->view('shortest/edit', [
-            'pageTitle'    => 'ویرایش پروژه کوتاه‌ترین مسیر: ' . $project['name'],
+            'pageTitle'    => 'ویرایش: ' . $project['name'],
             'currentPage'  => 'shortest',
             'project'      => $project,
-            'nodes'        => $this->model->getNodes((int)$id),
-            'edges'        => $this->model->getEdges((int)$id),
+            'nodes'        => $nodes,  // ← مطمئن شوید این آرایه خالی نیست
+            'edges'        => $edges,  // ← مطمئن شوید این آرایه خالی نیست
         ]);
     }
 

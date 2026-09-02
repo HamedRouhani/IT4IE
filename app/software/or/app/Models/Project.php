@@ -230,4 +230,36 @@ class Project extends Model
             [$userId, (int)$limit]
         );
     }
+    
+    /**
+     * دریافت تمام پروژه‌ها به همراه نام نوع مسئله
+     */
+    public function getAllWithProblemType()
+    {
+        $t  = $this->getTableName();
+        $pt = $this->tablePrefix . 'problem_types';
+        
+        $sql = "SELECT p.id, p.name, p.status, p.optimal_value, p.created_at, pt.name_fa AS problem_type_name
+                FROM {$t} p
+                LEFT JOIN {$pt} pt ON p.problem_type_id = pt.id
+                ORDER BY p.created_at DESC";
+        
+        return $this->query($sql);
+    }
+
+    /**
+     * دریافت یک پروژه به همراه نام نوع مسئله
+     */
+    public function getByIdWithProblemType($id)
+    {
+        $t  = $this->getTableName();
+        $pt = $this->tablePrefix . 'problem_types';
+        
+        $sql = "SELECT p.*, pt.name_fa AS problem_type_name 
+                FROM {$t} p 
+                LEFT JOIN {$pt} pt ON p.problem_type_id = pt.id 
+                WHERE p.id = ?";
+        
+        return $this->queryOne($sql, [$id]);
+    }
 }

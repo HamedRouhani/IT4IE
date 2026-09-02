@@ -123,13 +123,17 @@ class AssignmentController extends Controller
             return;
         }
 
+        // دریافت ماتریس هزینه‌ها و وضعیت ممنوعیت‌ها به صورت ساختاریافته
+        $cd = $this->model->getCostMatrix((int)$id);
+
         $this->view('assignment/edit', [
             'pageTitle'    => 'ویرایش پروژه تخصیص: ' . $project['name'],
             'currentPage'  => 'assignment',
             'project'      => $project,
-            'sources'      => $this->model->getSources((int)$id),
-            'destinations' => $this->model->getDestinations((int)$id),
-            'edges'        => $this->model->getEdges((int)$id),
+            'sources'      => $cd['sources'],
+            'destinations' => $cd['dests'],
+            'costMatrix'   => $cd['matrix'],     
+            'prohibited'   => $cd['prohibited'], 
         ]);
     }
 

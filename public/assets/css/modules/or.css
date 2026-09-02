@@ -373,3 +373,114 @@
 .or-tooltip:hover::after {
     opacity: 1;
 }
+
+/* ═══════════════════════════════════════════════ */
+/*  OR Analyzer - استایل‌های صفحه نمایش روش‌ها   */
+/*  مسیر: public/assets/css/modules/or.css        */
+/* ═══════════════════════════════════════════════ */
+
+/* ── هدر گرادیانت ── */
+.or-header-card {
+    background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 50%, #3182ce 100%);
+    border-radius: 12px;
+}
+
+/* ── کارت CTA ── */
+.or-cta-card {
+    background: linear-gradient(135deg, #276749 0%, #38a169 50%, #48bb78 100%);
+    border-radius: 12px;
+}
+
+/* ── سایدبار چسبان ── */
+.or-sticky-sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+/* ── شماره گام‌ها ── */
+.or-step-number {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    font-size: 0.9rem;
+    border: 2px solid rgba(255, 193, 7, 0.3);
+}
+
+/* ── خط جداکننده گام‌ها ── */
+.or-step-divider {
+    margin-right: 19px;
+    margin-left: 0;
+    border-top: 1px dashed #dee2e6;
+    opacity: 0.6;
+}
+
+/* ── کارت فرمول ── */
+.or-formula-box {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.25s ease;
+    background: #fff;
+}
+.or-formula-box:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+    border-color: #cbd5e0;
+}
+.or-formula-body code {
+    direction: ltr;
+    display: inline-block;
+    letter-spacing: 0.5px;
+}
+
+/* ── آیکون ورودی/خروجی ── */
+.or-io-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    flex-shrink: 0;
+}
+.or-io-input {
+    background: rgba(13, 110, 253, 0.1);
+    color: #0d6efd;
+}
+.or-io-output {
+    background: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+/* ── اسکرول نرم ── */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ── افست اسکرول برای هدر ثابت ── */
+.or-section {
+    scroll-margin-top: 80px;
+}
+
+/* ── ریسپانسیو: موبایل ── */
+@media (max-width: 991.98px) {
+    .or-sticky-sidebar {
+        position: relative;
+        top: 0;
+    }
+    .or-header-card .card-body {
+        text-align: center;
+    }
+    .or-header-card .col-lg-4 {
+        text-align: center !important;
+    }
+    .or-header-card .d-flex.gap-2 {
+        justify-content: center;
+    }
+}
+
+/* ── حالت تاریک (اختیاری - برای آینده) ── */
+@media (prefers-color-scheme: dark) {
+    /* می‌توانید بعداً استایل‌های dark mode را اینجا اضافه کنید */
+}

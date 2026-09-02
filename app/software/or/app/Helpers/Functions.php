@@ -94,4 +94,31 @@ if (!function_exists('or_checkBalance')) {
         $d = $totalDemand - $totalSupply;
         return ['balanced'=>false, 'message'=>"⚠️ تقاضا بیشتر از عرضه است. یک مبدأ مجازی با عرضه {$d} اضافه خواهد شد.", 'dummy_type'=>'source', 'dummy_capacity'=>$d];
     }
+
+    /**
+     * فرمت‌بندی هوشمند اعداد
+     * - اعداد صحیح (مثل 220.0000) را به صورت "220" نمایش می‌دهد
+     * - اعداد اعشاری (مثل 215.0012) را با حفظ ارقام معنادار نمایش می‌دهد
+     * 
+     * @param mixed $value مقدار عددی
+     * @param int $maxDecimals حداکثر تعداد ارقام اعشار (پیش‌فرض 4)
+     * @return string
+     */
+    function orFormatNumber($value, $maxDecimals = 4) {
+        if ($value === null || $value === '' || $value === '-') return '-';
+        
+        $float = (float)$value;
+        
+        // اگر عدد صحیح است، بدون اعشار نمایش بده
+        if ($float == floor($float)) {
+            return number_format($float, 0, '.', ',');
+        }
+        
+        // در غیر این صورت، با حذف صفرهای اضافی در انتها نمایش بده
+        $formatted = number_format($float, $maxDecimals, '.', '');
+        $formatted = rtrim($formatted, '0');
+        $formatted = rtrim($formatted, '.');
+        
+        return $formatted;
+    }
 }

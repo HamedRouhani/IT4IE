@@ -234,7 +234,7 @@ class TransportController extends Controller
             'project'      => $project,
             'sources'      => $this->model->getSources((int)$id),
             'destinations' => $this->model->getDestinations((int)$id),
-            'edges'        => $this->model->getEdges((int)$id),
+            'edges'        => $this->model->getEdges((int)$id),  // ← این خط مهم است
         ]);
     }
 

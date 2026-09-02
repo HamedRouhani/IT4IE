@@ -1,15 +1,18 @@
 <?php 
-$nodeMap = [];
-foreach ($nodes as $n) $nodeMap[$n['id']] = $n['name'];
+// ۱. مرتب‌سازی آرایه گره‌ها
+$nodes = array_values($nodes);
+
+// ۲. ساخت آرایه edges برای جاوااسکریپت
 $edgesData = [];
 foreach ($edges as $edge) {
     $edgesData[] = [
-        'from' => array_search($edge['source_id'], array_column($nodes, 'id')),
-        'to' => array_search($edge['destination_id'], array_column($nodes, 'id')),
-        'weight' => $edge['cost']
+        'from' => (int)$edge['source_id'],
+        'to' => (int)$edge['destination_id'],
+        'weight' => (float)($edge['cost'] ?? 0)
     ];
 }
 ?>
+
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -59,7 +62,7 @@ foreach ($edges as $edge) {
                     </div>
                     <div class="mb-3">
                         <h6 class="text-muted">یال‌ها:</h6>
-                        <div id="edgesList" class="table-responsive">
+                        <div class="table-responsive">
                             <table class="table table-sm table-bordered">
                                 <thead class="table-light">
                                     <tr><th>#</th><th>مبدأ</th><th>مقصد</th><th>وزن</th><th>عملیات</th></tr>
@@ -80,8 +83,8 @@ foreach ($edges as $edge) {
     </div>
 </div>
 
-<!-- Modal افزودن یال -->
-<div class="modal fade" id="edgeModal" tabindex="-1">
+<!-- Modal افزودن یال (فقط برای زمانی که Bootstrap لود باشد) -->
+<div class="modal fade" id="edgeModal" tabindex="-1" style="display:none;">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -102,48 +105,166 @@ foreach ($edges as $edge) {
 </div>
 
 <script>
-let nodes = <?= json_encode($nodes) ?>;
-let edges = <?= json_encode($edgesData) ?>;
-let edgeModal;
+// ============================================
+// دریافت داده‌ها از PHP
+// ============================================
+let nodes = <?= json_encode($nodes, JSON_UNESCAPED_UNICODE) ?>;
+let edges = <?= json_encode($edgesData, JSON_UNESCAPED_UNICODE) ?>;
 
-document.addEventListener('DOMContentLoaded', () => {
-    edgeModal = new bootstrap.Modal(document.getElementById('edgeModal'));
+console.log('✅ داده‌ها دریافت شدند:', { nodes, edges });
+
+// ============================================
+// رندر فوری - بدون انتظار برای Bootstrap
+// ============================================
+function renderNodes() {
+    const nodesList = document.getElementById('nodesList');
+    if (!nodesList) return;
+    
+    if (nodes.length === 0) {
+        nodesList.innerHTML = '<span class="text-muted">هیچ گره‌ای وجود ندارد</span>';
+        return;
+    }
+    
+    nodesList.innerHTML = nodes.map(n => 
+        `<span class="badge bg-primary fs-6 p-2">${n.name} (ID: ${n.id})</span>`
+    ).join('');
+    
+    // به‌روزرسانی لیست کشویی Modal (اگر وجود داشته باشد)
+    const options = nodes.map(n => `<option value="${n.id}">${n.name}</option>`).join('');
+    const edgeFrom = document.getElementById('edgeFrom');
+    const edgeTo = document.getElementById('edgeTo');
+    if (edgeFrom) edgeFrom.innerHTML = options;
+    if (edgeTo) edgeTo.innerHTML = options;
+    
+    console.log('✅ گره‌ها رندر شدند:', nodes.length);
+}
+
+function renderEdges() {
+    const tbody = document.getElementById('edgesTableBody');
+    if (!tbody) return;
+    
+    if (edges.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">هنوز یالی اضافه نشده است.</td></tr>';
+        console.log('⚠️ جدول یال‌ها خالی است');
+        return;
+    }
+    
+    tbody.innerHTML = edges.map((e, idx) => {
+        const fromNode = nodes.find(n => n.id === e.from);
+        const toNode = nodes.find(n => n.id === e.to);
+        
+        const fromName = fromNode ? fromNode.name : 'نامشخص';
+        const toName = toNode ? toNode.name : 'نامشخص';
+        
+        return `
+        <tr>
+            <td>${idx + 1}</td>
+            <td>${fromName}</td>
+            <td>${toName}</td>
+            <td>${e.weight}</td>
+            <td><button class="btn btn-sm btn-outline-danger" onclick="removeEdge(${idx})"><i class="fas fa-times"></i></button></td>
+        </tr>
+        `;
+    }).join('');
+    
+    console.log('✅ یال‌ها رندر شدند:', edges.length);
+}
+
+// ============================================
+// فراخوانی فوری هنگام لود DOM
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOM لود شد - شروع رندر');
     renderNodes();
     renderEdges();
 });
 
-function generateGraph() {
-    const numNodes = parseInt(document.getElementById('numNodes').value);
-    nodes = [];
-    for (let i = 0; i < numNodes; i++) nodes.push({ id: i, name: `گره ${i + 1}` });
-    edges = [];
+// اگر DOM قبلاً لود شده باشد
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    console.log('🚀 DOM قبلاً لود شده - رندر فوری');
     renderNodes();
     renderEdges();
 }
 
-function renderNodes() {
-    document.getElementById('nodesList').innerHTML = nodes.map(n => 
-        `<span class="badge bg-primary fs-6 p-2">${n.name}</span>`
-    ).join('');
+// ============================================
+// توابع مدیریت گراف
+// ============================================
+function generateGraph() {
+    if(!confirm('آیا مطمئن هستید؟ تمام یال‌های فعلی پاک خواهند شد.')) return;
+    
+    const numNodes = parseInt(document.getElementById('numNodes').value) || 2;
+    nodes = [];
+    for (let i = 0; i < numNodes; i++) {
+        nodes.push({ id: i + 1, name: `گره ${i + 1}` }); 
+    }
+    edges = []; 
+    renderNodes();
+    renderEdges();
 }
 
 function addEdge() {
-    if (nodes.length < 2) { alert('حداقل ۲ گره نیاز است.'); return; }
-    document.getElementById('edgeFrom').innerHTML = nodes.map(n => `<option value="${n.id}">${n.name}</option>`).join('');
-    document.getElementById('edgeTo').innerHTML = nodes.map(n => `<option value="${n.id}">${n.name}</option>`).join('');
-    document.getElementById('edgeWeight').value = 1;
-    edgeModal.show();
+    if (nodes.length < 2) { 
+        alert('حداقل ۲ گره نیاز است.'); 
+        return; 
+    }
+    
+    // بررسی وجود Bootstrap
+    if (typeof window.bootstrap !== 'undefined') {
+        // استفاده از Modal
+        const options = nodes.map(n => `<option value="${n.id}">${n.name}</option>`).join('');
+        document.getElementById('edgeFrom').innerHTML = options;
+        document.getElementById('edgeTo').innerHTML = options;
+        document.getElementById('edgeWeight').value = 1;
+        
+        const modal = new window.bootstrap.Modal(document.getElementById('edgeModal'));
+        modal.show();
+    } else {
+        // Fallback: استفاده از prompt ساده
+        const fromOptions = nodes.map((n, i) => `${i}: ${n.name}`).join('\n');
+        const fromIdx = prompt(`گره مبدأ را انتخاب کنید:\n${fromOptions}`);
+        if (fromIdx === null) return;
+        
+        const toOptions = nodes.map((n, i) => `${i}: ${n.name}`).join('\n');
+        const toIdx = prompt(`گره مقصد را انتخاب کنید:\n${toOptions}`);
+        if (toIdx === null) return;
+        
+        const weight = prompt('وزن یال را وارد کنید:', '1');
+        if (weight === null) return;
+        
+        const from = nodes[parseInt(fromIdx)].id;
+        const to = nodes[parseInt(toIdx)].id;
+        
+        if (from === to) { 
+            alert('مبدأ و مقصد نمی‌توانند یکسان باشند.'); 
+            return; 
+        }
+        
+        edges.push({ from, to, weight: parseFloat(weight) });
+        renderEdges();
+    }
 }
 
 function saveEdge() {
     const from = parseInt(document.getElementById('edgeFrom').value);
     const to = parseInt(document.getElementById('edgeTo').value);
     const weight = parseFloat(document.getElementById('edgeWeight').value);
-    if (from === to) { alert('مبدأ و مقصد نمی‌توانند یکسان باشند.'); return; }
-    if (weight < 0) { alert('وزن نمی‌تواند منفی باشد.'); return; }
+    
+    if (from === to) { 
+        alert('مبدأ و مقصد نمی‌توانند یکسان باشند.'); 
+        return; 
+    }
+    if (weight < 0) { 
+        alert('وزن نمی‌تواند منفی باشد.'); 
+        return; 
+    }
+    
     edges.push({ from, to, weight });
     renderEdges();
-    edgeModal.hide();
+    
+    if (typeof window.bootstrap !== 'undefined') {
+        const modal = window.bootstrap.Modal.getInstance(document.getElementById('edgeModal'));
+        if (modal) modal.hide();
+    }
 }
 
 function removeEdge(idx) {
@@ -151,23 +272,9 @@ function removeEdge(idx) {
     renderEdges();
 }
 
-function renderEdges() {
-    const tbody = document.getElementById('edgesTableBody');
-    if (edges.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">هنوز یالی اضافه نشده است.</td></tr>';
-        return;
-    }
-    tbody.innerHTML = edges.map((e, idx) => `
-        <tr>
-            <td>${idx + 1}</td>
-            <td>${nodes[e.from].name}</td>
-            <td>${nodes[e.to].name}</td>
-            <td>${e.weight}</td>
-            <td><button class="btn btn-sm btn-outline-danger" onclick="removeEdge(${idx})"><i class="fas fa-times"></i></button></td>
-        </tr>
-    `).join('');
-}
-
+// ============================================
+// ذخیره پروژه
+// ============================================
 async function updateShortestProject(id) {
     const payload = {
         name: document.getElementById('projName').value,
@@ -188,13 +295,13 @@ async function updateShortestProject(id) {
         });
         const data = await res.json();
         if (data.success) {
-            alert('✅ تغییرات ذخیره شد!');
+            alert('✅ تغییرات با موفقیت ذخیره شد!');
             window.location.href = '<?= or_url("controller=shortest&action=show&id=") ?>' + id;
         } else {
-            alert('❌ ' + data.error);
+            alert('❌ خطا: ' + data.error);
         }
     } catch (e) {
-        alert('❌ خطای شبکه');
+        alert('❌ خطای شبکه: ' + e.message);
     } finally {
         btn.innerHTML = '<i class="fas fa-save"></i> ذخیره تغییرات';
         btn.disabled = false;
