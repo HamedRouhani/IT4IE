@@ -267,19 +267,41 @@ class AssignmentController extends Controller
         }
     }
 
+    // ✅ حذف اختصاصی (اصلاح‌شده برای مسئله تخصیص)
     public function delete($id)
     {
         $this->requireAuth();
-        $p = $this->model->find((int)$id);
+        
+        // استفاده از getWithDetails برای دریافت problem_type_code از طریق JOIN
+        $p = $this->model->getWithDetails((int)$id);
+        
         if ($p && $p['user_id'] == $this->currentUserId && ($p['problem_type_code'] ?? '') === 'ASSIGN') {
+            // ۱. حذف وابستگی‌ها (گره‌ها، یال‌ها، تخصیص‌ها و نتایج)
             $this->model->query("DELETE FROM or_project_nodes WHERE project_id=?", [(int)$id]);
             $this->model->query("DELETE FROM or_project_edges WHERE project_id=?", [(int)$id]);
             $this->model->query("DELETE FROM or_project_allocations WHERE project_id=?", [(int)$id]);
             $this->model->query("DELETE FROM or_project_results WHERE project_id=?", [(int)$id]);
+            
+            // ۲. حذف خود پروژه
             $this->model->delete((int)$id);
+            
             $this->logActivity('delete', 'assignment', (int)$id);
-            $this->flashSuccess('پروژه تخصیص حذف شد.');
+            
+            // نمایش پیام موفقیت
+            if (method_exists($this, 'flashSuccess')) {
+                $this->flashSuccess('پروژه تخصیص با موفقیت حذف شد.');
+            } else {
+                $this->flash('success', 'پروژه تخصیص با موفقیت حذف شد.');
+            }
+        } else {
+            // نمایش پیام خطا در صورت عدم تطابق
+            if (method_exists($this, 'flashError')) {
+                $this->flashError('پروژه یافت نشد یا دسترسی مجاز نیست.');
+            } else {
+                $this->flash('error', 'پروژه یافت نشد یا دسترسی مجاز نیست.');
+            }
         }
+        
         $this->redirect('controller=assignment');
     }
 }

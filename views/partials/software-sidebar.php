@@ -77,6 +77,7 @@ $moduleMenus = [
         'param' => 'controller',
         'menus' => [
             ['route' => 'dashboard',     'icon' => 'fas fa-home',              'label' => 'داشبورد'],
+            ['route' => 'smart_modeler', 'icon' => 'fas fa-brain',             'label' => 'مدلسازی هوشمند'],
             ['route' => 'transport',     'icon' => 'fas fa-truck',             'label' => 'حمل و نقل'],
             ['route' => 'assignment',    'icon' => 'fas fa-users-cog',         'label' => 'تخصیص'],
             ['route' => 'transship',     'icon' => 'fas fa-project-diagram',   'label' => 'ترانشیپمنت'],

@@ -203,16 +203,36 @@ class TransportController extends Controller
     public function delete($id)
     {
         $this->requireAuth();
-        $p = $this->model->find((int)$id);
+        
+        // استفاده از getWithDetails برای دریافت problem_type_code از طریق JOIN
+        $p = $this->model->getWithDetails((int)$id);
+        
         if ($p && $p['user_id'] == $this->currentUserId && ($p['problem_type_code'] ?? '') === 'TRANS') {
+            // حذف وابستگی‌ها
             $this->model->query("DELETE FROM or_project_nodes WHERE project_id=?", [(int)$id]);
             $this->model->query("DELETE FROM or_project_edges WHERE project_id=?", [(int)$id]);
             $this->model->query("DELETE FROM or_project_allocations WHERE project_id=?", [(int)$id]);
             $this->model->query("DELETE FROM or_project_results WHERE project_id=?", [(int)$id]);
+            
+            // حذف خود پروژه
             $this->model->delete((int)$id);
+            
             $this->logActivity('delete', 'transport', (int)$id);
-            $this->flashSuccess('پروژه حمل و نقل حذف شد.');
+            
+            // نمایش پیام موفقیت (بسته به نام متد در Controller پایه، flashSuccess یا flash)
+            if (method_exists($this, 'flashSuccess')) {
+                $this->flashSuccess('پروژه حمل و نقل با موفقیت حذف شد.');
+            } else {
+                $this->flash('success', 'پروژه حمل و نقل با موفقیت حذف شد.');
+            }
+        } else {
+            if (method_exists($this, 'flashError')) {
+                $this->flashError('پروژه یافت نشد یا دسترسی مجاز نیست.');
+            } else {
+                $this->flash('error', 'پروژه یافت نشد یا دسترسی مجاز نیست.');
+            }
         }
+        
         $this->redirect('controller=transport');
     }
 

@@ -38,14 +38,23 @@ $iconMap = [
                 </ol>
             </nav>
         </div>
-        <!-- ✅ حذف دکمه پروژه جدید (چون کنترلر project حذف شده) -->
-        <a href="<?= or_url('controller=problem_type') ?>" class="btn btn-or-primary">
-            <i class="fas fa-cubes"></i> انتخاب نوع مسئله
-        </a>
+        <div> 
+            <!-- ✅ حذف دکمه پروژه جدید (چون کنترلر project حذف شده) -->
+            <a href="<?= or_url('controller=problem_type') ?>" class="btn btn-or-primary">
+                <i class="fas fa-cubes"></i> انتخاب نوع مسئله
+            </a>
+        </div> 
     </div>
 
     <!-- کارت‌های آماری -->
     <div class="row g-3 mb-4">
+        <div class="card border-0 shadow-sm" style="cursor: pointer;" onclick="window.location.href='?controller=smart_modeler'">
+            <div class="card-body text-center">
+                <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                <h5>مدلسازی هوشمند</h5>
+                <p class="text-muted small mb-0">توصیف مسئله به فارسی و تشخیص خودکار</p>
+            </div>
+        </div>
         <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">

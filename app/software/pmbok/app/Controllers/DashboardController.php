@@ -85,6 +85,7 @@ class DashboardController extends Controller
             'knowledgeAreas' => $knowledgeAreas,
             'recentProjects' => $recentProjects,
             'highRisks' => $highRisks,
+            'activeProjects' => $activeProjects ?? [],
         ]);
     }
 }

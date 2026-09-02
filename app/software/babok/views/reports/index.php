@@ -6,11 +6,11 @@
 ?>
 
 <div style="max-width: 1100px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+    <div style="background: linear-gradient(135deg, #494f6b 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
         <h2 style="margin: 0 0 10px 0; font-size: 1.8rem;">
             <i class="fas fa-file-alt"></i> گزارش‌های هوشمند پروژه
         </h2>
-        <p style="margin: 0; opacity: 0.95; font-size: 1rem;">
+        <p style="margin: 0; color: white; font-size: 1rem; font-weight: 500;">
             پروژه مورد نظر را انتخاب کنید تا گزارش کامل، قابل پرینت یا خروجی Excel تولید شود.
         </p>
     </div>

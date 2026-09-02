@@ -1,6 +1,23 @@
 <?php
-$pageTitle = 'داشبورد - PMBOK Analyzer';
-$activePage = 'dashboard';
+/**
+ * داشبورد اصلی ماژول PMBOK Analyzer
+ * مسیر: app/software/pmbok/views/dashboard/index.php
+ * نسخه: ایمن‌سازی شده برای PHP 8+ (رفع خطای Undefined variable و null foreach)
+ */
+
+// ──────────────────────────────────────────────
+// 🛡️ لایه ایمنی متغیرها (جلوگیری از خطاهای PHP 8)
+// ──────────────────────────────────────────────
+$pageTitle      = $pageTitle ?? 'داشبورد - PMBOK Analyzer';
+$activePage     = $activePage ?? 'dashboard';
+$isAuthenticated = $isAuthenticated ?? false;
+
+// تبدیل به آرایه خالی در صورت null بودن (رفع خطای foreach)
+$stats          = is_array($stats) ? $stats : [];
+$knowledgeAreas = $knowledgeAreas ?? [];
+$highRisks      = $highRisks ?? [];
+$recentProjects = $recentProjects ?? [];
+$activeProjects = $activeProjects ?? []; // ✅ رفع مستقیم خطای گزارش‌شده شما
 ?>
 
 <!-- کارت‌های آمار -->
@@ -58,15 +75,13 @@ $activePage = 'dashboard';
     <!-- حوزه‌های دانشی -->
     <div class="card">
         <h3 class="card-title"><i class="fas fa-diagram-project"></i> حوزه‌های دانشی PMBOK</h3>
-        <?php if (empty($knowledgeAreas)): ?>
-            <p class="text-muted">هیچ حوزه‌ای یافت نشد.</p>
-        <?php else: ?>
+        <?php if (!empty($knowledgeAreas)): ?>
             <ul class="list-items">
                 <?php foreach ($knowledgeAreas as $area): ?>
                     <li class="list-item">
                         <a href="?controller=knowledgeArea&action=show&id=<?= $area['id'] ?>" class="list-item-link">
                             <i class="fas fa-folder"></i>
-                            <span><?= htmlspecialchars($area['name']) ?></span>
+                            <span><?= htmlspecialchars($area['name'] ?? 'نامشخص') ?></span>
                         </a>
                         <span class="badge badge-primary"><?= $area['task_count'] ?? 0 ?></span>
                     </li>
@@ -77,15 +92,15 @@ $activePage = 'dashboard';
                     <i class="fas fa-arrow-left"></i> مشاهده همه
                 </a>
             </div>
+        <?php else: ?>
+            <p class="text-muted">هیچ حوزه‌ای یافت نشد.</p>
         <?php endif; ?>
     </div>
     
     <!-- ریسک‌های بحرانی -->
     <div class="card">
         <h3 class="card-title"><i class="fas fa-exclamation-triangle" style="color:#EF4444;"></i> ریسک‌های بحرانی</h3>
-        <?php if (empty($highRisks)): ?>
-            <p class="text-muted"><i class="fas fa-check-circle" style="color:#10B981;"></i> ریسک بحرانی وجود ندارد.</p>
-        <?php else: ?>
+        <?php if (!empty($highRisks)): ?>
             <?php foreach ($highRisks as $risk): ?>
                 <div class="list-item" style="gap: 12px;">
                     <div class="activity-icon" style="color:#EF4444;">
@@ -93,11 +108,11 @@ $activePage = 'dashboard';
                     </div>
                     <div class="list-item-info">
                         <a href="?controller=risk&action=show&id=<?= $risk['id'] ?>" class="list-item-link">
-                            <?= htmlspecialchars($risk['title']) ?>
+                            <?= htmlspecialchars($risk['title'] ?? 'ریسک بدون عنوان') ?>
                         </a>
                         <small class="text-muted">
-                            <i class="fas fa-project-diagram"></i> <?= htmlspecialchars($risk['project_name']) ?>
-                            | امتیاز: <strong style="color:#EF4444;"><?= $risk['risk_score'] ?></strong>
+                            <i class="fas fa-project-diagram"></i> <?= htmlspecialchars($risk['project_name'] ?? 'نامشخص') ?>
+                            | امتیاز: <strong style="color:#EF4444;"><?= $risk['risk_score'] ?? 0 ?></strong>
                         </small>
                     </div>
                 </div>
@@ -107,14 +122,24 @@ $activePage = 'dashboard';
                     <i class="fas fa-list"></i> مشاهده همه ریسک‌ها
                 </a>
             </div>
+        <?php else: ?>
+            <p class="text-muted"><i class="fas fa-check-circle" style="color:#10B981;"></i> ریسک بحرانی وجود ندارد.</p>
         <?php endif; ?>
     </div>
 </div>
 
-<!-- پروژه‌های اخیر -->
-<?php if (!empty($recentProjects)): ?>
+<!-- پروژه‌های فعال و اخیر -->
+<?php 
+// ادغام هوشمند: اگر activeProjects بود از آن استفاده کن، در غیر این صورت recentProjects
+$displayProjects = !empty($activeProjects) ? $activeProjects : $recentProjects;
+?>
+
+<?php if (!empty($displayProjects)): ?>
 <div class="card" style="margin-top: 20px;">
-    <h3 class="card-title"><i class="fas fa-clock"></i> پروژه‌های اخیر</h3>
+    <h3 class="card-title">
+        <i class="fas fa-clock"></i> 
+        <?= !empty($activeProjects) ? 'پروژه‌های فعال' : 'پروژه‌های اخیر' ?>
+    </h3>
     <div class="table-responsive">
         <table class="table">
             <thead>
@@ -126,21 +151,21 @@ $activePage = 'dashboard';
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($recentProjects as $project): ?>
+                <?php foreach ($displayProjects as $project): ?>
                 <tr>
-                    <td><strong><?= htmlspecialchars($project['name']) ?></strong></td>
+                    <td><strong><?= htmlspecialchars($project['name'] ?? 'پروژه بدون نام') ?></strong></td>
                     <td>
                         <span class="badge badge-info">
-                            <?= pmbok_getMethodologyLabel($project['methodology']) ?>
+                            <?= pmbok_getMethodologyLabel($project['methodology'] ?? '') ?>
                         </span>
                     </td>
                     <td>
-                        <span class="badge badge-<?= pmbok_getPhaseColor($project['phase']) ?>">
-                            <?= pmbok_getPhaseLabel($project['phase']) ?>
+                        <span class="badge badge-<?= pmbok_getPhaseColor($project['phase'] ?? '') ?>">
+                            <?= pmbok_getPhaseLabel($project['phase'] ?? '') ?>
                         </span>
                     </td>
                     <td>
-                        <a href="?controller=project&action=show&id=<?= $project['id'] ?>" class="btn btn-sm btn-primary">
+                        <a href="?controller=project&action=show&id=<?= $project['id'] ?>" class="btn btn-sm btn-primary" title="مشاهده جزئیات">
                             <i class="fas fa-eye"></i>
                         </a>
                     </td>

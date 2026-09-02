@@ -184,19 +184,41 @@ class ShortestController extends Controller
         }
     }
 
+    // ✅ حذف اختصاصی (اصلاح‌شده برای کوتاه‌ترین مسیر)
     public function delete($id)
     {
         $this->requireAuth();
-        $p = $this->model->find((int)$id);
+        
+        // ✅ تغییر کلیدی: استفاده از getWithDetails به جای find برای دریافت problem_type_code
+        $p = $this->model->getWithDetails((int)$id);
+        
         if ($p && $p['user_id'] == $this->currentUserId && ($p['problem_type_code'] ?? '') === 'SHORTEST') {
+            // ۱. حذف وابستگی‌ها
             $this->model->query("DELETE FROM or_project_nodes WHERE project_id=?", [(int)$id]);
             $this->model->query("DELETE FROM or_project_edges WHERE project_id=?", [(int)$id]);
             $this->model->query("DELETE FROM or_project_allocations WHERE project_id=?", [(int)$id]);
             $this->model->query("DELETE FROM or_project_results WHERE project_id=?", [(int)$id]);
+            
+            // ۲. حذف خود پروژه
             $this->model->delete((int)$id);
+            
             $this->logActivity('delete', 'shortest', (int)$id);
-            $this->flashSuccess('پروژه حذف شد.');
+            
+            // نمایش پیام موفقیت
+            if (method_exists($this, 'flashSuccess')) {
+                $this->flashSuccess('پروژه کوتاه‌ترین مسیر با موفقیت حذف شد.');
+            } else {
+                $this->flash('success', 'پروژه کوتاه‌ترین مسیر با موفقیت حذف شد.');
+            }
+        } else {
+            // نمایش پیام خطا در صورت عدم تطابق
+            if (method_exists($this, 'flashError')) {
+                $this->flashError('پروژه یافت نشد یا دسترسی مجاز نیست.');
+            } else {
+                $this->flash('error', 'پروژه یافت نشد یا دسترسی مجاز نیست.');
+            }
         }
+        
         $this->redirect('controller=shortest');
     }
 

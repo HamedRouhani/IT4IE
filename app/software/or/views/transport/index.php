@@ -120,8 +120,7 @@
 <script>
 function deleteProject(id, name) {
     if (confirm('آیا از حذف پروژه "' + name + '" مطمئن هستید؟ این عملیات غیرقابل بازگشت است.')) {
-        // ✅ هدایت به کنترلر عمومی project برای حذف
-        window.location.href = '<?= or_url("controller=project&action=delete&id=") ?>' + id;
+        window.location.href = '<?= or_url("controller=transport&action=delete&id=") ?>' + id;
     }
 }
 </script>

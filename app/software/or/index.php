@@ -86,6 +86,7 @@ $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
 // ============================================
 $controllerMap = [
     'dashboard'    => 'DashboardController',
+    'smart_modeler'  => 'SmartModelerController',
     'problem_type' => 'ProblemTypeController',
     'method'       => 'MethodController',
     'transport'    => 'TransportController',
