@@ -38,6 +38,9 @@ $cssVersion = '2.0'; // برای شکستن کش مرورگر
     <?php if ($moduleName): ?>
     <link rel="stylesheet" href="/assets/css/modules/<?php echo $moduleName; ?>.css?v=<?php echo $cssVersion; ?>">
     <?php endif; ?>
+    <?php
+    echo '<link rel="stylesheet" href="/assets/css/modules/statlab.css?v=' . time() . '">';
+    ?>
 </head>
 <body class="software-mode">
 

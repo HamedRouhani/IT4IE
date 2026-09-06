@@ -89,6 +89,23 @@ $moduleMenus = [
             ['route' => 'report',        'icon' => 'fas fa-chart-bar',         'label' => 'گزارش‌ها'],
         ]
     ],
+
+    // -------- StatLab Analyzer --------
+    'statlab' => [
+        'name'  => 'StatLab Analyzer',
+        'icon'  => 'fas fa-chart-line',
+        'param' => 'controller',
+        'menus' => [
+            ['route' => 'dashboard',          'icon' => 'fas fa-gauge-high',         'label' => 'داشبورد'],
+            ['route' => 'project',            'icon' => 'fas fa-folder-open',        'label' => 'پروژه‌های آماری'],
+            ['route' => 'descriptive',        'icon' => 'fas fa-chart-simple',       'label' => 'آمار توصیفی'],
+            ['route' => 'distribution',       'icon' => 'fas fa-dice',               'label' => 'توزیع‌های احتمال'],
+            ['route' => 'hypothesis',         'icon' => 'fas fa-scale-balanced',     'label' => 'آزمون فرض'],
+            ['route' => 'regression',         'icon' => 'fas fa-chart-line',         'label' => 'رگرسیون و همبستگی'],
+            ['route' => 'smart_statistician', 'icon' => 'fas fa-wand-magic-sparkles','label' => 'دستیار هوشمند'],
+            ['route' => 'report',             'icon' => 'fas fa-chart-bar',          'label' => 'گزارش‌ها'],
+        ]
+    ],
 ];
 
 // ============================================================

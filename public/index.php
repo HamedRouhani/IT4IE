@@ -37,6 +37,7 @@ $moduleSlugs = [
     'pmbok-analyzer' => 'pmbok',
     'mcdm-analyzer'  => 'mcdm',
     'or-analyzer'    => 'or',
+    'statlab-analyzer'  => 'statlab',
 ];
 
 // ============================================
