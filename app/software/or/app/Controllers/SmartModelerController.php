@@ -121,13 +121,44 @@ class SmartModelerController extends Controller
 
             $pt = (new ProblemType())->getByCode($typeMap[$type]['code']);
             
+            $projectObjective = $modelData['objective'] ?? 'minimize';
+
+            if ($type === 'LP' && !empty($modelData['variables']) && !empty($modelData['constraints'])) {
+                $c = [];
+                foreach ($modelData['variables'] as $var) {
+                    $c[] = (float)($var['coeff'] ?? 0);
+                }
+                
+                $A = [];
+                $b = [];
+                $types = [];
+                foreach ($modelData['constraints'] as $const) {
+                    $A[] = array_map('floatval', $const['coeffs'] ?? []);
+                    $b[] = (float)($const['capacity'] ?? 0);
+                    $types[] = $const['type'] ?? '<=';
+                }
+                
+                // جایگزینی model_data با فرمت استاندارد
+                $modelData = [
+                    'c' => $c,
+                    'A' => $A,
+                    'b' => $b,
+                    'types' => $types,
+                    'name' => $modelData['name'] ?? '',
+                    'description' => $modelData['description'] ?? '',
+                    'objective' => $modelData['objective'] ?? 'maximize',
+                ];
+                
+                $projectObjective = $modelData['objective'];
+            }
+
             // ۱. ایجاد پروژه اصلی
             $projectId = $this->model->create([
                 'user_id' => $this->currentUserId,
                 'name' => $modelData['name'] ?? "پروژه {$typeMap[$type]['code']} هوشمند",
                 'description' => $modelData['description'] ?? '',
                 'problem_type_id' => $pt['id'],
-                'objective' => $modelData['objective'] ?? 'minimize',
+                'objective' => $projectObjective,
                 'status' => 'draft',
                 'model_data' => json_encode($modelData, JSON_UNESCAPED_UNICODE),
             ]);

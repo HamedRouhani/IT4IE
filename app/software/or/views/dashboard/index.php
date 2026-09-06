@@ -107,20 +107,22 @@ $iconMap = [
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-warning bg-opacity-10 rounded-3 p-3">
-                                <i class="fas fa-calculator fa-2x text-warning"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 me-3">
-                            <h6 class="text-muted mb-1">روش‌های حل</h6>
-                            <h3 class="mb-0"><?= $stats['methods'] ?? 0 ?></h3>
-                        </div>
-                    </div>
-                </div>
+            <div class="or-stat-card text-center">
+                <h6 class="text-muted mb-2">روش‌های حل</h6>
+                <h3 class="mb-0 text-info fw-bold"><?= number_format($stats['methods']) ?></h3>
+                <small class="text-muted">
+                    <?php if (!empty($methodsByCategory)): ?>
+                        <?= implode(' · ', array_map(function($cat, $cnt) {
+                            $labels = [
+                                'exact' => 'دقیق',
+                                'heuristic' => 'ابتکاری',
+                                'initial' => 'اولیه',
+                                'optimization' => 'بهینه‌سازی',
+                            ];
+                            return ($labels[$cat] ?? $cat) . ": {$cnt}";
+                        }, array_keys($methodsByCategory), array_values($methodsByCategory))) ?>
+                    <?php endif; ?>
+                </small>
             </div>
         </div>
     </div>

@@ -1,8 +1,10 @@
 <?php
-/**
- * نمایش جزئیات پروژه برنامه‌ریزی خطی (Simplex)
- * مسیر: app/software/or/views/simplex/show.php
- */
+if (isset($modelData['variables']) && !isset($modelData['c'])) {
+    $modelData['c'] = array_map(fn($v) => (float)($v['coeff'] ?? 0), $modelData['variables']);
+    $modelData['A'] = array_map(fn($c) => array_map('floatval', $c['coeffs'] ?? []), $modelData['constraints']);
+    $modelData['b'] = array_map(fn($c) => (float)($c['capacity'] ?? 0), $modelData['constraints']);
+    $modelData['types'] = array_map(fn($c) => $c['type'] ?? '<=', $modelData['constraints']);
+}
 ?>
 
 <div class="container-fluid py-4">

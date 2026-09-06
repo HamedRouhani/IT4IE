@@ -39,6 +39,12 @@
                                    value="مدل تولید بهینه" required>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="modelDesc" class="form-label">توضیحات</label>
+                            <textarea class="form-control" id="modelDesc" rows="3" 
+                                    placeholder="توضیحات پروژه (اختیاری)"></textarea>
+                        </div>
+
                         <!-- نوع تابع هدف -->
                         <div class="mb-3">
                             <label class="form-label">هدف مسئله</label>
@@ -222,14 +228,11 @@ async function submitModel() {
         types[select.dataset.i] = select.value;
     });
 
-    // ✅ اصلاح: ارسال 'objective' به جای 'obj_type'
-    const payload = {
+   const payload = {
         name: modelName,
+        description: document.getElementById('modelDesc').value,  // ← اضافه شد
         objective: objType, 
-        c: c,
-        A: A,
-        b: b,
-        types: types
+        c: c, A: A, b: b, types: types
     };
 
     const btn = event.target;

@@ -1,5 +1,6 @@
 <?php
 namespace App\Software\Or\Models;
+
 use App\Software\Or\Core\Model;
 
 class Method extends Model
@@ -35,5 +36,59 @@ class Method extends Model
     public function getByCode($code)
     {
         return $this->queryOne("SELECT * FROM {$this->getTableName()} WHERE code = ?", [$code]);
+    }
+
+    /**
+     * شمارش کل روش‌ها (سازگار با کلاس والد)
+     */
+    public function count($conditions = [])
+    {
+        $table = $this->getTableName();
+        
+        $sql = "SELECT COUNT(*) FROM `{$table}`";
+        $params = [];
+        
+        if (!empty($conditions)) {
+            $where = [];
+            foreach ($conditions as $key => $value) {
+                $where[] = "`{$key}` = ?";
+                $params[] = $value;
+            }
+            $sql .= " WHERE " . implode(" AND ", $where);
+        }
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * شمارش روش‌ها به تفکیک دسته (exact, heuristic, initial, optimization)
+     */
+    public function countByCategory()
+    {
+        $table = $this->getTableName(); // ✅ علامت $ اضافه شد
+        $stmt = $this->db->query("
+            SELECT category, COUNT(*) as cnt 
+            FROM `{$table}` 
+            GROUP BY category
+        ");
+        return $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
+    }
+
+    /**
+     * شمارش روش‌ها به تفکیک نوع مسئله
+     */
+    public function countByProblemType()
+    {
+        $t  = $this->getTableName();
+        $pt = $this->tablePrefix . 'problem_types';
+        $stmt = $this->db->query("
+            SELECT pt.name_fa, COUNT(m.id) as cnt 
+            FROM `{$t}` m 
+            JOIN `{$pt}` pt ON m.problem_type_id = pt.id 
+            GROUP BY pt.id, pt.name_fa
+        ");
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

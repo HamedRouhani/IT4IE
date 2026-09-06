@@ -1,19 +1,21 @@
 <?php
-/**
- * فرم ویرایش مدل برنامه‌ریزی خطی
- * مسیر: app/software/or/views/simplex/edit.php
- */
-
 $modelData = json_decode($project['model_data'] ?? '{}', true) ?: [];
 
-$c = $modelData['c'] ?? [];
-$A = $modelData['A'] ?? [];
-$b = $modelData['b'] ?? [];
-$types = $modelData['types'] ?? [];
+if (isset($modelData['variables']) && !isset($modelData['c'])) {
+    $c = array_map(fn($v) => (float)($v['coeff'] ?? 0), $modelData['variables']);
+    $A = array_map(fn($c) => array_map('floatval', $c['coeffs'] ?? []), $modelData['constraints']);
+    $b = array_map(fn($c) => (float)($c['capacity'] ?? 0), $modelData['constraints']);
+    $types = array_map(fn($c) => $c['type'] ?? '<=', $modelData['constraints']);
+} else {
+    $c = $modelData['c'] ?? [];
+    $A = $modelData['A'] ?? [];
+    $b = $modelData['b'] ?? [];
+    $types = $modelData['types'] ?? [];
+}
 
 $numVars = count($c);
 $numConstraints = count($b);
-$objective = $project['objective'] ?? 'maximize';
+$objective = $project['objective'] ?? ($modelData['objective'] ?? 'maximize');
 
 $cJson = json_encode($c, JSON_UNESCAPED_UNICODE) ?: '[]';
 $AJson = json_encode($A, JSON_UNESCAPED_UNICODE) ?: '[]';

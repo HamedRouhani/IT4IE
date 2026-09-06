@@ -199,6 +199,26 @@ class SmartModeler
     }
 
     /**
+     * ✅ پاکسازی نام گره/شهر از کلمات مزاحم و علائم نگارشی
+     */
+    private function cleanNodeName($name)
+    {
+        $name = trim($name);
+        // حذف علائم نگارشی
+        $name = preg_replace('/[،,.؛;:!؟?()«»\[\]{}"-]+/u', '', $name);
+        // حذف پیشوند «شهر»
+        $name = preg_replace('/^شهر/u', '', $name);
+        // حذف افعال مزاحم انتهای نام («شیراز هستند» → «شیراز»)
+        $name = preg_replace('/(?:هستند|است|می‌باشد|میباشد)$/u', '', $name);
+        $name = trim($name);
+        // حذف کلمات توقف
+        $stop = ['به', 'از', 'تا', 'با', 'وزن', 'فاصله', 'هزینه', 'کیلومتر', 'کیلومتری',
+                'مبدأ', 'مقصد', 'و', 'در', 'را', 'که', 'این', 'ها', 'یال', 'شبکه', 'پیدا'];
+        if (in_array($name, $stop, true)) return '';
+        return $name;
+    }
+
+    /**
      * محاسبه امتیاز هر نوع مسئله
      */
     private function calculateScores($text)
@@ -316,7 +336,6 @@ class SmartModeler
         // =====================================================
         
         if ($type === 'LP') {
-            // تشخیص تعداد متغیرها و محدودیت‌ها
             $numVariables = 2;
             $numConstraints = 2;
             
@@ -327,7 +346,14 @@ class SmartModeler
                 $numConstraints = (int)$matches[1];
             }
             
-            // ساخت متغیرها
+            // ✅ تشخیص هوشمند نوع محدودیت‌ها
+            $defaultConstraintType = '<=';
+            if (preg_match('/حداکثر|نباید\s+بیشتر\s+از|کمتر\s+مساوی|حداکثر\s+مصرف|حداکثر\s+تولید|حداکثر\s+ظرفیت|نمی‌تواند\s+بیشتر/u', $text)) {
+                $defaultConstraintType = '<=';
+            } elseif (preg_match('/حداقل|نباید\s+کمتر\s+از|بیشتر\s+مساوی|حداقل\s+مصرف|حداقل\s+تولید|حداقل\s+ظرفیت|نمی‌تواند\s+کمتر/u', $text)) {
+                $defaultConstraintType = '>=';
+            }
+            
             $variables = [];
             for ($i = 0; $i < $numVariables; $i++) {
                 $variables[] = [
@@ -336,7 +362,6 @@ class SmartModeler
                 ];
             }
             
-            // ساخت محدودیت‌ها
             $constraints = [];
             $constraintStartIdx = $numVariables;
             for ($i = 0; $i < $numConstraints; $i++) {
@@ -348,13 +373,14 @@ class SmartModeler
                 $constraints[] = [
                     'name' => "محدودیت " . ($i + 1),
                     'coeffs' => $coeffs,
-                    'capacity' => $n[$capacityIdx] ?? (60 + $i * 20)
+                    'capacity' => $n[$capacityIdx] ?? (60 + $i * 20),
+                    'type' => $defaultConstraintType // ← اضافه شد
                 ];
             }
             
             $params['model_data'] = [
                 'name' => 'پروژه برنامه‌ریزی خطی (استخراج هوشمند)',
-                'description' => mb_substr($text, 0, 250),
+                'description' => $text,
                 'objective' => in_array('maximize', $params['objectives']) ? 'maximize' : 'minimize',
                 'variables' => $variables,
                 'constraints' => $constraints
@@ -404,7 +430,7 @@ class SmartModeler
             
             $params['model_data'] = [
                 'name' => 'پروژه حمل و نقل (استخراج هوشمند)',
-                'description' => mb_substr($text, 0, 250),
+                'description' => $text,
                 'sources' => $sources,
                 'destinations' => $destinations,
                 'cost_matrix' => $costMatrix
@@ -446,71 +472,83 @@ class SmartModeler
             
             $params['model_data'] = [
                 'name' => 'پروژه تخصیص (استخراج هوشمند)',
-                'description' => mb_substr($text, 0, 250),
+                'description' => $text,
                 'agents' => $agents,
                 'tasks' => $tasks,
                 'cost_matrix' => $costMatrix
             ];
         } 
         elseif ($type === 'SHORTEST') {
-            $numNodes = 3;
-            
-            if (preg_match('/(\d+)\s*(?:شهر|گره|نقطه)/u', $text, $matches)) {
-                $numNodes = (int)$matches[1];
-            } elseif (preg_match_all('/(?:شهر|گره|نقطه)\s+\S+/u', $text, $matches)) {
-                $numNodes = count(array_unique($matches[0]));
+            // ۱. استخراج یال‌ها با الگوی «X به Y عدد» یا «X تا Y با وزن عدد»
+            $edgePattern = '/(?:از\s+)?([\p{Arabic}\x{200C}a-zA-Z]+)\s+(?:به|تا)\s+([\p{Arabic}\x{200C}a-zA-Z]+)(?:\s+(?:با\s+)?(?:وزن|فاصله|هزینه|طول))?\s+(\d+(?:\.\d+)?)/u';
+            preg_match_all($edgePattern, $textForNumbers, $edgeMatches, PREG_SET_ORDER);
+
+            // ۲. ساخت فهرست گره‌ها از نام‌های داخل یال‌ها
+            $nodeNames = [];
+            $rawEdges  = [];
+            foreach ($edgeMatches as $m) {
+                $from = $this->cleanNodeName($m[1]);
+                $to   = $this->cleanNodeName($m[2]);
+                $w    = (float)$m[3];
+                if (mb_strlen($from) < 2 || mb_strlen($to) < 2) continue;
+                if (!in_array($from, $nodeNames, true)) $nodeNames[] = $from;
+                if (!in_array($to,   $nodeNames, true)) $nodeNames[] = $to;
+                $rawEdges[] = ['from' => $from, 'to' => $to, 'weight' => $w];
             }
-            
-            // ساخت گره‌ها
-            $nodes = [];
-            for ($i = 0; $i < $numNodes; $i++) {
-                $nodes[] = ['name' => "گره " . ($i + 1)];
-            }
-            
-            // استخراج یال‌ها از متن (الگوی: X به Y با وزن Z)
-            $edges = [];
-            preg_match_all('/(\S+)\s+(?:به|تا)\s+(\S+)(?:\s+(?:با\s+)?(?:وزن|فاصله|هزینه)\s+)?(\d+)/u', $textForNumbers, $edgeMatches, PREG_SET_ORDER);
-            
-            foreach ($edgeMatches as $idx => $match) {
-                $fromName = trim($match[1]);
-                $toName = trim($match[2]);
-                $weight = (float)$match[3];
-                
-                // پیدا کردن ایندکس گره‌ها
-                $fromIdx = 0;
-                $toIdx = 0;
-                foreach ($nodes as $i => $node) {
-                    if (strpos($node['name'], $fromName) !== false || strpos($fromName, $node['name']) !== false) {
-                        $fromIdx = $i;
-                    }
-                    if (strpos($node['name'], $toName) !== false || strpos($toName, $node['name']) !== false) {
-                        $toIdx = $i;
+
+            // ۳. افزودن شهرهایی که به صورت لیست آمده‌اند («شامل قم، اصفهان و شیراز»)
+            if (preg_match('/شامل\s+([^\.!؟?؛;]+)/u', $text, $listMatch)) {
+                $parts = preg_split('/[،,]+|\s+و\s+/u', $listMatch[1]);
+                foreach ($parts as $p) {
+                    $name = $this->cleanNodeName($p);
+                    if (mb_strlen($name) >= 2 && !in_array($name, $nodeNames, true)) {
+                        $nodeNames[] = $name;
                     }
                 }
-                
-                $edges[] = [
-                    'from' => $fromIdx,
-                    'to' => $toIdx,
-                    'weight' => $weight
-                ];
             }
-            
-            // اگر یالی پیدا نشد، از اعداد موجود در متن استفاده کن
-            if (empty($edges) && count($n) >= 2) {
-                for ($i = 0; $i < $numNodes - 1; $i++) {
+
+            // ۴. fallback: اگر هیچ یالی پیدا نشد، گره‌های عددی بساز
+            if (empty($nodeNames)) {
+                $numNodes = 3;
+                if (preg_match('/(\d+)\s*(?:شهر|گره|نقطه)/u', $text, $mm)) {
+                    $numNodes = max(2, (int)$mm[1]);
+                }
+                for ($i = 0; $i < $numNodes; $i++) {
+                    $nodeNames[] = "گره " . ($i + 1);
+                }
+            }
+
+            $nodes = [];
+            foreach ($nodeNames as $name) {
+                $nodes[] = ['name' => $name];
+            }
+
+            // ۵. تبدیل یال‌ها به ایندکس گره‌ها
+            $edges = [];
+            foreach ($rawEdges as $re) {
+                $fromIdx = array_search($re['from'], $nodeNames, true);
+                $toIdx   = array_search($re['to'],   $nodeNames, true);
+                if ($fromIdx !== false && $toIdx !== false) {
+                    $edges[] = ['from' => $fromIdx, 'to' => $toIdx, 'weight' => $re['weight']];
+                }
+            }
+
+            // ۶. fallback یال‌ها: زنجیره خطی با اعداد متن
+            if (empty($edges) && count($nodes) > 1 && count($n) >= 1) {
+                for ($i = 0; $i < count($nodes) - 1; $i++) {
                     $edges[] = [
-                        'from' => $i,
-                        'to' => $i + 1,
-                        'weight' => $n[$i] ?? (10 + $i * 10)
+                        'from'   => $i,
+                        'to'     => $i + 1,
+                        'weight' => $n[$i] ?? (10 + $i * 10),
                     ];
                 }
             }
-            
+
             $params['model_data'] = [
-                'name' => 'پروژه کوتاه‌ترین مسیر (استخراج هوشمند)',
-                'description' => mb_substr($text, 0, 250),
-                'nodes' => $nodes,
-                'edges' => $edges
+                'name'        => 'پروژه کوتاه‌ترین مسیر (استخراج هوشمند)',
+                'description' => mb_substr($text, 0, 2000),
+                'nodes'       => $nodes,
+                'edges'       => $edges,
             ];
         }
         elseif ($type === 'TRANSSHIP') {
@@ -531,7 +569,7 @@ class SmartModeler
             
             $params['model_data'] = [
                 'name' => 'پروژه ترانشیپمنت (استخراج هوشمند)',
-                'description' => mb_substr($text, 0, 250),
+                'description' => $text,
                 'sources' => array_map(fn($i) => ['name' => "مبدأ " . ($i + 1), 'capacity' => 100], range(0, $numSources - 1)),
                 'transshipment' => array_map(fn($i) => ['name' => "گره واسط " . ($i + 1)], range(0, $numTransshipment - 1)),
                 'destinations' => array_map(fn($i) => ['name' => "مقصد " . ($i + 1), 'demand' => 100], range(0, $numDestinations - 1))

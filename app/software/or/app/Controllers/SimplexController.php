@@ -47,11 +47,23 @@ class SimplexController extends Controller
         $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
         $pt = (new ProblemType())->getByCode('LP');
 
+        if (isset($payload['variables']) && !isset($payload['c'])) {
+            $c = array_map(fn($v) => (float)($v['coeff'] ?? 0), $payload['variables']);
+            $A = array_map(fn($c) => array_map('floatval', $c['coeffs'] ?? []), $payload['constraints']);
+            $b = array_map(fn($c) => (float)($c['capacity'] ?? 0), $payload['constraints']);
+            $types = array_map(fn($c) => $c['type'] ?? '<=', $payload['constraints']);
+        } else {
+            $c = $payload['c'] ?? [];
+            $A = $payload['A'] ?? [];
+            $b = $payload['b'] ?? [];
+            $types = $payload['types'] ?? [];
+        }
+
         $modelData = [
-            'c'     => $payload['c'] ?? [],
-            'A'     => $payload['A'] ?? [],
-            'b'     => $payload['b'] ?? [],
-            'types' => $payload['types'] ?? [],
+            'c'     => $c,
+            'A'     => $A,
+            'b'     => $b,
+            'types' => $types,
         ];
 
         $pid = $this->model->create([
@@ -131,11 +143,24 @@ class SimplexController extends Controller
             $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
             $shouldSolve = (bool)($payload['solve_after_update'] ?? false);
             
+            // در ابتدای هر دو متد، بعد از دریافت $payload:
+            if (isset($payload['variables']) && !isset($payload['c'])) {
+                $c = array_map(fn($v) => (float)($v['coeff'] ?? 0), $payload['variables']);
+                $A = array_map(fn($c) => array_map('floatval', $c['coeffs'] ?? []), $payload['constraints']);
+                $b = array_map(fn($c) => (float)($c['capacity'] ?? 0), $payload['constraints']);
+                $types = array_map(fn($c) => $c['type'] ?? '<=', $payload['constraints']);
+            } else {
+                $c = $payload['c'] ?? [];
+                $A = $payload['A'] ?? [];
+                $b = $payload['b'] ?? [];
+                $types = $payload['types'] ?? [];
+            }
+
             $modelData = [
-                'c'     => $payload['c'] ?? [],
-                'A'     => $payload['A'] ?? [],
-                'b'     => $payload['b'] ?? [],
-                'types' => $payload['types'] ?? [],
+                'c'     => $c,
+                'A'     => $A,
+                'b'     => $b,
+                'types' => $types,
             ];
 
             $this->model->update((int)$id, [
