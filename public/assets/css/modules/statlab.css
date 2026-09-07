@@ -404,3 +404,21 @@
     .stat-box { border: 1px solid #dee2e6; background: #fff !important; }
     body { background: #fff !important; }
 }
+
+/* ═══ ردیف‌های لیست گزارش‌ها ═══ */
+.statlab-report-row {
+    transition: transform .15s, box-shadow .15s;
+}
+.statlab-report-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.12) !important;
+}
+
+/* ═══ کارت‌های دسترسی سریع داشبورد ═══ */
+.statlab-quick-card {
+    transition: transform .15s, box-shadow .15s;
+}
+.statlab-quick-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.12) !important;
+}

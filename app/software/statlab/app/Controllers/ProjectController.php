@@ -113,7 +113,13 @@ class ProjectController extends Controller
         }
 
         $datasets = $this->datasetModel->getByProject($id);
-        $results  = $this->resultModel->getLatestByProject($id, 10);
+        $results  = $this->resultModel->getByProject($id);
+
+        // ✅ نگاشت dataset_id → آرایه اعداد (برای محاسبه آمار توصیفی در ویو)
+        $datasetData = [];
+        foreach ($datasets as $d) {
+            $datasetData[(int)$d['id']] = array_map('floatval', json_decode($d['data_json'] ?? '[]', true) ?: []);
+        }
 
         $this->view('project/show', [
             'pageTitle'   => $project['name'],
@@ -121,6 +127,7 @@ class ProjectController extends Controller
             'project'     => $project,
             'datasets'    => $datasets,
             'results'     => $results,
+            'datasetData' => $datasetData,
         ]);
     }
 

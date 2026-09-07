@@ -2,36 +2,39 @@
 namespace App\Software\Statlab\Controllers;
 
 use App\Software\Statlab\Core\Controller;
+use App\Software\Statlab\Models\Project;
+use App\Software\Statlab\Models\Dataset;
+use App\Software\Statlab\Models\Result;
 use App\Software\Statlab\Helpers\HypothesisTester as HT;
 
 class HypothesisController extends Controller
 {
+    private $projectModel;
+    private $datasetModel;
+    private $resultModel;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->projectModel = new Project();
+        $this->datasetModel = new Dataset();
+        $this->resultModel  = new Result();
+    }
+
     public function index(): void
     {
         $this->requireAuth();
-
-        $projects = $this->queryProjects();
-
         $this->view('hypothesis/index', [
-            'pageTitle'   => 'آزمون فرض',
-            'currentPage' => 'hypothesis',
-            'tests'       => HT::list(),
-            'projects'    => $projects,
+            'pageTitle'       => 'آزمون فرض',
+            'currentPage'     => 'hypothesis',
+            'tests'           => HT::list(),
+            'projects'        => $this->projectModel->getListForUser($this->currentUserId),
+            'presetTest'      => trim($_GET['test'] ?? ''),
+            'presetProjectId' => (int)($_GET['project_id'] ?? 0),
         ]);
     }
 
-    private function queryProjects(): array
-    {
-        $pm = new \App\Software\Statlab\Models\Project();
-        return $pm->query(
-            "SELECT id, name FROM `{$pm->getTableName()}` WHERE user_id = :uid ORDER BY updated_at DESC LIMIT 50",
-            ['uid' => $this->currentUserId]
-        );
-    }
-
-    /**
-     * اجرای آزمون (AJAX) + ذخیره در پروژه
-     */
+    /** اجرای آزمون فرض (AJAX) */
     public function analyze(): void
     {
         $this->requireAuth();
@@ -42,75 +45,79 @@ class HypothesisController extends Controller
 
         try {
             $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
-            $test  = $payload['test'] ?? '';
-            $alpha = (float)($payload['alpha'] ?? 0.05);
-            $tests = HT::list();
+            $test    = $payload['test'] ?? '';
+            $alpha   = (float)($payload['alpha'] ?? 0.05);
+            $tests   = HT::list();
 
             if (!isset($tests[$test])) {
                 $this->json(['success' => false, 'error' => 'آزمون نامعتبر است.']);
                 return;
             }
 
-            // اعتبارسنجی ورودی‌ها
-            $in = ['alternative' => $payload['alternative'] ?? 'two'];
+            // ─── ۱) اعتبارسنجی ورودی‌ها ───
+            $in    = ['alternative' => $payload['alternative'] ?? 'two'];
             $parse = fn($txt) => $this->parseNumbers((string)$txt);
 
             switch ($test) {
                 case 'one_sample_t':
                     $in['data1'] = $parse($payload['data1'] ?? '');
-                    $in['mu0'] = (float)($payload['mu0'] ?? 0);
+                    $in['mu0']   = (float)($payload['mu0'] ?? 0);
                     if (count($in['data1']) < 3) throw new \Exception('حداقل ۳ داده لازم است.');
                     break;
+
                 case 'two_sample_t':
                 case 'f_var':
                 case 'mann_whitney':
                     $in['data1'] = $parse($payload['data1'] ?? '');
                     $in['data2'] = $parse($payload['data2'] ?? '');
-                    if (count($in['data1']) < 3 || count($in['data2']) < 3) throw new \Exception('هر گروه حداقل ۳ داده لازم دارد.');
+                    if (count($in['data1']) < 3 || count($in['data2']) < 3)
+                        throw new \Exception('هر گروه حداقل ۳ داده لازم دارد.');
                     break;
+
                 case 'paired_t':
                     $in['data1'] = $parse($payload['data1'] ?? '');
                     $in['data2'] = $parse($payload['data2'] ?? '');
-                    if (count($in['data1']) !== count($in['data2'])) throw new \Exception('در آزمون جفتی، تعداد داده‌های دو گروه باید برابر باشد.');
+                    if (count($in['data1']) !== count($in['data2']))
+                        throw new \Exception('در آزمون جفتی، تعداد داده‌های دو گروه باید برابر باشد.');
                     if (count($in['data1']) < 3) throw new \Exception('حداقل ۳ جفت داده لازم است.');
                     break;
+
                 case 'one_prop_z':
-                    $in['x'] = (int)($payload['x'] ?? 0);
-                    $in['n'] = (int)($payload['n'] ?? 0);
+                    $in['x']  = (int)($payload['x'] ?? 0);
+                    $in['n']  = (int)($payload['n'] ?? 0);
                     $in['p0'] = (float)($payload['p0'] ?? 0.5);
-                    if ($in['n'] < 5 || $in['x'] > $in['n']) throw new \Exception('مقادیر x و n معتبر نیستند.');
+                    if ($in['n'] < 5 || $in['x'] < 0 || $in['x'] > $in['n'])
+                        throw new \Exception('مقادیر x و n معتبر نیستند.');
                     break;
+
                 case 'chi2_gof':
                     $in['observed'] = $parse($payload['observed'] ?? '');
                     $in['expected'] = $parse($payload['expected'] ?? '');
                     if (count($in['observed']) < 2) throw new \Exception('حداقل ۲ دسته لازم است.');
                     break;
+
                 case 'chi2_indep':
                     $in['matrix'] = $this->parseMatrix((string)($payload['matrix'] ?? ''));
-                    if (count($in['matrix']) < 2 || count($in['matrix'][0]) < 2) throw new \Exception('جدول توافقی حداقل ۲×۲ لازم است.');
+                    if (count($in['matrix']) < 2 || count($in['matrix'][0]) < 2)
+                        throw new \Exception('جدول توافقی حداقل ۲×۲ لازم است.');
                     break;
             }
 
-            // اجرای آزمون
+            // ─── ۲) اجرای آزمون ───
             $result = HT::run($test, $in, $alpha);
 
-            // ─── ذخیره در پروژه ───
+            // ─── ) پروژه: بازیابی یا ایجاد ───
             $projectId = (int)($payload['project_id'] ?? 0);
-            $projectName = trim($payload['project_name'] ?? '');
-            $pm = new \App\Software\Statlab\Models\Project();
-            $dm = new \App\Software\Statlab\Models\Dataset();
-            $rm = new \App\Software\Statlab\Models\Result();
-
             if ($projectId > 0) {
-                $proj = $pm->find($projectId);
+                $proj = $this->projectModel->find($projectId);
                 if (!$proj || (int)$proj['user_id'] !== (int)$this->currentUserId) {
                     $this->json(['success' => false, 'error' => 'دسترسی به پروژه مجاز نیست.'], 403);
                     return;
                 }
             } else {
-                $projectId = $pm->create([
+                $projectId = (int)$this->projectModel->create([
                     'user_id'            => $this->currentUserId,
-                    'name'               => $projectName ?: ($tests[$test]['name_fa'] . ' - ' . date('Y-m-d H:i')),
+                    'name'               => trim($payload['project_name'] ?? '') ?: ($tests[$test]['name_fa'] . ' - ' . date('Y-m-d H:i')),
                     'description'        => 'تحلیل آزمون فرض',
                     'category_code'      => 'hypothesis',
                     'analysis_type_code' => $test,
@@ -121,25 +128,19 @@ class HypothesisController extends Controller
                 $this->logActivity('create_project', 'project', $projectId);
             }
 
-            // ذخیره datasetها
-            if (!empty($in['data1'])) {
-                $dm->create([
-                    'project_id' => $projectId, 'user_id' => $this->currentUserId,
-                    'name' => 'نمونه ۱', 'source' => 'manual',
-                    'data_json' => json_encode($in['data1']), 'sample_size' => count($in['data1']), 'variables_count' => 1,
-                ]);
-            }
-            if (!empty($in['data2'])) {
-                $dm->create([
-                    'project_id' => $projectId, 'user_id' => $this->currentUserId,
-                    'name' => 'نمونه ۲', 'source' => 'manual',
-                    'data_json' => json_encode($in['data2']), 'sample_size' => count($in['data2']), 'variables_count' => 1,
-                ]);
-            }
+            // ─── ۴) ✅ datasetها بدون افزونگی ───
+            $sourceIds = $payload['source_ids'] ?? [];
+            $ds1 = !empty($in['data1'])
+                ? $this->resolveDataset($this->datasetModel, $projectId, $in['data1'], 'نمونه ۱', $sourceIds, 'data1')
+                : null;
+            $ds2 = !empty($in['data2'])
+                ? $this->resolveDataset($this->datasetModel, $projectId, $in['data2'], 'نمونه ۲', $sourceIds, 'data2')
+                : null;
 
-            // ذخیره result
-            $rm->create([
+            // ─── ) ذخیره نتیجه ───
+            $this->resultModel->create([
                 'project_id'         => $projectId,
+                'dataset_id'         => $ds1,
                 'analysis_type_code' => 'hypothesis',
                 'test_code'          => $test,
                 'method_name'        => $tests[$test]['name_fa'],
@@ -153,18 +154,19 @@ class HypothesisController extends Controller
                 'interpretation_fa'  => $result['interpretation_fa'],
             ]);
 
-            $pm->update($projectId, ['status' => 'completed']);
-            $this->logActivity('analyze_hypothesis', 'project', $projectId);
+            $this->projectModel->update($projectId, ['status' => 'completed']);
+            $this->logActivity('analyze_hypothesis', $test, $projectId);
 
             $this->json([
-                'success'    => true,
-                'test_name'  => $tests[$test]['name_fa'],
-                'result'     => $result,
-                'project_id' => $projectId,
+                'success'     => true,
+                'test_name'   => $tests[$test]['name_fa'],
+                'result'      => $result,
+                'project_id'  => $projectId,
+                'dataset_ids' => ['data1' => $ds1, 'data2' => $ds2],
             ]);
 
         } catch (\Throwable $e) {
-            error_log("StatLab Hypothesis Error: " . $e->getMessage());
+            error_log('StatLab Hypothesis Error: ' . $e->getMessage());
             $this->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
@@ -172,8 +174,11 @@ class HypothesisController extends Controller
     private function parseNumbers(string $text): array
     {
         $out = [];
-        $text = str_replace(['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹','٠','١','٢','٣','٤','٥','٦','٧','٨','٩'],
-                            ['0','1','2','3','4','5','6','7','8','9','0','1','2','3','4','5','6','7','8','9'], $text);
+        $text = str_replace(
+            ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹','٠','١','٢','٣','٤','٥','٦','٧','٨','٩'],
+            ['0','1','2','3','4','5','6','7','8','9','0','1','2','3','4','5','6','7','8','9'],
+            $text
+        );
         foreach (preg_split('/[\s,;\n\r\t|]+/', $text) as $part) {
             $part = trim($part);
             if ($part !== '' && is_numeric($part)) $out[] = (float)$part;
@@ -188,7 +193,7 @@ class HypothesisController extends Controller
             $vals = $this->parseNumbers($line);
             if (!empty($vals)) $rows[] = $vals;
         }
-        // همسان‌سازی طول سطرها
+        if (empty($rows)) return [];
         $max = max(array_map('count', $rows));
         foreach ($rows as &$r) $r = array_pad($r, $max, 0);
         return $rows;

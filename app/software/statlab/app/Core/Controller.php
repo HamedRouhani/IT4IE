@@ -144,4 +144,30 @@ class Controller
         }
         return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     }
+
+    /**
+     * ✅ تعیین dataset بدون افزونگی:
+     * ۱) اگر از dataset موجودِ همان پروژه آمده → همان id
+     * ۲) اگر داده عیناً در پروژه هست → بازیابی
+     * ۳) در غیر این صورت → ایجاد جدید
+     */
+    protected function resolveDataset($dm, int $projectId, array $values, string $defaultName, array $sourceIds, string $key): int
+    {
+        $sid = (int)($sourceIds[$key] ?? 0);
+        if ($sid > 0) {
+            $ds = $dm->find($sid);
+            if ($ds && (int)$ds['project_id'] === $projectId) return $sid;
+        }
+        $match = $dm->findMatching($projectId, $values);
+        if ($match) return (int)$match['id'];
+        return (int)$dm->create([
+            'project_id'      => $projectId,
+            'user_id'         => $this->currentUserId,
+            'name'            => $defaultName,
+            'source'          => 'manual',
+            'data_json'       => json_encode($values),
+            'sample_size'     => count($values),
+            'variables_count' => 1,
+        ]);
+    }
 }

@@ -21,14 +21,10 @@ class DescriptiveController extends Controller
         $this->resultModel  = new Result();
     }
 
-    /**
-     * صفحه اصلی آمار توصیفی
-     */
     public function index(): void
     {
         $this->requireAuth();
 
-        // ✅ پروژه مقصد برای اتصال داده (اگر از صفحه پروژه آمده باشد)
         $attachProjectId = (int)($_GET['project_id'] ?? 0);
         $attachProject = null;
         if ($attachProjectId > 0) {
@@ -39,98 +35,50 @@ class DescriptiveController extends Controller
             }
         }
 
-        // لیست پروژه‌های کاربر برای select
-        $projects = $this->projectModel->query(
-            "SELECT id, name, status FROM `{$this->projectModel->getTableName()}` 
-            WHERE user_id = :uid ORDER BY updated_at DESC LIMIT 50",
-            ['uid' => $this->currentUserId]
-        );
-
         $this->view('descriptive/index', [
             'pageTitle'       => 'آمار توصیفی',
             'currentPage'     => 'descriptive',
-            'projects'        => $projects,
+            'projects'        => $this->projectModel->getListForUser($this->currentUserId),
             'attachProject'   => $attachProject,
             'attachProjectId' => $attachProjectId,
         ]);
     }
 
-    /**
-     * تحلیل داده‌های ورودی (AJAX)
-     * - اگر project_id=0: پروژه جدید ایجاد می‌کند
-     * - اگر project_id>0: dataset و result را به پروژه موجود اضافه می‌کند
-     * - result_data به صورت تجمیعی ذخیره می‌شود (همه متغیرها در یک JSON)
-     */
+    /** تحلیل آماری توصیفی (AJAX) */
     public function analyze(): void
     {
         $this->requireAuth();
-
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->json(['success' => false, 'error' => 'درخواست نامعتبر'], 405);
             return;
         }
 
         try {
-            // ─────────────────────────────────────────────
-            // ۱) دریافت و اعتبارسنجی payload
-            // ─────────────────────────────────────────────
-            $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
-            $dataText    = trim($payload['data'] ?? '');
-            $projectId   = (int)($payload['project_id'] ?? 0);
-            $variableName = trim($payload['variable_name'] ?? 'متغیر اصلی');
+            $payload      = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+            $dataText     = trim($payload['data'] ?? '');
+            $variableName = trim($payload['variable_name'] ?? 'متغیر اصلی') ?: 'متغیر اصلی';
+            $projectId    = (int)($payload['project_id'] ?? 0);
             $projectName  = trim($payload['project_name'] ?? '');
 
-            if (empty($dataText)) {
-                $this->json(['success' => false, 'error' => 'داده‌ای وارد نشده است']);
-                return;
-            }
-
-            if (mb_strlen($variableName) > 100) {
-                $variableName = mb_substr($variableName, 0, 100);
-            }
-
-            // ─────────────────────────────────────────────
-            // ۲) Parse داده‌ها
-            // ─────────────────────────────────────────────
-            $data = $this->parseData($dataText);
-
+            $data = $this->parseNumbers($dataText);
             if (count($data) < 2) {
-                $this->json([
-                    'success' => false,
-                    'error'   => 'حداقل ۲ داده معتبر نیاز است. تعداد داده‌های معتبر یافت‌شده: ' . count($data)
-                ]);
+                $this->json(['success' => false, 'error' => 'حداقل ۲ داده معتبر نیاز است.']);
                 return;
             }
 
-            // ─────────────────────────────────────────────
-            // ۳) محاسبات آماری
-            // ─────────────────────────────────────────────
+            // محاسبات
             $stats = StatEngine::describe($data);
             $interpretation = $this->generateInterpretation($stats);
 
-            // ─────────────────────────────────────────────
-            // ۴) مدیریت پروژه (ایجاد یا استفاده از موجود)
-            // ─────────────────────────────────────────────
-            $isNewProject = false;
-            $project = null;
-
+            // پروژه: بازیابی یا ایجاد
             if ($projectId > 0) {
-                // ─── استفاده از پروژه موجود ───
-                $project = $this->projectModel->find($projectId);
-                
-                if (!$project) {
-                    $this->json(['success' => false, 'error' => 'پروژه یافت نشد.'], 404);
-                    return;
-                }
-                
-                // بررسی مالکیت
-                if ((int)$project['user_id'] !== (int)$this->currentUserId) {
-                    $this->json(['success' => false, 'error' => 'دسترسی به این پروژه مجاز نیست.'], 403);
+                $proj = $this->projectModel->find($projectId);
+                if (!$proj || (int)$proj['user_id'] !== (int)$this->currentUserId) {
+                    $this->json(['success' => false, 'error' => 'دسترسی به پروژه مجاز نیست.'], 403);
                     return;
                 }
             } else {
-                // ─── ایجاد پروژه جدید (فقط برای اولین متغیر) ───
-                $projectId = $this->projectModel->create([
+                $projectId = (int)$this->projectModel->create([
                     'user_id'            => $this->currentUserId,
                     'name'               => $projectName ?: ('تحلیل توصیفی - ' . date('Y-m-d H:i')),
                     'description'        => 'تحلیل خودکار داده‌های ورودی',
@@ -140,219 +88,81 @@ class DescriptiveController extends Controller
                     'significance_level' => 0.05,
                     'status'             => 'completed',
                 ]);
-                
-                $isNewProject = true;
-                $project = $this->projectModel->find($projectId);
-                
                 $this->logActivity('create_project', 'project', $projectId);
+                $proj = $this->projectModel->find($projectId);
             }
 
-            // ─────────────────────────────────────────────
-            // ۵) ذخیره Dataset
-            // ─────────────────────────────────────────────
-            $datasetId = $this->datasetModel->create([
-                'project_id'      => $projectId,
-                'user_id'         => $this->currentUserId,
-                'name'            => $variableName,
-                'source'          => 'manual',
-                'data_json'       => json_encode($data, JSON_UNESCAPED_UNICODE),
-                'variables'       => json_encode([
-                    ['name' => $variableName, 'type' => 'numeric', 'count' => count($data)]
-                ], JSON_UNESCAPED_UNICODE),
-                'sample_size'     => count($data),
-                'variables_count' => 1,
-                'has_missing'     => 0,
-                'missing_count'   => 0,
-            ]);
+            // ✅ dataset بدون افزونگی
+            $datasetId = $this->resolveDataset($this->datasetModel, $projectId, $data, $variableName, [], 'data1');
 
-            // ─────────────────────────────────────────────
-            // ۶) ذخیره Result
-            // ─────────────────────────────────────────────
-            $resultId = $this->resultModel->create([
+            // نتیجه
+            $this->resultModel->create([
                 'project_id'         => $projectId,
                 'dataset_id'         => $datasetId,
                 'analysis_type_code' => 'descriptive',
                 'test_code'          => 'summary_stats',
                 'method_name'        => 'Summary Statistics (آمار توصیفی)',
-                'input_params'       => json_encode([
-                    'variable' => $variableName,
-                    'sample_size' => count($data),
-                ], JSON_UNESCAPED_UNICODE),
+                'input_params'       => json_encode(['variable' => $variableName], JSON_UNESCAPED_UNICODE),
                 'output_data'        => json_encode($stats, JSON_UNESCAPED_UNICODE),
                 'interpretation_fa'  => $interpretation,
             ]);
 
-            // ─────────────────────────────────────────────
-            // ۷) به‌روزرسانی تجمیعی result_data پروژه
-            // ─────────────────────────────────────────────
-            $accumulated = [];
-            if (!empty($project['result_data'])) {
-                $accumulated = json_decode($project['result_data'], true) ?: [];
-            }
-            
-            // اضافه کردن نتیجه فعلی با کلید = نام متغیر
-            $accumulated[$variableName] = [
-                'dataset_id'      => $datasetId,
-                'result_id'       => $resultId,
-                'sample_size'     => count($data),
-                'stats'           => $stats,
-                'interpretation'  => $interpretation,
-                'analyzed_at'     => date('Y-m-d H:i:s'),
-            ];
-
-            // شمارش کل datasets این پروژه
-            $totalDatasets = $this->datasetModel->count(['project_id' => $projectId]);
-
+            // result_data تجمیعی پروژه
+            $accumulated = json_decode($proj['result_data'] ?? '{}', true) ?: [];
+            $accumulated[$variableName] = $stats;
             $this->projectModel->update($projectId, [
                 'status'      => 'completed',
                 'result_data' => json_encode($accumulated, JSON_UNESCAPED_UNICODE),
-                'description' => sprintf(
-                    'تحلیل آماری %d متغیر شامل: %s',
-                    $totalDatasets,
-                    implode('، ', array_keys($accumulated))
-                ),
+                'description' => 'تحلیل آماری ' . count($accumulated) . ' متغیر شامل: ' . implode('، ', array_keys($accumulated)),
             ]);
 
             $this->logActivity('analyze_descriptive', 'dataset', $datasetId);
 
-            // ─────────────────────────────────────────────
-            // ۸) ارسال پاسخ موفق
-            // ─────────────────────────────────────────────
             $this->json([
-                'success'       => true,
-                'project_id'    => $projectId,
-                'dataset_id'    => $datasetId,
-                'result_id'     => $resultId,
-                'stats'         => $stats,
-                'interpretation'=> $interpretation,
-                'data_count'    => count($data),
-                'is_new_project'=> $isNewProject,
-                'total_variables' => count($accumulated),
-                'message'       => $isNewProject 
-                    ? 'پروژه جدید ایجاد شد و تحلیل با موفقیت انجام شد.' 
-                    : 'متغیر جدید به پروژه موجود اضافه شد.',
-                'redirect'      => stat_url('controller=project&action=show&id=' . $projectId),
+                'success'    => true,
+                'project_id' => $projectId,
+                'dataset_id' => $datasetId,
+                'stats'      => $stats,
+                'data_count' => count($data),
             ]);
 
         } catch (\Throwable $e) {
-            error_log("StatLab Analyze Error: " . $e->getMessage() . 
-                    " in " . $e->getFile() . ":" . $e->getLine());
-            
-            $this->json([
-                'success' => false,
-                'error'   => 'خطا در تحلیل: ' . $e->getMessage(),
-                'file'    => basename($e->getFile()),
-                'line'    => $e->getLine(),
-            ], 500);
+            error_log('StatLab Descriptive Error: ' . $e->getMessage());
+            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Parse داده‌ها از فرمت‌های مختلف
-     * پشتیبانی از: اعداد فارسی/عربی، جداکننده‌های متعدد (newline, comma, semicolon, space, tab)
-     */
-    private function parseData(string $text): array
+    private function parseNumbers(string $text): array
     {
-        $data = [];
-        
-        // جداکننده‌های رایج: newline، کاما، semicolon، tab، فاصله
-        $parts = preg_split('/[\n\r,;|\t]+/', $text);
-        
-        foreach ($parts as $part) {
+        $out = [];
+        $text = str_replace(
+            ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹','٠','١','٢','٣','٤','٥','٦','٧','٨','٩'],
+            ['0','1','2','3','4','5','6','7','8','9','0','1','2','3','4','5','6','7','8','9'],
+            $text
+        );
+        foreach (preg_split('/[\s,;\n\r\t|]+/', $text) as $part) {
             $part = trim($part);
-            if ($part === '') continue;
-            
-            // تبدیل اعداد فارسی (۰-۹) به انگلیسی
-            $persian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
-            $arabic  = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
-            $english = ['0','1','2','3','4','5','6','7','8','9'];
-            
-            $part = str_replace($persian, $english, $part);
-            $part = str_replace($arabic, $english, $part);
-            
-            // حذف علائم اضافی (مثل % یا واحد)
-            $part = preg_replace('/[^0-9.\-+eE]/', '', $part);
-            
-            if ($part !== '' && is_numeric($part)) {
-                $data[] = (float)$part;
-            }
+            if ($part !== '' && is_numeric($part)) $out[] = (float)$part;
         }
-        
-        return $data;
+        return $out;
     }
 
-    /**
-     * تولید تفسیر فارسی هوشمند برای نتایج آماری
-     */
-    private function generateInterpretation(array $stats): string
+    private function generateInterpretation(array $s): string
     {
-        $interp = [];
-        $n = $stats['count'];
-
-        // ۱) بررسی حجم نمونه
-        if ($n < 5) {
-            $interp[] = "⚠️ حجم نمونه بسیار کوچک است ({$n} مشاهده). نتایج قابل اعتماد نیستند.";
-        } elseif ($n < 30) {
-            $interp[] = "⚠️ نمونه کوچک است ({$n} مشاهده). در استنتاج آماری احتیاط کنید.";
-        } else {
-            $interp[] = "✅ حجم نمونه مناسب است ({$n} مشاهده).";
+        $out = [];
+        $n = $s['count'];
+        $out[] = $n < 30 ? "⚠️ نمونه کوچک است ({$n} مشاهده)؛ در تعمیم احتیاط کنید." : "✅ حجم نمونه مناسب است ({$n} مشاهده).";
+        $sk = $s['skewness'];
+        $out[] = abs($sk) < 0.5 ? "📊 توزیع تقریباً متقارن است (چولگی: " . round($sk, 3) . ")."
+               : ($sk > 0 ? "📈 چولگی مثبت (دنباله راست): " . round($sk, 3) : "📉 چولگی منفی (دنباله چپ): " . round($sk, 3));
+        $ku = $s['kurtosis'];
+        $out[] = abs($ku) < 0.5 ? "✓ کشیدگی نزدیک به نرمال." : ($ku > 0 ? "🔺 لپتوکورتیک (دم سنگین)." : "🔻 پلاتیکورتیک (دم سبک).");
+        $oc = count($s['outliers']);
+        $out[] = $oc > 0 ? "⚠️ {$oc} داده پرت با روش IQR شناسایی شد." : "✓ داده پرت شناسایی نشد.";
+        if (abs($s['mean']) > 0.001) {
+            $cv = ($s['std'] / abs($s['mean'])) * 100;
+            $out[] = $cv > 30 ? "⚠️ ضریب تغییرات بالا (" . round($cv, 2) . "%)." : "✅ ضریب تغییرات قابل قبول (" . round($cv, 2) . "%).";
         }
-
-        // ۲) مقایسه میانگین و میانه (تشخیص چولگی)
-        $mean   = $stats['mean'];
-        $median = $stats['median'];
-        if (abs($mean - $median) < 0.01 * abs($mean + 0.001)) {
-            $interp[] = "📊 میانگین و میانه تقریباً برابرند که نشان‌دهنده تقارن داده‌هاست.";
-        } elseif ($mean > $median) {
-            $interp[] = "📈 میانگین بزرگ‌تر از میانه است (چولگی مثبت - دنباله بلند در سمت راست).";
-        } else {
-            $interp[] = "📉 میانگین کوچک‌تر از میانه است (چولگی منفی - دنباله بلند در سمت چپ).";
-        }
-
-        // ۳) تحلیل چولگی
-        $skew = $stats['skewness'];
-        if (abs($skew) < 0.5) {
-            $interp[] = "✓ توزیع تقریباً متقارن است (چولگی: " . round($skew, 3) . ").";
-        } elseif ($skew > 0.5 && $skew < 1) {
-            $interp[] = "↗️ توزیع به سمت راست کمی چوله است (چولگی: " . round($skew, 3) . ").";
-        } elseif ($skew >= 1) {
-            $interp[] = "⚠️ توزیع به شدت به سمت راست چوله است (چولگی: " . round($skew, 3) . ").";
-        } elseif ($skew < -0.5 && $skew > -1) {
-            $interp[] = "↙️ توزیع به سمت چپ کمی چوله است (چولگی: " . round($skew, 3) . ").";
-        } else {
-            $interp[] = "⚠️ توزیع به شدت به سمت چپ چوله است (چولگی: " . round($skew, 3) . ").";
-        }
-
-        // ۴) تحلیل کشیدگی (Kurtosis)
-        $kurt = $stats['kurtosis'];
-        if (abs($kurt) < 0.5) {
-            $interp[] = "✓ کشیدگی نزدیک به توزیع نرمال است (کشیدگی: " . round($kurt, 3) . ").";
-        } elseif ($kurt > 0) {
-            $interp[] = "🔺 توزیع لپتوکورتیک (کشیده‌تر از نرمال) با دم‌های سنگین است.";
-        } else {
-            $interp[] = "🔻 توزیع پلاتیکورتیک (پهن‌تر از نرمال) با دم‌های سبک است.";
-        }
-
-        // ۵) ضریب تغییرات (CV)
-        if (abs($mean) > 0.001) {
-            $cv = ($stats['std'] / abs($mean)) * 100;
-            if ($cv < 15) {
-                $interp[] = "✅ ضریب تغییرات پایین است (CV = " . round($cv, 2) . "%) → داده‌ها یکنواخت‌اند.";
-            } elseif ($cv < 30) {
-                $interp[] = "✓ ضریب تغییرات متوسط است (CV = " . round($cv, 2) . "%) → پراکندگی قابل قبول.";
-            } else {
-                $interp[] = "⚠️ ضریب تغییرات بالا است (CV = " . round($cv, 2) . "%) → پراکندگی زیاد.";
-            }
-        }
-
-        // ۶) داده‌های پرت
-        $outCount = count($stats['outliers']);
-        if ($outCount > 0) {
-            $interp[] = "⚠️ {$outCount} داده پرت با روش IQR شناسایی شد. بازبینی آن‌ها توصیه می‌شود.";
-        } else {
-            $interp[] = "✓ داده پرت شناسایی نشد.";
-        }
-
-        return implode("\n", $interp);
+        return implode("\n", $out);
     }
 }

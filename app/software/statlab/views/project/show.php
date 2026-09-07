@@ -4,6 +4,7 @@
  * مسیر: app/software/statlab/views/project/show.php
  */
 $activeTab = $_GET['tab'] ?? 'datasets';
+$datasetData = $datasetData ?? [];
 ?>
 <div class="container-fluid py-3 py-md-4">
 
@@ -126,50 +127,100 @@ $activeTab = $_GET['tab'] ?? 'datasets';
         <?php endif; ?>
 
     <!-- ═══ تب نتایج ═══ -->
-    <?php elseif ($activeTab === 'results'): ?>
-        <?php if (empty($results)): ?>
-            <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>هنوز نتیجه‌ای ثبت نشده است.</div>
-        <?php else: ?>
-            <?php foreach ($results as $r):
-                $out = json_decode($r['output_data'] ?? '{}', true) ?: [];
-            ?>
-                <div class="card border-0 shadow-sm mb-3">
-                    <div class="card-header bg-white py-2 py-md-3">
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-1">
-                            <h6 class="mb-0 small small-md-normal">
-                                <i class="fas fa-chart-line me-1 text-success"></i>
-                                <?= stat_e($r['method_name']) ?>
-                            </h6>
-                            <small class="text-muted">
-                                <?= stat_e($r['dataset_name'] ?? '-') ?> | <?= stat_e($r['created_at']) ?>
-                            </small>
+        <?php elseif ($activeTab === 'results'): ?>
+            <?php if (empty($results)): ?>
+                <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>هنوز نتیجه‌ای ثبت نشده است.</div>
+            <?php else: ?>
+                <?php foreach ($results as $r):
+                    $out = json_decode($r['output_data'] ?? '{}', true) ?: [];
+
+                    // ✅ ادغام آماره‌های داخل extra (مربوط به آزمون‌های فرض)
+                    if (!empty($out['extra']) && is_array($out['extra'])) {
+                        $out = array_merge($out, $out['extra']);
+                    }
+                    if (isset($out['n']) && !isset($out['count'])) $out['count'] = $out['n'];
+
+                    // ✅ اگر میانگین/میانه/انحراف در خروجی نیست، از دادهٔ متصل به نتیجه محاسبه کن
+                    if (!isset($out['mean'])) {
+                        $vals = $datasetData[(int)($r['dataset_id'] ?? 0)] ?? [];
+                        $n = count($vals);
+                        if ($n >= 1) {
+                            $mean = array_sum($vals) / $n;
+                            $sorted = $vals; sort($sorted);
+                            $mid = intdiv($n, 2);
+                            $median = $n % 2 ? $sorted[$mid] : ($sorted[$mid - 1] + $sorted[$mid]) / 2;
+                            $ss = 0;
+                            foreach ($vals as $v) $ss += ($v - $mean) ** 2;
+                            $out['count']  = $out['count'] ?? $n;
+                            $out['mean']   = $mean;
+                            $out['median'] = $median;
+                            $out['std']    = $n > 1 ? sqrt($ss / ($n - 1)) : 0;
+                        }
+                    }
+
+                    // ✅ شاخص‌های شرطی متناسب با نوع تحلیل
+                    $metrics = [];
+                    if (isset($out['count']))        $metrics['تعداد'] = number_format((float)$out['count'], 0);
+                    if (isset($out['mean']))         $metrics['میانگین'] = number_format((float)$out['mean'], 4);
+                    if (isset($out['median']))       $metrics['میانه'] = number_format((float)$out['median'], 4);
+                    if (isset($out['std']))          $metrics['انحراف معیار'] = number_format((float)$out['std'], 4);
+                    if (isset($out['pearson_r']))    $metrics['پیرسون r'] = number_format((float)$out['pearson_r'], 4);
+                    if (isset($out['spearman_rho'])) $metrics['اسپیرمن ρ'] = number_format((float)$out['spearman_rho'], 4);
+                    if (isset($out['r2']))           $metrics['R²'] = number_format((float)$out['r2'] * 100, 1) . '%';
+                    if (isset($out['slope']))        $metrics['شیب'] = number_format((float)$out['slope'], 4);
+                    if (isset($out['intercept']))    $metrics['عرض از مبدأ'] = number_format((float)$out['intercept'], 4);
+                    if (isset($out['F']))            $metrics['F'] = number_format((float)$out['F'], 3);
+                    if (isset($out['statistic']))    $metrics['آماره ' . ($out['statistic_name'] ?? '')] = number_format((float)$out['statistic'], 4);
+                    if (isset($out['coefficients'])) {
+                        $sig = count(array_filter($out['coefficients'], fn($c) => !empty($c['sig'])));
+                        $metrics['ضرایب معنادار'] = $sig . ' از ' . count($out['coefficients']);
+                    }
+                    $metrics = array_slice($metrics, 0, 8, true);
+
+                    $pval = $r['p_value'] !== null ? (float)$r['p_value'] : null;
+                ?>
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-white py-2 py-md-3">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-1">
+                                <h6 class="mb-0 small">
+                                    <i class="fas fa-chart-line me-1 text-primary"></i>
+                                    <?= stat_e($r['method_name']) ?>
+                                    <?php if (!empty($r['dataset_name'])): ?>
+                                        <small class="text-muted">| متغیر: <?= stat_e($r['dataset_name']) ?></small>
+                                    <?php endif; ?>
+                                </h6>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <?php if ($pval !== null): ?>
+                                        <span class="badge <?= $pval < 0.05 ? 'bg-success' : 'bg-secondary' ?>">
+                                            p = <?= $pval < 0.000001 ? number_format($pval, 1, '.', 'e') : number_format($pval, 5) ?>
+                                            <?= $pval < 0.05 ? '(معنادار)' : '(نامعنادر)' ?>
+                                        </span>
+                                    <?php endif; ?>
+                                    <small class="text-muted align-self-center"><?= stat_e($r['created_at']) ?></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-3">
+                            <?php if (!empty($metrics)): ?>
+                                <div class="row g-1 g-md-2 mb-2">
+                                    <?php foreach ($metrics as $label => $value): ?>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="stat-box">
+                                                <small><?= stat_e($label) ?></small>
+                                                <strong class="small"><?= $value ?></strong>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if (!empty($r['interpretation_fa'])): ?>
+                                <pre class="small mb-0" style="white-space: pre-wrap; color:#495057;"><?= stat_e($r['interpretation_fa']) ?></pre>
+                            <?php endif; ?>
                         </div>
                     </div>
-                    <div class="card-body p-3">
-                        <?php if (!empty($r['interpretation_fa'])): ?>
-                            <div class="alert alert-info mb-2 mb-md-3 py-2">
-                                <h6 class="fw-bold mb-1 small"><i class="fas fa-lightbulb me-1"></i> تفسیر:</h6>
-                                <pre class="mb-0 small" style="white-space: pre-wrap;"><?= stat_e($r['interpretation_fa']) ?></pre>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if (!empty($out)): ?>
-                            <div class="row g-1 g-md-2 mb-2 mb-md-3">
-                                <div class="col-6 col-md-3"><div class="stat-box"><small>میانگین</small><strong class="text-primary"><?= number_format($out['mean'] ?? 0, 4) ?></strong></div></div>
-                                <div class="col-6 col-md-3"><div class="stat-box"><small>میانه</small><strong class="text-success"><?= number_format($out['median'] ?? 0, 4) ?></strong></div></div>
-                                <div class="col-6 col-md-3"><div class="stat-box"><small>انحراف معیار</small><strong class="text-warning"><?= number_format($out['std'] ?? 0, 4) ?></strong></div></div>
-                                <div class="col-6 col-md-3"><div class="stat-box"><small>تعداد</small><strong><?= (int)($out['count'] ?? 0) ?></strong></div></div>
-                            </div>
-                        <?php endif; ?>
-
-                        <button type="button" class="btn btn-sm btn-outline-secondary w-100 w-md-auto"
-                                onclick="showResultDetails(<?= (int)$r['id'] ?>)">
-                            <i class="fas fa-code me-1"></i> مشاهده JSON کامل
-                        </button>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
 
     <!-- ═══ تب اطلاعات تکمیلی ═══ -->
     <?php else: ?>
