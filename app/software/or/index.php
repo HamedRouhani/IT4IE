@@ -96,6 +96,7 @@ $controllerMap = [
     'simplex'      => 'SimplexController',
     'sensitivity'  => 'SensitivityController',
     'report'       => 'ReportController',
+    'queueing'  => 'QueueingController',
 ];
 
 try {

@@ -84,6 +84,7 @@ $moduleMenus = [
             ['route' => 'shortest',      'icon' => 'fas fa-route',             'label' => 'کوتاه‌ترین مسیر'],
             ['route' => 'simplex',       'icon' => 'fas fa-chart-line',        'label' => 'برنامه‌ریزی خطی'],
             ['route' => 'sensitivity',   'icon' => 'fas fa-sliders-h',         'label' => 'تحلیل حساسیت'],
+            ['route' => 'queueing',      'icon' => 'fas fa-people-line',       'label' => 'نظریه صف'],
             ['route' => 'problem_type',  'icon' => 'fas fa-cubes',             'label' => 'انواع مسئله'],
             ['route' => 'method',        'icon' => 'fas fa-calculator',        'label' => 'روش‌های حل'],
             ['route' => 'report',        'icon' => 'fas fa-chart-bar',         'label' => 'گزارش‌ها'],

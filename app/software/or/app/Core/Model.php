@@ -98,4 +98,15 @@ class Model
         $stmt = $this->db->prepare($sql); $stmt->execute($params);
         return ($stmt->fetch(PDO::FETCH_ASSOC))['count'] ?? 0;
     }
+
+    /**
+     * اجرای کوئری بدون خروجی (DELETE/UPDATE)
+     */
+    public function execute(string $sql, array $params = []): int
+    {
+        if (!$this->db) return 0;
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->rowCount();
+    }
 }

@@ -121,4 +121,18 @@ if (!function_exists('or_checkBalance')) {
         
         return $formatted;
     }
+
+    if (!function_exists('or_stat_box')) {
+        /**
+         * جعبه آماری استاندارد: برچسب بالا + مقدار پایین (کاملاً مستقل از CSS سفارشی)
+         */
+        function or_stat_box(string $label, string $value, string $valueClass = ''): string
+        {
+            $esc = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+            return '<div class="border rounded bg-light text-center p-2 h-100">'
+                . '<small class="d-block text-muted mb-1" style="font-size:.72rem;line-height:1.3;">' . $esc($label) . '</small>'
+                . '<strong class="d-block' . ($valueClass !== '' ? ' ' . $valueClass : '') . '" style="line-height:1.3;word-break:break-word;">' . $esc($value) . '</strong>'
+                . '</div>';
+        }
+    }
 }

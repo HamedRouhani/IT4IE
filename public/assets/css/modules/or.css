@@ -484,3 +484,103 @@ html {
 @media (prefers-color-scheme: dark) {
     /* می‌توانید بعداً استایل‌های dark mode را اینجا اضافه کنید */
 }
+
+/* ═══════════════════════════════════════════════════════
+   Queueing Theory Styles
+   ═══════════════════════════════════════════════════════ */
+
+.or-page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+@media (min-width: 768px) {
+    .or-page-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.or-page-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #212529;
+    margin: 0;
+}
+
+.or-page-header small {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* Stat boxes for queueing results */
+.stat-box {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.stat-box:hover {
+    background: #fff;
+    border-color: #0dcaf0;
+    box-shadow: 0 2px 8px rgba(13, 202, 240, 0.15);
+}
+
+.stat-box small {
+    display: block;
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.stat-box strong {
+    font-size: 1.1rem;
+    color: #212529;
+}
+
+/* Queueing specific colors */
+.text-info { color: #0dcaf0 !important; }
+.bg-info { background-color: #0dcaf0 !important; }
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .stat-box {
+        padding: 0.5rem;
+    }
+    .stat-box strong {
+        font-size: 0.95rem;
+    }
+}
+
+/* Canvas containers */
+#pnChart, #sensChart {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background: #fff;
+}
+
+/* Project cards */
+.or-queueing-project-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.or-queueing-project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+/* تب‌های صفحه نمایش پروژه صف */
+.or-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.or-tabs::-webkit-scrollbar { display: none; }
+.or-tabs .nav-link { white-space: nowrap; font-size: .9rem; }
+@media (max-width: 576px) {
+    .or-tabs .nav-link { font-size: .8rem; padding: .4rem .7rem; }
+}
