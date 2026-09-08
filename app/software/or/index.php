@@ -85,18 +85,23 @@ $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
 // 🎯 ROUTER ماژول OR
 // ============================================
 $controllerMap = [
-    'dashboard'    => 'DashboardController',
+    'dashboard'      => 'DashboardController',
     'smart_modeler'  => 'SmartModelerController',
-    'problem_type' => 'ProblemTypeController',
-    'method'       => 'MethodController',
-    'transport'    => 'TransportController',
-    'assignment'   => 'AssignmentController',
-    'transship'    => 'TransshipController',
-    'shortest'     => 'ShortestController',
-    'simplex'      => 'SimplexController',
-    'sensitivity'  => 'SensitivityController',
-    'report'       => 'ReportController',
-    'queueing'  => 'QueueingController',
+    'problem_type'   => 'ProblemTypeController',
+    'method'         => 'MethodController',
+    'transport'      => 'TransportController',
+    'assignment'     => 'AssignmentController',
+    'transship'      => 'TransshipController',
+    'shortest'       => 'ShortestController',
+    'simplex'        => 'SimplexController',
+    'sensitivity'    => 'SensitivityController',
+    'report'         => 'ReportController',
+    'queueing'       => 'QueueingController',
+    'monte_carlo'    => 'MonteCarloController',
+    'markov'         => 'MarkovController',
+    'game_theory'    => 'GameTheoryController',
+    'dual'           => 'DualController',
+    'ilp'            => 'ILPController',
 ];
 
 try {

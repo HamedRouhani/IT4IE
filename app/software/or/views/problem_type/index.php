@@ -1,6 +1,6 @@
 <?php
 /**
- * لیست انواع مسئله
+ * لیست انواع مسئله - صفحه اصلی
  * مسیر: app/software/or/views/problem_type/index.php
  */
 
@@ -11,6 +11,12 @@ $controllerMap = [
     'ASSIGN'    => 'assignment',
     'TRANSSHIP' => 'transship',
     'SHORTEST'  => 'shortest',
+    'QUEUEING'  => 'queueing',
+    'MONTE_CARLO' => 'monte_carlo',
+    'MARKOV'    => 'markov',
+    'GAME_THEORY' => 'game_theory',
+    'DUAL'      => 'dual',
+    'ILP'       => 'ilp',
 ];
 
 // آیکون‌های اختصاصی برای هر نوع مسئله
@@ -20,31 +26,35 @@ $iconMap = [
     'ASSIGN'    => 'fas fa-users-cog text-info',
     'TRANSSHIP' => 'fas fa-project-diagram text-warning',
     'SHORTEST'  => 'fas fa-route text-success',
+    'QUEUEING'  => 'fas fa-people-line text-primary',
+    'MONTE_CARLO' => 'fas fa-dice text-warning',
+    'MARKOV'    => 'fas fa-project-diagram text-info',
+    'GAME_THEORY' => 'fas fa-chess text-danger',
+    'DUAL'      => 'fas fa-balance-scale-right text-success',
+    'ILP'       => 'fas fa-cubes text-dark',
 ];
 ?>
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-3 py-md-4">
     <!-- هدر صفحه -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="or-page-header">
         <div>
-            <h2 class="mb-1">
-                <i class="fas fa-cubes text-primary"></i> انواع مسئله
-            </h2>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="<?= or_url('') ?>">OR Analyzer</a></li>
-                    <li class="breadcrumb-item active">انواع مسئله</li>
-                </ol>
-            </nav>
+            <h3 class="mb-1">
+                <i class="fas fa-cubes text-primary me-2"></i> انواع مسئله
+            </h3>
+            <small class="text-muted">OR Analyzer - انتخاب نوع مسئله برای ایجاد مدل</small>
         </div>
+        <a href="<?= or_url('controller=dashboard') ?>" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-right me-1"></i><span class="d-none d-md-inline">بازگشت</span>
+        </a>
     </div>
 
-    <div class="alert alert-info mb-4">
-        <i class="fas fa-info-circle"></i> 
+    <div class="alert alert-info py-2 small mb-4">
+        <i class="fas fa-info-circle me-1"></i>
         نوع مسئله مورد نظر خود را انتخاب کنید تا به فرم ایجاد مدل اختصاصی آن هدایت شوید.
     </div>
 
-    <div class="row g-4">
+    <div class="row g-3 g-md-4">
         <?php foreach ($problemTypes as $pt): ?>
             <?php 
             $code = $pt['code'] ?? '';
@@ -54,26 +64,27 @@ $iconMap = [
             // اگر کنترلر اختصاصی برای این نوع مسئله وجود داشت، آن را نمایش بده
             if ($targetController): 
             ?>
-                <div class="col-md-6 col-lg-4">
-                    <a href="<?= or_url('controller=' . $targetController . '&action=create') ?>" 
-                       class="text-decoration-none">
-                        <div class="card border-0 shadow-sm h-100 hover-card transition-all">
-                            <div class="card-body text-center p-4">
-                                <div class="mb-3">
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                    <!-- در حلقه foreach که کارت‌ها را می‌سازد، لینک را اینگونه قرار دهید: -->
+                    <a href="<?= or_url('controller=problem_type&action=create&type=' . $code) ?>" 
+                        class="text-decoration-none or-problem-card-link">
+                        <div class="card border-0 shadow-sm h-100 or-problem-card">
+                            <div class="card-body text-center p-3 p-md-4">
+                                <div class="or-problem-icon mb-3">
                                     <i class="<?= $iconClass ?> fa-3x"></i>
                                 </div>
-                                <h5 class="card-title mb-2 text-dark">
+                                <h5 class="card-title mb-2 text-dark fw-bold">
                                     <?= or_e($pt['name_fa']) ?>
                                 </h5>
                                 <p class="card-text text-muted small mb-3">
                                     <?= or_e($pt['description'] ?? 'برای شروع روی این کارت کلیک کنید') ?>
                                 </p>
-                                <span class="badge bg-light text-dark border">
-                                    کد: <?= $code ?>
+                                <span class="badge bg-light text-dark border mb-3 d-inline-block">
+                                    کد: <?= or_e($code) ?>
                                 </span>
-                                <div class="mt-3">
+                                <div class="mt-2">
                                     <span class="btn btn-sm btn-or-primary">
-                                        <i class="fas fa-plus"></i> ایجاد مدل جدید
+                                        <i class="fas fa-plus me-1"></i> ایجاد مدل جدید
                                     </span>
                                 </div>
                             </div>
@@ -84,13 +95,3 @@ $iconMap = [
         <?php endforeach; ?>
     </div>
 </div>
-
-<style>
-.hover-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.hover-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-}
-</style>
