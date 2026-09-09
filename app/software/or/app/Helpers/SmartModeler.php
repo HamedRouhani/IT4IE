@@ -2,28 +2,144 @@
 namespace App\Software\Or\Helpers;
 
 /**
- * SmartModeler - سیستم هوشمند تشخیص و مدلسازی مسائل OR
+ * ═══════════════════════════════════════════════════════════════
+ * SmartModeler v2.0 - سیستم هوشمند تشخیص و مدلسازی مسائل OR
+ * ═══════════════════════════════════════════════════════════════
+ * 
  * این کلاس متن فارسی کاربر را تحلیل کرده و نوع مسئله، مدل ریاضی و راه‌حل را پیشنهاد می‌دهد
+ * 
+ * پشتیبانی از ۱۱ نوع مسئله:
+ * 1. Transport (حمل و نقل)
+ * 2. Assignment (تخصیص)
+ * 3. Shortest Path (کوتاه‌ترین مسیر)
+ * 4. LP (برنامه‌ریزی خطی)
+ * 5. ILP (برنامه‌ریزی صحیح)
+ * 6. Transshipment (ترانشیپمنت)
+ * 7. Queueing (صف)
+ * 8. Markov (زنجیره مارکوف)
+ * 9. Game Theory (نظریه بازی‌ها)
+ * 10. Monte Carlo (شبیه‌سازی مونت‌کارلو)
+ * 11. Dual (نظریه دوگان)
+ * 
+ * @version 2.0.0
  */
 class SmartModeler
 {
     private $db;
+    private $preprocessor;
     private $patterns = [];
     private $samples = [];
     
-    // ضرایب اهمیت دسته‌بندی‌ها
+    /**
+     * انواع مسئله پشتیبانی‌شده
+     */
+    private const PROBLEM_TYPES = [
+        'TRANS'       => 'حمل و نقل',
+        'ASSIGN'      => 'تخصیص',
+        'SHORTEST'    => 'کوتاه‌ترین مسیر',
+        'LP'          => 'برنامه‌ریزی خطی',
+        'ILP'         => 'برنامه‌ریزی صحیح',
+        'TRANSSHIP'   => 'ترانشیپمنت',
+        'QUEUEING'    => 'صف (Queueing)',
+        'MARKOV'      => 'زنجیره مارکوف',
+        'GAME_THEORY' => 'نظریه بازی‌ها',
+        'MONTE_CARLO' => 'شبیه‌سازی مونت‌کارلو',
+        'DUAL'        => 'نظریه دوگان',
+    ];
+
+    /**
+     * ═══════════════════════════════════════════════════════
+     * لایه تشخیصی: الگوهای یکتا (Discriminative Patterns)
+     * هر الگو فقط و فقط متعلق به یک نوع مسئله است
+     * ═══════════════════════════════════════════════════════
+     */
+    private const DISCRIMINATIVE = [
+        'ILP' => [
+            ['pattern' => '/عدد\s+صحیح|اعداد\s+صحیح/u',                     'weight' => 60],
+            ['pattern' => '/متغیر(?:های)?\s+صحیح/u',                         'weight' => 60],
+            ['pattern' => '/صحیح\s+(?:باشد|باشند|است|هستند)/u',              'weight' => 50],
+            ['pattern' => '/باینری|صفر\s+و\s+یک|دودویی/u',                   'weight' => 60],
+            ['pattern' => '/integer|\bILP\b/ui',                             'weight' => 60],
+            ['pattern' => '/گسسته/u',                                        'weight' => 40],
+            ['pattern' => '/شاخه\s+و\s+کران|branch\s*(?:and|&)\s*bound/ui',  'weight' => 60],
+            ['pattern' => '/کوله\s*پشتی/u',                                  'weight' => 50],
+        ],
+        'DUAL' => [
+            ['pattern' => '/دوگان|دوگانی/u',                                 'weight' => 60],
+            ['pattern' => '/قیمت\s+سایه|shadow\s*price/ui',                  'weight' => 60],
+            ['pattern' => '/مسئله\s+اصلی\s+و\s+دوگان/u',                     'weight' => 70],
+            ['pattern' => '/قضیه\s+دوگانگی|نظریه\s+دوگانگی/u',                'weight' => 60],
+        ],
+        'GAME_THEORY' => [
+            ['pattern' => '/تعادل\s+نش|نقطه\s+زینی|نقطه\s+زینه/u',           'weight' => 70],
+            ['pattern' => '/ماتریس\s+پرداخت/u',                              'weight' => 60],
+            ['pattern' => '/بازیکن/u',                                       'weight' => 50],
+            ['pattern' => '/استراتژی/u',                                     'weight' => 40],
+            ['pattern' => '/حاصل\s*جمع\s+صفر|zero[\s-]*sum/ui',              'weight' => 60],
+            ['pattern' => '/ارزش\s+بازی/u',                                  'weight' => 50],
+            ['pattern' => '/رقیب|حریف/u',                                    'weight' => 30],
+        ],
+        'QUEUEING' => [
+            ['pattern' => '/λ|μ|لامبدا/u',                                   'weight' => 60],
+            ['pattern' => '/نرخ\s+ورود/u',                                   'weight' => 50],
+            ['pattern' => '/نرخ\s+خدمت|نرخ\s+سرویس/u',                       'weight' => 50],
+            ['pattern' => '/(?<![\p{Arabic}])صف(?![\p{Arabic}])/u',          'weight' => 30],
+            ['pattern' => '/M\/M\/\d|M\/G\/1|M\/D\/1/u',                     'weight' => 70],
+        ],
+        'MARKOV' => [
+            ['pattern' => '/مارکوف/u',                                       'weight' => 70],
+            ['pattern' => '/ماتریس\s+انتقال/u',                              'weight' => 60],
+            ['pattern' => '/احتمال\s+گذار/u',                                'weight' => 60],
+            ['pattern' => '/حالت\s+پایدار|توزیع\s+پایدار/u',                 'weight' => 50],
+            ['pattern' => '/نیمه\s*خراب/u',                                  'weight' => 40],
+        ],
+        'MONTE_CARLO' => [
+            ['pattern' => '/مونت\s*کارلو|monte\s*carlo/ui',                  'weight' => 70],
+            ['pattern' => '/توزیع\s+(?:نرمال|یکنواخت|مثلثی|نمایی|لگاریتمی)/u','weight' => 50],
+            ['pattern' => '/شبیه\s*سازی\s+تصادفی/u',                         'weight' => 50],
+            ['pattern' => '/انحراف\s+معیار/u',                               'weight' => 30],
+        ],
+        'TRANSSHIP' => [
+            ['pattern' => '/ترانشیپ/u',                                      'weight' => 70],
+            ['pattern' => '/گره\s+واسط|مرکز\s+واسط/u',                       'weight' => 60],
+            ['pattern' => '/چند\s+مرحله/u',                                  'weight' => 40],
+        ],
+        'SHORTEST' => [
+            ['pattern' => '/کوتاه\s*ترین\s+مسیر/u',                          'weight' => 60],
+            ['pattern' => '/فاصله(?:\s+بین)?\s+شهر/u',                       'weight' => 50],
+            ['pattern' => '/(?<![\p{Arabic}])یال(?![\p{Arabic}])/u',         'weight' => 30],
+            ['pattern' => '/دایجسترا|dijkstra|floyd/ui',                     'weight' => 60],
+        ],
+        'ASSIGN' => [
+            ['pattern' => '/یک\s+به\s+یک/u',                                 'weight' => 60],
+            ['pattern' => '/تخصیص\s+بهینه|اختصاص\s+یاب/u',                   'weight' => 50],
+            ['pattern' => '/مجارستانی|hungarian/ui',                         'weight' => 70],
+            ['pattern' => '/اپراتور/u',                                      'weight' => 40],
+        ],
+        'TRANS' => [
+            ['pattern' => '/عرضه.*تقاضا/su',                                 'weight' => 60],
+            ['pattern' => '/مبدأ.*مقصد/su',                                  'weight' => 50],
+            ['pattern' => '/هزینه\s+حمل/u',                                  'weight' => 50],
+            ['pattern' => '/کارخانه.*انبار/su',                              'weight' => 50],
+        ],
+    ];
+    
+    /**
+     * ضرایب اهمیت دسته‌بندی‌ها
+     */
     private $categoryWeights = [
-        'source'      => 1.2,  // کلمات مربوط به مبدأ/منبع
-        'destination' => 1.2,  // کلمات مربوط به مقصد
-        'cost'        => 1.3,  // کلمات مربوط به هزینه/فاصله
-        'constraint'  => 1.1,  // کلمات مربوط به محدودیت
-        'objective'   => 1.4,  // کلمات مربوط به هدف (بیشینه/کمینه)
-        'general'     => 1.0,  // کلمات عمومی
+        'source'      => 1.2,
+        'destination' => 1.2,
+        'cost'        => 1.3,
+        'constraint'  => 1.1,
+        'objective'   => 1.4,
+        'general'     => 1.0,
     ];
 
     public function __construct($db = null)
     {
         $this->db = $db;
+        $this->preprocessor = new PersianTextPreprocessor();
         $this->loadPatterns();
         $this->loadSamples();
     }
@@ -43,6 +159,11 @@ class SmartModeler
         } catch (\Exception $e) {
             $this->patterns = $this->getDefaultPatterns();
         }
+
+        foreach ($this->patterns as &$p) {
+            $p['keyword_fa'] = $this->preprocessor->normalize($p['keyword_fa']);
+        }
+        unset($p);
     }
 
     /**
@@ -68,7 +189,7 @@ class SmartModeler
     private function getDefaultPatterns()
     {
         return [
-            // ====== حمل و نقل (TRANS) - کلمات خاص ======
+            // ====== حمل و نقل (TRANS) ======
             ['problem_type_code' => 'TRANS', 'keyword_fa' => 'حمل', 'weight' => 5, 'category' => 'general'],
             ['problem_type_code' => 'TRANS', 'keyword_fa' => 'نقل', 'weight' => 5, 'category' => 'general'],
             ['problem_type_code' => 'TRANS', 'keyword_fa' => 'توزیع', 'weight' => 4, 'category' => 'general'],
@@ -79,7 +200,7 @@ class SmartModeler
             ['problem_type_code' => 'TRANS', 'keyword_fa' => 'تقاضا', 'weight' => 5, 'category' => 'destination'],
             ['problem_type_code' => 'TRANS', 'keyword_fa' => 'هزینه حمل', 'weight' => 6, 'category' => 'cost'],
             
-            // ====== تخصیص (ASSIGN) - کلمات خاص ======
+            // ====== تخصیص (ASSIGN) ======
             ['problem_type_code' => 'ASSIGN', 'keyword_fa' => 'تخصیص', 'weight' => 6, 'category' => 'general'],
             ['problem_type_code' => 'ASSIGN', 'keyword_fa' => 'اختصاص', 'weight' => 6, 'category' => 'general'],
             ['problem_type_code' => 'ASSIGN', 'keyword_fa' => 'یک به یک', 'weight' => 6, 'category' => 'general'],
@@ -88,7 +209,7 @@ class SmartModeler
             ['problem_type_code' => 'ASSIGN', 'keyword_fa' => 'اپراتور', 'weight' => 4, 'category' => 'source'],
             ['problem_type_code' => 'ASSIGN', 'keyword_fa' => 'دستگاه', 'weight' => 4, 'category' => 'destination'],
             
-            // ====== کوتاه‌ترین مسیر (SHORTEST) - کلمات خاص ======
+            // ====== کوتاه‌ترین مسیر (SHORTEST) ======
             ['problem_type_code' => 'SHORTEST', 'keyword_fa' => 'مسیر', 'weight' => 5, 'category' => 'general'],
             ['problem_type_code' => 'SHORTEST', 'keyword_fa' => 'کوتاه', 'weight' => 6, 'category' => 'objective'],
             ['problem_type_code' => 'SHORTEST', 'keyword_fa' => 'فاصله', 'weight' => 5, 'category' => 'cost'],
@@ -96,27 +217,76 @@ class SmartModeler
             ['problem_type_code' => 'SHORTEST', 'keyword_fa' => 'جاده', 'weight' => 4, 'category' => 'general'],
             ['problem_type_code' => 'SHORTEST', 'keyword_fa' => 'گره', 'weight' => 4, 'category' => 'general'],
             
-            // ====== برنامه‌ریزی خطی (LP) - کلمات خاص و قوی ======
+            // ====== برنامه‌ریزی خطی (LP) ======
             ['problem_type_code' => 'LP', 'keyword_fa' => 'برنامه‌ریزی', 'weight' => 6, 'category' => 'general'],
             ['problem_type_code' => 'LP', 'keyword_fa' => 'خطی', 'weight' => 6, 'category' => 'general'],
-            ['problem_type_code' => 'LP', 'keyword_fa' => 'سود', 'weight' => 6, 'category' => 'objective'], // ✅ کلیدی!
+            ['problem_type_code' => 'LP', 'keyword_fa' => 'سود', 'weight' => 6, 'category' => 'objective'],
             ['problem_type_code' => 'LP', 'keyword_fa' => 'بیشینه', 'weight' => 6, 'category' => 'objective'],
             ['problem_type_code' => 'LP', 'keyword_fa' => 'حداکثر', 'weight' => 6, 'category' => 'objective'],
             ['problem_type_code' => 'LP', 'keyword_fa' => 'کمینه', 'weight' => 6, 'category' => 'objective'],
             ['problem_type_code' => 'LP', 'keyword_fa' => 'حداقل', 'weight' => 6, 'category' => 'objective'],
             ['problem_type_code' => 'LP', 'keyword_fa' => 'محدودیت', 'weight' => 5, 'category' => 'constraint'],
             ['problem_type_code' => 'LP', 'keyword_fa' => 'قیود', 'weight' => 5, 'category' => 'constraint'],
-            ['problem_type_code' => 'LP', 'keyword_fa' => 'منابع', 'weight' => 4, 'category' => 'constraint'],
-            ['problem_type_code' => 'LP', 'keyword_fa' => 'ظرفیت', 'weight' => 3, 'category' => 'constraint'],
             ['problem_type_code' => 'LP', 'keyword_fa' => 'تابع هدف', 'weight' => 7, 'category' => 'objective'],
-            ['problem_type_code' => 'LP', 'keyword_fa' => 'متغیر', 'weight' => 4, 'category' => 'general'],
-            ['problem_type_code' => 'LP', 'keyword_fa' => 'تولید', 'weight' => 3, 'category' => 'general'],
             
-            // ====== ترانشیپمنت (TRANSSHIP) - کلمات خاص ======
+            // ====== برنامه‌ریزی صحیح (ILP) ======
+            ['problem_type_code' => 'ILP', 'keyword_fa' => 'صحیح', 'weight' => 7, 'category' => 'general'],
+            ['problem_type_code' => 'ILP', 'keyword_fa' => 'عددی', 'weight' => 6, 'category' => 'general'],
+            ['problem_type_code' => 'ILP', 'keyword_fa' => 'باینری', 'weight' => 7, 'category' => 'general'],
+            ['problem_type_code' => 'ILP', 'keyword_fa' => 'صفر و یک', 'weight' => 7, 'category' => 'general'],
+            ['problem_type_code' => 'ILP', 'keyword_fa' => 'integer', 'weight' => 6, 'category' => 'general'],
+            ['problem_type_code' => 'ILP', 'keyword_fa' => 'تعداد', 'weight' => 4, 'category' => 'general'],
+            
+            // ====== ترانشیپمنت (TRANSSHIP) ======
             ['problem_type_code' => 'TRANSSHIP', 'keyword_fa' => 'ترانشیپ', 'weight' => 6, 'category' => 'general'],
             ['problem_type_code' => 'TRANSSHIP', 'keyword_fa' => 'واسط', 'weight' => 5, 'category' => 'general'],
             ['problem_type_code' => 'TRANSSHIP', 'keyword_fa' => 'میانی', 'weight' => 5, 'category' => 'general'],
             ['problem_type_code' => 'TRANSSHIP', 'keyword_fa' => 'چند مرحله', 'weight' => 6, 'category' => 'general'],
+            
+            // ====== صف (QUEUEING) ======
+            ['problem_type_code' => 'QUEUEING', 'keyword_fa' => 'صف', 'weight' => 7, 'category' => 'general'],
+            ['problem_type_code' => 'QUEUEING', 'keyword_fa' => 'انتظار', 'weight' => 6, 'category' => 'general'],
+            ['problem_type_code' => 'QUEUEING', 'keyword_fa' => 'نوبت', 'weight' => 5, 'category' => 'general'],
+            ['problem_type_code' => 'QUEUEING', 'keyword_fa' => 'مشتری', 'weight' => 4, 'category' => 'general'],
+            ['problem_type_code' => 'QUEUEING', 'keyword_fa' => 'سرور', 'weight' => 5, 'category' => 'general'],
+            ['problem_type_code' => 'QUEUEING', 'keyword_fa' => 'پنجره', 'weight' => 4, 'category' => 'general'],
+            ['problem_type_code' => 'QUEUEING', 'keyword_fa' => 'نرخ ورود', 'weight' => 6, 'category' => 'general'],
+            ['problem_type_code' => 'QUEUEING', 'keyword_fa' => 'نرخ خدمت', 'weight' => 6, 'category' => 'general'],
+            ['problem_type_code' => 'QUEUEING', 'keyword_fa' => 'لامبدا', 'weight' => 7, 'category' => 'general'],
+            ['problem_type_code' => 'QUEUEING', 'keyword_fa' => 'مو', 'weight' => 5, 'category' => 'general'],
+            
+            // ====== زنجیره مارکوف (MARKOV) ======
+            ['problem_type_code' => 'MARKOV', 'keyword_fa' => 'مارکوف', 'weight' => 8, 'category' => 'general'],
+            ['problem_type_code' => 'MARKOV', 'keyword_fa' => 'حالت', 'weight' => 6, 'category' => 'general'],
+            ['problem_type_code' => 'MARKOV', 'keyword_fa' => 'گذار', 'weight' => 6, 'category' => 'general'],
+            ['problem_type_code' => 'MARKOV', 'keyword_fa' => 'انتقال', 'weight' => 5, 'category' => 'general'],
+            ['problem_type_code' => 'MARKOV', 'keyword_fa' => 'سالم', 'weight' => 4, 'category' => 'general'],
+            ['problem_type_code' => 'MARKOV', 'keyword_fa' => 'خراب', 'weight' => 4, 'category' => 'general'],
+            ['problem_type_code' => 'MARKOV', 'keyword_fa' => 'احتمال', 'weight' => 5, 'category' => 'general'],
+            ['problem_type_code' => 'MARKOV', 'keyword_fa' => 'پایدار', 'weight' => 5, 'category' => 'general'],
+            
+            // ====== نظریه بازی‌ها (GAME_THEORY) ======
+            ['problem_type_code' => 'GAME_THEORY', 'keyword_fa' => 'بازی', 'weight' => 6, 'category' => 'general'],
+            ['problem_type_code' => 'GAME_THEORY', 'keyword_fa' => 'بازیکن', 'weight' => 7, 'category' => 'general'],
+            ['problem_type_code' => 'GAME_THEORY', 'keyword_fa' => 'استراتژی', 'weight' => 6, 'category' => 'general'],
+            ['problem_type_code' => 'GAME_THEORY', 'keyword_fa' => 'پرداخت', 'weight' => 5, 'category' => 'general'],
+            ['problem_type_code' => 'GAME_THEORY', 'keyword_fa' => 'نش', 'weight' => 7, 'category' => 'general'],
+            ['problem_type_code' => 'GAME_THEORY', 'keyword_fa' => 'تعادل', 'weight' => 5, 'category' => 'general'],
+            ['problem_type_code' => 'GAME_THEORY', 'keyword_fa' => 'رقابت', 'weight' => 4, 'category' => 'general'],
+            
+            // ====== شبیه‌سازی مونت‌کارلو (MONTE_CARLO) ======
+            ['problem_type_code' => 'MONTE_CARLO', 'keyword_fa' => 'مونت', 'weight' => 7, 'category' => 'general'],
+            ['problem_type_code' => 'MONTE_CARLO', 'keyword_fa' => 'کارلو', 'weight' => 7, 'category' => 'general'],
+            ['problem_type_code' => 'MONTE_CARLO', 'keyword_fa' => 'شبیه‌سازی', 'weight' => 6, 'category' => 'general'],
+            ['problem_type_code' => 'MONTE_CARLO', 'keyword_fa' => 'تصادفی', 'weight' => 5, 'category' => 'general'],
+            ['problem_type_code' => 'MONTE_CARLO', 'keyword_fa' => 'تکرار', 'weight' => 4, 'category' => 'general'],
+            ['problem_type_code' => 'MONTE_CARLO', 'keyword_fa' => 'توزیع', 'weight' => 5, 'category' => 'general'],
+            
+            // ====== نظریه دوگان (DUAL) ======
+            ['problem_type_code' => 'DUAL', 'keyword_fa' => 'دوگان', 'weight' => 8, 'category' => 'general'],
+            ['problem_type_code' => 'DUAL', 'keyword_fa' => 'اصلی', 'weight' => 4, 'category' => 'general'],
+            ['problem_type_code' => 'DUAL', 'keyword_fa' => 'dual', 'weight' => 7, 'category' => 'general'],
+            ['problem_type_code' => 'DUAL', 'keyword_fa' => 'متغیر دوگان', 'weight' => 7, 'category' => 'general'],
         ];
     }
 
@@ -134,45 +304,55 @@ class SmartModeler
             ];
         }
 
-        // ۱. پاکسازی و نرمال‌سازی متن
-        $cleanText = $this->normalizeText($text);
+        // ۱. پاکسازی و نرمال‌سازی متن با PersianTextPreprocessor
+        $cleanText = $this->preprocessor->normalize($text);
+        
+        // ۲. استخراج داده‌های ساختاری
+        $extractedData = $this->extractStructuralData($cleanText);
 
-        // ۲. امتیازدهی به هر نوع مسئله
-        $scores = $this->calculateScores($cleanText);
+        // ۳. امتیازدهی به هر نوع مسئله
+        $scores = $this->calculateScores($cleanText, $extractedData);
 
-        // ۳. مرتب‌سازی بر اساس امتیاز
+        // ۴. مرتب‌سازی بر اساس امتیاز
         arsort($scores);
 
-        // ۴. تشخیص بهترین تطابق
+        // ۵. تشخیص بهترین تطابق
         $topType = array_key_first($scores);
         $topScore = $scores[$topType];
         $totalScore = array_sum($scores);
         
-        // محاسبه درصد اطمینان
+        // محاسبه درصد اطمینان با margin
         $confidence = $totalScore > 0 ? round(($topScore / $totalScore) * 100, 1) : 0;
+        
+        // محاسبه margin (فاصله بین اول و دوم)
+        $sortedScores = array_values($scores);
+        $margin = count($sortedScores) > 1 ? $sortedScores[0] - $sortedScores[1] : $sortedScores[0];
+        $marginPercent = $totalScore > 0 ? round(($margin / $totalScore) * 100, 1) : 0;
 
-        // ۵. استخراج پارامترها از متن
-        $extractedParams = $this->extractParameters($cleanText, $topType);
+        // ۶. استخراج پارامترها از متن
+        $extractedParams = $this->extractParameters($cleanText, $topType, $extractedData);
 
-        // ۶. یافتن نزدیک‌ترین نمونه واقعی
+        // ۷. یافتن نزدیک‌ترین نمونه واقعی
         $similarSample = $this->findSimilarSample($topType, $cleanText);
 
-        // ۷. پیشنهاد روش حل
+        // ۸. پیشنهاد روش حل
         $suggestedMethod = $this->suggestMethod($topType, $extractedParams);
 
-        // ۸. تولید مدل ریاضی پیشنهادی
+        // ۹. تولید مدل ریاضی پیشنهادی
         $mathModel = $this->generateMathModel($topType, $extractedParams);
 
-        // ۹. ذخیره در تاریخچه (اگر دیتابیس موجود باشد)
+        // ۱۰. ذخیره در تاریخچه
         $this->saveAnalysis($text, $topType, $confidence, $suggestedMethod, $extractedParams);
 
         return [
             'success' => true,
             'detected_type' => $topType,
-            'detected_type_name' => $this->getTypeName($topType),
+            'detected_type_name' => self::PROBLEM_TYPES[$topType] ?? $topType,
             'confidence' => $confidence,
+            'margin' => $marginPercent,
             'all_scores' => $scores,
             'extracted_params' => $extractedParams,
+            'extracted_data' => $extractedData,
             'suggested_method' => $suggestedMethod,
             'math_model' => $mathModel,
             'similar_sample' => $similarSample,
@@ -182,121 +362,209 @@ class SmartModeler
     }
 
     /**
-     * نرمال‌سازی متن فارسی
+     * استخراج داده‌های ساختاری از متن
      */
-    private function normalizeText($text)
+    private function extractStructuralData(string $text): array
     {
-        // ✅ آرایه صحیح و کامل تبدیل اعداد فارسی به انگلیسی
-        $persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-        $englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        
-        $text = str_replace($persianNumbers, $englishNumbers, $text);
-        $text = str_replace(['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'], $englishNumbers, $text); // اعداد عربی
-        
-        // حذف کاراکترهای اضافی
-        $text = preg_replace('/\s+/', ' ', $text);
-        return trim($text);
-    }
-
-    /**
-     * ✅ پاکسازی نام گره/شهر از کلمات مزاحم و علائم نگارشی
-     */
-    private function cleanNodeName($name)
-    {
-        $name = trim($name);
-        // حذف علائم نگارشی
-        $name = preg_replace('/[،,.؛;:!؟?()«»\[\]{}"-]+/u', '', $name);
-        // حذف پیشوند «شهر»
-        $name = preg_replace('/^شهر/u', '', $name);
-        // حذف افعال مزاحم انتهای نام («شیراز هستند» → «شیراز»)
-        $name = preg_replace('/(?:هستند|است|می‌باشد|میباشد)$/u', '', $name);
-        $name = trim($name);
-        // حذف کلمات توقف
-        $stop = ['به', 'از', 'تا', 'با', 'وزن', 'فاصله', 'هزینه', 'کیلومتر', 'کیلومتری',
-                'مبدأ', 'مقصد', 'و', 'در', 'را', 'که', 'این', 'ها', 'یال', 'شبکه', 'پیدا'];
-        if (in_array($name, $stop, true)) return '';
-        return $name;
+        return [
+            'numbers' => $this->preprocessor->extractNumbers($text),
+            'numbers_with_units' => $this->preprocessor->extractNumbersWithUnits($text),
+            'matrices' => $this->preprocessor->extractMatrices($text),
+            'stochastic_matrices' => $this->preprocessor->findStochasticMatrices(
+                $this->preprocessor->extractMatrices($text)
+            ),
+            'queue_rates' => $this->preprocessor->extractQueueRates($text),
+            'probabilities' => $this->preprocessor->extractProbabilities($text),
+            'ranges' => $this->preprocessor->extractRanges($text),
+            'coefficients' => $this->preprocessor->extractCoefficients($text),
+        ];
     }
 
     /**
      * محاسبه امتیاز هر نوع مسئله
      */
-    private function calculateScores($text)
+    private function calculateScores(string $text, array $extractedData): array
     {
-        $scores = [
-            'TRANS' => 0,
-            'ASSIGN' => 0,
-            'SHORTEST' => 0,
-            'LP' => 0,
-            'TRANSSHIP' => 0,
-        ];
+        $scores = array_fill_keys(array_keys(self::PROBLEM_TYPES), 0);
 
-        // . امتیازدهی بر اساس کلمات کلیدی
+        // ۱. امتیازدهی کلمات کلیدی (با تطبیق مرزداری برای کلمات کوتاه)
         foreach ($this->patterns as $pattern) {
-            $keyword = $pattern['keyword_fa'];
-            $weight = (int)$pattern['weight'];
+            $keyword  = $pattern['keyword_fa'];
+            $weight   = (int)$pattern['weight'];
             $category = $pattern['category'] ?? 'general';
-            $type = $pattern['problem_type_code'];
+            $type     = $pattern['problem_type_code'];
+            if (!isset($scores[$type])) continue;
 
-            $count = substr_count($text, $keyword);
-            
+            $count = $this->countKeywordOccurrences($text, $keyword);
             if ($count > 0) {
-                $categoryMultiplier = $this->categoryWeights[$category] ?? 1.0;
-                $scores[$type] += ($count * $weight * $categoryMultiplier);
+                $multiplier = $this->categoryWeights[$category] ?? 1.0;
+                $scores[$type] += ($count * $weight * $multiplier);
             }
         }
 
-        // ۲. ✅ تشخیص هوشمند ترکیبی (الگوهای خاص)
-        
-        // اگر "سود" + "محدودیت" یا "قیود" بود → قطعاً LP
-        if (strpos($text, 'سود') !== false && (strpos($text, 'محدودیت') !== false || strpos($text, 'قیود') !== false)) {
-            $scores['LP'] += 20; // امتیاز قوی
+        // ۲. امتیازهای ساختاری
+        $scores = $this->addStructuralScores($scores, $text, $extractedData);
+
+        // ۳. امتیازهای ترکیبی (قواعد قبلی)
+        $scores = $this->addCombinationScores($scores, $text);
+
+        // ۴. ✅ لایه تشخیصی + سرکوب واژگان مشترک
+        $scores = $this->applyDiscriminativeLayer($scores, $text);
+
+        return $scores;
+    }
+
+    /**
+     * ✅ شمارش وقوع کلمه با رعایت مرز کلمه برای کلمات کوتاه (≤۴ حرف)
+     * جلوگیری از شمارش «مو» داخل «مورد»، «نش» داخل «نشان»، «بازی» داخل «بازیابی»
+     */
+    private function countKeywordOccurrences(string $text, string $keyword): int
+    {
+        if ($keyword === '') return 0;
+        if (mb_strlen($keyword) <= 4) {
+            $pattern = '/(?<![\p{Arabic}])' . preg_quote($keyword, '/') . '(?![\p{Arabic}])/u';
+            $n = preg_match_all($pattern, $text);
+            return $n === false ? 0 : $n;
         }
-        
-        // اگر "بیشینه‌سازی" یا "حداکثر" + "سود" بود → LP با هدف maximize
-        if ((strpos($text, 'بیشینه') !== false || strpos($text, 'حداکثر') !== false) && strpos($text, 'سود') !== false) {
-            $scores['LP'] += 15;
+        return mb_substr_count($text, $keyword);
+    }
+
+    /**
+     * ✅ لایه تشخیصی: پاداش الگوهای یکتا + سرکوب واژگان مشترک بهینه‌سازی
+     */
+    private function applyDiscriminativeLayer(array $scores, string $text): array
+    {
+        $discScores = [];
+        foreach (self::DISCRIMINATIVE as $type => $rules) {
+            $bonus = 0;
+            foreach ($rules as $rule) {
+                if (preg_match($rule['pattern'], $text)) {
+                    $bonus += $rule['weight'];
+                }
+            }
+            $discScores[$type] = $bonus;
+            if (isset($scores[$type])) {
+                $scores[$type] += $bonus;
+            }
         }
-        
-        // اگر "کمینه‌سازی" یا "حداقل" + "هزینه" بود → LP با هدف minimize
-        if ((strpos($text, 'کمینه') !== false || strpos($text, 'حداقل') !== false) && strpos($text, 'هزینه') !== false) {
-            $scores['LP'] += 15;
+
+        // سرکوب LP وقتی یک نوع خاص با نشانه یکتا تشخیص داده شده
+        // (چون «سود/بیشینه/محدودیت/تابع هدف» واژگان مشترک همه مسائل بهینه‌سازی‌اند)
+        $maxNonLp = 0;
+        foreach ($discScores as $t => $b) {
+            if ($t !== 'LP' && $b > $maxNonLp) $maxNonLp = $b;
         }
-        
-        // اگر "مبدأ" + "مقصد" + "عرضه" + "تقاضا" بود → حمل و نقل
-        if (strpos($text, 'مبدأ') !== false && strpos($text, 'مقصد') !== false && 
-            strpos($text, 'عرضه') !== false && strpos($text, 'تقاضا') !== false) {
-            $scores['TRANS'] += 25; // امتیاز خیلی قوی
-        }
-        
-        // اگر "یک به یک" یا "اختصاص" + "کارگر/وظیفه" بود → تخصیص
-        if ((strpos($text, 'یک به یک') !== false || strpos($text, 'اختصاص') !== false) &&
-            (strpos($text, 'کارگر') !== false || strpos($text, 'وظیفه') !== false)) {
-            $scores['ASSIGN'] += 20;
-        }
-        
-        // اگر "کوتاه‌ترین مسیر" یا "فاصله" + "شهر/گره" بود → Shortest Path
-        if ((strpos($text, 'کوتاه') !== false && strpos($text, 'مسیر') !== false) ||
-            (strpos($text, 'فاصله') !== false && (strpos($text, 'شهر') !== false || strpos($text, 'گره') !== false))) {
-            $scores['SHORTEST'] += 20;
-        }
-        
-        // اگر "ترانشیپ" یا "واسط" + "چند مرحله" بود → Transshipment
-        if ((strpos($text, 'ترانشیپ') !== false || strpos($text, 'واسط') !== false) &&
-            strpos($text, 'چند مرحله') !== false) {
-            $scores['TRANSSHIP'] += 25;
+        if ($maxNonLp >= 40) {
+            $scores['LP'] = (int)round($scores['LP'] * 0.15);
         }
 
         return $scores;
     }
 
     /**
-     * استخراج پارامترها از متن (اعداد، نام‌ها، محدودیت‌ها)
+     * افزودن امتیازهای ساختاری
      */
-    private function extractParameters($text, $type)
+    private function addStructuralScores(array $scores, string $text, array $extractedData): array
+    {
+        // MARKOV: وجود ماتریس stochastic
+        if (!empty($extractedData['stochastic_matrices'])) {
+            $scores['MARKOV'] += 20;
+        }
+        
+        // QUEUEING: وجود λ و μ
+        if ($extractedData['queue_rates']['lambda'] !== null && 
+            $extractedData['queue_rates']['mu'] !== null) {
+            $scores['QUEUEING'] += 25;
+        }
+        
+        // GAME: وجود ماتریس‌های 2x2 یا بزرگتر
+        foreach ($extractedData['matrices'] as $matrix) {
+            if ($matrix['type'] !== 'array' && count($matrix['data']) >= 2) {
+                $scores['GAME_THEORY'] += 10;
+                break;
+            }
+        }
+        
+        // MONTECARLO: وجود توزیع‌های احتمالی
+        if (count($extractedData['probabilities']) >= 2) {
+            $scores['MONTE_CARLO'] += 15;
+        }
+        
+        // LP/ILP: وجود ضرایب
+        if (count($extractedData['coefficients']) >= 2) {
+            $scores['LP'] += 10;
+            // اگر کلمه "صحیح" یا "عددی" هم باشد، ILP
+            if (preg_match('/(صحیح|عددی|integer|باینری)/ui', $text)) {
+                $scores['ILP'] += 20;
+            }
+        }
+        
+        return $scores;
+    }
+
+    /**
+     * امتیازدهی ترکیبی (الگوهای خاص)
+     */
+    private function addCombinationScores(array $scores, string $text): array
+    {
+        // LP با سود و محدودیت
+        if (mb_strpos($text, 'سود') !== false && 
+            (mb_strpos($text, 'محدودیت') !== false || mb_strpos($text, 'قیود') !== false)) {
+            $scores['LP'] += 20;
+        }
+        
+        // LP با بیشینه/کمینه
+        if ((mb_strpos($text, 'بیشینه') !== false || mb_strpos($text, 'حداکثر') !== false) && 
+            mb_strpos($text, 'سود') !== false) {
+            $scores['LP'] += 15;
+        }
+        
+        if ((mb_strpos($text, 'کمینه') !== false || mb_strpos($text, 'حداقل') !== false) && 
+            mb_strpos($text, 'هزینه') !== false) {
+            $scores['LP'] += 15;
+        }
+        
+        // TRANS با همه عناصر
+        if (mb_strpos($text, 'مبدأ') !== false && mb_strpos($text, 'مقصد') !== false && 
+            mb_strpos($text, 'عرضه') !== false && mb_strpos($text, 'تقاضا') !== false) {
+            $scores['TRANS'] += 25;
+        }
+        
+        // ASSIGN با یک‌به‌یک
+        if ((mb_strpos($text, 'یک به یک') !== false || mb_strpos($text, 'اختصاص') !== false) &&
+            (mb_strpos($text, 'کارگر') !== false || mb_strpos($text, 'وظیفه') !== false)) {
+            $scores['ASSIGN'] += 20;
+        }
+        
+        // SHORTEST با شهر/فاصله
+        if ((mb_strpos($text, 'کوتاه') !== false && mb_strpos($text, 'مسیر') !== false) ||
+            (mb_strpos($text, 'فاصله') !== false && 
+             (mb_strpos($text, 'شهر') !== false || mb_strpos($text, 'گره') !== false))) {
+            $scores['SHORTEST'] += 20;
+        }
+        
+        // TRANSSHIP با واسط
+        if ((mb_strpos($text, 'ترانشیپ') !== false || mb_strpos($text, 'واسط') !== false) &&
+            mb_strpos($text, 'چند مرحله') !== false) {
+            $scores['TRANSSHIP'] += 25;
+        }
+        
+        // DUAL با LP
+        if (mb_strpos($text, 'دوگان') !== false && 
+            (mb_strpos($text, 'برنامه‌ریزی') !== false || mb_strpos($text, 'خطی') !== false)) {
+            $scores['DUAL'] += 30;
+        }
+        
+        return $scores;
+    }
+
+    /**
+     * استخراج پارامترها از متن
+     */
+    private function extractParameters(string $text, string $type, array $extractedData): array
     {
         $params = [
-            'numbers' => [],
+            'numbers' => $extractedData['numbers'],
             'potential_sources' => [],
             'potential_destinations' => [],
             'objectives' => [],
@@ -304,285 +572,595 @@ class SmartModeler
             'model_data' => null,
         ];
 
-        // تبدیل اعداد فارسی به انگلیسی
-        $persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-        $englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        $textForNumbers = str_replace($persianNumbers, $englishNumbers, $text);
-        $textForNumbers = str_replace(['٠','١','٢','٣','٤','٥','٦','','٨','٩'], $englishNumbers, $textForNumbers);
-        
-        // استخراج تمام اعداد به ترتیب
-        preg_match_all('/\d+(?:\.\d+)?/', $textForNumbers, $matches);
-        $params['numbers'] = array_map('floatval', $matches[0]);
-        $n = $params['numbers'];
-
         // تشخیص مفاهیم کلیدی
-        if (strpos($text, 'کارخانه') !== false || strpos($text, 'مبدأ') !== false) $params['potential_sources'][] = 'کارخانه/مبدأ';
-        if (strpos($text, 'انبار') !== false || strpos($text, 'مقصد') !== false) $params['potential_destinations'][] = 'انبار/مقصد';
-        if (strpos($text, 'کارگر') !== false || strpos($text, 'اپراتور') !== false || strpos($text, 'عامل') !== false) $params['potential_sources'][] = 'نیروی کار';
-        if (strpos($text, 'وظیفه') !== false || strpos($text, 'دستگاه') !== false || strpos($text, 'پروژه') !== false) $params['potential_destinations'][] = 'وظیفه/دستگاه';
+        if (mb_strpos($text, 'کارخانه') !== false || mb_strpos($text, 'مبدأ') !== false) {
+            $params['potential_sources'][] = 'کارخانه/مبدأ';
+        }
+        if (mb_strpos($text, 'انبار') !== false || mb_strpos($text, 'مقصد') !== false) {
+            $params['potential_destinations'][] = 'انبار/مقصد';
+        }
+        if (mb_strpos($text, 'کارگر') !== false || mb_strpos($text, 'اپراتور') !== false) {
+            $params['potential_sources'][] = 'نیروی کار';
+        }
+        if (mb_strpos($text, 'وظیفه') !== false || mb_strpos($text, 'دستگاه') !== false) {
+            $params['potential_destinations'][] = 'وظیفه/دستگاه';
+        }
         
-        if (strpos($text, 'حداکثر') !== false || strpos($text, 'بیشینه') !== false || strpos($text, 'سود') !== false) {
+        if (mb_strpos($text, 'حداکثر') !== false || mb_strpos($text, 'بیشینه') !== false || mb_strpos($text, 'سود') !== false) {
             $params['objectives'][] = 'maximize';
         }
-        if (strpos($text, 'حداقل') !== false || strpos($text, 'کمینه') !== false || strpos($text, 'هزینه') !== false) {
+        if (mb_strpos($text, 'حداقل') !== false || mb_strpos($text, 'کمینه') !== false || mb_strpos($text, 'هزینه') !== false) {
             $params['objectives'][] = 'minimize';
         }
-        if (strpos($text, 'محدودیت') !== false || strpos($text, 'ظرفیت') !== false || strpos($text, 'قیود') !== false) {
+        if (mb_strpos($text, 'محدودیت') !== false || mb_strpos($text, 'ظرفیت') !== false || mb_strpos($text, 'قیود') !== false) {
             $params['constraints'][] = 'capacity_limit';
         }
 
-        // =====================================================
-        // تولید خودکار model_data بر اساس نوع مسئله
-        // =====================================================
-        
-        if ($type === 'LP') {
-            $numVariables = 2;
-            $numConstraints = 2;
-            
-            if (preg_match('/(\d+)\s*(?:متغیر|محصول|کالا)/u', $text, $matches)) {
-                $numVariables = (int)$matches[1];
-            }
-            if (preg_match('/(\d+)\s*(?:محدودیت|قید|منبع|ساعت)/u', $text, $matches)) {
-                $numConstraints = (int)$matches[1];
-            }
-            
-            // ✅ تشخیص هوشمند نوع محدودیت‌ها
-            $defaultConstraintType = '<=';
-            if (preg_match('/حداکثر|نباید\s+بیشتر\s+از|کمتر\s+مساوی|حداکثر\s+مصرف|حداکثر\s+تولید|حداکثر\s+ظرفیت|نمی‌تواند\s+بیشتر/u', $text)) {
-                $defaultConstraintType = '<=';
-            } elseif (preg_match('/حداقل|نباید\s+کمتر\s+از|بیشتر\s+مساوی|حداقل\s+مصرف|حداقل\s+تولید|حداقل\s+ظرفیت|نمی‌تواند\s+کمتر/u', $text)) {
-                $defaultConstraintType = '>=';
-            }
-            
-            $variables = [];
-            for ($i = 0; $i < $numVariables; $i++) {
-                $variables[] = [
-                    'name' => "متغیر " . ($i + 1),
-                    'coeff' => $n[$i] ?? (50 + $i * 20)
-                ];
-            }
-            
-            $constraints = [];
-            $constraintStartIdx = $numVariables;
-            for ($i = 0; $i < $numConstraints; $i++) {
-                $coeffs = [];
-                for ($j = 0; $j < $numVariables; $j++) {
-                    $coeffs[] = $n[$constraintStartIdx + ($i * $numVariables) + $j] ?? (1 + $j);
-                }
-                $capacityIdx = $constraintStartIdx + ($numConstraints * $numVariables) + $i;
-                $constraints[] = [
-                    'name' => "محدودیت " . ($i + 1),
-                    'coeffs' => $coeffs,
-                    'capacity' => $n[$capacityIdx] ?? (60 + $i * 20),
-                    'type' => $defaultConstraintType // ← اضافه شد
-                ];
-            }
-            
-            $params['model_data'] = [
-                'name' => 'پروژه برنامه‌ریزی خطی (استخراج هوشمند)',
-                'description' => $text,
-                'objective' => in_array('maximize', $params['objectives']) ? 'maximize' : 'minimize',
-                'variables' => $variables,
-                'constraints' => $constraints
-            ];
-        } 
-        elseif ($type === 'TRANS') {
-            $numSources = 2;
-            $numDestinations = 2;
-            
-            if (preg_match('/(\d+)\s*(?:کارخانه|مبدأ|منبع)/u', $text, $matches)) {
-                $numSources = (int)$matches[1];
-            }
-            if (preg_match('/(\d+)\s*(?:انبار|مقصد|مشتری)/u', $text, $matches)) {
-                $numDestinations = (int)$matches[1];
-            }
-            
-            // ساخت مبدأها (ایندکس 0 تعداد است، ظرفیت‌ها از 1 شروع می‌شوند)
-            $sources = [];
-            for ($i = 0; $i < $numSources; $i++) {
-                $sources[] = [
-                    'name' => "مبدأ " . ($i + 1),
-                    'capacity' => $n[1 + $i] ?? 100
-                ];
-            }
-            
-            // ساخت مقصدها (بعد از ظرفیت‌ها و عدد "تعداد انبار")
-            $demandStartIdx = $numSources + 2;
-            $destinations = [];
-            for ($j = 0; $j < $numDestinations; $j++) {
-                $destinations[] = [
-                    'name' => "مقصد " . ($j + 1),
-                    'demand' => $n[$demandStartIdx + $j] ?? 100
-                ];
-            }
-            
-            // ساخت ماتریس هزینه
-            $costStartIdx = $demandStartIdx + $numDestinations;
-            $costMatrix = [];
-            for ($i = 0; $i < $numSources; $i++) {
-                $row = [];
-                for ($j = 0; $j < $numDestinations; $j++) {
-                    $costIdx = $costStartIdx + ($i * $numDestinations) + $j;
-                    $row[] = $n[$costIdx] ?? (5 + $i + $j);
-                }
-                $costMatrix[] = $row;
-            }
-            
-            $params['model_data'] = [
-                'name' => 'پروژه حمل و نقل (استخراج هوشمند)',
-                'description' => $text,
-                'sources' => $sources,
-                'destinations' => $destinations,
-                'cost_matrix' => $costMatrix
-            ];
-        }
-        elseif ($type === 'ASSIGN') {
-            $numAgents = 2;
-            $numTasks = 2;
-            
-            if (preg_match('/(\d+)\s*(?:کارگر|اپراتور|عامل|نیرو)/u', $text, $matches)) {
-                $numAgents = (int)$matches[1];
-            }
-            if (preg_match('/(\d+)\s*(?:وظیفه|دستگاه|پروژه)/u', $text, $matches)) {
-                $numTasks = (int)$matches[1];
-            }
-            
-            // ساخت عوامل
-            $agents = [];
-            for ($i = 0; $i < $numAgents; $i++) {
-                $agents[] = ['name' => "عامل " . ($i + 1)];
-            }
-            
-            // ساخت وظایف
-            $tasks = [];
-            for ($j = 0; $j < $numTasks; $j++) {
-                $tasks[] = ['name' => "وظیفه " . ($j + 1)];
-            }
-            
-            // ساخت ماتریس هزینه/زمان
-            $costMatrix = [];
-            for ($i = 0; $i < $numAgents; $i++) {
-                $row = [];
-                for ($j = 0; $j < $numTasks; $j++) {
-                    $costIdx = ($i * $numTasks) + $j;
-                    $row[] = $n[$costIdx] ?? (5 + $i + $j);
-                }
-                $costMatrix[] = $row;
-            }
-            
-            $params['model_data'] = [
-                'name' => 'پروژه تخصیص (استخراج هوشمند)',
-                'description' => $text,
-                'agents' => $agents,
-                'tasks' => $tasks,
-                'cost_matrix' => $costMatrix
-            ];
-        } 
-        elseif ($type === 'SHORTEST') {
-            // ۱. استخراج یال‌ها با الگوی «X به Y عدد» یا «X تا Y با وزن عدد»
-            $edgePattern = '/(?:از\s+)?([\p{Arabic}\x{200C}a-zA-Z]+)\s+(?:به|تا)\s+([\p{Arabic}\x{200C}a-zA-Z]+)(?:\s+(?:با\s+)?(?:وزن|فاصله|هزینه|طول))?\s+(\d+(?:\.\d+)?)/u';
-            preg_match_all($edgePattern, $textForNumbers, $edgeMatches, PREG_SET_ORDER);
-
-            // ۲. ساخت فهرست گره‌ها از نام‌های داخل یال‌ها
-            $nodeNames = [];
-            $rawEdges  = [];
-            foreach ($edgeMatches as $m) {
-                $from = $this->cleanNodeName($m[1]);
-                $to   = $this->cleanNodeName($m[2]);
-                $w    = (float)$m[3];
-                if (mb_strlen($from) < 2 || mb_strlen($to) < 2) continue;
-                if (!in_array($from, $nodeNames, true)) $nodeNames[] = $from;
-                if (!in_array($to,   $nodeNames, true)) $nodeNames[] = $to;
-                $rawEdges[] = ['from' => $from, 'to' => $to, 'weight' => $w];
-            }
-
-            // ۳. افزودن شهرهایی که به صورت لیست آمده‌اند («شامل قم، اصفهان و شیراز»)
-            if (preg_match('/شامل\s+([^\.!؟?؛;]+)/u', $text, $listMatch)) {
-                $parts = preg_split('/[،,]+|\s+و\s+/u', $listMatch[1]);
-                foreach ($parts as $p) {
-                    $name = $this->cleanNodeName($p);
-                    if (mb_strlen($name) >= 2 && !in_array($name, $nodeNames, true)) {
-                        $nodeNames[] = $name;
-                    }
-                }
-            }
-
-            // ۴. fallback: اگر هیچ یالی پیدا نشد، گره‌های عددی بساز
-            if (empty($nodeNames)) {
-                $numNodes = 3;
-                if (preg_match('/(\d+)\s*(?:شهر|گره|نقطه)/u', $text, $mm)) {
-                    $numNodes = max(2, (int)$mm[1]);
-                }
-                for ($i = 0; $i < $numNodes; $i++) {
-                    $nodeNames[] = "گره " . ($i + 1);
-                }
-            }
-
-            $nodes = [];
-            foreach ($nodeNames as $name) {
-                $nodes[] = ['name' => $name];
-            }
-
-            // ۵. تبدیل یال‌ها به ایندکس گره‌ها
-            $edges = [];
-            foreach ($rawEdges as $re) {
-                $fromIdx = array_search($re['from'], $nodeNames, true);
-                $toIdx   = array_search($re['to'],   $nodeNames, true);
-                if ($fromIdx !== false && $toIdx !== false) {
-                    $edges[] = ['from' => $fromIdx, 'to' => $toIdx, 'weight' => $re['weight']];
-                }
-            }
-
-            // ۶. fallback یال‌ها: زنجیره خطی با اعداد متن
-            if (empty($edges) && count($nodes) > 1 && count($n) >= 1) {
-                for ($i = 0; $i < count($nodes) - 1; $i++) {
-                    $edges[] = [
-                        'from'   => $i,
-                        'to'     => $i + 1,
-                        'weight' => $n[$i] ?? (10 + $i * 10),
-                    ];
-                }
-            }
-
-            $params['model_data'] = [
-                'name'        => 'پروژه کوتاه‌ترین مسیر (استخراج هوشمند)',
-                'description' => mb_substr($text, 0, 2000),
-                'nodes'       => $nodes,
-                'edges'       => $edges,
-            ];
-        }
-        elseif ($type === 'TRANSSHIP') {
-            // مشابه حمل و نقل اما با گره‌های واسط
-            $numSources = 2;
-            $numTransshipment = 1;
-            $numDestinations = 2;
-            
-            if (preg_match('/(\d+)\s*(?:کارخانه|مبدأ)/u', $text, $matches)) {
-                $numSources = (int)$matches[1];
-            }
-            if (preg_match('/(\d+)\s*(?:واسط|میانی|مرکز\s+توزیع)/u', $text, $matches)) {
-                $numTransshipment = (int)$matches[1];
-            }
-            if (preg_match('/(\d+)\s*(?:انبار|مقصد)/u', $text, $matches)) {
-                $numDestinations = (int)$matches[1];
-            }
-            
-            $params['model_data'] = [
-                'name' => 'پروژه ترانشیپمنت (استخراج هوشمند)',
-                'description' => $text,
-                'sources' => array_map(fn($i) => ['name' => "مبدأ " . ($i + 1), 'capacity' => 100], range(0, $numSources - 1)),
-                'transshipment' => array_map(fn($i) => ['name' => "گره واسط " . ($i + 1)], range(0, $numTransshipment - 1)),
-                'destinations' => array_map(fn($i) => ['name' => "مقصد " . ($i + 1), 'demand' => 100], range(0, $numDestinations - 1))
-            ];
+        // تولید model_data بر اساس نوع مسئله
+        switch ($type) {
+            case 'LP':
+            case 'ILP':
+                $params['model_data'] = $this->buildLPModel($text, $extractedData, $type === 'ILP');
+                break;
+            case 'TRANS':
+                $params['model_data'] = $this->buildTransportModel($text, $extractedData);
+                break;
+            case 'ASSIGN':
+                $params['model_data'] = $this->buildAssignmentModel($text, $extractedData);
+                break;
+            case 'SHORTEST':
+                $params['model_data'] = $this->buildShortestModel($text, $extractedData);
+                break;
+            case 'TRANSSHIP':
+                $params['model_data'] = $this->buildTransshipModel($text, $extractedData);
+                break;
+            case 'QUEUEING':
+                $params['model_data'] = $this->buildQueueingModel($text, $extractedData);
+                break;
+            case 'MARKOV':
+                $params['model_data'] = $this->buildMarkovModel($text, $extractedData);
+                break;
+            case 'GAME_THEORY':
+                $params['model_data'] = $this->buildGameModel($text, $extractedData);
+                break;
+            case 'MONTE_CARLO':
+                $params['model_data'] = $this->buildMonteCarloModel($text, $extractedData);
+                break;
+            case 'DUAL':
+                $params['model_data'] = $this->buildDualModel($text, $extractedData);
+                break;
         }
 
         return $params;
     }
 
+    // ═══════════════════════════════════════════════════════
+    // متدهای ساخت مدل برای هر نوع مسئله
+    // ═══════════════════════════════════════════════════════
+
+    private function buildLPModel(string $text, array $extractedData, bool $isInteger = false): array
+    {
+        $n = $extractedData['numbers'];
+
+        // ═══════════════════════════════════════════════════════
+        // ✅ حالت جدید: استخراج سطربه‌سطر «ضرایب X و Y و ظرفیت Z»
+        // ═══════════════════════════════════════════════════════
+        $rowConstraints = [];
+        if (preg_match_all('/ضرایب\s+([\d\sو.,]+?)\s+و\s+ظرفیت\s+(\d+(?:\.\d+)?)/u', $text, $rm, PREG_SET_ORDER)) {
+            foreach ($rm as $r) {
+                preg_match_all('/\d+(?:\.\d+)?/', $r[1], $cn);
+                if (!empty($cn[0])) {
+                    $rowConstraints[] = [
+                        'coeffs'   => array_map('floatval', $cn[0]),
+                        'capacity' => (float)$r[2],
+                    ];
+                }
+            }
+        }
+
+        // ✅ ضرایب تابع هدف: اعدادِ پس از عبارت «تابع هدف»
+        $objCoeffs = null;
+        if (preg_match('/تابع\s+هدف[^0-9]*?([\d\sو.,]+?)(?:\s+است|\s+می‌?باشد|[.،,;:]|$)/u', $text, $om)) {
+            preg_match_all('/\d+(?:\.\d+)?/', $om[1], $on);
+            if (!empty($on[0])) {
+                $objCoeffs = array_map('floatval', $on[0]);
+            }
+        }
+
+        // تشخیص نوع قیود
+        $defaultConstraintType = '<=';
+        if (preg_match('/حداقل|نباید\s+کمتر\s+از|بیشتر\s+مساوی/u', $text)) {
+            $defaultConstraintType = '>=';
+        }
+
+        $objective = (preg_match('/بیشینه|حداکثر|ماکزیمم|maximize/ui', $text)) ? 'maximize' : 'minimize';
+
+        // ─────────────────────────────────────────────────────────
+        // مسیر A: قیود سطربه‌سطر یافت شد (دقیق‌ترین حالت)
+        // ─────────────────────────────────────────────────────────
+        if (!empty($rowConstraints)) {
+            $numVariables = count($rowConstraints[0]['coeffs']);
+
+            $variables = [];
+            for ($i = 0; $i < $numVariables; $i++) {
+                $variables[] = [
+                    'name'       => "متغیر " . ($i + 1),
+                    'coeff'      => $objCoeffs[$i] ?? ($n[$i] ?? (50 + $i * 20)),
+                    'is_integer' => $isInteger,
+                ];
+            }
+
+            $constraints = [];
+            foreach ($rowConstraints as $i => $rc) {
+                $constraints[] = [
+                    'name'     => "محدودیت " . ($i + 1),
+                    'coeffs'   => $rc['coeffs'],
+                    'capacity' => $rc['capacity'],
+                    'type'     => $defaultConstraintType,
+                ];
+            }
+
+            return [
+                'name'        => $isInteger ? 'پروژه برنامه‌ریزی صحیح (استخراج هوشمند)' : 'پروژه برنامه‌ریزی خطی (استخراج هوشمند)',
+                'description' => mb_substr($text, 0, 2000),
+                'objective'   => $objective,
+                'variables'   => $variables,
+                'constraints' => $constraints,
+                'is_integer'  => $isInteger,
+            ];
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // مسیر B: منطق قبلی (خواندن ترتیبی اعداد) — بدون رگرسیون
+        // ─────────────────────────────────────────────────────────
+        $numVariables = 2;
+        $numConstraints = 2;
+
+        if (preg_match('/(\d+)\s*(?:متغیر|محصول|کالا)/u', $text, $matches)) {
+            $numVariables = (int)$matches[1];
+        }
+        if (preg_match('/(\d+)\s*(?:محدودیت|قید|منبع|ساعت)/u', $text, $matches)) {
+            $numConstraints = (int)$matches[1];
+        }
+
+        $variables = [];
+        for ($i = 0; $i < $numVariables; $i++) {
+            $variables[] = [
+                'name'       => "متغیر " . ($i + 1),
+                'coeff'      => $objCoeffs[$i] ?? ($n[$i] ?? (50 + $i * 20)),
+                'is_integer' => $isInteger,
+            ];
+        }
+
+        $constraints = [];
+        $constraintStartIdx = $numVariables;
+        for ($i = 0; $i < $numConstraints; $i++) {
+            $coeffs = [];
+            for ($j = 0; $j < $numVariables; $j++) {
+                $coeffs[] = $n[$constraintStartIdx + ($i * $numVariables) + $j] ?? (1 + $j);
+            }
+            $capacityIdx = $constraintStartIdx + ($numConstraints * $numVariables) + $i;
+            $constraints[] = [
+                'name'     => "محدودیت " . ($i + 1),
+                'coeffs'   => $coeffs,
+                'capacity' => $n[$capacityIdx] ?? (60 + $i * 20),
+                'type'     => $defaultConstraintType,
+            ];
+        }
+
+        return [
+            'name'        => $isInteger ? 'پروژه برنامه‌ریزی صحیح (استخراج هوشمند)' : 'پروژه برنامه‌ریزی خطی (استخراج هوشمند)',
+            'description' => mb_substr($text, 0, 2000),
+            'objective'   => $objective,
+            'variables'   => $variables,
+            'constraints' => $constraints,
+            'is_integer'  => $isInteger,
+        ];
+    }
+
+    private function buildTransportModel(string $text, array $extractedData): array
+    {
+        $n = $extractedData['numbers'];
+        $numSources = 2;
+        $numDestinations = 2;
+        
+        if (preg_match('/(\d+)\s*(?:کارخانه|مبدأ|منبع)/u', $text, $matches)) {
+            $numSources = (int)$matches[1];
+        }
+        if (preg_match('/(\d+)\s*(?:انبار|مقصد|مشتری)/u', $text, $matches)) {
+            $numDestinations = (int)$matches[1];
+        }
+        
+        $sources = [];
+        for ($i = 0; $i < $numSources; $i++) {
+            $sources[] = [
+                'name' => "مبدأ " . ($i + 1),
+                'capacity' => $n[1 + $i] ?? 100
+            ];
+        }
+        
+        $demandStartIdx = $numSources + 2;
+        $destinations = [];
+        for ($j = 0; $j < $numDestinations; $j++) {
+            $destinations[] = [
+                'name' => "مقصد " . ($j + 1),
+                'demand' => $n[$demandStartIdx + $j] ?? 100
+            ];
+        }
+        
+        $costStartIdx = $demandStartIdx + $numDestinations;
+        $costMatrix = [];
+        for ($i = 0; $i < $numSources; $i++) {
+            $row = [];
+            for ($j = 0; $j < $numDestinations; $j++) {
+                $costIdx = $costStartIdx + ($i * $numDestinations) + $j;
+                $row[] = $n[$costIdx] ?? (5 + $i + $j);
+            }
+            $costMatrix[] = $row;
+        }
+        
+        return [
+            'name' => 'پروژه حمل و نقل (استخراج هوشمند)',
+            'description' => mb_substr($text, 0, 2000),
+            'sources' => $sources,
+            'destinations' => $destinations,
+            'cost_matrix' => $costMatrix
+        ];
+    }
+
+    private function buildAssignmentModel(string $text, array $extractedData): array
+    {
+        $n = $extractedData['numbers'];
+        $numAgents = 2;
+        $numTasks = 2;
+        
+        if (preg_match('/(\d+)\s*(?:کارگر|اپراتور|عامل|نیرو)/u', $text, $matches)) {
+            $numAgents = (int)$matches[1];
+        }
+        if (preg_match('/(\d+)\s*(?:وظیفه|دستگاه|پروژه)/u', $text, $matches)) {
+            $numTasks = (int)$matches[1];
+        }
+        
+        $agents = [];
+        for ($i = 0; $i < $numAgents; $i++) {
+            $agents[] = ['name' => "عامل " . ($i + 1)];
+        }
+        
+        $tasks = [];
+        for ($j = 0; $j < $numTasks; $j++) {
+            $tasks[] = ['name' => "وظیفه " . ($j + 1)];
+        }
+        
+        $costMatrix = [];
+        for ($i = 0; $i < $numAgents; $i++) {
+            $row = [];
+            for ($j = 0; $j < $numTasks; $j++) {
+                $costIdx = ($i * $numTasks) + $j;
+                $row[] = $n[$costIdx] ?? (5 + $i + $j);
+            }
+            $costMatrix[] = $row;
+        }
+        
+        return [
+            'name' => 'پروژه تخصیص (استخراج هوشمند)',
+            'description' => mb_substr($text, 0, 2000),
+            'agents' => $agents,
+            'tasks' => $tasks,
+            'cost_matrix' => $costMatrix
+        ];
+    }
+
+    private function buildShortestModel(string $text, array $extractedData): array
+    {
+        // استخراج یال‌ها
+        $edgePattern = '/(?:از\s+)?([\p{Arabic}\x{200C}a-zA-Z]+)\s+(?:به|تا)\s+([\p{Arabic}\x{200C}a-zA-Z]+)(?:\s+(?:با\s+)?(?:وزن|فاصله|هزینه|طول))?\s+(\d+(?:\.\d+)?)/u';
+        preg_match_all($edgePattern, $text, $edgeMatches, PREG_SET_ORDER);
+
+        $nodeNames = [];
+        $rawEdges = [];
+        foreach ($edgeMatches as $m) {
+            $from = $this->cleanNodeName($m[1]);
+            $to = $this->cleanNodeName($m[2]);
+            $w = (float)$m[3];
+            if (mb_strlen($from) < 2 || mb_strlen($to) < 2) continue;
+            if (!in_array($from, $nodeNames, true)) $nodeNames[] = $from;
+            if (!in_array($to, $nodeNames, true)) $nodeNames[] = $to;
+            $rawEdges[] = ['from' => $from, 'to' => $to, 'weight' => $w];
+        }
+
+        if (preg_match('/شامل\s+([^.!?؛;]+)/u', $text, $listMatch)) {
+            $parts = preg_split('/[،,]+|\s+و\s+/u', $listMatch[1]);
+            foreach ($parts as $p) {
+                $name = $this->cleanNodeName($p);
+                if (mb_strlen($name) >= 2 && !in_array($name, $nodeNames, true)) {
+                    $nodeNames[] = $name;
+                }
+            }
+        }
+
+        if (empty($nodeNames)) {
+            $numNodes = 3;
+            if (preg_match('/(\d+)\s*(?:شهر|گره|نقطه)/u', $text, $mm)) {
+                $numNodes = max(2, (int)$mm[1]);
+            }
+            for ($i = 0; $i < $numNodes; $i++) {
+                $nodeNames[] = "گره " . ($i + 1);
+            }
+        }
+
+        $nodes = [];
+        foreach ($nodeNames as $name) {
+            $nodes[] = ['name' => $name];
+        }
+
+        $edges = [];
+        foreach ($rawEdges as $re) {
+            $fromIdx = array_search($re['from'], $nodeNames, true);
+            $toIdx = array_search($re['to'], $nodeNames, true);
+            if ($fromIdx !== false && $toIdx !== false) {
+                $edges[] = ['from' => $fromIdx, 'to' => $toIdx, 'weight' => $re['weight']];
+            }
+        }
+
+        if (empty($edges) && count($nodes) > 1) {
+            $n = $extractedData['numbers'];
+            for ($i = 0; $i < count($nodes) - 1; $i++) {
+                $edges[] = [
+                    'from' => $i,
+                    'to' => $i + 1,
+                    'weight' => $n[$i] ?? (10 + $i * 10),
+                ];
+            }
+        }
+
+        return [
+            'name' => 'پروژه کوتاه‌ترین مسیر (استخراج هوشمند)',
+            'description' => mb_substr($text, 0, 2000),
+            'nodes' => $nodes,
+            'edges' => $edges,
+        ];
+    }
+
+    private function buildTransshipModel(string $text, array $extractedData): array
+    {
+        $numSources = 2;
+        $numTransshipment = 1;
+        $numDestinations = 2;
+        
+        if (preg_match('/(\d+)\s*(?:کارخانه|مبدأ)/u', $text, $matches)) {
+            $numSources = (int)$matches[1];
+        }
+        if (preg_match('/(\d+)\s*(?:واسط|میانی|مرکز\s+توزیع)/u', $text, $matches)) {
+            $numTransshipment = (int)$matches[1];
+        }
+        if (preg_match('/(\d+)\s*(?:انبار|مقصد)/u', $text, $matches)) {
+            $numDestinations = (int)$matches[1];
+        }
+        
+        return [
+            'name' => 'پروژه ترانشیپمنت (استخراج هوشمند)',
+            'description' => mb_substr($text, 0, 2000),
+            'sources' => array_map(fn($i) => ['name' => "مبدأ " . ($i + 1), 'capacity' => 100], range(0, $numSources - 1)),
+            'transshipment' => array_map(fn($i) => ['name' => "گره واسط " . ($i + 1)], range(0, $numTransshipment - 1)),
+            'destinations' => array_map(fn($i) => ['name' => "مقصد " . ($i + 1), 'demand' => 100], range(0, $numDestinations - 1))
+        ];
+    }
+
+    private function buildQueueingModel(string $text, array $extractedData): array
+    {
+        $rates = $extractedData['queue_rates'];
+        $lambda = $rates['lambda'] ?? 10;
+        $mu = $rates['mu'] ?? 15;
+        
+        // تشخیص تعداد سرورها
+        $servers = 1;
+        if (preg_match('/(\d+)\s*(?:سرور|پنجره|صندوق|کارمند)/u', $text, $matches)) {
+            $servers = (int)$matches[1];
+        }
+        
+        // تشخیص ظرفیت
+        $capacity = null;
+        if (preg_match('/ظرفیت\s*(\d+)/u', $text, $matches)) {
+            $capacity = (int)$matches[1];
+        }
+        
+        // تشخیص مدل
+        $modelCode = 'MM1';
+        if ($servers > 1 && $capacity === null) {
+            $modelCode = 'MMc';
+        } elseif ($servers === 1 && $capacity !== null) {
+            $modelCode = 'MM1K';
+        } elseif ($servers > 1 && $capacity !== null) {
+            $modelCode = 'MMcK';
+        }
+        
+        return [
+            'name' => 'پروژه صف (استخراج هوشمند)',
+            'description' => mb_substr($text, 0, 2000),
+            'model_code' => $modelCode,
+            'lambda' => $lambda,
+            'mu' => $mu,
+            'servers' => $servers,
+            'capacity' => $capacity,
+        ];
+    }
+
+    private function buildMarkovModel(string $text, array $extractedData): array
+    {
+        $states = ['سالم', 'خراب'];
+        $transitionMatrix = [[0.9, 0.1], [0.4, 0.6]];
+        $initialState = [1, 0];
+        $steps = 5;
+        
+        // استفاده از ماتریس stochastic استخراج شده
+        if (!empty($extractedData['stochastic_matrices'])) {
+            $transitionMatrix = $extractedData['stochastic_matrices'][0]['data'];
+            $n = count($transitionMatrix);
+            $states = [];
+            for ($i = 0; $i < $n; $i++) {
+                $states[] = "حالت " . ($i + 1);
+            }
+            $initialState = array_fill(0, $n, 0);
+            $initialState[0] = 1;
+        }
+        
+        // استخراج تعداد گام‌ها
+        if (preg_match('/(\d+)\s*(?:گام|مرحله|دوره)/u', $text, $matches)) {
+            $steps = (int)$matches[1];
+        }
+        
+        return [
+            'name' => 'پروژه زنجیره مارکوف (استخراج هوشمند)',
+            'description' => mb_substr($text, 0, 2000),
+            'states' => $states,
+            'transition_matrix' => $transitionMatrix,
+            'initial_state' => $initialState,
+            'steps' => $steps,
+        ];
+    }
+
+    private function buildGameModel(string $text, array $extractedData): array
+    {
+        $player1Strategies = ['استراتژی 1', 'استراتژی 2'];
+        $player2Strategies = ['استراتژی 1', 'استراتژی 2'];
+        $payoffMatrix = [[3, -2], [-1, 4]];
+        
+        // استفاده از ماتریس استخراج شده
+        if (!empty($extractedData['matrices'])) {
+            foreach ($extractedData['matrices'] as $matrix) {
+                if ($matrix['type'] !== 'array' && count($matrix['data']) >= 2) {
+                    $payoffMatrix = $matrix['data'];
+                    $n = count($payoffMatrix);
+                    $player1Strategies = [];
+                    $player2Strategies = [];
+                    for ($i = 0; $i < $n; $i++) {
+                        $player1Strategies[] = "استراتژی " . ($i + 1);
+                        $player2Strategies[] = "استراتژی " . ($i + 1);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        return [
+            'name' => 'پروژه نظریه بازی‌ها (استخراج هوشمند)',
+            'description' => mb_substr($text, 0, 2000),
+            'player1_strategies' => $player1Strategies,
+            'player2_strategies' => $player2Strategies,
+            'payoff_matrix' => $payoffMatrix,
+        ];
+    }
+
+    private function buildMonteCarloModel(string $text, array $extractedData): array
+    {
+        // استخراج تعداد تکرار
+        $iterations = 10000;
+        if (preg_match('/(\d+)\s*(?:تکرار|شبیه‌سازی|نمونه|iteration)/ui', $text, $matches)) {
+            $iterations = max(100, min(1000000, (int)$matches[1])); // بین 100 و 1,000,000
+        }
+        
+        // استخراج متغیرها از متن
+        $rawVariables = $this->preprocessor->extractMonteCarloVariables($text);
+        
+        // اگر هیچ متغیری یافت نشد، یک متغیر پیش‌فرض بساز
+        if (empty($rawVariables)) {
+            $rawVariables = [
+                [
+                    'name_fa' => 'متغیر اصلی',
+                    'dist'    => 'normal',
+                    'params'  => ['mean' => 100, 'std' => 10]
+                ]
+            ];
+        }
+        
+        // اختصاص نام انگلیسی به متغیرها (سازگار با MonteCarloEngine)
+        $variables = $this->preprocessor->assignEnglishNames($rawVariables);
+        
+        // ساخت تابع هدف (پیش‌فرض: جمع همه متغیرها)
+        $varNames = array_map(fn($v) => $v['name'], $variables);
+        $functionExpr = implode(' + ', $varNames);
+        
+        // بررسی الگوی ضرب در متن
+        if (preg_match('/(?:حاصل\s*ضرب|ضرب\s+در\s+یکدیگر|ضرب\s+هم)/u', $text)) {
+            $functionExpr = implode(' * ', $varNames);
+        }
+        
+        // بررسی الگوی تفریق در متن
+        if (preg_match('/(?:هزینه\s+کل|سود\s+خالص|درآمد\s+منهای|تفاضل)/u', $text)) {
+            if (count($varNames) === 2) {
+                $functionExpr = $varNames[0] . ' - ' . $varNames[1];
+            }
+        }
+        
+        // ایجاد توصیف متغیرها برای نمایش
+        $variablesDescription = [];
+        foreach ($variables as $v) {
+            $desc = $v['label'] . ' (' . $v['name'] . '): ';
+            switch ($v['dist']) {
+                case 'normal':
+                    $desc .= "نرمال(μ={$v['params']['mean']}, σ={$v['params']['std']})";
+                    break;
+                case 'uniform':
+                    $desc .= "یکنواخت[{$v['params']['min']}, {$v['params']['max']}]";
+                    break;
+                case 'triangular':
+                    $desc .= "مثلثی[{$v['params']['min']}, {$v['params']['mode']}, {$v['params']['max']}]";
+                    break;
+                case 'exponential':
+                    $desc .= "نمایی(λ={$v['params']['lambda']})";
+                    break;
+                case 'lognormal':
+                    $desc .= "لگاریتمی-نرمال(μ={$v['params']['mean']}, σ={$v['params']['std']})";
+                    break;
+            }
+            $variablesDescription[] = $desc;
+        }
+        
+        return [
+            'name'                 => 'پروژه شبیه‌سازی مونت‌کارلو (استخراج هوشمند)',
+            'description'          => mb_substr($text, 0, 2000) . "\n\n--- متغیرهای استخراج‌شده ---\n" . implode("\n", $variablesDescription) . "\nتابع هدف: {$functionExpr}",
+            'variables'            => $variables,
+            'function_expr'        => $functionExpr,
+            'iterations'           => $iterations,
+            'variables_description'=> $variablesDescription,
+        ];
+    }
+
+    /**
+     * ✅ ساخت مدل دوگان: ابتدا مسئله اصلی (Primal) به‌صورت LP استخراج می‌شود
+     * سپس موتور DualSimplexEngine آن را حل کرده و قیمت‌های سایه‌ای می‌دهد
+     */
+    private function buildDualModel(string $text, array $extractedData): array
+    {
+        // استخراج کامل مسئله اصلی (متغیرها + قیود + هدف)
+        $primal = $this->buildLPModel($text, $extractedData, false);
+
+        $primal['name'] = 'پروژه نظریه دوگان (استخراج هوشمند)';
+        $primal['is_dual'] = true;
+
+        return $primal;
+    }
+
+    /**
+     * پاکسازی نام گره
+     */
+    private function cleanNodeName(string $name): string
+    {
+        $name = trim($name);
+        $name = preg_replace('/[،,.؛;:!؟?()«»\[\]{}"-]+/u', '', $name);
+        $name = preg_replace('/^شهر/u', '', $name);
+        $name = preg_replace('/(?:هستند|است|می‌باشد|میباشد)$/u', '', $name);
+        $name = trim($name);
+        $stop = ['به', 'از', 'تا', 'با', 'وزن', 'فاصله', 'هزینه', 'کیلومتر', 'کیلومتری',
+                'مبدأ', 'مقصد', 'و', 'در', 'را', 'که', 'این', 'ها', 'یال', 'شبکه', 'پیدا'];
+        if (in_array($name, $stop, true)) return '';
+        return $name;
+    }
+
     /**
      * یافتن نمونه مشابه
      */
-    private function findSimilarSample($type, $text)
+    private function findSimilarSample(string $type, string $text): ?array
     {
         $candidates = array_filter($this->samples, function($s) use ($type) {
             return $s['problem_type_code'] === $type;
@@ -590,34 +1168,50 @@ class SmartModeler
 
         if (empty($candidates)) return null;
 
-        // ساده‌ترین انتخاب: اولین نمونه از همان نوع
         return array_values($candidates)[0];
     }
 
     /**
-     * پیشنهاد روش حل بر اساس نوع مسئله و پارامترها
+     * پیشنهاد روش حل
      */
-    private function suggestMethod($type, $params)
+    private function suggestMethod(string $type, array $params): ?array
     {
         $methods = [
             'TRANS' => [
-                'primary' => ['code' => 'VAM', 'name' => 'تقریب ووگل (VAM)', 'reason' => 'دقیق‌ترین روش اولیه برای مسائل حمل‌ونقل'],
-                'alternative' => ['code' => 'NWC', 'name' => 'گوشه شمال غربی', 'reason' => 'ساده‌ترین روش برای شروع'],
-                'optimization' => ['code' => 'MODI', 'name' => 'MODI (u-v)', 'reason' => 'برای بهینه‌سازی جواب اولیه'],
+                'primary' => ['code' => 'VAM', 'name' => 'تقریب ووگل (VAM)', 'reason' => 'دقیق‌ترین روش اولیه'],
+                'alternative' => ['code' => 'NWC', 'name' => 'گوشه شمال غربی', 'reason' => 'ساده‌ترین روش'],
             ],
             'ASSIGN' => [
-                'primary' => ['code' => 'HUNGARIAN', 'name' => 'الگوریتم مجارستانی', 'reason' => 'بهترین روش برای مسائل تخصیص'],
+                'primary' => ['code' => 'HUNGARIAN', 'name' => 'الگوریتم مجارستانی', 'reason' => 'بهترین روش برای تخصیص'],
             ],
             'SHORTEST' => [
                 'primary' => ['code' => 'DIJKSTRA', 'name' => 'Dijkstra', 'reason' => 'برای گراف با وزن‌های نامنفی'],
-                'alternative' => ['code' => 'FLOYD', 'name' => 'Floyd-Warshall', 'reason' => 'برای کوتاه‌ترین مسیر بین همه جفت‌گره‌ها'],
+                'alternative' => ['code' => 'FLOYD', 'name' => 'Floyd-Warshall', 'reason' => 'برای همه جفت‌گره‌ها'],
             ],
             'LP' => [
                 'primary' => ['code' => 'SIMPLEX', 'name' => 'سیمپلکس', 'reason' => 'روش استاندارد برای LP'],
                 'alternative' => ['code' => 'BIG_M', 'name' => 'Big-M', 'reason' => 'اگر قیود نامساوی ≥ دارید'],
             ],
+            'ILP' => [
+                'primary' => ['code' => 'BRANCH_BOUND', 'name' => 'Branch and Bound', 'reason' => 'روش استاندارد برای ILP'],
+            ],
             'TRANSSHIP' => [
-                'primary' => ['code' => 'MIN_COST_FLOW', 'name' => 'Minimum Cost Flow', 'reason' => 'بهترین روش برای مسائل چندمرحله‌ای'],
+                'primary' => ['code' => 'MIN_COST_FLOW', 'name' => 'Minimum Cost Flow', 'reason' => 'بهترین روش برای چندمرحله‌ای'],
+            ],
+            'QUEUEING' => [
+                'primary' => ['code' => 'ANALYTICAL', 'name' => 'تحلیلی', 'reason' => 'محاسبه مستقیم با فرمول‌ها'],
+            ],
+            'MARKOV' => [
+                'primary' => ['code' => 'MATRIX_MULT', 'name' => 'ضرب ماتریسی', 'reason' => 'محاسبه حالت پس از n گام'],
+            ],
+            'GAME_THEORY' => [
+                'primary' => ['code' => 'NASH', 'name' => 'تعادل نش', 'reason' => 'یافتن استراتژی بهینه'],
+            ],
+            'MONTE_CARLO' => [
+                'primary' => ['code' => 'SIMULATION', 'name' => 'شبیه‌سازی', 'reason' => 'تولید نمونه‌های تصادفی'],
+            ],
+            'DUAL' => [
+                'primary' => ['code' => 'DUAL_SIMPLEX', 'name' => 'سیمپلکس دوگان', 'reason' => 'حل مسئله دوگان'],
             ],
         ];
 
@@ -627,7 +1221,7 @@ class SmartModeler
     /**
      * تولید مدل ریاضی پیشنهادی
      */
-    private function generateMathModel($type, $params)
+    private function generateMathModel(string $type, array $params): ?array
     {
         $models = [
             'TRANS' => [
@@ -639,50 +1233,85 @@ class SmartModeler
                     'Σᵢ xᵢⱼ = demandⱼ  (برای هر مقصد j)',
                     'xᵢⱼ ≥ 0',
                 ],
-                'explanation' => 'هدف کمینه‌سازی کل هزینه حمل با رعایت محدودیت‌های عرضه و تقاضا است.',
             ],
             'ASSIGN' => [
                 'title' => 'مدل ریاضی مسئله تخصیص',
-                'variables' => 'xᵢⱼ = 1 اگر عامل i به وظیفه j اختصاص یابد، در غیر این صورت 0',
+                'variables' => 'xᵢⱼ = 1 اگر عامل i به وظیفه j اختصاص یابد، 0 در غیر این صورت',
                 'objective' => 'Min Z = ΣΣ cᵢⱼ × xᵢⱼ',
                 'constraints' => [
-                    'Σⱼ xᵢⱼ = 1  (هر عامل دقیقاً به یک وظیفه)',
-                    'Σᵢ xᵢⱼ = 1  (هر وظیفه دقیقاً به یک عامل)',
+                    'Σⱼ xᵢⱼ = 1  (هر عامل دقیقاً یک وظیفه)',
+                    'Σᵢ xᵢⱼ = 1  (هر وظیفه دقیقاً یک عامل)',
                     'xᵢⱼ ∈ {0, 1}',
                 ],
-                'explanation' => 'مسئله تخصیص یک حالت خاص از حمل‌ونقل است که در آن عرضه و تقاضا همگی برابر 1 هستند.', // ✅ علامت => اینجا اضافه شد
             ],
             'SHORTEST' => [
                 'title' => 'مدل ریاضی کوتاه‌ترین مسیر',
-                'variables' => 'xᵢⱼ = 1 اگر یال (i,j) در مسیر باشد، در غیر این صورت 0',
+                'variables' => 'xᵢⱼ = 1 اگر یال (i,j) در مسیر باشد، 0 در غیر این صورت',
                 'objective' => 'Min Z = ΣΣ dᵢⱼ × xᵢⱼ',
                 'constraints' => [
-                    'Σⱼ xᵢⱼ - Σₖ xₖᵢ = 1  (برای مبدأ)',
-                    'Σⱼ xᵢⱼ - Σₖ xₖᵢ = -1  (برای مقصد)',
-                    'Σⱼ xᵢⱼ - Σₖ xₖᵢ = 0  (برای گره‌های میانی)',
+                    'جریان ورودی = جریان خروجی برای هر گره میانی',
+                    'xᵢⱼ ∈ {0, 1}',
                 ],
-                'explanation' => 'جریان خالص در مبدأ 1+، در مقصد 1- و در سایر گره‌ها 0 است.',
             ],
             'LP' => [
                 'title' => 'مدل ریاضی برنامه‌ریزی خطی',
-                'variables' => 'xⱼ = مقدار تولید/تصمیم برای متغیر j',
+                'variables' => 'x₁, x₂, ..., xₙ = متغیرهای تصمیم',
                 'objective' => 'Max/Min Z = Σ cⱼ × xⱼ',
                 'constraints' => [
-                    'Σ aᵢⱼ × xⱼ ≤ bᵢ  (برای هر محدودیت i)',
-                    'xⱼ ≥ 0',
+                    'Σ aᵢⱼ × xⱼ ≤/=/≥ bᵢ  (برای هر محدودیت i)',
+                    'xⱼ ≥ 0  (غیرمنفی بودن)',
                 ],
-                'explanation' => 'تابع هدف خطی با قیود خطی. ناحیه موجه یک چندوجهی محدب است.',
             ],
-            'TRANSSHIP' => [
-                'title' => 'مدل ریاضی ترانشیپمنت',
-                'variables' => 'xᵢⱼ = مقدار جریان از گره i به گره j',
-                'objective' => 'Min Z = ΣΣ cᵢⱼ × xᵢⱼ',
+            'ILP' => [
+                'title' => 'مدل ریاضی برنامه‌ریزی صحیح',
+                'variables' => 'x₁, x₂, ..., xₙ = متغیرهای تصمیم صحیح',
+                'objective' => 'Max/Min Z = Σ cⱼ × xⱼ',
                 'constraints' => [
-                    'جریان خروجی - جریان ورودی = supply (برای مبادی)',
-                    'جریان خروجی - جریان ورودی = -demand (برای مقاصد)',
-                    'جریان خروجی = جریان ورودی (برای گره‌های واسط)',
+                    'Σ aᵢⱼ × xⱼ ≤/=/≥ bᵢ',
+                    'xⱼ ∈ Z  (صحیح بودن)',
                 ],
-                'explanation' => 'تعادل جریان در هر گره باید برقرار باشد.',
+            ],
+            'QUEUEING' => [
+                'title' => 'مدل ریاضی صف (M/M/c/K)',
+                'variables' => 'λ = نرخ ورود، μ = نرخ خدمت، c = تعداد سرورها',
+                'objective' => 'محاسبه معیارهای عملکرد (L, Lq, W, Wq, ρ)',
+                'constraints' => [
+                    'ρ = λ / (c × μ) < 1  (پایداری سیستم)',
+                ],
+            ],
+            'MARKOV' => [
+                'title' => 'مدل ریاضی زنجیره مارکوف',
+                'variables' => 'P = ماتریس انتقال، π = بردار حالت',
+                'objective' => 'π(n) = π(0) × Pⁿ  (حالت پس از n گام)',
+                'constraints' => [
+                    'Σⱼ Pᵢⱼ = 1  (مجموع هر سطر = 1)',
+                    'π × P = π  (حالت پایدار)',
+                ],
+            ],
+            'GAME_THEORY' => [
+                'title' => 'مدل ریاضی نظریه بازی‌ها',
+                'variables' => 'A = ماتریس پرداخت بازیکن 1، B = ماتریس پرداخت بازیکن 2',
+                'objective' => 'یافتن تعادل نش (Nash Equilibrium)',
+                'constraints' => [
+                    'استراتژی‌های ترکیبی: Σ pᵢ = 1',
+                ],
+            ],
+            'MONTE_CARLO' => [
+                'title' => 'مدل شبیه‌سازی مونت‌کارلو',
+                'variables' => 'X₁, X₂, ... = متغیرهای تصادفی با توزیع مشخص',
+                'objective' => 'E[f(X)] ≈ (1/N) Σ f(xᵢ)  (تخمین امید ریاضی)',
+                'constraints' => [
+                    'N = تعداد تکرارها (معمولاً > 10000)',
+                ],
+            ],
+            'DUAL' => [
+                'title' => 'مدل ریاضی نظریه دوگان',
+                'variables' => 'y₁, y₂, ..., yₘ = متغیرهای دوگان',
+                'objective' => 'Max W = Σ bᵢ × yᵢ',
+                'constraints' => [
+                    'Σ aᵢⱼ × yᵢ ≤ cⱼ  (برای هر متغیر اصلی j)',
+                    'yᵢ ≥ 0',
+                ],
             ],
         ];
 
@@ -690,45 +1319,72 @@ class SmartModeler
     }
 
     /**
-     * مراحل بعدی پیشنهادی
+     * مراحل بعدی
      */
-    private function getNextSteps($type)
+    private function getNextSteps(string $type): array
     {
         $steps = [
             'TRANS' => [
-                '۱. تعداد مبادی (منابع) و مقاصد را مشخص کنید',
-                '۲. ظرفیت عرضه هر مبدأ و تقاضای هر مقصد را تعیین کنید',
+                '۱. مبادی و ظرفیت آن‌ها را مشخص کنید',
+                '۲. مقاصد و تقاضای آن‌ها را وارد کنید',
                 '۳. ماتریس هزینه حمل را تکمیل کنید',
-                '. بررسی توازن مسئله (عرضه کل = تقاضای کل)',
-                '۵. انتخاب روش حل (VAM + MODI پیشنهاد می‌شود)',
+                '۴. انتخاب روش حل (VAM، NWC، MODI)',
             ],
             'ASSIGN' => [
-                '. لیست عوامل (کارگران/ماشین‌ها) را مشخص کنید',
-                '۲. لیست وظایف (پروژه‌ها) را مشخص کنید',
-                '. ماتریس هزینه/زمان را تکمیل کنید',
-                '۴. بررسی مربعی بودن ماتریس (در صورت نیاز، Dummy اضافه کنید)',
-                '. اجرای الگوریتم مجارستانی',
+                '۱. عوامل (کارگران/اپراتورها) را مشخص کنید',
+                '۲. وظایف (دستگاه‌ها/پروژه‌ها) را وارد کنید',
+                '۳. ماتریس هزینه/زمان را تکمیل کنید',
+                '۴. اجرای الگوریتم مجارستانی',
             ],
             'SHORTEST' => [
                 '۱. گره‌ها (شهرها/نقاط) را مشخص کنید',
-                '۲. یال‌ها (جاده‌ها/اتصالات) و وزن آن‌ها را وارد کنید',
+                '۲. یال‌ها و وزن آن‌ها را وارد کنید',
                 '۳. مبدأ و مقصد نهایی را تعیین کنید',
-                '۴. انتخاب الگوریتم (Dijkstra برای یک مبدأ، Floyd برای همه جفت‌ها)',
-                '۵. بررسی وجود چرخه منفی (در صورت وجود، Bellman-Ford استفاده شود)',
+                '۴. انتخاب الگوریتم (Dijkstra یا Floyd)',
             ],
             'LP' => [
                 '۱. متغیرهای تصمیم را تعریف کنید',
-                '. تابع هدف (بیشینه‌سازی سود یا کمینه‌سازی هزینه) را بنویسید',
-                '۳. قیود (محدودیت‌های منابع) را مشخص کنید',
-                '۴. شرایط غیرمنفی بودن متغیرها را اضافه کنید',
-                '۵. انتخاب روش حل (سیمپلکس، Big-M یا دو مرحله‌ای)',
+                '۲. تابع هدف را بنویسید',
+                '۳. قیود را مشخص کنید',
+                '۴. انتخاب روش حل (سیمپلکس)',
+            ],
+            'ILP' => [
+                '۱. متغیرهای صحیح را تعریف کنید',
+                '۲. تابع هدف و قیود را مشخص کنید',
+                '۳. انتخاب روش Branch and Bound',
             ],
             'TRANSSHIP' => [
                 '۱. مبادی، گره‌های واسط و مقاصد را مشخص کنید',
                 '۲. ظرفیت هر گره را تعیین کنید',
                 '۳. هزینه حمل بین هر جفت گره را وارد کنید',
-                '۴. تبدیل به مدل حمل‌ونقل استاندارد',
-                '۵. حل با روش کمینه هزینه جریان',
+            ],
+            'QUEUEING' => [
+                '۱. نرخ ورود (λ) و نرخ خدمت (μ) را مشخص کنید',
+                '۲. تعداد سرورها (c) را تعیین کنید',
+                '۳. ظرفیت سیستم (K) را مشخص کنید (در صورت وجود)',
+                '۴. محاسبه معیارهای عملکرد',
+            ],
+            'MARKOV' => [
+                '۱. حالت‌های سیستم را مشخص کنید',
+                '۲. ماتریس انتقال را وارد کنید',
+                '۳. حالت اولیه را تعیین کنید',
+                '۴. تعداد گام‌ها را مشخص کنید',
+            ],
+            'GAME_THEORY' => [
+                '۱. بازیکنان و استراتژی‌های آن‌ها را مشخص کنید',
+                '۲. ماتریس پرداخت را وارد کنید',
+                '۳. یافتن تعادل نش',
+            ],
+            'MONTE_CARLO' => [
+                '۱. متغیرهای تصادفی و توزیع آن‌ها را مشخص کنید',
+                '۲. تابع هدف را تعریف کنید',
+                '۳. تعداد تکرارها را تعیین کنید',
+                '۴. اجرای شبیه‌سازی و تحلیل نتایج',
+            ],
+            'DUAL' => [
+                '۱. مسئله اصلی (Primal) را مشخص کنید',
+                '۲. تبدیل به مسئله دوگان',
+                '۳. حل با سیمپلکس دوگان',
             ],
         ];
 
@@ -738,34 +1394,38 @@ class SmartModeler
     /**
      * تولید هشدارها
      */
-    private function generateWarnings($type, $params)
+    private function generateWarnings(string $type, array $params): array
     {
         $warnings = [];
 
         if ($type === 'TRANS') {
             if (empty($params['potential_sources'])) {
-                $warnings[] = 'منابع (مبادی) در متن شناسایی نشدند. لطفاً کارخانه‌ها یا مراکز تأمین را مشخص کنید.';
+                $warnings[] = 'منابع (مبادی) در متن شناسایی نشدند.';
             }
             if (empty($params['potential_destinations'])) {
-                $warnings[] = 'مقاصد در متن شناسایی نشدند. لطفاً انبارها یا مشتریان را مشخص کنید.';
+                $warnings[] = 'مقاصد در متن شناسایی نشدند.';
             }
         }
 
         if ($type === 'ASSIGN') {
-            $warnings[] = 'برای مسئله تخصیص، تعداد عوامل و وظایف باید برابر باشد (ماتریس مربعی).';
+            $warnings[] = 'برای مسئله تخصیص، تعداد عوامل و وظایف باید برابر باشد.';
         }
 
-        if ($type === 'SHORTEST') {
-            if (in_array('minimize', $params['objectives']) || in_array('minimize_cost', $params['objectives'])) {
-                // خوب است
-            } else {
-                $warnings[] = 'هدف معمولاً کمینه‌سازی فاصله/هزینه است. مطمئن شوید هدف را مشخص کرده‌اید.';
+        if ($type === 'QUEUEING') {
+            if (!isset($params['model_data']['lambda']) || !isset($params['model_data']['mu'])) {
+                $warnings[] = 'نرخ ورود (λ) و نرخ خدمت (μ) باید مشخص شوند.';
             }
         }
 
-        if ($type === 'LP') {
+        if ($type === 'MARKOV') {
+            if (empty($params['model_data']['transition_matrix'])) {
+                $warnings[] = 'ماتریس انتقال باید مشخص شود.';
+            }
+        }
+
+        if ($type === 'LP' || $type === 'ILP') {
             if (count($params['constraints']) === 0) {
-                $warnings[] = 'هیچ محدودیتی در متن شناسایی نشد. LP بدون قید معنا ندارد.';
+                $warnings[] = 'هیچ محدودیتی در متن شناسایی نشد.';
             }
         }
 
@@ -775,7 +1435,7 @@ class SmartModeler
     /**
      * ذخیره تحلیل در تاریخچه
      */
-    private function saveAnalysis($text, $type, $confidence, $method, $params)
+    private function saveAnalysis(string $text, string $type, float $confidence, ?array $method, array $params): void
     {
         if (!$this->db) return;
         
@@ -799,24 +1459,9 @@ class SmartModeler
     }
 
     /**
-     * دریافت نام فارسی نوع مسئله
-     */
-    private function getTypeName($code)
-    {
-        $names = [
-            'TRANS' => 'حمل و نقل (Transportation)',
-            'ASSIGN' => 'تخصیص (Assignment)',
-            'SHORTEST' => 'کوتاه‌ترین مسیر (Shortest Path)',
-            'LP' => 'برنامه‌ریزی خطی (Linear Programming)',
-            'TRANSSHIP' => 'ترانشیپمنت (Transshipment)',
-        ];
-        return $names[$code] ?? 'نامشخص';
-    }
-
-    /**
      * دریافت همه نمونه‌های واقعی
      */
-    public function getSamples($type = null)
+    public function getSamples(?string $type = null): array
     {
         if ($type) {
             return array_filter($this->samples, function($s) use ($type) {

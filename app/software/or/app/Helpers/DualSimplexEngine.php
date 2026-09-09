@@ -1,8 +1,16 @@
 <?php
 namespace App\Software\Or\Helpers;
 
+/**
+ * DualSimplexEngine - موتور حل برنامه‌ریزی خطی (نسخه اصلاح‌شده ۲.۰)
+ * سیمپلکس استاندارد با روش Big-M و ماتریس اولیه صحیح
+ */
 class DualSimplexEngine
 {
+    private const MAX_ITER = 200;
+    private const EPS = 1e-9;
+    private const BIG_M = 1e7;
+
     public static function solve(array $c, array $A, array $b, array $constraints_types = [], string $sense = 'maximize'): array
     {
         $m = count($A);
@@ -11,142 +19,139 @@ class DualSimplexEngine
         if ($m === 0 || $n === 0) {
             return ['status' => 'error', 'message' => 'ماتریس محدودیت‌ها یا ضرایب تابع هدف خالی است.'];
         }
-
         if (empty($constraints_types)) {
             $constraints_types = array_fill(0, $m, '<=');
         }
 
-        $tableau = [];
-        $num_slack = 0;
-        $num_artificial = 0;
-        
+        // ── ۱) نرمال‌سازی: سمت راست نامنفی ──
+        $rows = []; $types = []; $rhs = [];
         for ($i = 0; $i < $m; $i++) {
-            $row = $A[$i];
-            $type = $constraints_types[$i] ?? '<=';
-            
-            if ($type === '<=') {
-                $row[] = 1;
-                $num_slack++;
-            } elseif ($type === '>=') {
-                $row[] = -1;
-                $row[] = 1;
-                $num_slack++;
-                $num_artificial++;
-            } elseif ($type === '=') {
-                $row[] = 1;
-                $num_artificial++;
+            $row = array_values(array_map('floatval', (array)$A[$i]));
+            while (count($row) < $n) $row[] = 0.0;
+            $row = array_slice($row, 0, $n);
+            $bi = (float)($b[$i] ?? 0);
+            $t = $constraints_types[$i] ?? '<=';
+            if ($bi < 0) {
+                $row = array_map(fn($v) => -$v, $row);
+                $bi = -$bi;
+                $t = ($t === '<=') ? '>=' : (($t === '>=') ? '<=' : '=');
             }
-            $row[] = $b[$i];
+            $rows[] = $row; $types[] = $t; $rhs[] = $bi;
+        }
+
+        // ── ۲) شمارش ستون‌های slack/surplus و مصنوعی ──
+        $numSlack = 0; $numArt = 0;
+        foreach ($types as $t) {
+            if ($t === '<=') $numSlack++;
+            elseif ($t === '>=') { $numSlack++; $numArt++; }
+            else { $numArt++; }
+        }
+        $totalVars = $n + $numSlack + $numArt;
+
+        // ── ۳) ساخت tableau با ماتریس همانی صحیح ──
+        $tableau = []; $basis = []; $artCols = []; $slackColOf = [];
+        $s = 0; $a = 0;
+        for ($i = 0; $i < $m; $i++) {
+            $row = $rows[$i];
+            for ($k = 0; $k < $numSlack + $numArt; $k++) $row[] = 0.0;
+            $t = $types[$i];
+            if ($t === '<=') {
+                $row[$n + $s] = 1.0; $basis[$i] = $n + $s; $slackColOf[$i] = $n + $s; $s++;
+            } elseif ($t === '>=') {
+                $row[$n + $s] = -1.0; $slackColOf[$i] = $n + $s; $s++;
+                $col = $n + $numSlack + $a; $row[$col] = 1.0; $basis[$i] = $col; $artCols[] = $col; $a++;
+            } else {
+                $col = $n + $numSlack + $a; $row[$col] = 1.0; $basis[$i] = $col; $artCols[] = $col; $a++;
+            }
+            $row[] = $rhs[$i];
             $tableau[] = $row;
         }
 
-        $isMinimize = ($sense === 'minimize');
-        $objCoeffs = array_map(fn($val) => -$val, $c);
-        $zRow = array_merge($objCoeffs, array_fill(0, $num_slack + $num_artificial, 0), [0]);
-        $tableau[] = $zRow;
+        // ── ۴) سطر هدف (ماکزیمم داخلی) با جریمه Big-M ──
+        $cc = array_map('floatval', $c);
+        if ($sense === 'minimize') $cc = array_map(fn($v) => -$v, $cc);
+        $z = array_fill(0, $totalVars, 0.0);
+        for ($j = 0; $j < $n; $j++) $z[$j] = -$cc[$j];
+        foreach ($artCols as $col) $z[$col] = self::BIG_M;
+        $z[] = 0.0;
+        // صفرکردن ستون‌های پایه در سطر هدف
+        for ($i = 0; $i < $m; $i++) {
+            $col = $basis[$i];
+            if (abs($z[$col]) > self::EPS) {
+                $f = $z[$col];
+                for ($j = 0; $j <= $totalVars; $j++) $z[$j] -= $f * $tableau[$i][$j];
+            }
+        }
+        $tableau[] = $z;
 
-        $numCols = $n + $num_slack + $num_artificial + 1;
-        $maxIter = 100;
+        // ── ۵) تکرارهای سیمپلکس ──
         $iter = 0;
-
-        while ($iter < $maxIter) {
+        while ($iter < self::MAX_ITER) {
             $iter++;
-            $enteringCol = -1;
-            $minZ = 0;
-            for ($j = 0; $j < $n + $num_slack + $num_artificial; $j++) {
-                if ($tableau[$m][$j] < $minZ) {
-                    $minZ = $tableau[$m][$j];
-                    $enteringCol = $j;
-                }
+            $enter = -1; $minV = -1e-9;
+            for ($j = 0; $j < $totalVars; $j++) {
+                if ($tableau[$m][$j] < $minV) { $minV = $tableau[$m][$j]; $enter = $j; }
             }
-
-            if ($enteringCol === -1) {
-                return self::extractResults($tableau, $c, $n, $m, $sense, $isMinimize, $num_slack, $num_artificial);
-            }
-
-            $leavingRow = -1;
-            $minRatio = INF;
+            if ($enter === -1) break; // بهینه
+            $leave = -1; $minRatio = INF;
             for ($i = 0; $i < $m; $i++) {
-                if ($tableau[$i][$enteringCol] > 1e-9) {
-                    $ratio = $tableau[$i][$numCols - 1] / $tableau[$i][$enteringCol];
-                    if ($ratio < $minRatio) {
-                        $minRatio = $ratio;
-                        $leavingRow = $i;
-                    }
+                if ($tableau[$i][$enter] > self::EPS) {
+                    $r = $tableau[$i][$totalVars] / $tableau[$i][$enter];
+                    if ($r < $minRatio - self::EPS) { $minRatio = $r; $leave = $i; }
                 }
             }
-
-            if ($leavingRow === -1) {
+            if ($leave === -1) {
                 return ['status' => 'unbounded', 'message' => 'مسئله کران‌دار نیست (جواب بی‌نهایت).'];
             }
-
-            $pivot = $tableau[$leavingRow][$enteringCol];
-            for ($j = 0; $j < $numCols; $j++) {
-                $tableau[$leavingRow][$j] /= $pivot;
-            }
-
+            $piv = $tableau[$leave][$enter];
+            for ($j = 0; $j <= $totalVars; $j++) $tableau[$leave][$j] /= $piv;
             for ($i = 0; $i <= $m; $i++) {
-                if ($i !== $leavingRow) {
-                    $factor = $tableau[$i][$enteringCol];
-                    for ($j = 0; $j < $numCols; $j++) {
-                        $tableau[$i][$j] -= $factor * $tableau[$leavingRow][$j];
+                if ($i !== $leave) {
+                    $f = $tableau[$i][$enter];
+                    if (abs($f) > self::EPS) {
+                        for ($j = 0; $j <= $totalVars; $j++) $tableau[$i][$j] -= $f * $tableau[$leave][$j];
                     }
                 }
             }
+            $basis[$leave] = $enter;
         }
 
-        return ['status' => 'error', 'message' => 'به حداکثر تعداد تکرار مجاز رسید.'];
-    }
-
-    private static function extractResults(array $tableau, array $c, int $n, int $m, string $sense, bool $isMinimize, int $num_slack, int $num_artificial): array
-    {
-        $lastRow = $tableau[$m];
-        $rawObj = $lastRow[count($lastRow) - 1];
-        $objectiveValue = $isMinimize ? -$rawObj : $rawObj;
-
-        $shadowPrices = [];
-        for ($j = 0; $j < $m; $j++) {
-            $colIndex = $n + $j;
-            $shadowPrices[] = round(abs($lastRow[$colIndex] ?? 0), 4);
-        }
-
-        $reducedCosts = [];
-        for ($j = 0; $j < $n; $j++) {
-            $reducedCosts[] = round(abs($lastRow[$j]), 4);
-        }
-
-        $solution = array_fill(0, $n, 0.0);
+        // ── ) استخراج نتیجه ──
+        $sol = array_fill(0, $n, 0.0);
         for ($i = 0; $i < $m; $i++) {
-            $basicCol = -1;
-            for ($j = 0; $j < $n; $j++) {
-                if (abs($tableau[$i][$j] - 1) < 1e-6) {
-                    $isBasic = true;
-                    for ($k = 0; $k < $m; $k++) {
-                        if ($k !== $i && abs($tableau[$k][$j]) > 1e-6) {
-                            $isBasic = false;
-                            break;
-                        }
-                    }
-                    if ($isBasic) {
-                        $basicCol = $j;
-                        break;
-                    }
+            if ($basis[$i] < $n) $sol[$basis[$i]] = $tableau[$i][$totalVars];
+        }
+        foreach ($artCols as $col) {
+            for ($i = 0; $i < $m; $i++) {
+                if ($basis[$i] === $col && $tableau[$i][$totalVars] > 1e-6) {
+                    return ['status' => 'infeasible', 'message' => 'مسئله جواب موجه ندارد (infeasible).'];
                 }
             }
-            if ($basicCol !== -1) {
-                $solution[$basicCol] = round($tableau[$i][count($tableau[$i]) - 1], 4);
+        }
+        $zInternal = $tableau[$m][$totalVars];
+        $objective = ($sense === 'minimize') ? -$zInternal : $zInternal;
+
+        $shadow = [];
+        for ($i = 0; $i < $m; $i++) {
+            if (isset($slackColOf[$i])) {
+                $y = $tableau[$m][$slackColOf[$i]];
+                $shadow[] = round(($sense === 'minimize') ? -$y : $y, 4);
+            } else {
+                $shadow[] = 0.0;
             }
         }
+        $reduced = [];
+        for ($j = 0; $j < $n; $j++) $reduced[] = round($tableau[$m][$j], 4);
 
         return [
             'status' => 'optimal',
             'sense' => $sense,
-            'objective_value' => round($objectiveValue, 4),
-            'solution' => $solution,
-            'shadow_prices' => $shadowPrices,
-            'reduced_costs' => $reducedCosts,
-            'iterations' => 0,
-            'interpretation' => self::generateInterpretation($solution, $shadowPrices, $reducedCosts, $objectiveValue, $sense)
+            'objective_value' => round($objective, 4),
+            'solution' => array_map(fn($v) => round($v, 4), $sol),
+            'shadow_prices' => $shadow,
+            'reduced_costs' => $reduced,
+            'iterations' => $iter,
+            'interpretation' => self::generateInterpretation(array_map(fn($v) => round($v, 4), $sol), $shadow, $reduced, $objective, $sense),
         ];
     }
 
@@ -155,7 +160,6 @@ class DualSimplexEngine
         $out = [];
         $senseText = $sense === 'maximize' ? 'ماکزیمم' : 'مینیمم';
         $out[] = "✅ جواب بهینه با موفقیت یافت شد. مقدار تابع هدف ($senseText): " . number_format($obj, 4);
-        
         $activeResources = [];
         foreach ($sp as $i => $price) {
             if ($price > 0.001) {
@@ -167,7 +171,6 @@ class DualSimplexEngine
         } else {
             $out[] = "💡 هیچ منبعی کاملاً مصرف نشده است (قیمت‌های سایه‌ای صفر هستند).";
         }
-
         $bindingVars = [];
         foreach ($rc as $i => $cost) {
             if ($cost > 0.001 && abs($sol[$i]) < 1e-6) {
@@ -177,7 +180,6 @@ class DualSimplexEngine
         if (!empty($bindingVars)) {
             $out[] = "⚠️ متغیرهای غیرپایه (تولید نشده): " . implode('، ', $bindingVars) . ". ضریب تابع هدف این متغیرها باید به این مقدار بهبود یابد تا وارد پایه شوند.";
         }
-
         return implode("\n", $out);
     }
 }

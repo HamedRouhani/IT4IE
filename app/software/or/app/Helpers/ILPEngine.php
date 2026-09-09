@@ -45,14 +45,23 @@ class ILPEngine
             $node = array_shift($queue);
             $nodesExplored++;
 
-            // حل زیرمسئله LP با Simplex
-            $lpResult = DualSimplexEngine::solve(
-                $node['c'],
-                $node['A'],
-                $node['b'],
-                $node['constraints_types'],
-                $sense
-            );
+            // ✅ ساخت زیرمسئله LP با اعمال کران‌های شاخه‌وبکران
+            $Ac = $node['A'];
+            $bc = $node['b'];
+            $tc = $node['constraints_types'];
+            foreach ($node['bounds'] as $j => $bd) {
+                if ($j >= $n) continue;
+                [$lo, $hi] = $bd;
+                if ($hi < INF) {          // کران بالا: x_j <= hi
+                    $row = array_fill(0, $n, 0); $row[$j] = 1;
+                    $Ac[] = $row; $bc[] = $hi; $tc[] = '<=';
+                }
+                if ($lo > 0) {            // کران پایین: x_j >= lo
+                    $row = array_fill(0, $n, 0); $row[$j] = 1;
+                    $Ac[] = $row; $bc[] = $lo; $tc[] = '>=';
+                }
+            }
+            $lpResult = DualSimplexEngine::solve($node['c'], $Ac, $bc, $tc, $sense);
 
             if ($lpResult['status'] !== 'optimal') {
                 $branchingLog[] = [
