@@ -162,3 +162,52 @@
     background: #DC2626;
     color: #fff;
 }
+
+/* ========================================
+   MCDM SUMMARY CARD
+   ======================================== */
+.summary-card {
+    border-right-color: var(--primary);
+    background: linear-gradient(135deg, rgba(108, 60, 225, 0.05), rgba(118, 75, 162, 0.05));
+}
+
+.summary-card .rec-items li i {
+    color: var(--primary);
+    margin-top: 5px;
+}
+
+.summary-cta {
+    margin-top: 16px;
+    text-align: center;
+}
+
+.method-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.method-chip {
+    background: var(--white);
+    border: 1px solid rgba(108, 60, 225, 0.25);
+    color: var(--primary);
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.cat-methods {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.cat-methods i {
+    color: var(--primary);
+}

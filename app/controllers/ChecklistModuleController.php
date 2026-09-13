@@ -124,7 +124,7 @@ class ChecklistModuleController extends Controller
             $maxScore += 3 * $q['weight'];
         }
 
-        $recommendations = $this->checklistModel->analyzeAnswers($answers, $questions);
+        $recommendations = $this->checklistModel->analyzeAnswers($answers, $questions, $checklistId);
         $riskLevel = $this->checklistModel->calculateRiskLevel($totalScore, $maxScore);
 
         $data = [
