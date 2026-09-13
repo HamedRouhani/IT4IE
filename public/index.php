@@ -98,7 +98,7 @@ require_once APP_PATH . '/core/Database.php';
 // DIRECT INCLUDE MODELS (با بررسی وجود فایل)
 // ============================================
 $commonModels = ['Post', 'Category', 'Setting', 'Message', 'User', 'Software', 
-                 'SoftwareActivityLog', 'SoftwareUsageLimit'];
+                 'SoftwareActivityLog', 'SoftwareUsageLimit',  'Checklist'];
 foreach ($commonModels as $model) {
     $file = APP_PATH . '/models/' . $model . '.php';
     if (file_exists($file)) {
@@ -229,6 +229,12 @@ if ($url === 'profile/update') {
 if ($url === 'profile/password') {
     require_once APP_PATH . '/controllers/ProfileController.php';
     (new App\Controllers\ProfileController())->updatePassword();
+    exit;
+}
+
+if ($url === 'profile/messages') {
+    require_once APP_PATH . '/controllers/ProfileController.php';
+    (new App\Controllers\ProfileController())->messages();
     exit;
 }
 
@@ -398,6 +404,16 @@ if (strpos($url, 'admin') === 0) {
         '#^tags/delete/(\d+)$#'      => 'deleteTag',
         '#^software/edit/(\d+)$#'    => 'editSoftware',
         '#^software/delete/(\d+)$#'  => 'deleteSoftware',
+        '#^checklist/edit/(\d+)$#'            => 'editChecklist',
+        '#^checklist/delete/(\d+)$#'          => 'deleteChecklist',
+        '#^checklist/questions/(\d+)$#'       => 'checklistQuestions',
+        '#^checklist/question/add/(\d+)$#'    => 'addChecklistQuestion',
+        '#^checklist/question/delete/(\d+)$#' => 'deleteChecklistQuestion',
+        '#^checklist/view/(\d+)$#'            => 'viewChecklist',
+        '#^checklist/update-status$#'         => 'updateChecklistStatus',
+        '#^checklist/message/(\d+)$#'         => 'messageChecklist',
+        '#^checklist/question/edit/(\d+)$#'   => 'editChecklistQuestion',
+        '#^checklist/question/move/(\d+)$#'   => 'moveChecklistQuestion',
     ];
 
     foreach ($paramRoutes as $pattern => $method) {
@@ -431,6 +447,9 @@ if (strpos($url, 'admin') === 0) {
         'software-activity'   => 'softwareActivity',
         'software-limits'     => 'softwareLimits',
         'software-usage'      => 'softwareUsage',
+        'checklist'           => 'checklist',
+        'checklists'          => 'checklists',
+        'checklist/create'    => 'createChecklist',
     ];
 
     if (array_key_exists($adminUrl, $simpleRoutes)) {
@@ -449,6 +468,61 @@ if (strpos($url, 'admin') === 0) {
     // ----------------------------------------
     http_response_code(404);
     echo "404 Not Found - Admin: " . htmlspecialchars($adminUrl);
+    exit;
+}
+
+// ============================================
+// CHECKLIST MODULE ROUTES
+// ============================================
+if ($url === 'checklist' || $url === 'checklists') {
+    require_once APP_PATH . '/controllers/ChecklistModuleController.php';
+    (new App\Controllers\ChecklistModuleController())->index();
+    exit;
+}
+if (strpos($url, 'checklist/view/') === 0) {
+    $slug = substr($url, strlen('checklist/view/'));
+    require_once APP_PATH . '/controllers/ChecklistModuleController.php';
+    (new App\Controllers\ChecklistModuleController())->view($slug);
+    exit;
+}
+if ($url === 'checklist/submit') {
+    require_once APP_PATH . '/controllers/ChecklistModuleController.php';
+    (new App\Controllers\ChecklistModuleController())->submit();
+    exit;
+}
+if (strpos($url, 'checklist/result/') === 0) {
+    $slug = substr($url, strlen('checklist/result/'));
+    require_once APP_PATH . '/controllers/ChecklistModuleController.php';
+    (new App\Controllers\ChecklistModuleController())->result($slug);
+    exit;
+}
+if ($url === 'checklist/history') {
+    require_once APP_PATH . '/controllers/ChecklistModuleController.php';
+    (new App\Controllers\ChecklistModuleController())->history();
+    exit;
+}
+if (preg_match('#^checklist/delete/(\d+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/ChecklistModuleController.php';
+    (new App\Controllers\ChecklistModuleController())->deleteSubmission($m[1]);
+    exit;
+}
+
+// ============================================
+// ADMIN CHECKLIST ROUTES
+// ============================================
+if ($url === 'admin/checklist') {
+    require_once APP_PATH . '/controllers/ChecklistController.php';
+    (new App\Controllers\ChecklistController())->adminIndex();
+    exit;
+}
+if (preg_match('#^admin/checklist/view/(\d+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/ChecklistController.php';
+    (new App\Controllers\ChecklistController())->adminView($m[1]);
+    exit;
+}
+if ($url === 'admin/checklist/update-status') {
+    require_once APP_PATH . '/controllers/ChecklistController.php';
+    (new App\Controllers\ChecklistController())->adminUpdateStatus();
     exit;
 }
 

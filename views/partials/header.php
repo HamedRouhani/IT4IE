@@ -24,6 +24,13 @@
                     </li>
                     
                     <li class="nav-item">
+                        <a href="/checklist" class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], '/checklist') === 0) ? 'active' : ''; ?>">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>چک‌لیست‌ها</span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
                         <a href="/about" class="nav-link <?php echo ($_SERVER['REQUEST_URI'] == '/about') ? 'active' : ''; ?>">
                             <i class="fas fa-info-circle"></i>
                             <span>درباره ما</span>
@@ -53,6 +60,9 @@
                         <div class="user-dropdown-menu" id="userDropdownMenu">
                             <a href="/profile" class="dropdown-item">
                                 <i class="fas fa-user"></i> پروفایل
+                            </a>
+                            <a href="/checklist/history" class="dropdown-item">
+                                <i class="fas fa-clipboard-list"></i> تاریخچه چک‌لیست‌های من
                             </a>
                             <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'editor'): ?>
                                 <a href="/admin" class="dropdown-item">

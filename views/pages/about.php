@@ -76,57 +76,45 @@
 
         <break>
         
-        <!-- ============================================
-             SERVICES
+            <!-- ============================================
+             SERVICES (بسته‌های خدماتی محصول‌شده)
              ============================================ -->
         <section class="about-services">
             <div class="section-header">
-                <h2>📋 حوزه‌های تخصصی</h2>
-                <p>خدماتی که با تکیه بر دانش روز و تجربه عملی ارائه می‌دهیم</p>
+                <h2>📦 بسته‌های خدماتی تخصصی</h2>
+                <p>به جای پروژه‌های مبهم و طولانی، خدمات ما در قالب بسته‌های مشخص با خروجی شفاف و زمان‌بندی دقیق ارائه می‌شوند.</p>
             </div>
             <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <h4>فرآیندکاوی (Process Mining)</h4>
-                    <p>تحلیل و بهبود فرآیندها با استفاده از الگوریتم‌های پیشرفته مانند Alpha، Inductive Miner و...</p>
+                <!-- بسته ۱ -->
+                <div class="service-card premium">
+                    <div class="service-badge">پیشنهاد ویژه</div>
+                    <div class="service-icon"><i class="fas fa-stethoscope"></i></div>
+                    <h4>۱. عیب‌یابی و ممیزی فرآیند (Diagnostic)</h4>
+                    <p>تحلیل ۲ تا ۴ هفته‌ای فرآیندهای فعلی سازمان با استفاده از تکنیک‌های Process Mining و مصاحبه تخصصی. <br><strong>خروجی:</strong> گزارش جامع گلوگاه‌ها، نقشه فرآیند وضع موجود (As-Is) و ۳ پیشنهاد فوری برای بهبود.</p>
+                    <div class="service-price">⏱ مدت: ۲ تا ۴ هفته | 💰 هزینه: استعلام قیمت</div>
+                    <a href="/contact?package=diagnostic" class="btn-service">درخواست این بسته</a>
                 </div>
+                
+                <!-- بسته ۲ -->
                 <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h4>تحلیل کسب‌وکار (BABOK)</h4>
-                    <p>تحلیل نیازمندی‌ها، الهام‌گیری، تحلیل استراتژیک و ارزیابی راه‌حل بر اساس استاندارد BABOK</p>
+                    <div class="service-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <h4>۲. منتورینگ و استقرار استاندارد BABOK</h4>
+                    <p>آموزش و نظارت مستقیم بر تیم‌های فنی و مهندسان صنایع شما برای نوشتن مستندات صحیح نیازمندی‌ها. <br><strong>هدف:</strong> حذف دوباره‌کاری‌های پرهزینه در توسعه نرم‌افزار و ایجاد زبان مشترک بین کسب‌وکار و IT.</p>
+                    <div class="service-price">⏱ مدت: ۱ تا ۳ ماه | 💰 هزینه: استعلام قیمت</div>
+                    <a href="/contact?package=babok" class="btn-service">درخواست این بسته</a>
                 </div>
+                
+                <!-- بسته ۳ -->
                 <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h4>هوش مصنوعی</h4>
-                    <p>پیاده‌سازی راه‌حل‌های هوش مصنوعی برای بهینه‌سازی فرآیندها و تحلیل داده</p>
+                    <div class="service-icon"><i class="fas fa-handshake"></i></div>
+                    <h4>۳. مشاوره ماهانه تحول دیجیتال (Retainer)</h4>
+                    <p>همراهی مستمر به عنوان "مغز متفکر بیرونی". شامل ۴ ساعت جلسه استراتژیک ماهانه، بررسی پیشرفت پروژه‌های نرم‌افزاری و ارائه نقشه راه بهینه‌سازی بدون درگیری در اجرای روزمره.</p>
+                    <div class="service-price">⏱ مدت: اشتراک ماهانه | 💰 هزینه: استعلام قیمت</div>
+                    <a href="/contact?package=retainer" class="btn-service">درخواست این بسته</a>
                 </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-cubes"></i>
-                    </div>
-                    <h4>توسعه نرم‌افزار</h4>
-                    <p>طراحی و توسعه نرم‌افزارهای مدیریتی با PHP، Python، Angular و SQL Server</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-database"></i>
-                    </div>
-                    <h4>تحلیل داده</h4>
-                    <p>استخراج بینش از داده‌ها با استفاده از Python، R و SQL و ارائه گزارش‌های کاربردی</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                    <h4>آموزش و مشاوره</h4>
-                    <p>دوره‌های تخصصی در حوزه‌های مدیریت پروژه، تحلیل کسب‌وکار، فرآیندکاوی و هوش مصنوعی</p>
-                </div>
+            </div>
+            <div class="services-note" style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border-right: 4px solid #0d6efd;">
+                <p style="margin: 0;"><i class="fas fa-info-circle"></i> <strong>توجه مهم:</strong> خدمات "توسعه و کدنویسی نرم‌افزار" به صورت مستقل ارائه <u>نمی‌شود</u>. تمرکز ما بر تحلیل، طراحی و نظارت بر فرآیندهاست تا تیم فنی داخلی یا پیمانکار شما بهترین و کم‌هزینه‌ترین خروجی را داشته باشد.</p>
             </div>
         </section>
         

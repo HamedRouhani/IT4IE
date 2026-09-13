@@ -39,7 +39,9 @@
     </main>
     
     <!-- Footer -->
-    <?php include VIEWS_PATH . '/partials/footer.php'; ?>
+    <?php if (!isset($hideFooter) || !$hideFooter): ?>
+        <?php include VIEWS_PATH . '/partials/footer.php'; ?>
+    <?php endif; ?>
     
     <!-- Custom JS -->
     <script src="/assets/js/script.js"></script>

@@ -222,4 +222,42 @@ class ProfileController extends Controller
 
         return false;
     }
+
+    /**
+     * 📨 پیام‌ها و پاسخ‌های کاربر (نمایش مجزا در پروفایل)
+     */
+    public function messages()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            $_SESSION['error'] = 'برای مشاهده پیام‌ها ابتدا وارد شوید.';
+            $this->redirect('/login');
+            return;
+        }
+
+        $user = $this->userModel->find($_SESSION['user_id']);
+        if (!$user) {
+            $_SESSION['error'] = 'کاربر یافت نشد.';
+            $this->redirect('/');
+            return;
+        }
+
+        require_once APP_PATH . '/models/Message.php';
+        $messageModel = new \App\Models\Message();
+
+        // رشته‌های گفتگوی کاربر (پیام‌های خودش + گفتگوهایی که مدیریت به نام او ایجاد کرده)
+        $threads = $messageModel->getUserMessages($_SESSION['user_id']);
+
+        // دریافت پاسخ‌های مدیریت برای هر رشته
+        $messages = [];
+        foreach ($threads as $thread) {
+            $thread['replies'] = $messageModel->getReplies($thread['id']);
+            $messages[] = $thread;
+        }
+
+        $this->renderProfile('profile/messages', [
+            'title'    => 'پیام‌ها و پاسخ‌ها - ' . $user['name'],
+            'user'     => $user,
+            'messages' => $messages
+        ]);
+    }
 }

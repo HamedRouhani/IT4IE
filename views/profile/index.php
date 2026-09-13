@@ -30,6 +30,9 @@
             </div>
         </div>
         <div class="profile-actions">
+            <a href="/profile/messages" class="btn btn-primary">
+                <i class="fas fa-comments"></i> پیام‌ها و پاسخ‌ها
+            </a>
             <a href="/profile/edit" class="btn btn-primary">
                 <i class="fas fa-edit"></i> ویرایش پروفایل
             </a>

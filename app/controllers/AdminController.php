@@ -796,4 +796,437 @@ class AdminController extends Controller
         $_SESSION['message'] = 'دسته‌بندی با موفقیت حذف شد.';
         $this->redirect('/admin/categories');
     }
+
+    /**
+     * 📋 لیست چک‌لیست‌های ارزیابی ریسک
+     */
+    public function checklist()
+    {
+        $this->requireAdmin();
+
+        require_once APP_PATH . '/models/Checklist.php';
+        $checklistModel = new \App\Models\Checklist();
+
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $limit = 20;
+        $offset = ($page - 1) * $limit;
+
+        $submissions = $checklistModel->getAllSubmissions($limit, $offset);
+        $stats = $checklistModel->getStats();
+
+        $this->renderAdmin('admin/checklist', [
+            'title' => 'مدیریت چک‌لیست‌های ارزیابی ریسک - IT4IE',
+            'submissions' => $submissions,
+            'stats' => $stats,
+            'currentPage' => $page
+        ]);
+    }
+
+    /**
+     * 📄 جزئیات یک چک‌لیست
+     */
+    public function viewChecklist($id)
+    {
+        $this->requireAdmin();
+
+        require_once APP_PATH . '/models/Checklist.php';
+        $checklistModel = new \App\Models\Checklist();
+
+        $submission = $checklistModel->getSubmission($id);
+
+        if (!$submission) {
+            $_SESSION['error'] = 'چک‌لیست یافت نشد';
+            $this->redirect('/admin/checklist');
+            return;
+        }
+
+        $submission['answers_decoded'] = json_decode($submission['answers'], true) ?? [];
+        $submission['recommendations_decoded'] = json_decode($submission['recommendations'], true) ?? [];
+
+        $questions = $checklistModel->getActiveQuestions();
+
+        $this->renderAdmin('admin/checklist-view', [
+            'title' => 'جزئیات چک‌لیست #' . $id . ' - IT4IE',
+            'submission' => $submission,
+            'questions' => $questions
+        ]);
+    }
+
+    /**
+     * ✏️ به‌روزرسانی وضعیت پیگیری
+     */
+    public function updateChecklistStatus()
+    {
+        $this->requireAdmin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/admin/checklist');
+            return;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $status = $_POST['status'] ?? 'new';
+        $notes = trim($_POST['notes'] ?? '');
+
+        if ($id > 0) {
+            require_once APP_PATH . '/models/Checklist.php';
+            $checklistModel = new \App\Models\Checklist();
+            $checklistModel->updateStatus($id, $status, $notes);
+            $_SESSION['message'] = 'وضعیت با موفقیت به‌روز شد';
+        }
+
+        $this->redirect('/admin/checklist/view/' . $id);
+    }
+
+    /**
+     * 📨 ارسال پیام درون‌برنامه‌ای به کاربر (با استفاده از سیستم موجود پیام‌ها)
+     */
+    public function messageChecklist($id)
+    {
+        if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] ?? '') !== 'admin') {
+            http_response_code(403);
+            echo "403 - دسترسی غیرمجاز";
+            exit;
+        }
+
+        require_once APP_PATH . '/models/Checklist.php';
+        require_once APP_PATH . '/models/Message.php';
+        $checklistModel = new \App\Models\Checklist();
+        $messageModel   = new \App\Models\Message();
+
+        $submission = $checklistModel->getSubmission($id);
+        if (!$submission) {
+            $_SESSION['error'] = 'چک‌لیست یافت نشد';
+            $this->redirect('/admin/checklist');
+            return;
+        }
+
+        // پیام درون‌برنامه‌ای فقط برای ارسال‌هایی که به حساب کاربری متصل‌اند
+        if (empty($submission['user_id'])) {
+            $_SESSION['error'] = 'این ارسال به حساب کاربری متصل نیست؛ امکان پیام درون‌برنامه‌ای وجود ندارد.';
+            $this->redirect('/admin/checklist/view/' . $id);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $subject = trim($_POST['subject'] ?? '');
+            $content = trim($_POST['message'] ?? '');
+
+            if (strlen($subject) < 5 || strlen($content) < 10) {
+                $_SESSION['error'] = 'موضوع و متن پیام را کامل وارد کنید.';
+                $this->redirect('/admin/checklist/message/' . $id);
+                return;
+            }
+
+            // ۱) ایجاد رشته گفتگو به نام کاربر (تا در صفحه «تماس با ما» او لیست شود)
+            $created = $messageModel->create([
+                'name'       => $submission['name'],
+                'email'      => $submission['email'],
+                'subject'    => $subject,
+                'message'    => 'گفتگو توسط مدیریت IT4IE درباره ارزیابی چک‌لیست #' . $id . ' آغاز شد.',
+                'user_id'    => $submission['user_id'],
+                'parent_id'  => null,
+                'status'     => 'replied',
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+            ]);
+
+            if ($created) {
+                // دریافت ID رشته تازه‌ساخت (همان اتصال PDO، پس LAST_INSERT_ID دقیق است)
+                $rows = $messageModel->query("SELECT LAST_INSERT_ID() AS tid");
+                $threadId = is_array($rows) ? (int)($rows[0]['tid'] ?? 0) : 0;
+
+                if ($threadId > 0) {
+                    // ۲) ثبت پیام مدیر به‌صورت «پاسخ» همان رشته → کاربر با عنوان «پاسخ مدیر» می‌بیند
+                    $messageModel->addReply($threadId, $_SESSION['user_id'], $content);
+
+                    // ۳) به‌روزرسانی خودکار وضعیت پیگیری چک‌لیست
+                    $checklistModel->updateStatus($id, 'contacted', 'پیام درون‌برنامه‌ای ارسال شد: ' . $subject);
+
+                    $_SESSION['message'] = '✅ پیام ارسال شد و در صفحه «تماس با ما» کاربر نمایش داده می‌شود.';
+                    $this->redirect('/admin/checklist/view/' . $id);
+                    return;
+                }
+            }
+
+            $_SESSION['error'] = 'خطا در ارسال پیام.';
+            $this->redirect('/admin/checklist/message/' . $id);
+            return;
+        }
+
+        // نمایش فرم ارسال
+        $this->renderAdmin('admin/checklist-message', [
+            'title'          => 'ارسال پیام به کاربر - IT4IE',
+            'submission'     => $submission,
+            'defaultSubject' => 'نتیجه ارزیابی چک‌لیست #' . $id . ' و پیشنهاد مشاوره',
+        ]);
+    }
+
+        // ============================================
+    // مدیریت چک‌لیست‌ها
+    // ============================================
+
+    public function checklists()
+    {
+        $this->requireAdmin();
+        
+        require_once APP_PATH . '/models/Checklist.php';
+        $checklistModel = new \App\Models\Checklist();
+        
+        $checklists = $checklistModel->getAllChecklists(true);
+        
+        $this->renderAdmin('admin/checklists', [
+            'title' => 'مدیریت چک‌لیست‌ها',
+            'checklists' => $checklists
+        ]);
+    }
+
+    public function createChecklist()
+    {
+        $this->requireAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            require_once APP_PATH . '/models/Checklist.php';
+            $checklistModel = new \App\Models\Checklist();
+            
+            $slug = trim($_POST['slug'] ?? '');
+            if (empty($slug)) {
+                $slug = preg_replace('/[^a-z0-9\-]/', '-', strtolower(trim($_POST['title'] ?? '')));
+            }
+            
+            $data = [
+                'title' => trim($_POST['title'] ?? ''),
+                'slug' => $slug,
+                'description' => trim($_POST['description'] ?? ''),
+                'category' => trim($_POST['category'] ?? 'general'),
+                'icon' => trim($_POST['icon'] ?? 'fa-clipboard-list'),
+                'estimated_time' => (int)($_POST['estimated_time'] ?? 5),
+                'is_active' => (int)($_POST['is_active'] ?? 1),
+                'is_featured' => (int)($_POST['is_featured'] ?? 0),
+                'sort_order' => (int)($_POST['sort_order'] ?? 0)
+            ];
+            
+            if ($checklistModel->createChecklist($data)) {
+                $_SESSION['message'] = 'چک‌لیست با موفقیت ایجاد شد';
+            } else {
+                $_SESSION['error'] = 'خطا در ایجاد چک‌لیست';
+            }
+            $this->redirect('/admin/checklists');
+            return;
+        }
+        
+        $this->renderAdmin('admin/checklist-form', [
+            'title' => 'ایجاد چک‌لیست جدید',
+            'checklist' => null
+        ]);
+    }
+
+    public function editChecklist($id)
+    {
+        $this->requireAdmin();
+        
+        require_once APP_PATH . '/models/Checklist.php';
+        $checklistModel = new \App\Models\Checklist();
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $slug = trim($_POST['slug'] ?? '');
+            if (empty($slug)) {
+                $slug = preg_replace('/[^a-z0-9\-]/', '-', strtolower(trim($_POST['title'] ?? '')));
+            }
+            
+            $data = [
+                'title' => trim($_POST['title'] ?? ''),
+                'slug' => $slug,
+                'description' => trim($_POST['description'] ?? ''),
+                'category' => trim($_POST['category'] ?? 'general'),
+                'icon' => trim($_POST['icon'] ?? 'fa-clipboard-list'),
+                'estimated_time' => (int)($_POST['estimated_time'] ?? 5),
+                'is_active' => isset($_POST['is_active']) ? 1 : 0,
+                'is_featured' => isset($_POST['is_featured']) ? 1 : 0,
+                'sort_order' => (int)($_POST['sort_order'] ?? 0)
+            ];
+            
+            if ($checklistModel->updateChecklist($id, $data)) {
+                $_SESSION['message'] = 'چک‌لیست با موفقیت به‌روز شد';
+            } else {
+                $_SESSION['error'] = 'خطا در به‌روزرسانی';
+            }
+            $this->redirect('/admin/checklists');
+            return;
+        }
+        
+        $checklist = $checklistModel->getChecklist($id);
+        if (!$checklist) {
+            $_SESSION['error'] = 'چک‌لیست یافت نشد';
+            $this->redirect('/admin/checklists');
+            return;
+        }
+        
+        $this->renderAdmin('admin/checklist-form', [
+            'title' => 'ویرایش چک‌لیست - ' . $checklist['title'],
+            'checklist' => $checklist
+        ]);
+    }
+
+    public function deleteChecklist($id)
+    {
+        $this->requireAdmin();
+        
+        require_once APP_PATH . '/models/Checklist.php';
+        $checklistModel = new \App\Models\Checklist();
+        
+        if ($checklistModel->deleteChecklist($id)) {
+            $_SESSION['message'] = 'چک‌لیست حذف شد';
+        } else {
+            $_SESSION['error'] = 'خطا در حذف';
+        }
+        $this->redirect('/admin/checklists');
+    }
+
+    public function checklistQuestions($id)
+    {
+        $this->requireAdmin();
+        
+        require_once APP_PATH . '/models/Checklist.php';
+        $checklistModel = new \App\Models\Checklist();
+        
+        $checklist = $checklistModel->getChecklist($id);
+        if (!$checklist) {
+            $_SESSION['error'] = 'چک‌لیست یافت نشد';
+            $this->redirect('/admin/checklists');
+            return;
+        }
+        
+        $questions = $checklistModel->getOrderedQuestions($id);
+        
+        // حالت ویرایش: ?edit=ID
+        $editQuestion = null;
+        if (!empty($_GET['edit'])) {
+            $editQuestion = $checklistModel->getQuestion((int)$_GET['edit']);
+            if ($editQuestion && (int)$editQuestion['checklist_id'] !== (int)$id) {
+                $editQuestion = null;
+            }
+        }
+        
+        $this->renderAdmin('admin/checklist-questions', [
+            'title' => 'مدیریت سوالات - ' . $checklist['title'],
+            'checklist' => $checklist,
+            'questions' => $questions,
+            'editQuestion' => $editQuestion
+        ]);
+    }
+
+    public function editChecklistQuestion($id)
+    {
+        $this->requireAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/admin/checklists');
+            return;
+        }
+        
+        require_once APP_PATH . '/models/Checklist.php';
+        $checklistModel = new \App\Models\Checklist();
+        
+        $q = $checklistModel->getQuestion($id);
+        if (!$q) {
+            $_SESSION['error'] = 'سوال یافت نشد';
+            $this->redirect('/admin/checklists');
+            return;
+        }
+        
+        $data = [
+            'category' => trim($_POST['category'] ?? 'general'),
+            'question_text' => trim($_POST['question_text'] ?? ''),
+            'weight' => (int)($_POST['weight'] ?? 1),
+            'sort_order' => (int)($_POST['sort_order'] ?? 0),
+            'is_active' => (int)($_POST['is_active'] ?? 1)
+        ];
+        
+        $checklistModel->updateQuestion($id, $data);
+        $_SESSION['message'] = 'سوال با موفقیت به‌روزرسانی شد';
+        $this->redirect('/admin/checklist/questions/' . $q['checklist_id']);
+    }
+
+    public function moveChecklistQuestion($id)
+    {
+        $this->requireAdmin();
+        
+        $dir = $_GET['dir'] ?? 'up';
+        $checklistId = (int)($_GET['checklist_id'] ?? 0);
+        
+        require_once APP_PATH . '/models/Checklist.php';
+        $m = new \App\Models\Checklist();
+        
+        $questions = $m->getOrderedQuestions($checklistId);
+        
+        // نرمال‌سازی ترتیب‌ها (۰،۱،۲،...)
+        foreach ($questions as $i => $q) {
+            if ((int)$q['sort_order'] !== $i) {
+                $m->setSortOrder($q['id'], $i);
+                $questions[$i]['sort_order'] = $i;
+            }
+        }
+        
+        // پیدا کردن موقعیت سوال جاری
+        $idx = null;
+        foreach ($questions as $i => $q) {
+            if ((int)$q['id'] === (int)$id) { $idx = $i; break; }
+        }
+        
+        if ($idx !== null) {
+            $target = ($dir === 'up') ? $idx - 1 : $idx + 1;
+            if ($target >= 0 && $target < count($questions)) {
+                // جابه‌جایی ترتیب دو سوال
+                $m->setSortOrder($questions[$idx]['id'], $target);
+                $m->setSortOrder($questions[$target]['id'], $idx);
+            }
+        }
+        
+        $this->redirect('/admin/checklist/questions/' . $checklistId);
+    }
+
+    public function addChecklistQuestion($checklistId)
+    {
+        $this->requireAdmin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/admin/checklist/questions/' . $checklistId);
+            return;
+        }
+        
+        require_once APP_PATH . '/models/Checklist.php';
+        $checklistModel = new \App\Models\Checklist();
+        
+        $data = [
+            'checklist_id' => (int)$checklistId,
+            'category' => trim($_POST['category'] ?? 'general'),
+            'question_text' => trim($_POST['question_text'] ?? ''),
+            'weight' => (int)($_POST['weight'] ?? 1),
+            'sort_order' => (int)($_POST['sort_order'] ?? 0),
+            'is_active' => (int)($_POST['is_active'] ?? 1)
+        ];
+        
+        if ($checklistModel->createQuestion($data)) {
+            $_SESSION['message'] = 'سوال اضافه شد';
+        } else {
+            $_SESSION['error'] = 'خطا در افزودن سوال';
+        }
+        $this->redirect('/admin/checklist/questions/' . $checklistId);
+    }
+
+    public function deleteChecklistQuestion($id)
+    {
+        $this->requireAdmin();
+        
+        require_once APP_PATH . '/models/Checklist.php';
+        $checklistModel = new \App\Models\Checklist();
+        
+        $checklistId = $_GET['checklist_id'] ?? 0;
+        
+        if ($checklistModel->deleteQuestion($id)) {
+            $_SESSION['message'] = 'سوال حذف شد';
+        }
+        $this->redirect('/admin/checklist/questions/' . $checklistId);
+    }
 }
