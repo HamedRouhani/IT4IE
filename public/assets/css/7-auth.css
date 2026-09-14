@@ -240,3 +240,218 @@
 .alert-warning-custom ul li {
     margin-bottom: 4px;
 }
+
+/* ========================================
+   7. AUTH PAGES - صفحات احراز هویت
+   Layout: auth.php (login, register, forgot-password)
+   ======================================== */
+
+/* ========================================
+   BODY & PAGE STRUCTURE
+   ======================================== */
+body.auth-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ========================================
+   AUTH HEADER
+   ======================================== */
+.auth-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    padding: 14px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(108, 60, 225, 0.08);
+}
+
+.auth-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ========================================
+   AUTH LOGO - لوگوی صفحات احراز هویت
+   ======================================== */
+.auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--dark);
+    font-size: 1.4rem;
+    font-weight: 800;
+    transition: var(--transition);
+}
+
+.auth-logo:hover {
+    transform: translateY(-1px);
+}
+
+.auth-logo-img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 12px;
+    display: block;
+    transition: var(--transition);
+}
+
+.auth-logo:hover .auth-logo-img {
+    transform: scale(1.05) rotate(-2deg);
+}
+
+.auth-logo span {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Fallback آیکون (در صورت عدم لود تصویر) */
+.auth-logo i.fas {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: var(--white);
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+/* ========================================
+   AUTH BACK LINK - لینک بازگشت به خانه
+   ======================================== */
+.auth-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gray-dark);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(108, 60, 225, 0.15);
+    transition: var(--transition);
+}
+
+.auth-back-link:hover {
+    background: rgba(108, 60, 225, 0.06);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.auth-back-link i {
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+.auth-back-link:hover i {
+    transform: translateX(3px);
+}
+
+/* ========================================
+   AUTH MAIN CONTENT
+   ======================================== */
+.auth-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.auth-container {
+    max-width: 1200px;
+    width: 100%;
+}
+
+/* ========================================
+   RESPONSIVE - تبلت
+   ======================================== */
+@media (max-width: 768px) {
+    .auth-header {
+        padding: 12px 0;
+    }
+
+    .auth-header .container {
+        padding: 0 16px;
+        gap: 10px;
+    }
+
+    .auth-logo {
+        font-size: 1.2rem;
+        gap: 10px;
+    }
+
+    .auth-logo-img {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+    }
+
+    .auth-logo i.fas {
+        width: 42px;
+        height: 42px;
+        font-size: 1.15rem;
+    }
+
+    .auth-back-link {
+        padding: 6px 12px;
+        font-size: 0.82rem;
+    }
+
+    .auth-main {
+        padding: 24px 16px;
+    }
+}
+
+/* ========================================
+   RESPONSIVE - موبایل کوچک
+   ======================================== */
+@media (max-width: 480px) {
+    .auth-logo {
+        font-size: 1.05rem;
+        gap: 8px;
+    }
+
+    .auth-logo-img {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+    }
+
+    .auth-logo i.fas {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .auth-back-link span {
+        display: none;
+    }
+
+    .auth-back-link {
+        padding: 8px 10px;
+    }
+
+    .auth-back-link i {
+        font-size: 1rem;
+    }
+}

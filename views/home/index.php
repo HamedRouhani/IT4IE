@@ -55,3 +55,71 @@
         <?php endif; ?>
     </div>
 </section>
+
+<!-- ============================================
+     شبکه‌های اجتماعی IT4IE
+     ============================================ -->
+<section class="social-cta-section">
+    <div class="container">
+        <div class="social-cta-card">
+            <div class="social-decoration">
+                <div class="decoration-circle circle-1"></div>
+                <div class="decoration-circle circle-2"></div>
+                <div class="decoration-circle circle-3"></div>
+            </div>
+
+            <div class="social-cta-content">
+                <span class="social-badge">🌐 همراه ما باشید</span>
+                <h2 class="social-title">
+                    IT4IE در شبکه‌های اجتماعی
+                </h2>
+                <p class="social-subtitle">
+                    آخرین مقالات تخصصی، ابزارهای تحلیلی و نکات کاربردی در حوزه مهندسی صنایع و مدیریت پروژه را در اینستاگرام و تلگرام دنبال کنید
+                </p>
+
+                <div class="social-buttons">
+                    <!-- اینستاگرام -->
+                    <a href="<?= htmlspecialchars($settings['instagram_url'] ?? 'https://instagram.com/it4ie.ir') ?>"
+                       target="_blank" rel="noopener noreferrer" class="social-btn instagram-btn">
+                        <div class="social-icon-wrapper">
+                            <i class="fab fa-instagram"></i>
+                        </div>
+                        <div class="social-info">
+                            <span class="social-label">اینستاگرام</span>
+                            <span class="social-handle">@it4ie.ir</span>
+                        </div>
+                        <i class="fas fa-arrow-left social-arrow"></i>
+                    </a>
+
+                    <!-- تلگرام -->
+                    <a href="<?= htmlspecialchars($settings['telegram_url'] ?? 'https://t.me/IT4IE.IR') ?>"
+                       target="_blank" rel="noopener noreferrer" class="social-btn telegram-btn">
+                        <div class="social-icon-wrapper">
+                            <i class="fab fa-telegram-plane"></i>
+                        </div>
+                        <div class="social-info">
+                            <span class="social-label">تلگرام</span>
+                            <span class="social-handle">@IT4IE.IR</span>
+                        </div>
+                        <i class="fas fa-arrow-left social-arrow"></i>
+                    </a>
+                </div>
+
+                <div class="social-features">
+                    <div class="feature-item">
+                        <i class="fas fa-book-open"></i>
+                        <span>مقالات تخصصی</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-video"></i>
+                        <span>ویدیوهای آموزشی</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-bell"></i>
+                        <span>اطلاع‌رسانی ابزارهای جدید</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

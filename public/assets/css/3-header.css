@@ -2,9 +2,7 @@
    3. HEADER & NAVIGATION
    ======================================== */
 .header {
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: #ffffff; /* مات: شرط لازم برای عملکرد صحیح multiply لوگو */
     box-shadow: 0 1px 3px rgba(108, 60, 225, 0.06);
     position: sticky;
     top: 0;
@@ -23,6 +21,10 @@
 /* ========================================
    LOGO
    ======================================== */
+.logo {
+    flex-shrink: 0;
+}
+
 .logo a {
     display: flex;
     align-items: center;
@@ -37,6 +39,55 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+/* ========================================
+   LOGO IMAGE - لوگوی تصویری IT4IE
+   ======================================== */
+.logo .logo-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    line-height: 0;
+}
+
+.logo .logo-img {
+    height: 80px;
+    width: 80px;
+    object-fit: cover;
+    object-position: center;
+    mix-blend-mode: multiply;      /* پس‌زمینهٔ سفید تصویر را محو می‌کند */
+    filter: brightness(1.05);      /* ته‌رنگ خاکستری پس‌زمینه را به سفید خالص می‌هلد */
+    border-radius: 16px;
+    transition: var(--transition);
+}
+
+.logo .logo-link:hover .logo-img {
+    transform: scale(1.07) rotate(-2deg);
+}
+
+@media (max-width: 992px) {
+    .logo .logo-img {
+        height: 70px;
+        width: 70px;
+        border-radius: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .logo .logo-img {
+        height: 60px;
+        width: 60px;
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo .logo-img {
+        height: 52px;
+        width: 52px;
+        border-radius: 10px;
+    }
 }
 
 /* ========================================
@@ -123,6 +174,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;
 }
 
 .btn-login {
@@ -291,40 +343,39 @@
 }
 
 /* ========================================
-   RESPONSIVE - موبایل (مهم)
+   RESPONSIVE - موبایل
    ======================================== */
 @media (max-width: 768px) {
     .mobile-toggle {
         display: flex;
     }
-    
+
     .nav {
         display: none;
         position: absolute;
         top: 100%;
         left: 0;
         right: 0;
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(12px);
+        background: #ffffff; /* مات برای جلوگیری از سایه‌روشن‌های ناخواسته */
         padding: 20px;
         box-shadow: var(--shadow-lg);
         border-top: 1px solid rgba(108, 60, 225, 0.06);
         z-index: 999;
     }
-    
+
     .nav.open {
         display: block;
     }
-    
+
     .nav-list {
         flex-direction: column;
-        gap: 8px; /* افزایش فاصله بین آیتم‌ها */
+        gap: 8px;
         padding: 0;
         margin: 0;
     }
-    
+
     .nav-link {
-        padding: 14px 18px; /* افزایش padding داخلی */
+        padding: 14px 18px;
         width: 100%;
         border-radius: var(--radius);
         font-size: 1rem;
@@ -333,23 +384,23 @@
         gap: 14px;
         border-bottom: 1px solid rgba(108, 60, 225, 0.04);
     }
-    
+
     .nav-link:last-child {
         border-bottom: none;
     }
-    
+
     .nav-link span {
         display: inline;
         font-size: 1rem;
     }
-    
+
     .nav-link i {
         font-size: 1.1rem;
         width: 24px;
         text-align: center;
         opacity: 0.7;
     }
-    
+
     /* Dropdown در موبایل */
     .dropdown-menu {
         position: static;
@@ -360,42 +411,42 @@
         background: rgba(108, 60, 225, 0.03);
         margin: 0;
     }
-    
+
     .nav-item.has-dropdown:hover .dropdown-menu {
         display: none;
     }
-    
+
     .nav-item.has-dropdown.open .dropdown-menu {
         display: block;
     }
-    
+
     .dropdown-link {
         padding: 10px 16px;
         font-size: 0.9rem;
         border-bottom: 1px solid rgba(108, 60, 225, 0.03);
     }
-    
+
     .dropdown-link:last-child {
         border-bottom: none;
     }
-    
+
     /* دکمه‌های هدر در موبایل */
     .header-actions .btn-register span {
         display: none;
     }
-    
+
     .header-actions .btn-login span {
         display: none;
     }
-    
+
     .btn-login {
         padding: 8px 14px;
     }
-    
+
     .btn-register {
         padding: 8px 14px;
     }
-    
+
     .user-name {
         display: none;
     }
@@ -405,16 +456,21 @@
    موبایل کوچک
    ======================================== */
 @media (max-width: 480px) {
+    .header-wrapper {
+        gap: 12px;
+        padding: 10px 0;
+    }
+
     .nav-link {
         padding: 12px 16px;
         font-size: 0.95rem;
     }
-    
+
     .nav-link i {
         font-size: 1rem;
         width: 20px;
     }
-    
+
     .nav-list {
         gap: 6px;
     }

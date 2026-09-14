@@ -1,0 +1,345 @@
+/* ========================================
+   20. SOCIAL CTA - شبکه‌های اجتماعی
+   ======================================== */
+.social-cta-section {
+    padding: 60px 0 80px;
+    position: relative;
+    background: linear-gradient(180deg, transparent 0%, rgba(108, 60, 225, 0.04) 100%);
+}
+
+.social-cta-card {
+    position: relative;
+    background: var(--white);
+    border-radius: 24px;
+    padding: 56px 48px;
+    overflow: hidden;
+    box-shadow: 
+        0 20px 60px rgba(108, 60, 225, 0.08),
+        0 0 0 1px rgba(108, 60, 225, 0.05);
+}
+
+/* Badge بالای عنوان */
+.social-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(108, 60, 225, 0.12), rgba(139, 92, 246, 0.12));
+    color: var(--primary);
+    padding: 6px 18px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(108, 60, 225, 0.15);
+}
+
+.social-title {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 16px;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.social-subtitle {
+    font-size: 1.05rem;
+    color: var(--gray-dark);
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 36px;
+    line-height: 1.9;
+}
+
+.social-cta-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+/* دکمه‌های شبکه‌های اجتماعی */
+.social-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 760px;
+    margin: 0 auto 32px;
+}
+
+.social-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 28px;
+    border-radius: 16px;
+    text-decoration: none;
+    color: var(--white);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* افکت shine */
+.social-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.35),
+        transparent
+    );
+    transition: left 0.7s ease;
+    z-index: 1;
+}
+
+.social-btn:hover::before {
+    left: 100%;
+}
+
+.social-btn:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* اینستاگرام - gradient واقعی برند */
+.instagram-btn {
+    background: linear-gradient(45deg, #feda75 0%, #fa7e1e 20%, #d62976 40%, #962fbf 60%, #4f5bd5 100%);
+}
+
+.instagram-btn:hover {
+    background: linear-gradient(45deg, #4f5bd5 0%, #962fbf 20%, #d62976 40%, #fa7e1e 60%, #feda75 100%);
+}
+
+/* تلگرام - رنگ برند */
+.telegram-btn {
+    background: linear-gradient(135deg, #0088cc 0%, #229ED9 50%, #34b7f1 100%);
+}
+
+.telegram-btn:hover {
+    background: linear-gradient(135deg, #34b7f1 0%, #229ED9 50%, #0088cc 100%);
+}
+
+.social-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+    transition: all 0.5s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.social-btn:hover .social-icon-wrapper {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(360deg) scale(1.1);
+}
+
+.social-icon-wrapper i {
+    font-size: 1.6rem;
+    color: var(--white);
+}
+
+.social-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.3;
+    flex: 1;
+    position: relative;
+    z-index: 2;
+}
+
+.social-label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.social-handle {
+    font-size: 0.88rem;
+    opacity: 0.92;
+    font-weight: 500;
+    color: var(--white);
+    direction: ltr;
+    text-align: left;
+}
+
+.social-arrow {
+    position: relative;
+    z-index: 2;
+    font-size: 1rem;
+    color: var(--white);
+    transition: transform 0.4s ease;
+    flex-shrink: 0;
+}
+
+.social-btn:hover .social-arrow {
+    transform: translateX(-6px);
+}
+
+/* ویژگی‌ها */
+.social-features {
+    display: flex;
+    justify-content: center;
+    gap: 36px;
+    flex-wrap: wrap;
+    padding-top: 24px;
+    border-top: 1px solid rgba(108, 60, 225, 0.08);
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--gray-dark);
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+.feature-item i {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+/* دکوراسیون */
+.social-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.decoration-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(108, 60, 225, 0.08), rgba(139, 92, 246, 0.04));
+    animation: socialFloat 18s infinite ease-in-out;
+}
+
+.circle-1 {
+    width: 240px;
+    height: 240px;
+    top: -120px;
+    right: -80px;
+    animation-delay: 0s;
+}
+
+.circle-2 {
+    width: 180px;
+    height: 180px;
+    bottom: -90px;
+    left: -60px;
+    animation-delay: 6s;
+}
+
+.circle-3 {
+    width: 120px;
+    height: 120px;
+    top: 40%;
+    right: 8%;
+    animation-delay: 12s;
+}
+
+@keyframes socialFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+    33% { transform: translate(20px, -20px) scale(1.1); opacity: 1; }
+    66% { transform: translate(-15px, 15px) scale(0.95); opacity: 0.8; }
+}
+
+/* ========================================
+   RESPONSIVE - تطبیق با 10-responsive.css
+   ======================================== */
+@media (max-width: 992px) {
+    .social-cta-card {
+        padding: 44px 32px;
+    }
+    
+    .social-buttons {
+        gap: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .social-cta-section {
+        padding: 40px 0 60px;
+    }
+    
+    .social-cta-card {
+        padding: 36px 24px;
+        border-radius: 20px;
+    }
+    
+    .social-buttons {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+    
+    .social-btn {
+        padding: 16px 22px;
+        border-radius: 14px;
+    }
+    
+    .social-icon-wrapper {
+        width: 46px;
+        height: 46px;
+    }
+    
+    .social-icon-wrapper i {
+        font-size: 1.4rem;
+    }
+    
+    .social-label {
+        font-size: 1rem;
+    }
+    
+    .social-handle {
+        font-size: 0.82rem;
+    }
+    
+    .social-features {
+        gap: 18px;
+    }
+    
+    .feature-item {
+        font-size: 0.85rem;
+    }
+    
+    .decoration-circle {
+        opacity: 0.5;
+    }
+}
+
+@media (max-width: 480px) {
+    .social-cta-card {
+        padding: 28px 18px;
+    }
+    
+    .social-btn {
+        gap: 12px;
+        padding: 14px 18px;
+    }
+    
+    .social-features {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .social-badge {
+        font-size: 0.78rem;
+        padding: 5px 14px;
+    }
+}

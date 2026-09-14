@@ -3,7 +3,15 @@
         <div class="header-wrapper">
             <!-- Logo -->
             <div class="logo">
-                <a href="/"><span>IT4IE</span></a>
+                <a href="/" class="logo-link" aria-label="IT4IE - Information Technology for Industrial Engineering">
+                    <img src="/assets/images/logo-it4ie-transparent.png"
+                        alt="IT4IE - Information Technology for Industrial Engineering"
+                        class="logo-img"
+                        width="80" height="80"
+                        fetchpriority="high"
+                        decoding="async"
+                        onerror="this.outerHTML='<span>IT4IE</span>'">
+                </a>
             </div>
             
             <!-- Navigation -->
