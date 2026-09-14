@@ -1,8 +1,30 @@
+<?php
+$isLoggedIn = isset($_SESSION['user_id']);
+$userName = $_SESSION['user_name'] ?? 'کاربر';
+?>
+
 <div class="checklist-list-page">
     <div class="container">
         <div class="page-hero">
             <h1>📋 چک‌لیست‌های تخصصی IT4IE</h1>
             <p>ابزارهای تعاملی برای ارزیابی و بهبود پروژه‌ها و فرآیندهای کسب‌وکار شما</p>
+            
+            <?php if ($isLoggedIn): ?>
+            <div class="user-checklist-actions">
+                <a href="/checklist/history" class="history-link">
+                    <span class="history-icon">
+                        <i class="fas fa-history"></i>
+                    </span>
+                    <span class="link-content">
+                        <span class="link-label">تاریخچه ارزیابی‌های</span>
+                        <span class="link-value"><strong><?= htmlspecialchars($userName) ?></strong></span>
+                    </span>
+                    <span class="arrow-icon">
+                        <i class="fas fa-arrow-left"></i>
+                    </span>
+                </a>
+            </div>
+            <?php endif; ?>
         </div>
 
         <div class="checklist-grid">

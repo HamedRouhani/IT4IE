@@ -807,18 +807,22 @@ class AdminController extends Controller
         require_once APP_PATH . '/models/Checklist.php';
         $checklistModel = new \App\Models\Checklist();
 
-        $page = max(1, (int)($_GET['page'] ?? 1));
+        $page  = max(1, (int)($_GET['page'] ?? 1));
         $limit = 20;
         $offset = ($page - 1) * $limit;
 
-        $submissions = $checklistModel->getAllSubmissions($limit, $offset);
-        $stats = $checklistModel->getStats();
+        $checklistFilter = isset($_GET['checklist']) ? (int)$_GET['checklist'] : null;
+
+        $submissions = $checklistModel->getAllSubmissions($limit, $offset, $checklistFilter);
+        $stats = $checklistModel->getStats($checklistFilter);
 
         $this->renderAdmin('admin/checklist', [
-            'title' => 'مدیریت چک‌لیست‌های ارزیابی ریسک - IT4IE',
-            'submissions' => $submissions,
-            'stats' => $stats,
-            'currentPage' => $page
+            'title'           => 'چک‌لیست‌های ارسال شده - پنل مدیریت',
+            'submissions'     => $submissions,
+            'stats'           => $stats,
+            'currentPage'     => $page,
+            'checklistFilter' => $checklistFilter,
+            'filterChecklist' => $checklistFilter ? $checklistModel->getChecklist($checklistFilter) : null,
         ]);
     }
 
@@ -1228,5 +1232,50 @@ class AdminController extends Controller
             $_SESSION['message'] = 'سوال حذف شد';
         }
         $this->redirect('/admin/checklist/questions/' . $checklistId);
+    }
+
+    /**
+     * 📊 مشاهده صفحه نتیجه یک ارسال (دید مدیر)
+     */
+    public function viewChecklistResult($id)
+    {
+        $this->requireAdmin();
+
+        require_once APP_PATH . '/models/Checklist.php';
+        require_once APP_PATH . '/models/Setting.php';
+        $checklistModel = new \App\Models\Checklist();
+        $settingModel   = new \App\Models\Setting();
+
+        $submission = $checklistModel->getSubmission($id);
+        if (!$submission) {
+            $_SESSION['error'] = 'ارسال یافت نشد';
+            $this->redirect('/admin/checklist');
+            return;
+        }
+
+        $percentage = $submission['max_score'] > 0
+            ? round(($submission['total_score'] / $submission['max_score']) * 100)
+            : 0;
+
+        $result = [
+            'checklist_title' => $submission['checklist_title'] ?? 'نتایج ارزیابی',
+            'checklist_slug'  => $submission['checklist_slug'] ?? '',
+            'risk_level'      => $submission['risk_level'],
+            'percentage'      => $percentage,
+            'total_score'     => $submission['total_score'],
+            'max_score'       => $submission['max_score'],
+            'recommendations' => json_decode($submission['recommendations'], true) ?? [],
+        ];
+
+        $this->render('checklist/result', [
+            'title'       => 'نتایج ' . ($submission['checklist_title'] ?? 'ارزیابی') . ' - IT4IE',
+            'settings'    => $settingModel->getAll(),
+            'result'      => $result,
+            'overallRec'  => $checklistModel->getOverallRecommendation($submission['risk_level'], $percentage),
+            'resultDate'  => $submission['created_at'],
+            'adminView'   => true,
+            'hideSidebar' => true,
+            'hideFooter'  => true,
+        ]);
     }
 }

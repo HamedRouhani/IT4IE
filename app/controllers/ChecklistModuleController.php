@@ -258,4 +258,50 @@ class ChecklistModuleController extends Controller
         $_SESSION['message'] = 'ارزیابی از تاریخچه شما حذف شد.';
         $this->redirect('/checklist/history');
     }
+
+    /**
+     * 👁 مشاهده نتیجه یک ارسال قبلی (فقط مالک رکورد)
+     */
+    public function viewSubmission($id)
+    {
+        if (!isset($_SESSION['user_id'])) {
+            $_SESSION['error'] = 'برای مشاهده نتیجه ابتدا وارد شوید.';
+            $this->redirect('/login');
+            return;
+        }
+
+        $submission = $this->checklistModel->getSubmission($id);
+
+        if (!$submission || (int)$submission['user_id'] !== (int)$_SESSION['user_id']) {
+            $_SESSION['error'] = 'دسترسی غیرمجاز یا رکورد یافت نشد.';
+            $this->redirect('/checklist/history');
+            return;
+        }
+
+        $percentage = $submission['max_score'] > 0
+            ? round(($submission['total_score'] / $submission['max_score']) * 100)
+            : 0;
+
+        $result = [
+            'checklist_title' => $submission['checklist_title'] ?? 'نتایج ارزیابی',
+            'checklist_slug'  => $submission['checklist_slug'] ?? '',
+            'risk_level'      => $submission['risk_level'],
+            'percentage'      => $percentage,
+            'total_score'     => $submission['total_score'],
+            'max_score'       => $submission['max_score'],
+            'recommendations' => json_decode($submission['recommendations'], true) ?? [],
+        ];
+
+        $settingModel = new \App\Models\Setting();
+
+        $this->render('checklist/result', [
+            'title'       => 'نتایج ' . ($submission['checklist_title'] ?? 'ارزیابی') . ' - IT4IE',
+            'settings'    => $settingModel->getAll(),
+            'result'      => $result,
+            'overallRec'  => $this->checklistModel->getOverallRecommendation($submission['risk_level'], $percentage),
+            'resultDate'  => $submission['created_at'],
+            'hideSidebar' => true,
+            'hideFooter'  => true,
+        ]);
+    }
 }

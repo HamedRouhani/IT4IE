@@ -60,6 +60,39 @@ $analyzerMap = [
         'ctaIcon' => 'fa-chart-bar',
         'ctaLabel' => 'شروع تحلیل با StatLab Analyzer',
     ],
+    'babok-technique-selector' => [
+        'emoji' => '🧭',
+        'subtitle' => 'تکنیک‌های مناسب BABOK برای شما شناسایی شد',
+        'color' => '#6c3ce1',
+        'message' => 'بر اساس پاسخ‌های شما، هدف استخراج، ویژگی ذی‌نفعان و منابع موجود تحلیل شد و مناسب‌ترین تکنیک‌های BABOK به‌ترتیب اولویت در بخش «تکنیک‌های پیشنهادی» ارائه شده‌اند.',
+        'stat1Label' => 'شاخص انطباق شرایط',
+        'stat3Label' => 'سطح قطعیت تحلیل',
+        'ctaHref' => '/software/babok-analyzer/?route=requirement',
+        'ctaIcon' => 'fa-microphone',
+        'ctaLabel' => 'شروع تحلیل هوشمند با BABOK Analyzer',
+    ],
+    'pmbok-focus-selector' => [
+        'emoji' => '📘',
+        'subtitle' => 'حوزه‌های دانشی اولویت‌دار PMBOK شناسایی شد',
+        'color' => '#0d6efd',
+        'message' => 'بر اساس پاسخ‌های شما، پنج بُعد آسیب‌پذیری پروژه تحلیل شد و حوزه‌های دانشی PMBOK که بیشترین نیاز به تقویت دارند، به‌ترتیب اولویت در بخش «حوزه‌های اولویت‌دار» ارائه شده‌اند.',
+        'stat1Label' => 'شاخص نیاز به تقویت',
+        'stat3Label' => 'سطح قطعیت تحلیل',
+        'ctaHref' => '/software/pmbok-analyzer/?controller=knowledgeArea',
+        'ctaIcon' => 'fa-sitemap',
+        'ctaLabel' => 'شروع مدیریت پروژه با PMBOK Analyzer',
+    ],
+    'or-method-selector' => [
+        'emoji' => '🧮',
+        'subtitle' => 'روش‌های مناسب OR برای مسئله شما شناسایی شد',
+        'color' => '#10b981',
+        'message' => 'بر اساس پاسخ‌های شما، طبیعت مسئله، ساختار ریاضی و عدم قطعیت تحلیل شد و مناسب‌ترین روش‌های تحقیق در عملیات به‌ترتیب اولویت در بخش «روش‌های پیشنهادی» ارائه شده‌اند.',
+        'stat1Label' => 'شاخص انطباق روش',
+        'stat3Label' => 'سطح قطعیت تحلیل',
+        'ctaHref' => '/software/or-analyzer/?controller=smart_modeler',
+        'ctaIcon' => 'fa-network-wired',
+        'ctaLabel' => 'شروع مدلسازی هوشمند در OR Analyzer',
+    ],
 ];
 
 // ============================================
@@ -113,6 +146,18 @@ if ($isAnalyzer) {
         <div class="result-card" style="border-top-color: <?= $headerColor ?>;">
             <div class="result-emoji"><?= $headerEmoji ?></div>
             <h1 class="result-title"><?= htmlspecialchars($result['checklist_title'] ?? 'نتایج ارزیابی') ?></h1>
+            <?php if (!empty($resultDate)): ?>
+            <div class="result-saved-badge">
+                <i class="fas fa-history"></i> نتیجه ذخیره‌شده در تاریخ <?= jdate($resultDate) ?>
+            </div>
+            <?php endif; ?>
+
+            <?php if (!empty($adminView)): ?>
+            <div class="result-saved-badge" style="border-color: #3182ce; color: #3182ce;">
+                <i class="fas fa-user-shield"></i> در حال مشاهده به‌عنوان مدیر —
+                <a href="/admin/checklist" style="color: #3182ce; font-weight: 700;">بازگشت به لیست ارسال‌ها</a>
+            </div>
+            <?php endif; ?>
             <h2 class="result-subtitle" style="color: <?= $headerColor ?>;"><?= htmlspecialchars($headerSubtitle) ?></h2>
             <p class="result-message"><?= htmlspecialchars($headerMessage) ?></p>
 
@@ -173,9 +218,9 @@ if ($isAnalyzer) {
             <?php endif; ?>
 
             <div class="summary-cta">
-                <a href="<?= htmlspecialchars($summary['analyzer_url'] ?? '/software/') ?>" class="btn-cta" style="background: <?= $headerColor ?>;">
-                    <i class="fas <?= htmlspecialchars($summary['analyzer_icon'] ?? 'fa-cubes') ?>"></i>
-                    <?= htmlspecialchars($summary['analyzer_label'] ?? 'شروع تحلیل در نرم‌افزار') ?>
+                <a href="<?= htmlspecialchars($ctaHref) ?>" class="btn-cta" style="background: <?= $headerColor ?>;">
+                    <i class="fas <?= $ctaIcon ?>"></i>
+                    <?= htmlspecialchars($ctaLabel) ?>
                 </a>
             </div>
         </div>

@@ -414,6 +414,7 @@ if (strpos($url, 'admin') === 0) {
         '#^checklist/message/(\d+)$#'         => 'messageChecklist',
         '#^checklist/question/edit/(\d+)$#'   => 'editChecklistQuestion',
         '#^checklist/question/move/(\d+)$#'   => 'moveChecklistQuestion',
+        '#^checklist/result/(\d+)$#' => 'viewChecklistResult',
     ];
 
     foreach ($paramRoutes as $pattern => $method) {
@@ -504,6 +505,11 @@ if ($url === 'checklist/history') {
 if (preg_match('#^checklist/delete/(\d+)$#', $url, $m)) {
     require_once APP_PATH . '/controllers/ChecklistModuleController.php';
     (new App\Controllers\ChecklistModuleController())->deleteSubmission($m[1]);
+    exit;
+}
+if (preg_match('#^checklist/submission/(\d+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/ChecklistModuleController.php';
+    (new App\Controllers\ChecklistModuleController())->viewSubmission($m[1]);
     exit;
 }
 

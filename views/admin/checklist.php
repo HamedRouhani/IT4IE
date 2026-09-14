@@ -6,6 +6,14 @@
             <h1>📋 مدیریت چک‌لیست‌های ارزیابی ریسک</h1>
             <span>نمایش و پیگیری نتایج ارزیابی کاربران</span>
         </div>
+
+        <?php if (!empty($filterChecklist)): ?>
+        <div class="admin-form" style="margin-bottom: 16px; background: rgba(108, 60, 225, 0.06); border: 1px solid rgba(108, 60, 225, 0.15);">
+            <i class="fas fa-filter" style="color: var(--primary); margin-left: 6px;"></i>
+            نمایش نتایج فیلترشده برای: <strong><?= htmlspecialchars($filterChecklist['title']) ?></strong>
+            <a href="/admin/checklist" style="color: var(--primary); font-weight: 700; margin-right: 12px;">حذف فیلتر</a>
+        </div>
+        <?php endif; ?>
         
         <div class="admin-stats">
             <div class="stat-card">
@@ -103,11 +111,14 @@
                                 </td>
                                 <td><?php echo jdate($sub['created_at']); ?></td>
                                 <td class="actions">
-                                    <a href="/admin/checklist/view/<?php echo $sub['id']; ?>" class="btn-view" title="مشاهده جزئیات">
+                                    <a href="/admin/checklist/view/<?= $sub['id'] ?>" class="btn-view" title="مشاهده جزئیات و پاسخ‌ها">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="/admin/checklist/message/<?php echo $sub['id']; ?>" class="btn-edit" title="ارسال پیام درون‌برنامه‌ای">
-                                        <i class="fas fa-paper-plane"></i>
+                                    <a href="/admin/checklist/result/<?= $sub['id'] ?>" class="btn-result" title="مشاهده صفحه نتیجه">
+                                        <i class="fas fa-poll"></i>
+                                    </a>
+                                    <a href="mailto:<?= htmlspecialchars($sub['email']) ?>" class="btn-edit" title="ارسال ایمیل">
+                                        <i class="fas fa-envelope"></i>
                                     </a>
                                 </td>
                             </tr>

@@ -211,3 +211,381 @@
 .cat-methods i {
     color: var(--primary);
 }
+
+.btn-view-history {
+    background: rgba(49, 130, 206, 0.12);
+    color: #3182ce;
+    border: none;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-view-history:hover {
+    background: #3182ce;
+    color: #fff;
+}
+
+.result-saved-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px auto 12px;
+    padding: 6px 16px;
+    border: 1px dashed var(--gray-light);
+    border-radius: var(--radius-full);
+    color: var(--gray-dark);
+    font-size: 0.8rem;
+}
+
+/* ========================================
+   USER CHECKLIST ACTIONS - دکمه تاریخچه
+   ======================================== */
+.user-checklist-actions {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.history-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, rgba(108, 60, 225, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    border: 2px solid rgba(108, 60, 225, 0.20);
+    color: var(--primary);
+    padding: 14px 28px;
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(108, 60, 225, 0.08);
+}
+
+.history-link:hover {
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(108, 60, 225, 0.25);
+}
+
+.history-link:hover i:first-child {
+    transform: rotate(0deg);
+}
+
+.history-link i:first-child {
+    font-size: 1.2rem;
+    transform: rotate(-45deg);
+    transition: transform 0.3s ease;
+}
+
+.history-link i:last-child {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    transition: var(--transition);
+}
+
+.history-link:hover i:last-child {
+    opacity: 1;
+    transform: translateX(-4px);
+}
+
+.history-link strong {
+    font-weight: 800;
+}
+
+@media (max-width: 768px) {
+    .history-link {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .history-link i:first-child {
+        font-size: 1rem;
+    }
+}
+
+/* ========================================
+   دکمه تاریخچه در صفحه /checklist
+   ======================================== */
+.user-checklist-actions {
+    margin-top: 32px;
+    display: flex;
+    justify-content: center;
+}
+
+.history-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 32px;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--white);
+    background: linear-gradient(135deg, #6c3ce1 0%, #8b5cf6 50%, #a78bfa 100%);
+    background-size: 200% 200%;
+    box-shadow: 
+        0 10px 30px rgba(108, 60, 225, 0.35),
+        0 5px 15px rgba(139, 92, 246, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: gradientShift 6s ease infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* افکت shine متحرک */
+.history-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transition: left 0.6s ease;
+}
+
+.history-link:hover::before {
+    left: 100%;
+}
+
+.history-link:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+        0 20px 40px rgba(108, 60, 225, 0.45),
+        0 10px 20px rgba(139, 92, 246, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.history-link:active {
+    transform: translateY(-2px) scale(1);
+}
+
+/* آیکون تاریخچه چرخان */
+.history-link .history-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    backdrop-filter: blur(10px);
+    transition: all 0.5s ease;
+}
+
+.history-link:hover .history-icon {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(-360deg);
+}
+
+.history-link .history-icon i {
+    font-size: 1.1rem;
+    color: var(--white);
+}
+
+/* متن دکمه */
+.history-link .link-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.3;
+}
+
+.history-link .link-label {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.history-link .link-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.history-link .link-value strong {
+    font-weight: 800;
+    color: #fef3c7;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* آیکون فلش */
+.history-link .arrow-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transition: all 0.4s ease;
+}
+
+.history-link:hover .arrow-icon {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateX(-4px);
+}
+
+.history-link .arrow-icon i {
+    font-size: 0.85rem;
+    color: var(--white);
+}
+
+/* ========================================
+   دکمه بازگشت در صفحه /checklist/history
+   ======================================== */
+.back-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 28px;
+    margin-bottom: 24px;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--primary);
+    background: rgba(108, 60, 225, 0.06);
+    border: 2px solid rgba(108, 60, 225, 0.15);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(108, 60, 225, 0.08);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+}
+
+.back-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(135deg, #6c3ce1, #8b5cf6);
+    transition: width 0.4s ease;
+    z-index: 0;
+}
+
+.back-link:hover::before {
+    width: 100%;
+}
+
+.back-link:hover {
+    color: var(--white);
+    border-color: transparent;
+    transform: translateX(-6px);
+    box-shadow: 0 8px 20px rgba(108, 60, 225, 0.25);
+}
+
+.back-link i,
+.back-link span {
+    position: relative;
+    z-index: 1;
+    transition: all 0.4s ease;
+}
+
+.back-link .back-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--white);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(108, 60, 225, 0.15);
+    transition: all 0.4s ease;
+}
+
+.back-link:hover .back-icon {
+    background: rgba(255, 255, 255, 0.95);
+    transform: rotate(-360deg);
+    box-shadow: 0 4px 12px rgba(108, 60, 225, 0.3);
+}
+
+.back-link .back-icon i {
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.back-link:hover .back-icon i {
+    color: var(--primary);
+}
+
+/* ========================================
+   ریسپانسیو
+   ======================================== */
+@media (max-width: 768px) {
+    .history-link {
+        padding: 14px 24px;
+        font-size: 0.9rem;
+        gap: 10px;
+    }
+    
+    .history-link .history-icon {
+        width: 34px;
+        height: 34px;
+    }
+    
+    .history-link .history-icon i {
+        font-size: 0.95rem;
+    }
+    
+    .history-link .link-label {
+        font-size: 0.7rem;
+    }
+    
+    .history-link .link-value {
+        font-size: 0.9rem;
+    }
+    
+    .back-link {
+        padding: 12px 22px;
+        font-size: 0.88rem;
+    }
+    
+    .back-link .back-icon {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    .history-link {
+        flex-direction: column;
+        text-align: center;
+        padding: 16px 20px;
+    }
+    
+    .history-link .link-content {
+        align-items: center;
+    }
+    
+    .history-link .arrow-icon {
+        display: none;
+    }
+}

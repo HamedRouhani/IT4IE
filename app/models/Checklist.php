@@ -303,7 +303,8 @@ class Checklist extends Model
 
     public function getSubmission($id)
     {
-        $sql = "SELECT s.*, c.title as checklist_title, u.name as user_name, u.email as user_email 
+        $sql = "SELECT s.*, c.title as checklist_title, c.slug as checklist_slug, 
+                       u.name as user_name, u.email as user_email 
                 FROM {$this->table} s 
                 LEFT JOIN {$this->checklistsTable} c ON s.checklist_id = c.id
                 LEFT JOIN users u ON s.user_id = u.id 
@@ -378,6 +379,15 @@ class Checklist extends Model
         }
         if ($slug === 'statistical-method-selector') {
             return $this->analyzeStatLab($answers, $questions);
+        }
+        if ($slug === 'babok-technique-selector') {
+            return $this->analyzeBABOK($answers, $questions);
+        }
+        if ($slug === 'pmbok-focus-selector') {
+            return $this->analyzePMBOK($answers, $questions);
+        }
+        if ($slug === 'or-method-selector') {
+            return $this->analyzeOR($answers, $questions);
         }
         return $this->analyzeProjectRisk($answers, $questions);
     }
@@ -662,6 +672,33 @@ class Checklist extends Model
             'همبستگی و رگرسیون (Correlation / Regression)' => 'سنجش رابطه و پیش‌بینی متغیرها',
             'آزمون کای‌دو (Chi-Square)' => 'تحلیل داده‌های رده‌ای و جدول توافقی',
             'تحلیل سری زمانی (Time Series)' => 'بررسی روند و تغییرات در بازه زمانی',
+            'مصاحبه عمیق (Interviews)' => 'کشف نیازهای پنهان از ذی‌نفعان کلیدی',
+            'کارگاه تسهیل‌شده (Workshops)' => 'اجماع سریع بین ذی‌نفعان متعارض',
+            'طوفان مغزی (Brainstorming)' => 'تولید ایده خلاقانه بدون قضاوت',
+            'پیمایش و پرسشنامه (Surveys)' => 'جمع‌آوری کمی از جامعه بزرگ و پراکنده',
+            'مشاهده میدانی (Observation)' => 'درک واقعیت اجرایی کار در محل',
+            'تحلیل اسناد (Document Analysis)' => 'استخراج نیاز از رویه‌ها و مستندات موجود',
+            'مدل‌سازی فرآیند (BPMN)' => 'ترسیم وضعیت موجود و مطلوب فرآیند',
+            'مدل‌سازی داده و DFD' => 'ساختار داده و جریان اطلاعات سیستم',
+            'نمونه‌سازی اولیه (Prototyping)' => 'اعتبارسنجی راه‌حل با نمونه ملموس',
+            'تحلیل SWOT و ریشه‌ای' => 'تصمیم استراتژیک و کشف علل بنیادی',
+            'مدیریت یکپارچگی و محدوده' => 'منشور پروژه، کنترل تغییرات و مدیریت محدوده',
+            'مدیریت زمان‌بندی' => 'شبکه فعالیت‌ها، مسیر بحرانی و کنترل برنامه',
+            'مدیریت هزینه' => 'برآورد، بودجه‌بندی و ارزش کسب‌شده (EVM)',
+            'مدیریت کیفیت و منابع' => 'استانداردهای کیفیت، کنترل و تخصیص منابع',
+            'مدیریت ریسک' => 'شناسایی، تحلیل و پاسخ به ریسک‌ها',
+            'مدیریت ذی‌نفعان و ارتباطات' => 'شناسایی ذی‌نفعان و مدیریت انتظارات و ارتباطات',
+            'مدیریت تدارکات' => 'قراردادها و تأمین کالا و خدمات',
+            'برنامه‌ریزی خطی (Simplex)' => 'بهینه‌سازی تابع هدف خطی با محدودیت‌های خطی',
+            'مسئله حمل‌ونقل (Transport)' => 'ارسال بهینه از چند مبدأ به چند مقصد',
+            'مسئله تخصیص (Assignment)' => 'تخصیص یک‌به‌یک منابع به فعالیت‌ها',
+            'مسئله ترانشیپ (Transship)' => 'حمل‌ونقل با مراکز واسط و توزیع',
+            'کوتاه‌ترین مسیر (Shortest Path)' => 'یافتن مسیر بهینه در گراف',
+            'شبیه‌سازی مونت‌کارلو (Monte Carlo)' => 'مدل‌سازی سیستم‌های پیچیده با عدم قطعیت',
+            'زنجیره مارکوف (Markov)' => 'تحلیل حالت‌های احتمالاتی و حالت پایدار',
+            'نظریه صف (Queueing)' => 'طراحی و تحلیل سیستم‌های انتظار',
+            'تحلیل حساسیت (Sensitivity)' => 'بررسی پایداری جواب بهینه',
+            'برنامه‌ریزی دوگان (Dual)' => 'تحلیل ارزش سایه‌ای منابع',
         ];
         
         return $descriptions[$method] ?? 'روش تصمیم‌گیری چندمعیاره';
@@ -825,6 +862,483 @@ class Checklist extends Model
             'analyzer_url' => '/software/statlab-analyzer/',
             'analyzer_label' => 'شروع تحلیل با StatLab Analyzer',
             'analyzer_icon' => 'fa-chart-bar'
+        ];
+
+        return $recommendations;
+    }
+
+    /**
+     * تحلیل چک‌لیست انتخاب تکنیک BABOK
+     */
+    private function analyzeBABOK($answers, $questions)
+    {
+        $categoryScores = [];
+        $categoryMaxScores = [];
+        $recommendations = [];
+
+        $categoryInfo = [
+            'sign1' => [
+                'title' => 'هدف استخراج نیازمندی‌ها',
+                'icon' => 'fa-bullseye',
+                'methods' => [
+                    'مصاحبه عمیق (Interviews)' => 3,
+                    'پیمایش و پرسشنامه (Surveys)' => 3,
+                    'مشاهده میدانی (Observation)' => 3,
+                    'مدل‌سازی فرآیند (BPMN)' => 2
+                ],
+                'recommendations' => [
+                    'نیازهای پنهان → مصاحبه فردی عمیق با سوالات باز',
+                    'حجم زیاد نیاز کمی → پیمایش با پرسشنامه طیف لیکرت',
+                    'جریان واقعی کار → مشاهده میدانی (Shadowing) و مدل‌سازی فرآیند'
+                ]
+            ],
+            'sign2' => [
+                'title' => 'ویژگی ذی‌نفعان',
+                'icon' => 'fa-users',
+                'methods' => [
+                    'مصاحبه عمیق (Interviews)' => 2,
+                    'کارگاه تسهیل‌شده (Workshops)' => 3,
+                    'طوفان مغزی (Brainstorming)' => 2,
+                    'پیمایش و پرسشنامه (Surveys)' => 2
+                ],
+                'recommendations' => [
+                    'ذی‌نفعان در دسترس → مصاحبه نیمه‌ساختاریافته',
+                    'تعارض منافع → کارگاه تسهیل‌شده با رأی‌گیری و اولویت‌بندی',
+                    'ذی‌نفعان پراکنده → پیمایش آنلاین + تحلیل اسناد'
+                ]
+            ],
+            'sign3' => [
+                'title' => 'منابع داده و مستندات',
+                'icon' => 'fa-folder-open',
+                'methods' => [
+                    'تحلیل اسناد (Document Analysis)' => 3,
+                    'مدل‌سازی داده و DFD' => 2,
+                    'مصاحبه عمیق (Interviews)' => 3,
+                    'مشاهده میدانی (Observation)' => 2
+                ],
+                'recommendations' => [
+                    'اسناد موجود → تحلیل اسناد و استخراج شکاف اطلاعاتی',
+                    'داده عملیاتی → مدل‌سازی داده، DFD و دیکشنری داده',
+                    'بدون مستندات → مصاحبه + مشاهده برای استخراج دانش ضمنی'
+                ]
+            ],
+            'sign4' => [
+                'title' => 'فاز و استراتژی پروژه',
+                'icon' => 'fa-chess-knight',
+                'methods' => [
+                    'تحلیل SWOT و ریشه‌ای' => 2,
+                    'مدل‌سازی فرآیند (BPMN)' => 3,
+                    'نمونه‌سازی اولیه (Prototyping)' => 3
+                ],
+                'recommendations' => [
+                    'فاز استراتژی → SWOT، تحلیل ریشه‌ای و تحلیل قوانین کسب‌وکار',
+                    'بهبود فرآیند → مدل‌سازی BPMN وضعیت موجود و مطلوب',
+                    'تعریف برای توسعه → پروتوتایپ، یوزکیس و یوزراستوری'
+                ]
+            ],
+            'sign5' => [
+                'title' => 'تحلیل و اعتبارسنجی',
+                'icon' => 'fa-clipboard-check',
+                'methods' => [
+                    'نمونه‌سازی اولیه (Prototyping)' => 2,
+                    'کارگاه تسهیل‌شده (Workshops)' => 2,
+                    'تحلیل اسناد (Document Analysis)' => 1
+                ],
+                'recommendations' => [
+                    'کنترل تغییرات → ماتریس ردیابی نیازمندی‌ها (RTM)',
+                    'اعتبارسنجی با نمونه → پروتوتایپ و آزمون استفاده‌پذیری',
+                    'اولویت‌بندی → کارگاه MoSCoW؛ برای مصالحه‌های پیچیده چک‌لیست MCDM'
+                ]
+            ]
+        ];
+
+        if (!is_array($questions)) return $recommendations;
+
+        foreach ($questions as $q) {
+            $cat = $q['category'];
+            if (!isset($categoryScores[$cat])) {
+                $categoryScores[$cat] = 0;
+                $categoryMaxScores[$cat] = 0;
+            }
+            $answerValue = $answers[$q['id']] ?? 0;
+            $categoryScores[$cat] += $answerValue * $q['weight'];
+            $categoryMaxScores[$cat] += 3 * $q['weight'];
+        }
+
+        // امتیازدهی به تکنیک‌های BABOK
+        $methodScores = [
+            'مصاحبه عمیق (Interviews)' => 0,
+            'کارگاه تسهیل‌شده (Workshops)' => 0,
+            'طوفان مغزی (Brainstorming)' => 0,
+            'پیمایش و پرسشنامه (Surveys)' => 0,
+            'مشاهده میدانی (Observation)' => 0,
+            'تحلیل اسناد (Document Analysis)' => 0,
+            'مدل‌سازی فرآیند (BPMN)' => 0,
+            'مدل‌سازی داده و DFD' => 0,
+            'نمونه‌سازی اولیه (Prototyping)' => 0,
+            'تحلیل SWOT و ریشه‌ای' => 0
+        ];
+
+        foreach ($categoryScores as $cat => $score) {
+            $max = $categoryMaxScores[$cat];
+            if ($max == 0) continue;
+            $percentage = ($score / $max) * 100;
+            if ($percentage >= 60) {
+                foreach (($categoryInfo[$cat]['methods'] ?? []) as $method => $weight) {
+                    $methodScores[$method] += $weight * ($percentage / 100);
+                }
+            }
+        }
+
+        arsort($methodScores);
+
+        foreach ($categoryScores as $cat => $score) {
+            $max = $categoryMaxScores[$cat];
+            $percentage = $max > 0 ? ($score / $max) * 100 : 0;
+            $level = 'low';
+            if ($percentage >= 70) $level = 'critical';
+            elseif ($percentage >= 50) $level = 'high';
+            elseif ($percentage >= 30) $level = 'medium';
+
+            $recommendations[$cat] = [
+                'title' => $categoryInfo[$cat]['title'] ?? $cat,
+                'icon' => $categoryInfo[$cat]['icon'] ?? 'fa-circle',
+                'score' => $score,
+                'max' => $max,
+                'percentage' => round($percentage),
+                'level' => $level,
+                'items' => $categoryInfo[$cat]['recommendations'] ?? [],
+                'topMethods' => array_keys(array_slice($categoryInfo[$cat]['methods'] ?? [], 0, 2, true))
+            ];
+        }
+
+        // خلاصه نهایی + اتصال به BABOK Analyzer
+        $recommendations['_summary'] = [
+            'title' => '🧭 تکنیک‌های پیشنهادی BABOK برای پروژه شما',
+            'icon' => 'fa-lightbulb',
+            'score' => array_sum($methodScores),
+            'max' => max(1, count($categoryScores)) * 3,
+            'percentage' => 100,
+            'level' => 'success',
+            'items' => $this->formatMethodRecommendations($methodScores),
+            'topMethods' => array_slice($methodScores, 0, 3, true),
+            'analyzer_url' => '/software/babok-analyzer/?route=requirement',
+            'analyzer_label' => 'شروع تحلیل هوشمند با BABOK Analyzer',
+            'analyzer_icon' => 'fa-microphone'
+        ];
+
+        return $recommendations;
+    }
+
+    /**
+     * تحلیل چک‌لیست اولویت‌بندی حوزه‌های دانشی PMBOK
+     */
+    private function analyzePMBOK($answers, $questions)
+    {
+        $categoryScores = [];
+        $categoryMaxScores = [];
+        $recommendations = [];
+
+        $categoryInfo = [
+            'sign1' => [
+                'title' => 'محدوده و نیازمندی‌ها',
+                'icon' => 'fa-bullseye',
+                'methods' => [
+                    'مدیریت یکپارچگی و محدوده' => 3,
+                    'مدیریت ذی‌نفعان و ارتباطات' => 1
+                ],
+                'recommendations' => [
+                    'کنترل یکپارچه تغییرات → تشکیل کمیته تغییر (CCB) و فرم رسمی Change Request',
+                    'تعریف محدوده → بیانیه محدوده مصوب + WBS تا سطح بسته کاری',
+                    'ردیابی نیازمندی‌ها → ماتریس RTM برای جلوگیری از خزش محدوده'
+                ]
+            ],
+            'sign2' => [
+                'title' => 'زمان‌بندی و برنامه',
+                'icon' => 'fa-clock',
+                'methods' => [
+                    'مدیریت زمان‌بندی' => 3,
+                    'مدیریت یکپارچگی و محدوده' => 1
+                ],
+                'recommendations' => [
+                    'شبکه فعالیت‌ها → ترسیم PDM و شناسایی مسیر بحرانی',
+                    'فشرده‌سازی برنامه → Crashing یا Fast-Tracking برای جبران تأخیر',
+                    'پایش پیشرفت → گزارش دوره‌ای SPI و به‌روزرسانی Baseline'
+                ]
+            ],
+            'sign3' => [
+                'title' => 'هزینه و بودجه',
+                'icon' => 'fa-coins',
+                'methods' => [
+                    'مدیریت هزینه' => 3,
+                    'مدیریت یکپارچگی و محدوده' => 1
+                ],
+                'recommendations' => [
+                    'برآورد دقیق → برآورد پایین‌به‌بالا به تفکیک بسته‌های کاری',
+                    'مدیریت ارزش کسب‌شده → پایش CPI/SPI و پیش‌بینی EAC',
+                    'ذخیره‌ها → تفکیک ذخیره احتیاطی (ریسک) و مدیریتی (ناشناخته‌ها)'
+                ]
+            ],
+            'sign4' => [
+                'title' => 'کیفیت و منابع',
+                'icon' => 'fa-medal',
+                'methods' => [
+                    'مدیریت کیفیت و منابع' => 3,
+                    'مدیریت تدارکات' => 1
+                ],
+                'recommendations' => [
+                    'پیشگیری به‌جای بازرسی → برنامه کیفیت و چک‌لیست پذیرش deliverableها',
+                    'ابزارهای کنترل → نمودار کنترل، پارتو و علت‌ومعلول (ایشیکاوا)',
+                    'ماتریس مسئولیت → RACI برای شفاف‌سازی نقش منابع انسانی'
+                ]
+            ],
+            'sign5' => [
+                'title' => 'ریسک، ذی‌نفعان و ارتباطات',
+                'icon' => 'fa-shield-alt',
+                'methods' => [
+                    'مدیریت ریسک' => 3,
+                    'مدیریت ذی‌نفعان و ارتباطات' => 2
+                ],
+                'recommendations' => [
+                    'دفتر ثبت ریسک → شناسایی، تحلیل کیفی/کمی و برنامه پاسخ در ماژول Risk',
+                    'ماتریس ذی‌نفعان → قدرت/علاقه و راهبرد درگیرسازی هر گروه',
+                    'برنامه ارتباطات → تقویم گزارش‌دهی مدون به هر گروه ذی‌نفع'
+                ]
+            ]
+        ];
+
+        if (!is_array($questions)) return $recommendations;
+
+        foreach ($questions as $q) {
+            $cat = $q['category'];
+            if (!isset($categoryScores[$cat])) {
+                $categoryScores[$cat] = 0;
+                $categoryMaxScores[$cat] = 0;
+            }
+            $answerValue = $answers[$q['id']] ?? 0;
+            $categoryScores[$cat] += $answerValue * $q['weight'];
+            $categoryMaxScores[$cat] += 3 * $q['weight'];
+        }
+
+        // امتیازدهی به حوزه‌های دانشی PMBOK
+        $methodScores = [
+            'مدیریت یکپارچگی و محدوده' => 0,
+            'مدیریت زمان‌بندی' => 0,
+            'مدیریت هزینه' => 0,
+            'مدیریت کیفیت و منابع' => 0,
+            'مدیریت ریسک' => 0,
+            'مدیریت ذی‌نفعان و ارتباطات' => 0,
+            'مدیریت تدارکات' => 0
+        ];
+
+        foreach ($categoryScores as $cat => $score) {
+            $max = $categoryMaxScores[$cat];
+            if ($max == 0) continue;
+            $percentage = ($score / $max) * 100;
+            if ($percentage >= 60) {
+                foreach (($categoryInfo[$cat]['methods'] ?? []) as $method => $weight) {
+                    $methodScores[$method] += $weight * ($percentage / 100);
+                }
+            }
+        }
+
+        arsort($methodScores);
+
+        foreach ($categoryScores as $cat => $score) {
+            $max = $categoryMaxScores[$cat];
+            $percentage = $max > 0 ? ($score / $max) * 100 : 0;
+            $level = 'low';
+            if ($percentage >= 70) $level = 'critical';
+            elseif ($percentage >= 50) $level = 'high';
+            elseif ($percentage >= 30) $level = 'medium';
+
+            $recommendations[$cat] = [
+                'title' => $categoryInfo[$cat]['title'] ?? $cat,
+                'icon' => $categoryInfo[$cat]['icon'] ?? 'fa-circle',
+                'score' => $score,
+                'max' => $max,
+                'percentage' => round($percentage),
+                'level' => $level,
+                'items' => $categoryInfo[$cat]['recommendations'] ?? [],
+                'topMethods' => array_keys(array_slice($categoryInfo[$cat]['methods'] ?? [], 0, 2, true))
+            ];
+        }
+
+        // خلاصه نهایی + اتصال به PMBOK Analyzer
+        $recommendations['_summary'] = [
+            'title' => '📘 حوزه‌های دانشی اولویت‌دار PMBOK برای پروژه شما',
+            'icon' => 'fa-sitemap',
+            'score' => array_sum($methodScores),
+            'max' => max(1, count($categoryScores)) * 3,
+            'percentage' => 100,
+            'level' => 'success',
+            'items' => $this->formatMethodRecommendations($methodScores),
+            'topMethods' => array_slice($methodScores, 0, 3, true),
+            'analyzer_url' => '/software/pmbok-analyzer/?controller=knowledgeArea',
+            'analyzer_label' => 'شروع مدیریت پروژه با PMBOK Analyzer',
+            'analyzer_icon' => 'fa-sitemap'
+        ];
+
+        return $recommendations;
+    }
+
+    /**
+     * تحلیل چک‌لیست انتخاب روش تحقیق در عملیات (OR)
+     */
+    private function analyzeOR($answers, $questions)
+    {
+        $categoryScores = [];
+        $categoryMaxScores = [];
+        $recommendations = [];
+
+        $categoryInfo = [
+            'sign1' => [
+                'title' => 'طبیعت مسئله',
+                'icon' => 'fa-bullseye',
+                'methods' => [
+                    'برنامه‌ریزی خطی (Simplex)' => 3,
+                    'مسئله تخصیص (Assignment)' => 3,
+                    'کوتاه‌ترین مسیر (Shortest Path)' => 3,
+                    'مسئله حمل‌ونقل (Transport)' => 2
+                ],
+                'recommendations' => [
+                    'بهینه‌سازی تابع هدف → Simplex + Dual برای تحلیل عمیق',
+                    'تخصیص یک‌به‌یک → Hungarian Algorithm یا Assignment',
+                    'مسیریابی شبکه → Dijkstra یا Floyd-Warshall در Shortest Path'
+                ]
+            ],
+            'sign2' => [
+                'title' => 'ساختار ریاضی مسئله',
+                'icon' => 'fa-square-root-alt',
+                'methods' => [
+                    'برنامه‌ریزی خطی (Simplex)' => 3,
+                    'مسئله حمل‌ونقل (Transport)' => 2,
+                    'زنجیره مارکوف (Markov)' => 3,
+                    'کوتاه‌ترین مسیر (Shortest Path)' => 2
+                ],
+                'recommendations' => [
+                    'ساختار خطی → Simplex با خروجی کامل جدول سیمپلکس',
+                    'ساختار شبکه‌ای → ماژول‌های Network OR (Transport، Assignment، Shortest)',
+                    'ساختار حالتی با احتمالات گذار → Markov Chains با ماتریس انتقال'
+                ]
+            ],
+            'sign3' => [
+                'title' => 'داده‌ها و عدم قطعیت',
+                'icon' => 'fa-dice',
+                'methods' => [
+                    'شبیه‌سازی مونت‌کارلو (Monte Carlo)' => 3,
+                    'نظریه صف (Queueing)' => 3,
+                    'زنجیره مارکوف (Markov)' => 2
+                ],
+                'recommendations' => [
+                    'عدم قطعیت در پارامترها → Monte Carlo برای هزاران شبیه‌سازی و توزیع خروجی',
+                    'سیستم صف با ورودی احتمالاتی → Queueing Theory (M/M/1, M/M/c و...)',
+                    'حالت‌های تصادفی → Markov برای تحلیل حالت پایدار'
+                ]
+            ],
+            'sign4' => [
+                'title' => 'مقیاس و ابعاد مسئله',
+                'icon' => 'fa-layer-group',
+                'methods' => [
+                    'مسئله حمل‌ونقل (Transport)' => 3,
+                    'مسئله ترانشیپ (Transship)' => 3,
+                    'مسئله تخصیص (Assignment)' => 2
+                ],
+                'recommendations' => [
+                    'چند مبدأ به چند مقصد → Transportation Problem با NW-Vogel-Modi',
+                    'شبکه با مراکز واسط → Transshipment با گسترش شبکه',
+                    'تخصیص متوازن → Assignment با Hungarian'
+                ]
+            ],
+            'sign5' => [
+                'title' => 'هدف نهایی تحلیل',
+                'icon' => 'fa-chart-line',
+                'methods' => [
+                    'تحلیل حساسیت (Sensitivity)' => 3,
+                    'برنامه‌ریزی دوگان (Dual)' => 3,
+                    'زنجیره مارکوف (Markov)' => 2
+                ],
+                'recommendations' => [
+                    'پایداری جواب → Sensitivity Analysis (Range of Optimality)',
+                    'ارزش سایه‌ای منابع → Dual Problem با Shadow Prices',
+                    'پیش‌بینی بلندمدت → Markov Steady-State Analysis'
+                ]
+            ]
+        ];
+
+        if (!is_array($questions)) return $recommendations;
+
+        foreach ($questions as $q) {
+            $cat = $q['category'];
+            if (!isset($categoryScores[$cat])) {
+                $categoryScores[$cat] = 0;
+                $categoryMaxScores[$cat] = 0;
+            }
+            $answerValue = $answers[$q['id']] ?? 0;
+            $categoryScores[$cat] += $answerValue * $q['weight'];
+            $categoryMaxScores[$cat] += 3 * $q['weight'];
+        }
+
+        // امتیازدهی به روش‌های OR
+        $methodScores = [
+            'برنامه‌ریزی خطی (Simplex)' => 0,
+            'مسئله حمل‌ونقل (Transport)' => 0,
+            'مسئله تخصیص (Assignment)' => 0,
+            'مسئله ترانشیپ (Transship)' => 0,
+            'کوتاه‌ترین مسیر (Shortest Path)' => 0,
+            'شبیه‌سازی مونت‌کارلو (Monte Carlo)' => 0,
+            'زنجیره مارکوف (Markov)' => 0,
+            'نظریه صف (Queueing)' => 0,
+            'تحلیل حساسیت (Sensitivity)' => 0,
+            'برنامه‌ریزی دوگان (Dual)' => 0
+        ];
+
+        foreach ($categoryScores as $cat => $score) {
+            $max = $categoryMaxScores[$cat];
+            if ($max == 0) continue;
+            $percentage = ($score / $max) * 100;
+            if ($percentage >= 60) {
+                foreach (($categoryInfo[$cat]['methods'] ?? []) as $method => $weight) {
+                    $methodScores[$method] += $weight * ($percentage / 100);
+                }
+            }
+        }
+
+        arsort($methodScores);
+
+        foreach ($categoryScores as $cat => $score) {
+            $max = $categoryMaxScores[$cat];
+            $percentage = $max > 0 ? ($score / $max) * 100 : 0;
+            $level = 'low';
+            if ($percentage >= 70) $level = 'critical';
+            elseif ($percentage >= 50) $level = 'high';
+            elseif ($percentage >= 30) $level = 'medium';
+
+            $recommendations[$cat] = [
+                'title' => $categoryInfo[$cat]['title'] ?? $cat,
+                'icon' => $categoryInfo[$cat]['icon'] ?? 'fa-circle',
+                'score' => $score,
+                'max' => $max,
+                'percentage' => round($percentage),
+                'level' => $level,
+                'items' => $categoryInfo[$cat]['recommendations'] ?? [],
+                'topMethods' => array_keys(array_slice($categoryInfo[$cat]['methods'] ?? [], 0, 2, true))
+            ];
+        }
+
+        // خلاصه نهایی + اتصال به OR Analyzer (Smart Modeler)
+        $recommendations['_summary'] = [
+            'title' => '🧮 روش‌های پیشنهادی OR برای مسئله شما',
+            'icon' => 'fa-network-wired',
+            'score' => array_sum($methodScores),
+            'max' => max(1, count($categoryScores)) * 3,
+            'percentage' => 100,
+            'level' => 'success',
+            'items' => $this->formatMethodRecommendations($methodScores),
+            'topMethods' => array_slice($methodScores, 0, 3, true),
+            'analyzer_url' => '/software/or-analyzer/?controller=smart_modeler',
+            'analyzer_label' => 'شروع مدلسازی هوشمند در OR Analyzer',
+            'analyzer_icon' => 'fa-network-wired'
         ];
 
         return $recommendations;

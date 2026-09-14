@@ -1,5 +1,12 @@
 <div class="checklist-history-page">
     <div class="container">
+        <a href="/checklist" class="back-link">
+            <span class="back-icon">
+                <i class="fas fa-arrow-right"></i>
+            </span>
+            <span>بازگشت به لیست چک‌لیست‌ها</span>
+        </a>
+        
         <h1>📋 تاریخچه چک‌لیست‌های من</h1>
         
         <?php if (empty($submissions)): ?>
@@ -33,8 +40,13 @@
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <div class="item-badge" style="background: <?= $color ?>;"><?= $label ?></div>
+
+                        <a href="/checklist/submission/<?= $sub['id'] ?>" class="btn-view-history" title="مشاهده نتیجه کامل">
+                            <i class="fas fa-eye"></i> مشاهده نتیجه
+                        </a>
+
                         <form method="POST" action="/checklist/delete/<?= $sub['id'] ?>" style="margin: 0;"
-                            onsubmit="return confirm('این ارزیابی برای همیشه از تاریخچه شما حذف می‌شود. مطمئن هستید؟');">
+                              onsubmit="return confirm('این ارزیابی برای همیشه از تاریخچه شما حذف می‌شود. مطمئن هستید؟');">
                             <button type="submit" class="btn-delete-history" title="حذف از تاریخچه">
                                 <i class="fas fa-trash"></i>
                             </button>

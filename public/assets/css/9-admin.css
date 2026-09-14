@@ -708,3 +708,11 @@
     outline: none;
     box-shadow: 0 0 0 3px rgba(108, 60, 225, 0.06);
 }
+
+.admin-table .actions .btn-result {
+    color: #3182ce;
+}
+
+.admin-table .actions .btn-result:hover {
+    background: rgba(49, 130, 206, 0.10);
+}

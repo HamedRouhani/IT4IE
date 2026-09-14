@@ -61,9 +61,6 @@
                             <a href="/profile" class="dropdown-item">
                                 <i class="fas fa-user"></i> پروفایل
                             </a>
-                            <a href="/checklist/history" class="dropdown-item">
-                                <i class="fas fa-clipboard-list"></i> تاریخچه چک‌لیست‌های من
-                            </a>
                             <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'editor'): ?>
                                 <a href="/admin" class="dropdown-item">
                                     <i class="fas fa-tachometer-alt"></i> پنل مدیریت
