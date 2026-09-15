@@ -260,7 +260,8 @@ class Checklist extends Model
                 ':ip_address' => $data['ip_address'],
                 ':user_agent' => $data['user_agent']
             ]);
-            return true;
+            $rows = $this->query("SELECT LAST_INSERT_ID() AS id");
+            return is_array($rows) ? (int)($rows[0]['id'] ?? 0) : 0;
         } catch (\Throwable $e) {
             error_log('Checklist::createSubmission ERROR: ' . $e->getMessage());
             return false;

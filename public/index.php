@@ -98,7 +98,7 @@ require_once APP_PATH . '/core/Database.php';
 // DIRECT INCLUDE MODELS (با بررسی وجود فایل)
 // ============================================
 $commonModels = ['Post', 'Category', 'Setting', 'Message', 'User', 'Software', 
-                 'SoftwareActivityLog', 'SoftwareUsageLimit',  'Checklist'];
+                 'SoftwareActivityLog', 'SoftwareUsageLimit',  'Checklist', 'Subscription', 'Payment'];
 foreach ($commonModels as $model) {
     $file = APP_PATH . '/models/' . $model . '.php';
     if (file_exists($file)) {
@@ -380,6 +380,25 @@ if ($url === 'posts' || $url === 'blog') {
 }
 
 // ============================================
+// BILLING ADMIN ROUTES (باید قبل از بلوک ADMIN باشد)
+// ============================================
+if ($url === 'admin/payments') {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->adminPayments();
+    exit;
+}
+if ($url === 'admin/vouchers') {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->adminVouchers();
+    exit;
+}
+if (preg_match('#^admin/payments/review/(\d+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->reviewPayment($m[1]);
+    exit;
+}
+
+// ============================================
 // ️ ADMIN ROUTES (کامل)
 // ============================================
 if (strpos($url, 'admin') === 0) {
@@ -510,6 +529,45 @@ if (preg_match('#^checklist/delete/(\d+)$#', $url, $m)) {
 if (preg_match('#^checklist/submission/(\d+)$#', $url, $m)) {
     require_once APP_PATH . '/controllers/ChecklistModuleController.php';
     (new App\Controllers\ChecklistModuleController())->viewSubmission($m[1]);
+    exit;
+}
+
+// ============================================
+// BILLING ROUTES (کاربر)
+// ============================================
+if ($url === 'pricing' || $url === 'plans') {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->pricing();
+    exit;
+}
+if ($url === 'billing/my') {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->my();
+    exit;
+}
+if ($url === 'billing/submit-payment') {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->submitPayment();
+    exit;
+}
+if ($url === 'billing/redeem') {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->redeem();
+    exit;
+}
+if ($url === 'billing/invoice') {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->requestInvoice();
+    exit;
+}
+if (preg_match('#^billing/subscribe/(\d+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->subscribe($m[1]);
+    exit;
+}
+if (preg_match('#^billing/pay/(\d+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->pay($m[1]);
     exit;
 }
 

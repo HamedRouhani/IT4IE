@@ -37,6 +37,13 @@
                             <span>چک‌لیست‌ها</span>
                         </a>
                     </li>
+
+                    <li class="nav-item">
+                        <a href="/pricing" class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], '/pricing') === 0) ? 'active' : ''; ?>">
+                            <i class="fas fa-crown"></i>
+                            <span>تعرفه‌ها</span>
+                        </a>
+                    </li>
                     
                     <li class="nav-item">
                         <a href="/about" class="nav-link <?php echo ($_SERVER['REQUEST_URI'] == '/about') ? 'active' : ''; ?>">
@@ -69,6 +76,23 @@
                             <a href="/profile" class="dropdown-item">
                                 <i class="fas fa-user"></i> پروفایل
                             </a>
+
+                            <!-- 🆕 اشتراک‌های من -->
+                            <a href="/billing/my" class="dropdown-item">
+                                <i class="fas fa-credit-card"></i> اشتراک‌ها و پرداخت‌های من
+                            </a>
+
+                                <?php
+                                try {
+                                    $headerSub = (new \App\Models\Subscription())->getActiveSubscription($_SESSION['user_id']);
+                                    if ($headerSub): ?>
+                                        <div class="dropdown-plan-pill">
+                                            <i class="fas fa-crown"></i>
+                                            طرح فعلی: <?= htmlspecialchars($headerSub['plan_name']) ?>
+                                        </div>
+                                <?php endif;
+                                } catch (\Throwable $e) {} ?>
+
                             <?php if ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'editor'): ?>
                                 <a href="/admin" class="dropdown-item">
                                     <i class="fas fa-tachometer-alt"></i> پنل مدیریت

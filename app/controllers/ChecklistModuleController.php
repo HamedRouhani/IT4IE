@@ -89,6 +89,17 @@ class ChecklistModuleController extends Controller
             return;
         }
 
+        // سقف رایگان ماهانه (Freemium) - بعد از بررسی لاگین
+        require_once APP_PATH . '/models/Subscription.php';
+        $subModel = new \App\Models\Subscription();
+        $limit = $subModel->getMonthlyChecklistLimit((int)$_SESSION['user_id']);
+        $used  = $subModel->countMonthlySubmissions((int)$_SESSION['user_id']);
+        if ($used >= $limit) {
+            $_SESSION['error'] = 'سهمیه ماهانه ارزیابی رایگان شما (' . $limit . ' مورد) به پایان رسیده است. برای ادامه، یکی از بسته‌ها را تهیه کنید.';
+            $this->redirect('/pricing');
+            return;
+        }
+
         $checklistId = (int)($_POST['checklist_id'] ?? 0);
         $checklist = $this->checklistModel->getChecklist($checklistId);
         
@@ -147,6 +158,9 @@ class ChecklistModuleController extends Controller
             $result = $this->checklistModel->createSubmission($data);
 
             if ($result) {
+                // لیداسکورینگ خودکار
+                $subModel->scoreSubmission($result, $riskLevel, $company, $user['phone'] ?? '');
+
                 $_SESSION['checklist_result'] = [
                     'checklist_id' => $checklistId,
                     'checklist_slug' => $checklist['slug'],

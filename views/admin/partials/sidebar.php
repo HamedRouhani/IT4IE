@@ -58,6 +58,30 @@ $checklistManageActive = (
             </a>
         </li>
         <li>
+            <a href="/admin/payments" class="<?php echo (strpos($currentPath, '/admin/payments') === 0) ? 'active' : ''; ?>">
+                <i class="fas fa-credit-card"></i> پرداخت‌ها
+            </a>
+        </li>
+        <li>
+            <a href="/admin/vouchers" class="<?php echo (strpos($currentPath, '/admin/vouchers') === 0) ? 'active' : ''; ?>">
+                <i class="fas fa-ticket-alt"></i> کدهای اشتراک
+            </a>
+        </li>
+        <li>
+            <a href="/admin/leads" class="<?php echo (strpos($currentPath, '/admin/leads') === 0) ? 'active' : ''; ?>">
+                <i class="fas fa-bullseye"></i> لیدها
+                <?php
+                try {
+                    $leadModel = new \App\Models\Subscription();
+                    $hotLeads = count($leadModel->getLeads(100, 75, 'new'));
+                    if ($hotLeads > 0): ?>
+                        <span class="nav-badge hot"><?= $hotLeads ?></span>
+                <?php endif;
+                } catch (\Throwable $e) {}
+                ?>
+            </a>
+        </li>
+        <li>
             <a href="/admin/users" class="<?php echo (strpos($currentPath, '/admin/users') === 0) ? 'active' : ''; ?>">
                 <i class="fas fa-users"></i> کاربران
             </a>

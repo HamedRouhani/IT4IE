@@ -12,6 +12,8 @@
                     <li><a href="/about">درباره ما</a></li>
                     <li><a href="/contact">تماس با ما</a></li>
                     <li><a href="/software">نرم‌افزارها</a></li>
+                    <li><a href="/pricing">تعرفه‌ها</a></li>
+                    <li><a href="/billing/my">اشتراک من</a></li>
                 </ul>
             </div>
             <div>

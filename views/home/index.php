@@ -79,27 +79,28 @@
 
                 <div class="social-buttons">
                     <!-- اینستاگرام -->
-                    <a href="<?= htmlspecialchars($settings['instagram_url'] ?? 'https://instagram.com/it4ie.ir') ?>"
+                    <a href="<?= htmlspecialchars($settings['instagram_url'] ?? 'https://instagram.com/it4ieir') ?>"
                        target="_blank" rel="noopener noreferrer" class="social-btn instagram-btn">
                         <div class="social-icon-wrapper">
                             <i class="fab fa-instagram"></i>
                         </div>
                         <div class="social-info">
                             <span class="social-label">اینستاگرام</span>
-                            <span class="social-handle">@it4ie.ir</span>
+                            <span class="social-handle">@it4ieir</span>
                         </div>
                         <i class="fas fa-arrow-left social-arrow"></i>
                     </a>
 
-                    <!-- تلگرام -->
-                    <a href="<?= htmlspecialchars($settings['telegram_url'] ?? 'https://t.me/IT4IE.IR') ?>"
+                    <!-- تلگرام - با باز شدن خودکار در اپلیکیشن موبایل -->
+                    <a href="https://t.me/IT4IEIR"
+                       onclick="handleTelegramClick(event, 'IT4IEIR')"
                        target="_blank" rel="noopener noreferrer" class="social-btn telegram-btn">
                         <div class="social-icon-wrapper">
                             <i class="fab fa-telegram-plane"></i>
                         </div>
                         <div class="social-info">
                             <span class="social-label">تلگرام</span>
-                            <span class="social-handle">@IT4IE.IR</span>
+                            <span class="social-handle">@IT4IEIR</span>
                         </div>
                         <i class="fas fa-arrow-left social-arrow"></i>
                     </a>
@@ -123,3 +124,22 @@
         </div>
     </div>
 </section>
+
+<script>
+// تشخیص موبایل و باز کردن تلگرام در اپلیکیشن
+function handleTelegramClick(event, username) {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        event.preventDefault();
+        // تلاش برای باز کردن اپلیکیشن تلگرام
+        window.location.href = 'tg://resolve?domain=' + username;
+        
+        // اگر اپلیکیشن نصب نباشد، بعد از ۲ ثانیه به نسخه وب منتقل می‌شود
+        setTimeout(function() {
+            window.location.href = 'https://t.me/' + username;
+        }, 2000);
+    }
+    // در دسکتاپ همان لینک عادی کار می‌کند
+}
+</script>
