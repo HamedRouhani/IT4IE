@@ -19,6 +19,7 @@
         <?php endif; ?>
         
         <form method="POST" action="/login" class="auth-form">
+            <?php echo $this->csrfField(); ?>
             <div class="form-group">
                 <label for="email">ایمیل</label>
                 <div class="input-group">

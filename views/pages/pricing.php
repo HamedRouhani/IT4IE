@@ -32,10 +32,28 @@ foreach ($plans as $p) {
         <!-- Grid تعرفه‌ها -->
         <div class="pricing-grid">
             <?php foreach ($plans as $plan):
+
+                $planSlug = strtolower(trim((string)($plan['slug'] ?? '')));
+                $planName = trim((string)($plan['name'] ?? ''));
+
+                if (
+                    $planSlug === 'organization' ||
+                    $planSlug === 'organizational' ||
+                    $planName === 'سازمانی'
+                ) {
+                    continue;
+                }
+
                 $features = json_decode($plan['features'] ?? '[]', true) ?: [];
-                $isCurrent = $currentSub && (int)$currentSub['plan_id'] === (int)$plan['id'];
+
+                $isCurrent = $currentSub
+                    && (int)$currentSub['plan_id'] === (int)$plan['id'];
+
                 $yearlySave = $plan['price_monthly'] > 0 && $plan['price_yearly'] > 0
-                    ? round((1 - ($plan['price_yearly'] / ($plan['price_monthly'] * 12))) * 100) : 0;
+                    ? round(
+                        (1 - ($plan['price_yearly'] / ($plan['price_monthly'] * 12))) * 100
+                    )
+                    : 0;
             ?>
             <article class="pricing-card <?= $plan['is_featured'] ? 'featured' : '' ?>">
                 <?php if ($plan['is_featured']): ?>
@@ -112,6 +130,7 @@ foreach ($plans as $p) {
                 <p>پیش‌فاکتور رسمی + پرداخت حواله‌ای برای شرکت‌ها و سازمان‌ها.</p>
 
                 <form method="POST" action="/billing/invoice">
+                    <?php echo $this->csrfField(); ?>
                     <input type="hidden"
                         name="plan_id"
                         value="<?= (int)$organizationPlan['id'] ?>">

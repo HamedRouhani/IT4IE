@@ -10,6 +10,49 @@ abstract class Controller
     protected $layout = 'main';
 
     /**
+     * دریافت توکن CSRF
+     */
+    protected function csrfToken()
+    {
+        if (empty($_SESSION['_csrf_token'])) {
+            $_SESSION['_csrf_token'] = bin2hex(random_bytes(32));
+        }
+
+        return $_SESSION['_csrf_token'];
+    }
+
+    /**
+     * تولید فیلد مخفی CSRF برای فرم‌ها
+     */
+    protected function csrfField()
+    {
+        return '<input type="hidden" name="_csrf_token" value="' .
+            htmlspecialchars($this->csrfToken(), ENT_QUOTES, 'UTF-8') .
+            '">';
+    }
+
+    /**
+     * بررسی توکن CSRF
+     */
+    protected function verifyCsrf()
+    {
+        $sessionToken = $_SESSION['_csrf_token'] ?? '';
+        $requestToken = $_POST['_csrf_token'] ?? '';
+
+        if (
+            !is_string($sessionToken) ||
+            !is_string($requestToken) ||
+            $sessionToken === '' ||
+            $requestToken === '' ||
+            !hash_equals($sessionToken, $requestToken)
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * رندر ویو با layout اصلی IT4IE
      */
     public function render($view, $data = [])

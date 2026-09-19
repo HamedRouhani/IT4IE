@@ -1,11 +1,31 @@
 <?php
 // views/profile/billing.php - نسخه تمیز بدون استایل
 $statusLabels = [
-    'awaiting_ref'      => ['متن' => 'در انتظار ثبت کد پیگیری', 'رنگ' => 'warning'],
-    'pending_review'    => ['متن' => 'در حال بررسی', 'رنگ' => 'info'],
-    'approved'          => ['متن' => 'تأیید شده', 'رنگ' => 'success'],
-    'rejected'          => ['متن' => 'رد شده', 'رنگ' => 'danger'],
-    'awaiting_contact'  => ['متن' => 'در انتظار تماس (پیش‌فاکتور)', 'رنگ' => 'info'],
+
+    'awaiting_ref' => [
+        'متن'  => 'در انتظار ثبت کد پیگیری',
+        'رنگ' => 'warning'
+    ],
+
+    'pending_review' => [
+        'متن'  => 'در حال بررسی',
+        'رنگ' => 'info'
+    ],
+
+    'approved' => [
+        'متن'  => 'تأیید شده',
+        'رنگ' => 'success'
+    ],
+
+    'rejected' => [
+        'متن'  => 'رد شده',
+        'رنگ' => 'danger'
+    ],
+
+    'awaiting_contact' => [
+        'متن'  => 'در انتظار بررسی پیش‌فاکتور',
+        'رنگ' => 'info'
+    ],
 ];
 $methodLabels = [
     'card_transfer' => 'کارت‌به‌کارت',
@@ -178,14 +198,99 @@ $daysLeft = $currentSub ? ceil((strtotime($currentSub['expires_at']) - time()) /
                                             </span>
                                         </td>
                                         <td>
-                                            <?php if ($p['status'] === 'awaiting_ref'): ?>
-                                                <a href="/billing/pay/<?= $p['id'] ?>" class="btn-mini">
-                                                    <i class="fas fa-edit"></i> ثبت کد
+                                            <?php if (
+                                                ($p['method'] ?? '') === 'invoice'
+                                                && ($p['status'] ?? '') === 'awaiting_contact'
+                                            ): ?>
+
+                                                <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">
+
+                                                    <a
+                                                        href="/billing/invoice/<?= (int)$p['id'] ?>"
+                                                        class="btn-mini"
+                                                    >
+                                                        <i class="fas fa-file-invoice"></i>
+                                                        مشاهده پیش‌فاکتور
+                                                    </a>
+
+                                                    <a
+                                                        href="/billing/pay/<?= (int)$p['id'] ?>"
+                                                        class="btn-mini"
+                                                    >
+                                                        <i class="fas fa-credit-card"></i>
+                                                        ثبت پرداخت
+                                                    </a>
+
+                                                </div>
+
+                                            <?php elseif (
+                                                ($p['method'] ?? '') === 'invoice'
+                                                && ($p['status'] ?? '') === 'pending_review'
+                                            ): ?>
+
+                                                <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">
+
+                                                    <a
+                                                        href="/billing/invoice/<?= (int)$p['id'] ?>"
+                                                        class="btn-mini"
+                                                    >
+                                                        <i class="fas fa-file-invoice"></i>
+                                                        مشاهده پیش‌فاکتور
+                                                    </a>
+
+                                                    <span class="text-muted">
+                                                        <i class="fas fa-clock"></i>
+                                                        در انتظار تأیید پرداخت
+                                                    </span>
+
+                                                </div>
+
+                                            <?php elseif (
+                                                ($p['method'] ?? '') === 'invoice'
+                                                && ($p['status'] ?? '') === 'approved'
+                                            ): ?>
+
+                                                <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">
+
+                                                    <a
+                                                        href="/billing/invoice/<?= (int)$p['id'] ?>"
+                                                        class="btn-mini"
+                                                    >
+                                                        <i class="fas fa-file-invoice"></i>
+                                                        مشاهده پیش‌فاکتور
+                                                    </a>
+
+                                                    <?php if (!empty($p['ref_code'])): ?>
+                                                        <span class="ref-code" dir="ltr">
+                                                            #<?= htmlspecialchars($p['ref_code']) ?>
+                                                        </span>
+                                                    <?php endif; ?>
+
+                                                </div>
+
+                                            <?php elseif (($p['status'] ?? '') === 'awaiting_ref'): ?>
+
+                                                <a
+                                                    href="/billing/pay/<?= (int)$p['id'] ?>"
+                                                    class="btn-mini"
+                                                >
+                                                    <i class="fas fa-edit"></i>
+                                                    ثبت کد
                                                 </a>
-                                            <?php elseif ($p['status'] === 'approved' && !empty($p['ref_code'])): ?>
-                                                <span class="ref-code" dir="ltr">#<?= htmlspecialchars($p['ref_code']) ?></span>
+
+                                            <?php elseif (
+                                                ($p['status'] ?? '') === 'approved'
+                                                && !empty($p['ref_code'])
+                                            ): ?>
+
+                                                <span class="ref-code" dir="ltr">
+                                                    #<?= htmlspecialchars($p['ref_code']) ?>
+                                                </span>
+
                                             <?php else: ?>
+
                                                 <span class="text-muted">-</span>
+
                                             <?php endif; ?>
                                         </td>
                                     </tr>

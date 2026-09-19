@@ -80,18 +80,12 @@ class BillingController extends Controller
             return;
         }
 
-        $isOrganization = (
-            strtolower(trim((string)($plan['slug'] ?? ''))) === 'organization' ||
-            strtolower(trim((string)($plan['slug'] ?? ''))) === 'organizational' ||
-            trim((string)($plan['name'] ?? '')) === 'سازمانی'
-        );
-
         $paymentId = $this->payModel->createForSubscription(
             (int)$_SESSION['user_id'],
             $subId,
-            $amount,
-            !$isOrganization
+            $amount
         );
+        
         if (!$paymentId) {
             $_SESSION['error'] = 'خطا در ایجاد رکورد پرداخت.';
             $this->redirect('/pricing');
@@ -116,6 +110,22 @@ class BillingController extends Controller
             return;
         }
 
+        $isAwaitingPayment =
+            ($payment['status'] ?? '') === 'awaiting_ref'
+            ||
+            (
+                ($payment['method'] ?? '') === 'invoice'
+                && ($payment['status'] ?? '') === 'awaiting_contact'
+            );
+
+        if (!$isAwaitingPayment) {
+            $_SESSION['error'] =
+                'این پرداخت قبلاً ثبت و برای بررسی ارسال شده است.';
+
+            $this->redirect('/billing/my');
+            return;
+        }
+
         $this->render('billing/pay', [
             'title'    => 'تکمیل پرداخت - IT4IE',
             'settings' => (new Setting())->getAll(),
@@ -134,26 +144,80 @@ class BillingController extends Controller
         }
 
         $paymentId = (int)($_POST['payment_id'] ?? 0);
-        $ref = trim($_POST['ref_code'] ?? '');
+        $ref = trim((string)($_POST['ref_code'] ?? ''));
 
-        $payment = $this->payModel->getPayment($paymentId);
-        if (!$payment || (int)$payment['user_id'] !== (int)$_SESSION['user_id']) {
-            $_SESSION['error'] = 'سفارش پرداخت یافت نشد.';
-            $this->redirect('/pricing');
+        if ($paymentId <= 0) {
+            $_SESSION['error'] = 'شناسه پرداخت نامعتبر است.';
+            $this->redirect('/billing/my');
             return;
         }
 
+        $payment = $this->payModel->getPayment($paymentId);
+
+        if (
+            !$payment ||
+            (int)$payment['user_id'] !== (int)$_SESSION['user_id']
+        ) {
+            $_SESSION['error'] = 'سفارش پرداخت یافت نشد.';
+            $this->redirect('/billing/my');
+            return;
+        }
+
+        $method = (string)($payment['method'] ?? '');
+        $status = (string)($payment['status'] ?? '');
+
+        /*
+        * پرداخت کارت‌به‌کارت معمولی:
+        * awaiting_ref
+        *
+        * پرداخت پیش‌فاکتور سازمانی:
+        * awaiting_contact
+        */
+        $allowed =
+            ($method === 'card_transfer' && $status === 'awaiting_ref') ||
+            ($method === 'invoice' && $status === 'awaiting_contact');
+
+        if (!$allowed) {
+            $_SESSION['error'] =
+                'این پرداخت در وضعیت قابل ثبت کد پیگیری نیست.';
+            $this->redirect('/billing/my');
+            return;
+        }
+
+        /*
+        * فقط عدد
+        */
         $refDigits = preg_replace('/\D/', '', $ref);
+
         if (strlen($refDigits) < 8 || strlen($refDigits) > 20) {
-            $_SESSION['error'] = 'کد پیگیری باید شامل ۸ تا ۲۰ رقم باشد.';
+            $_SESSION['error'] =
+                'کد پیگیری باید شامل ۸ تا ۲۰ رقم باشد.';
             $this->redirect('/billing/pay/' . $paymentId);
             return;
         }
 
-        $this->payModel->submitRef($paymentId, $refDigits, trim($_POST['payer_card'] ?? ''), trim($_POST['note'] ?? ''));
+        /*
+        * ثبت پرداخت
+        */
+        $success = $this->payModel->submitRef(
+            $paymentId,
+            $refDigits,
+            trim((string)($_POST['payer_card'] ?? '')),
+            trim((string)($_POST['note'] ?? ''))
+        );
 
-        $_SESSION['message'] = '✅ پرداخت شما ثبت شد و در صف بررسی است؛ معمولاً زیر ۲ ساعت فعال می‌شود.';
+        if (!$success) {
+            $_SESSION['error'] =
+                'ثبت پرداخت انجام نشد. ممکن است این پرداخت قبلاً ثبت شده باشد یا کد پیگیری تکراری باشد.';
+            $this->redirect('/billing/pay/' . $paymentId);
+            return;
+        }
+
+        $_SESSION['message'] =
+            '✅ پرداخت شما ثبت شد و برای بررسی ارسال گردید.';
+
         $this->redirect('/billing/my');
+        return;
     }
 
     /** فعال‌سازی با کد اشتراک */
@@ -171,10 +235,28 @@ class BillingController extends Controller
         $this->redirect('/billing/my');
     }
 
-    /** درخواست پیش‌فاکتور سازمانی */
+    /**
+     * درخواست پیش‌فاکتور سازمانی
+     */
     public function requestInvoice()
     {
-        if (!isset($_SESSION['user_id']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (!isset($_SESSION['user_id'])) {
+            $_SESSION['error'] =
+                'برای درخواست پیش‌فاکتور سازمانی ابتدا وارد حساب کاربری خود شوید.';
+
+            $this->redirect('/login');
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/pricing');
+            return;
+        }
+
+        if (!$this->verifyCsrf()) {
+            $_SESSION['error'] =
+                'درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.';
+
             $this->redirect('/pricing');
             return;
         }
@@ -187,43 +269,101 @@ class BillingController extends Controller
         $contact = trim($_POST['contact'] ?? '');
 
         if ($planId <= 0) {
-            $_SESSION['error'] = 'طرح اشتراک انتخاب نشده است.';
+            $_SESSION['error'] =
+                'طرح اشتراک انتخاب نشده است.';
+
             $this->redirect('/pricing');
             return;
         }
 
-        if ($company === '' || $nationalId === '' || $contact === '') {
-            $_SESSION['error'] = 'لطفاً اطلاعات سازمان را کامل وارد کنید.';
+        if (
+            $company === '' ||
+            $nationalId === '' ||
+            $contact === ''
+        ) {
+            $_SESSION['error'] =
+                'لطفاً اطلاعات سازمان را کامل وارد کنید.';
+
             $this->redirect('/pricing');
             return;
         }
 
         $plan = $this->subModel->getPlan($planId);
 
-        if (!$plan || (int)$plan['is_active'] !== 1) {
-            $_SESSION['error'] = 'طرح انتخاب‌شده در دسترس نیست.';
+        if (
+            !$plan ||
+            (int)($plan['is_active'] ?? 0) !== 1
+        ) {
+            $_SESSION['error'] =
+                'طرح انتخاب‌شده در دسترس نیست.';
+
             $this->redirect('/pricing');
             return;
         }
 
         /*
-        * پیش‌فاکتور سازمانی در حال حاضر سالانه است.
-        * مبلغ در Subscription ذخیره می‌شود تا اگر قیمت طرح
-        * بعداً تغییر کرد، مبلغ این درخواست تغییر نکند.
+        * فقط طرح سازمانی اجازه درخواست پیش‌فاکتور دارد.
+        */
+        $isOrganization =
+            strtolower(trim((string)($plan['slug'] ?? ''))) === 'organization'
+            || strtolower(trim((string)($plan['slug'] ?? ''))) === 'organizational'
+            || trim((string)($plan['name'] ?? '')) === 'سازمانی';
+
+        if (!$isOrganization) {
+            $_SESSION['error'] =
+                'این طرح فقط از مسیر خرید سازمانی قابل سفارش است.';
+
+            $this->redirect('/pricing');
+            return;
+        }
+
+        /*
+        * پیش‌فاکتور سازمانی فعلاً فقط سالانه است.
         */
         $period = 'yearly';
-        $amount = (int)$plan['price_yearly'];
+
+        $amount = (int)($plan['price_yearly'] ?? 0);
 
         if ($amount <= 0) {
-            $_SESSION['error'] = 'برای این طرح امکان صدور پیش‌فاکتور سازمانی وجود ندارد.';
+            $_SESSION['error'] =
+                'برای این طرح امکان صدور پیش‌فاکتور سازمانی وجود ندارد.';
+
             $this->redirect('/pricing');
             return;
         }
 
         /*
-        * ابتدا یک اشتراک pending ایجاد می‌کنیم.
-        * این رکورد هنوز فعال نیست و فقط به عنوان مرجع
-        * پیش‌فاکتور/خرید استفاده می‌شود.
+        * جلوگیری از ایجاد چند درخواست باز
+        * برای یک کاربر و یک طرح.
+        */
+        $existingPayments = $this->payModel->getUserPayments($userId);
+
+        foreach ($existingPayments as $existing) {
+
+            if (
+                ($existing['method'] ?? '') === 'invoice'
+                && (int)($existing['plan_id'] ?? 0) === $planId
+                && in_array(
+                    ($existing['status'] ?? ''),
+                    ['awaiting_contact', 'pending_review'],
+                    true
+                )
+            ) {
+                $_SESSION['message'] =
+                    'برای این طرح قبلاً یک درخواست پیش‌فاکتور ثبت کرده‌اید.';
+
+                $this->redirect(
+                    '/billing/invoice/' . (int)$existing['id']
+                );
+
+                return;
+            }
+        }
+
+        /*
+        * ایجاد Subscription به صورت pending.
+        *
+        * این اشتراک هنوز فعال نیست.
         */
         $subId = $this->subModel->createPending(
             $userId,
@@ -233,16 +373,22 @@ class BillingController extends Controller
         );
 
         if (!$subId) {
-            $_SESSION['error'] = 'خطا در ایجاد درخواست اشتراک سازمانی.';
+            $_SESSION['error'] =
+                'خطا در ایجاد درخواست اشتراک سازمانی.';
+
             $this->redirect('/pricing');
             return;
         }
 
-        $note = 'شرکت: ' . $company .
-                ' | شناسه ملی: ' . $nationalId .
-                ' | تماس: ' . $contact .
-                ' | طرح: ' . ($plan['name'] ?? '') .
-                ' | دوره: سالانه';
+        /*
+        * اطلاعات سازمان در Payment ذخیره می‌شود.
+        */
+        $note =
+            'شرکت: ' . $company .
+            ' | شناسه ملی: ' . $nationalId .
+            ' | تماس: ' . $contact .
+            ' | طرح: ' . ($plan['name'] ?? '') .
+            ' | دوره: سالانه';
 
         $paymentId = $this->payModel->createInvoiceRequest(
             $userId,
@@ -252,21 +398,74 @@ class BillingController extends Controller
         );
 
         if (!$paymentId) {
+
             /*
-            * اگر Payment ساخته نشد، Subscription pending
-            * باقی می‌ماند ولی فعال نمی‌شود.
+            * Subscription ساخته شده ولی Payment ساخته نشده.
+            * اشتراک فعال نمی‌شود.
             */
-            $_SESSION['error'] = 'خطا در ثبت درخواست پیش‌فاکتور.';
+            $this->subModel->markFailed($subId);
+
+            $_SESSION['error'] =
+                'خطا در ثبت درخواست پیش‌فاکتور.';
+
             $this->redirect('/pricing');
             return;
         }
 
-        $_SESSION['message'] =
-            '📄 درخواست پیش‌فاکتور طرح «' .
-            ($plan['name'] ?? '') .
-            '» با موفقیت ثبت شد؛ حداکثر تا یک روز کاری با شما تماس می‌گیریم.';
+        /*
+        * مستقیم پیش‌فاکتور را به کاربر نشان بده.
+        */
+        $this->redirect(
+            '/billing/invoice/' . $paymentId
+        );
 
-        $this->redirect('/billing/my');
+        return;
+    }
+
+    /**
+     * نمایش پیش‌فاکتور سازمانی
+     */
+    public function invoice($paymentId)
+    {
+        if (!isset($_SESSION['user_id'])) {
+            $_SESSION['error'] =
+                'برای مشاهده پیش‌فاکتور ابتدا وارد حساب کاربری خود شوید.';
+
+            $this->redirect('/login');
+            return;
+        }
+
+        $userId = (int)$_SESSION['user_id'];
+        $paymentId = (int)$paymentId;
+
+        if ($paymentId <= 0) {
+            $_SESSION['error'] =
+                'پیش‌فاکتور مورد نظر یافت نشد.';
+
+            $this->redirect('/billing/my');
+            return;
+        }
+
+        $invoice = $this->payModel->getInvoice(
+            $paymentId,
+            $userId
+        );
+
+        if (!$invoice) {
+            $_SESSION['error'] =
+                'پیش‌فاکتور مورد نظر یافت نشد یا به حساب شما تعلق ندارد.';
+
+            $this->redirect('/billing/my');
+            return;
+        }
+
+        $this->render('billing/invoice', [
+            'title'       => 'پیش‌فاکتور سازمانی - IT4IE',
+            'settings'    => (new Setting())->getAll(),
+            'invoice'     => $invoice,
+            'hideSidebar' => true,
+            'hideFooter'  => true,
+        ]);
     }
 
     /** اشتراک و پرداخت‌های من */
@@ -325,52 +524,274 @@ class BillingController extends Controller
             return;
         }
 
-        $payment = $this->payModel->getPayment((int)$id);
+        $paymentId = (int)$id;
+
+        if ($paymentId <= 0) {
+            $_SESSION['error'] = 'شناسه پرداخت نامعتبر است.';
+            $this->redirect('/admin/payments');
+            return;
+        }
+
+        $payment = $this->payModel->getPayment($paymentId);
+
         if (!$payment) {
+            $_SESSION['error'] = 'پرداخت موردنظر یافت نشد.';
             $this->redirect('/admin/payments');
             return;
         }
 
-        if (!in_array($payment['status'] ?? '', ['pending_review', 'awaiting_contact'], true)) {
-            $_SESSION['error'] = 'این درخواست قبلاً تعیین تکلیف شده است.';
+        $method = (string)($payment['method'] ?? '');
+        $currentStatus = (string)($payment['status'] ?? '');
+        $action = trim((string)($_POST['action'] ?? ''));
+        $adminNote = trim((string)($_POST['admin_note'] ?? ''));
+
+        if (
+            ($payment['method'] ?? '') === 'invoice' &&
+            ($payment['status'] ?? '') === 'awaiting_contact' &&
+            $action === 'approve'
+        ) {
+            $_SESSION['error'] =
+                'درخواست پیش‌فاکتور تا زمان ثبت و تأیید پرداخت قابل فعال‌سازی نیست.';
+
             $this->redirect('/admin/payments');
             return;
         }
 
-        $action = $_POST['action'] ?? '';
-        $adminNote = trim($_POST['admin_note'] ?? '');
+        /*
+        * وضعیت مجاز برای هر روش پرداخت
+        */
+        if ($method === 'card_transfer') {
 
-        if ($action === 'approve') {
+            if ($currentStatus !== 'pending_review') {
+                $_SESSION['error'] =
+                    'این پرداخت کارت‌به‌کارت در وضعیت قابل بررسی نیست.';
+                $this->redirect('/admin/payments');
+                return;
+            }
 
-            $this->payModel->setStatus(
-                (int)$id,
+        } elseif ($method === 'invoice') {
+
+            if (
+                $currentStatus !== 'pending_review'
+                && $currentStatus !== 'awaiting_contact'
+            ) {
+                $_SESSION['error'] =
+                    'این درخواست پیش‌فاکتور در وضعیت قابل بررسی نیست.';
+                $this->redirect('/admin/payments');
+                return;
+            }
+
+            // پیش‌فاکتور تا قبل از ثبت پرداخت قابل تأیید نیست
+            if (
+                $currentStatus === 'awaiting_contact'
+                && $action === 'approve'
+            ) {
+                $_SESSION['error'] =
+                    'درخواست پیش‌فاکتور تا زمان ثبت پرداخت قابل تأیید نیست.';
+                $this->redirect('/admin/payments');
+                return;
+            }
+
+        } else {
+
+            $_SESSION['error'] = 'روش پرداخت نامعتبر است.';
+            $this->redirect('/admin/payments');
+            return;
+        }
+
+        /*
+        * فقط approve / reject
+        */
+        if (!in_array($action, ['approve', 'reject'], true)) {
+            $_SESSION['error'] = 'عملیات نامعتبر است.';
+            $this->redirect('/admin/payments');
+            return;
+        }
+
+        /*
+        * برای کارت‌به‌کارت، تأیید بدون کد پیگیری ممنوع است.
+        */
+        if (
+            $action === 'approve' &&
+            $method === 'card_transfer' &&
+            trim((string)($payment['ref_code'] ?? '')) === ''
+        ) {
+            $_SESSION['error'] =
+                'پرداخت کارت‌به‌کارت بدون کد پیگیری قابل تأیید نیست.';
+            $this->redirect('/admin/payments');
+            return;
+        }
+
+        /*
+        * شروع Transaction
+        *
+        * هر دو Model به Database::getInstance()
+        * متصل هستند؛ بنابراین Transaction مشترک است.
+        */
+        if (!$this->payModel->beginTransaction()) {
+            $_SESSION['error'] = 'شروع تراکنش مالی امکان‌پذیر نبود.';
+            $this->redirect('/admin/payments');
+            return;
+        }
+
+        try {
+
+            /*
+            * ========================================
+            * رد پرداخت
+            * ========================================
+            */
+            if ($action === 'reject') {
+
+                $paymentUpdated = $this->payModel->setStatus(
+                    $paymentId,
+                    'rejected',
+                    (int)$_SESSION['user_id'],
+                    $adminNote
+                );
+
+                if (!$paymentUpdated) {
+                    throw new \RuntimeException(
+                        'تغییر وضعیت پرداخت به rejected ناموفق بود.'
+                    );
+                }
+
+                /*
+                * اگر پرداخت به یک اشتراک pending مربوط است،
+                * آن اشتراک هم باید failed شود.
+                */
+                if (!empty($payment['subscription_id'])) {
+
+                    $subscriptionUpdated = $this->subModel->markFailed(
+                        (int)$payment['subscription_id']
+                    );
+
+                    if (!$subscriptionUpdated) {
+                        throw new \RuntimeException(
+                            'تغییر وضعیت اشتراک به failed ناموفق بود.'
+                        );
+                    }
+                }
+
+                $this->payModel->commit();
+
+                $_SESSION['message'] =
+                    ($method === 'invoice')
+                        ? 'درخواست پیش‌فاکتور رد شد.'
+                        : 'پرداخت رد شد.';
+
+                $this->redirect('/admin/payments');
+                return;
+            }
+
+            /*
+            * ========================================
+            * تأیید پرداخت
+            * ========================================
+            */
+
+            $paymentUpdated = $this->payModel->setStatus(
+                $paymentId,
                 'approved',
                 (int)$_SESSION['user_id'],
                 $adminNote
             );
 
+            if (!$paymentUpdated) {
+                throw new \RuntimeException(
+                    'تغییر وضعیت پرداخت به approved ناموفق بود.'
+                );
+            }
+
+            /*
+            * فعال‌سازی اشتراک
+            */
             if (!empty($payment['subscription_id'])) {
 
-                $refTag = ($payment['method'] ?? '') === 'invoice'
-                    ? 'INVOICE:' . (int)$payment['id']
-                    : 'CARD:' . ($payment['ref_code'] ?? '');
+                if ($method === 'invoice') {
+                    $refTag = 'INVOICE:' . $paymentId;
+                } else {
+                    $refTag = 'CARD:' . trim((string)$payment['ref_code']);
+                }
 
-                $this->subModel->markActive(
+                $activated = $this->subModel->markActive(
                     (int)$payment['subscription_id'],
                     $refTag,
                     $payment['period'] ?? 'monthly'
                 );
+
+                if (!$activated) {
+                    throw new \RuntimeException(
+                        'فعال‌سازی اشتراک ناموفق بود.'
+                    );
+                }
             }
 
-            if (($payment['method'] ?? '') === 'invoice') {
-                $_SESSION['message'] = 'پیش‌فاکتور تأیید و اشتراک سازمانی فعال شد.';
-            } else {
-                $_SESSION['message'] = 'پرداخت تأیید و اشتراک فعال شد.';
-            }
+            /*
+            * فقط وقتی هر دو عملیات موفق باشند commit می‌کنیم.
+            */
+            $this->payModel->commit();
 
+            $_SESSION['message'] =
+                ($method === 'invoice')
+                    ? 'پیش‌فاکتور تأیید و اشتراک سازمانی فعال شد.'
+                    : 'پرداخت تأیید و اشتراک فعال شد.';
+
+        } catch (\Throwable $e) {
+
+            /*
+            * اگر هر مرحله شکست خورد،
+            * پرداخت و اشتراک با هم rollback می‌شوند.
+            */
+            $this->payModel->rollback();
+
+            error_log(
+                'BillingController::reviewPayment ERROR: ' .
+                $e->getMessage()
+            );
+
+            $_SESSION['error'] =
+                'عملیات انجام نشد. هیچ تغییری در وضعیت پرداخت و اشتراک ثبت نشد.';
         }
 
         $this->redirect('/admin/payments');
+        return;
+    }
+
+    /**
+     * نمایش پیش‌فاکتور برای مدیر
+     */
+    public function adminInvoice($paymentId)
+    {
+        $this->requireAdminAuth();
+
+        $paymentId = (int)$paymentId;
+
+        if ($paymentId <= 0) {
+            $_SESSION['error'] = 'شناسه پیش‌فاکتور نامعتبر است.';
+            $this->redirect('/admin/payments');
+            return;
+        }
+
+        $payment = $this->payModel->getInvoice($paymentId);
+
+        if (!$payment) {
+            $_SESSION['error'] = 'پیش‌فاکتور موردنظر یافت نشد.';
+            $this->redirect('/admin/payments');
+            return;
+        }
+
+        if (($payment['method'] ?? '') !== 'invoice') {
+            $_SESSION['error'] = 'این رکورد پیش‌فاکتور نیست.';
+            $this->redirect('/admin/payments');
+            return;
+        }
+
+        $this->render('billing/invoice', [
+            'title'   => 'پیش‌فاکتور سازمانی - پنل مدیریت',
+            'payment' => $payment,
+            'isAdmin' => true,
+        ]);
     }
 
     /** مدیریت کدهای اشتراک */

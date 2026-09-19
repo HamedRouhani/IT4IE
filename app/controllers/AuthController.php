@@ -22,6 +22,13 @@ class AuthController extends Controller
         $settings = $settingModel->getAll();
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            if (!$this->verifyCsrf()) {
+                $_SESSION['error'] = 'درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.';
+                $this->redirect('/login');
+                return;
+            }
+
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
             $captchaCode = $_POST['captcha'] ?? '';
@@ -52,21 +59,37 @@ class AuthController extends Controller
                     } elseif ($user['email_verified'] == 0) {
                         $errors[] = 'ایمیل شما تأیید نشده است.';
                     } else {
+                        // جلوگیری از Session Fixation
+                        session_regenerate_id(true);
+
                         $_SESSION['user_id'] = $user['id'];
                         $_SESSION['user_name'] = $user['name'];
                         $_SESSION['user_email'] = $user['email'];
                         $_SESSION['user_role'] = $user['role'];
-                        
+
                         $userModel->updateLastLogin($user['id']);
                         
                         if ($remember) {
+
                             $token = bin2hex(random_bytes(32));
                             $expires = time() + (86400 * 30);
+
                             $userModel->update($user['id'], [
                                 'remember_token' => $token,
                                 'remember_expires' => date('Y-m-d H:i:s', $expires)
                             ]);
-                            setcookie('remember_token', $token, $expires, '/', '', false, true);
+
+                            setcookie(
+                                'remember_token',
+                                $token,
+                                [
+                                    'expires'  => $expires,
+                                    'path'     => '/',
+                                    'secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+                                    'httponly' => true,
+                                    'samesite' => 'Lax'
+                                ]
+                            );
                         }
                         
                         // هدایت به صفحه قبلی یا صفحه اصلی
@@ -214,7 +237,17 @@ class AuthController extends Controller
     public function logout()
     {
         if (isset($_COOKIE['remember_token'])) {
-            setcookie('remember_token', '', time() - 3600, '/');
+            setcookie(
+                'remember_token',
+                '',
+                [
+                    'expires'  => time() - 3600,
+                    'path'     => '/',
+                    'secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
+                    'httponly' => true,
+                    'samesite' => 'Lax'
+                ]
+            );
             if (isset($_SESSION['user_id'])) {
                 $userModel = new User();
                 $userModel->update($_SESSION['user_id'], [

@@ -155,7 +155,27 @@ foreach ($payments as $p) {
                             </form>
                             <?php elseif ($p['status'] === 'awaiting_contact'): ?>
 
-                                <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">
+                                <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-start;">
+
+                                    <a href="/admin/payments/invoice/<?= (int)$p['id'] ?>"
+                                    class="btn-action"
+                                    title="مشاهده پیش‌فاکتور"
+                                    style="
+                                            display:inline-flex !important;
+                                            width:150px;
+                                            height:34px;
+                                            background:var(--primary) !important;
+                                            color:#fff !important;
+                                            border:0;
+                                            border-radius:6px;
+                                            align-items:center;
+                                            justify-content:center;
+                                            cursor:pointer;
+                                            text-decoration:none;
+                                    ">
+                                        <i class="fas fa-file-invoice"></i>
+                                        مشاهده پیش‌فاکتور
+                                    </a>
 
                                     <a href="mailto:<?= htmlspecialchars($p['user_email'] ?? '') ?>?subject=<?= urlencode('پیش‌فاکتور IT4IE - ' . ($p['plan_name'] ?? '')) ?>"
                                     class="btn-action email"
@@ -176,30 +196,39 @@ foreach ($payments as $p) {
 
                                         <button type="submit"
                                                 name="action"
-                                                value="approve"
-                                                class="btn-action approve"
-                                                title="تأیید پرداخت و فعال‌سازی"
-                                                style="display:inline-flex !important; width:80px; height:34px; background:#28a745 !important; color:#fff !important; border:0; border-radius:6px; align-items:center; justify-content:center; cursor:pointer;">
-                                            تأیید
-                                        </button>
-
-                                        <button type="submit"
-                                                name="action"
                                                 value="reject"
                                                 class="btn-action reject"
-                                                title="رد درخواست"
+                                                title="رد درخواست پیش‌فاکتور"
                                                 onclick="return confirm('این درخواست پیش‌فاکتور رد شود؟');"
-                                                style="display:inline-flex !important; width:55px; height:34px; background:#dc3545 !important; color:#fff !important; border:0; border-radius:6px; align-items:center; justify-content:center; cursor:pointer;">
-                                            رد
+                                                style="
+                                                    display:inline-flex !important;
+                                                    width:70px;
+                                                    height:34px;
+                                                    background:#dc3545 !important;
+                                                    color:#fff !important;
+                                                    border:0;
+                                                    border-radius:6px;
+                                                    align-items:center;
+                                                    justify-content:center;
+                                                    cursor:pointer;
+                                                ">
+                                            رد درخواست
                                         </button>
 
                                     </form>
 
-                                    <small style="display:block; color:var(--gray); font-size:.72rem; max-width:260px;">
+                                    <small style="
+                                        display:block;
+                                        color:var(--gray);
+                                        font-size:.72rem;
+                                        max-width:260px;
+                                        line-height:1.8;
+                                    ">
                                         <?= htmlspecialchars($p['note'] ?? '') ?>
                                     </small>
 
                                 </div>
+                                
                             <?php else: ?>
                                 <span class="text-muted">-</span>
                             <?php endif; ?>

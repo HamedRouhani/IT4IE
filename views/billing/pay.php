@@ -9,11 +9,14 @@ try {
 } catch (\Throwable $e) {}
 
 $statusText = [
-    'awaiting_ref' => 'در انتظار ثبت کد پیگیری',
-    'pending_review' => 'در حال بررسی توسط کارشناس',
-    'approved' => 'تأیید و فعال شده',
-    'rejected' => 'رد شده',
+    'awaiting_ref'     => 'در انتظار ثبت کد پیگیری',
+    'awaiting_contact' => 'در انتظار ثبت پرداخت سازمان',
+    'pending_review'   => 'در حال بررسی توسط کارشناس',
+    'approved'         => 'تأیید و فعال شده',
+    'rejected'         => 'رد شده',
 ];
+
+$isInvoice = ($payment['method'] ?? '') === 'invoice';
 ?>
 
 <section class="pricing-page">
@@ -39,11 +42,32 @@ $statusText = [
             <div class="pricing-card pay-card">
                 <h3>💳 تکمیل پرداخت طرح <?= htmlspecialchars($planName) ?></h3>
 
-                <?php if ($payment['status'] === 'awaiting_ref'): ?>
+                <?php if (
+                    $payment['status'] === 'awaiting_ref' ||
+                    (
+                        ($payment['method'] ?? '') === 'invoice' &&
+                        $payment['status'] === 'awaiting_contact'
+                    )
+                ): ?>
 
                     <div class="pay-alert">
                         <i class="fas fa-info-circle"></i>
-                        <span>مبلغ زیر را <strong>دقیقاً با رقم یکتا</strong> به کارت اعلام‌شده واریز کنید، سپس کد پیگیری را ثبت کنید.</span>
+
+                        <?php if ($isInvoice): ?>
+
+                            <span>
+                                مبلغ زیر را دقیقاً به حساب اعلام‌شده واریز کنید.
+                                پس از واریز، کد پیگیری تراکنش را در همین صفحه ثبت کنید.
+                            </span>
+
+                        <?php else: ?>
+
+                            <span>
+                                مبلغ زیر را دقیقاً به کارت اعلام‌شده واریز کنید،
+                                سپس کد پیگیری تراکنش را ثبت کنید.
+                            </span>
+
+                        <?php endif; ?>
                     </div>
 
                     <div class="pay-box">
@@ -94,7 +118,14 @@ $statusText = [
                         </div>
 
                         <button type="submit" class="btn-plan primary submit-btn">
-                            <i class="fas fa-paper-plane"></i> ثبت پرداخت و ارسال برای بررسی
+                            <i class="fas fa-paper-plane"></i>
+
+                            <?php if ($isInvoice): ?>
+                                ثبت پرداخت پیش‌فاکتور و ارسال برای بررسی
+                            <?php else: ?>
+                                ثبت پرداخت و ارسال برای بررسی
+                            <?php endif; ?>
+
                         </button>
                     </form>
 
@@ -102,10 +133,44 @@ $statusText = [
 
                     <div class="pay-status-box review">
                         <i class="fas fa-hourglass-half"></i>
-                        <h4>پرداخت شما در صف بررسی است</h4>
-                        <p>کد پیگیری <strong dir="ltr"><?= htmlspecialchars($payment['ref_code']) ?></strong> ثبت شد.</p>
-                        <p>معمولاً زیر <strong>۲ ساعت</strong> تأیید و اشتراک شما فعال می‌شود.</p>
-                        <a href="/billing/my" class="btn-plan ghost" style="margin-top:16px;">
+
+                        <?php if ($isInvoice): ?>
+
+                            <h4>پرداخت پیش‌فاکتور شما در حال بررسی است</h4>
+
+                            <p>
+                                کد پیگیری
+                                <strong dir="ltr">
+                                    <?= htmlspecialchars($payment['ref_code']) ?>
+                                </strong>
+                                ثبت شد.
+                            </p>
+
+                            <p>
+                                پس از تأیید پرداخت، اشتراک سازمانی شما فعال خواهد شد.
+                            </p>
+
+                        <?php else: ?>
+
+                            <h4>پرداخت شما در صف بررسی است</h4>
+
+                            <p>
+                                کد پیگیری
+                                <strong dir="ltr">
+                                    <?= htmlspecialchars($payment['ref_code']) ?>
+                                </strong>
+                                ثبت شد.
+                            </p>
+
+                            <p>
+                                پس از تأیید پرداخت، اشتراک شما فعال خواهد شد.
+                            </p>
+
+                        <?php endif; ?>
+
+                        <a href="/billing/my"
+                        class="btn-plan ghost"
+                        style="margin-top:16px;">
                             مشاهده وضعیت اشتراک
                         </a>
                     </div>

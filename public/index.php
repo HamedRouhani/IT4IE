@@ -382,6 +382,11 @@ if ($url === 'posts' || $url === 'blog') {
 // ============================================
 // BILLING ADMIN ROUTES (باید قبل از بلوک ADMIN باشد)
 // ============================================
+if (preg_match('#^admin/payments/invoice/(\d+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->adminInvoice((int)$m[1]);
+    exit;
+}
 if ($url === 'admin/payments') {
     require_once APP_PATH . '/controllers/BillingController.php';
     (new App\Controllers\BillingController())->adminPayments();
@@ -576,6 +581,11 @@ if ($url === 'billing/submit-payment') {
 if ($url === 'billing/redeem') {
     require_once APP_PATH . '/controllers/BillingController.php';
     (new App\Controllers\BillingController())->redeem();
+    exit;
+}
+if (preg_match('#^billing/invoice/(\d+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->invoice((int)$m[1]);
     exit;
 }
 if ($url === 'billing/invoice') {

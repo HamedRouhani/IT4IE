@@ -186,16 +186,63 @@ class Subscription extends Model
     public function markActive($id, $refTag, $period)
     {
         try {
-            // '0' = طرح رایگان (۱۰ سال)
-            $months = ($period === 'yearly') ? 12 : (($period === '0') ? 120 : 1);
+            $id = (int)$id;
+            $refTag = $refTag !== null ? trim((string)$refTag) : null;
+            $period = trim((string)$period);
+
+            if ($id <= 0) {
+                return false;
+            }
+
+            // مدت اشتراک
+            // 0 = طرح رایگان / 10 سال
+            $months = ($period === 'yearly')
+                ? 12
+                : (($period === '0') ? 120 : 1);
+
+            /*
+            * فقط اشتراک pending می‌تواند فعال شود.
+            * این شرط جلوی فعال‌سازی دوباره اشتراک را می‌گیرد.
+            */
             $this->query(
                 "UPDATE {$this->table}
-                 SET status = 'active', ref_id = :ref, starts_at = NOW(),
-                     expires_at = DATE_ADD(NOW(), INTERVAL :m MONTH)
-                 WHERE id = :id",
-                [':ref' => $refTag, ':m' => $months, ':id' => (int)$id]
+                SET
+                    status = 'active',
+                    ref_id = :ref,
+                    starts_at = NOW(),
+                    expires_at = DATE_ADD(NOW(), INTERVAL {$months} MONTH)
+                WHERE id = :id
+                AND status = 'pending'",
+                [
+                    ':ref' => $refTag,
+                    ':id'  => $id
+                ]
             );
-            return true;
+
+            // نتیجه واقعی UPDATE را بررسی می‌کنیم
+            $check = $this->query(
+                "SELECT
+                    id,
+                    status,
+                    ref_id,
+                    starts_at,
+                    expires_at
+                FROM {$this->table}
+                WHERE id = :id
+                LIMIT 1",
+                [
+                    ':id' => $id
+                ]
+            );
+
+            if (!is_array($check) || empty($check[0])) {
+                return false;
+            }
+
+            return
+                ($check[0]['status'] ?? '') === 'active' &&
+                (int)$check[0]['id'] === $id;
+
         } catch (\Throwable $e) {
             error_log('Subscription::markActive ERROR: ' . $e->getMessage());
             return false;
@@ -205,9 +252,38 @@ class Subscription extends Model
     public function markFailed($id)
     {
         try {
-            $this->query("UPDATE {$this->table} SET status = 'failed' WHERE id = :id", [':id' => (int)$id]);
-            return true;
+            $id = (int)$id;
+
+            if ($id <= 0) {
+                return false;
+            }
+
+            $this->query(
+                "UPDATE {$this->table}
+                SET status = 'failed'
+                WHERE id = :id
+                AND status = 'pending'",
+                [
+                    ':id' => $id
+                ]
+            );
+
+            $check = $this->query(
+                "SELECT id, status
+                FROM {$this->table}
+                WHERE id = :id
+                LIMIT 1",
+                [
+                    ':id' => $id
+                ]
+            );
+
+            return is_array($check)
+                && !empty($check[0])
+                && ($check[0]['status'] ?? '') === 'failed';
+
         } catch (\Throwable $e) {
+            error_log('Subscription::markFailed ERROR: ' . $e->getMessage());
             return false;
         }
     }
