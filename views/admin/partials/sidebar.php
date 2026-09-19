@@ -63,6 +63,12 @@ $checklistManageActive = (
             </a>
         </li>
         <li>
+            <a href="/admin/plans"
+            class="<?php echo (strpos($currentPath, '/admin/plans') === 0) ? 'active' : ''; ?>">
+                <i class="fas fa-tags"></i> طرح‌های اشتراک
+            </a>
+        </li>
+        <li>
             <a href="/admin/vouchers" class="<?php echo (strpos($currentPath, '/admin/vouchers') === 0) ? 'active' : ''; ?>">
                 <i class="fas fa-ticket-alt"></i> کدهای اشتراک
             </a>

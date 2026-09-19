@@ -1,6 +1,22 @@
 <?php
 // views/pages/pricing.php
 $pageTitle = 'تعرفه‌ها و بسته‌ها - IT4IE';
+
+$organizationPlan = null;
+
+foreach ($plans as $p) {
+    $planName = trim((string)($p['name'] ?? ''));
+    $planSlug = strtolower(trim((string)($p['slug'] ?? '')));
+
+    if (
+        $planSlug === 'organization' ||
+        $planSlug === 'organizational' ||
+        $planName === 'سازمانی'
+    ) {
+        $organizationPlan = $p;
+        break;
+    }
+}
 ?>
 
 <section class="pricing-page">
@@ -89,21 +105,42 @@ $pageTitle = 'تعرفه‌ها و بسته‌ها - IT4IE';
                 </form>
             </div>
 
+            <?php if ($organizationPlan): ?>
             <div class="extra-card">
                 <div class="extra-icon"><i class="fas fa-building"></i></div>
                 <h4>خرید سازمانی</h4>
                 <p>پیش‌فاکتور رسمی + پرداخت حواله‌ای برای شرکت‌ها و سازمان‌ها.</p>
+
                 <form method="POST" action="/billing/invoice">
-                    <input type="hidden" name="plan_id" value="3">
+                    <input type="hidden"
+                        name="plan_id"
+                        value="<?= (int)$organizationPlan['id'] ?>">
+
                     <input type="hidden" name="period" value="yearly">
-                    <input type="text" name="company" placeholder="نام شرکت" required>
-                    <input type="text" name="national_id" placeholder="شناسه ملی" required dir="ltr">
-                    <input type="text" name="contact" placeholder="شماره تماس" required dir="ltr">
+
+                    <input type="text"
+                        name="company"
+                        placeholder="نام شرکت"
+                        required>
+
+                    <input type="text"
+                        name="national_id"
+                        placeholder="شناسه ملی"
+                        required
+                        dir="ltr">
+
+                    <input type="text"
+                        name="contact"
+                        placeholder="شماره تماس"
+                        required
+                        dir="ltr">
+
                     <button type="submit" class="btn-plan primary">
                         <i class="fas fa-file-invoice"></i> درخواست پیش‌فاکتور
                     </button>
                 </form>
             </div>
+            <?php endif; ?>
         </div>
 
         <!-- اعتمادسازی -->

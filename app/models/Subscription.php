@@ -26,6 +26,126 @@ class Subscription extends Model
     }
 
     // ============================================
+    // مدیریت طرح‌ها توسط ادمین
+    // ============================================
+
+    public function createPlan($data)
+    {
+        try {
+            $this->query(
+                "INSERT INTO plans
+                (
+                    name,
+                    slug,
+                    description,
+                    features,
+                    price_monthly,
+                    price_yearly,
+                    checklist_limit_monthly,
+                    is_featured,
+                    is_active,
+                    sort_order
+                )
+                VALUES
+                (
+                    :name,
+                    :slug,
+                    :description,
+                    :features,
+                    :price_monthly,
+                    :price_yearly,
+                    :checklist_limit_monthly,
+                    :is_featured,
+                    :is_active,
+                    :sort_order
+                )",
+                [
+                    ':name' => $data['name'],
+                    ':slug' => $data['slug'],
+                    ':description' => $data['description'],
+                    ':features' => $data['features'],
+                    ':price_monthly' => (int)$data['price_monthly'],
+                    ':price_yearly' => (int)$data['price_yearly'],
+                    ':checklist_limit_monthly' => (int)$data['checklist_limit_monthly'],
+                    ':is_featured' => (int)$data['is_featured'],
+                    ':is_active' => (int)$data['is_active'],
+                    ':sort_order' => (int)$data['sort_order'],
+                ]
+            );
+
+            $rows = $this->query("SELECT LAST_INSERT_ID() AS id");
+
+            return is_array($rows)
+                ? (int)($rows[0]['id'] ?? 0)
+                : 0;
+
+        } catch (\Throwable $e) {
+            error_log('Subscription::createPlan ERROR: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    public function updatePlan($id, $data)
+    {
+        try {
+            $this->query(
+                "UPDATE plans
+                SET
+                    name = :name,
+                    slug = :slug,
+                    description = :description,
+                    features = :features,
+                    price_monthly = :price_monthly,
+                    price_yearly = :price_yearly,
+                    checklist_limit_monthly = :checklist_limit_monthly,
+                    is_featured = :is_featured,
+                    is_active = :is_active,
+                    sort_order = :sort_order
+                WHERE id = :id",
+                [
+                    ':id' => (int)$id,
+                    ':name' => $data['name'],
+                    ':slug' => $data['slug'],
+                    ':description' => $data['description'],
+                    ':features' => $data['features'],
+                    ':price_monthly' => (int)$data['price_monthly'],
+                    ':price_yearly' => (int)$data['price_yearly'],
+                    ':checklist_limit_monthly' => (int)$data['checklist_limit_monthly'],
+                    ':is_featured' => (int)$data['is_featured'],
+                    ':is_active' => (int)$data['is_active'],
+                    ':sort_order' => (int)$data['sort_order'],
+                ]
+            );
+
+            return true;
+
+        } catch (\Throwable $e) {
+            error_log('Subscription::updatePlan ERROR: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function planSlugExists($slug, $excludeId = 0)
+    {
+        $sql = "SELECT id
+                FROM plans
+                WHERE slug = :slug";
+
+        $params = [
+            ':slug' => $slug
+        ];
+
+        if ((int)$excludeId > 0) {
+            $sql .= " AND id != :exclude_id";
+            $params[':exclude_id'] = (int)$excludeId;
+        }
+
+        $result = $this->query($sql, $params);
+
+        return is_array($result) && !empty($result);
+    }
+
+    // ============================================
     // اشتراک‌ها
     // ============================================
     public function getActiveSubscription($userId)

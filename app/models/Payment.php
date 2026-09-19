@@ -10,17 +10,31 @@ class Payment extends Model
     // ============================================
     // پرداخت کارت‌به‌کارت
     // ============================================
-    public function createForSubscription($userId, $subscriptionId, $amount)
+    public function createForSubscription($userId, $subscriptionId, $amount, $uniqueAmount = true)
     {
-        $expected = $amount + random_int(100, 999); // رقم یکتا برای تطبیق بانکی
+        $expected = $uniqueAmount
+            ? $amount + random_int(100, 999)
+            : $amount;
+
         try {
             $this->query(
-                "INSERT INTO {$this->table} (user_id, subscription_id, method, amount, expected_amount, status)
-                 VALUES (:uid, :sid, 'card_transfer', :amt, :exp, 'awaiting_ref')",
-                [':uid' => (int)$userId, ':sid' => (int)$subscriptionId, ':amt' => (int)$amount, ':exp' => $expected]
+                "INSERT INTO {$this->table} 
+                (user_id, subscription_id, method, amount, expected_amount, status)
+                VALUES (:uid, :sid, 'card_transfer', :amt, :exp, 'awaiting_ref')",
+                [
+                    ':uid' => (int)$userId,
+                    ':sid' => (int)$subscriptionId,
+                    ':amt' => (int)$amount,
+                    ':exp' => (int)$expected
+                ]
             );
+
             $rows = $this->query("SELECT LAST_INSERT_ID() AS id");
-            return is_array($rows) ? (int)($rows[0]['id'] ?? 0) : 0;
+
+            return is_array($rows)
+                ? (int)($rows[0]['id'] ?? 0)
+                : 0;
+
         } catch (\Throwable $e) {
             error_log('Payment::createForSubscription ERROR: ' . $e->getMessage());
             return 0;
@@ -102,18 +116,47 @@ class Payment extends Model
     // ============================================
     // پیش‌فاکتور سازمانی
     // ============================================
-    public function createInvoiceRequest($userId, $amount, $note)
+    public function createInvoiceRequest($userId, $subscriptionId, $amount, $note)
     {
         try {
             $this->query(
-                "INSERT INTO {$this->table} (user_id, method, amount, expected_amount, note, status)
-                 VALUES (:uid, 'invoice', :amt, :amt, :note, 'awaiting_contact')",
-                [':uid' => (int)$userId, ':amt' => (int)$amount, ':note' => $note]
+                "INSERT INTO {$this->table}
+                (
+                    user_id,
+                    subscription_id,
+                    method,
+                    amount,
+                    expected_amount,
+                    note,
+                    status
+                )
+                VALUES
+                (
+                    :uid,
+                    :sid,
+                    'invoice',
+                    :amt,
+                    :amt,
+                    :note,
+                    'awaiting_contact'
+                )",
+                [
+                    ':uid'   => (int)$userId,
+                    ':sid'   => (int)$subscriptionId,
+                    ':amt'   => (int)$amount,
+                    ':note'  => $note,
+                ]
             );
-            return true;
+
+            $rows = $this->query("SELECT LAST_INSERT_ID() AS id");
+
+            return is_array($rows)
+                ? (int)($rows[0]['id'] ?? 0)
+                : 0;
+
         } catch (\Throwable $e) {
             error_log('Payment::createInvoiceRequest ERROR: ' . $e->getMessage());
-            return false;
+            return 0;
         }
     }
 

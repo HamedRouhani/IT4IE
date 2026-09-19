@@ -397,6 +397,29 @@ if (preg_match('#^admin/payments/review/(\d+)$#', $url, $m)) {
     (new App\Controllers\BillingController())->reviewPayment($m[1]);
     exit;
 }
+if ($url === 'admin/plans') {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->adminPlans();
+    exit;
+}
+
+if ($url === 'admin/plans/create') {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->createPlan();
+    exit;
+}
+
+if (preg_match('#^admin/plans/edit/(\d+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->editPlan($m[1]);
+    exit;
+}
+
+if (preg_match('#^admin/plans/update/(\d+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/BillingController.php';
+    (new App\Controllers\BillingController())->updatePlan($m[1]);
+    exit;
+}
 
 // ============================================
 // ️ ADMIN ROUTES (کامل)

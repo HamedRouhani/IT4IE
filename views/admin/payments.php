@@ -124,24 +124,82 @@ foreach ($payments as $p) {
                         </td>
                         <td class="actions">
                             <?php if ($p['status'] === 'pending_review'): ?>
-                            <form method="POST" action="/admin/payments/review/<?= $p['id'] ?>" class="review-form">
-                                <input type="text" name="admin_note" placeholder="یادداشت..." style="width:110px; padding:4px 8px; font-size:.75rem;">
-                                <button name="action" value="approve" class="btn-action approve" title="تأیید و فعال‌سازی">
-                                    <i class="fas fa-check"></i>
+                            <form method="POST"
+                                action="/admin/payments/review/<?= (int)$p['id'] ?>"
+                                class="review-form">
+
+                                <input type="text"
+                                    name="admin_note"
+                                    placeholder="یادداشت..."
+                                    style="width:110px; padding:6px 8px; font-size:.75rem;">
+
+                                <button type="submit"
+                                        name="action"
+                                        value="approve"
+                                        class="btn-action approve"
+                                        title="تأیید و فعال‌سازی"
+                                        style="display:inline-flex !important; width:80px; height:34px; background:#28a745 !important; color:#fff !important; border:0; border-radius:6px; align-items:center; justify-content:center; cursor:pointer;">
+                                    تأیید
                                 </button>
-                                <button name="action" value="reject" class="btn-action reject" title="رد"
-                                        onclick="return confirm('پرداخت رد شود؟');">
-                                    <i class="fas fa-times"></i>
+
+                                <button type="submit"
+                                        name="action"
+                                        value="reject"
+                                        class="btn-action reject"
+                                        title="رد پرداخت"
+                                        onclick="return confirm('پرداخت رد شود؟');"
+                                        style="display:inline-flex !important; width:55px; height:34px; background:#dc3545 !important; color:#fff !important; border:0; border-radius:6px; align-items:center; justify-content:center; cursor:pointer;">
+                                    رد
                                 </button>
+
                             </form>
                             <?php elseif ($p['status'] === 'awaiting_contact'): ?>
-                                <a href="mailto:<?= htmlspecialchars($p['user_email'] ?? '') ?>?subject=<?= urlencode('پیش‌فاکتور IT4IE - ' . ($p['plan_name'] ?? '')) ?>"
-                                   class="btn-action email" title="ارسال پیش‌فاکتور">
-                                    <i class="fas fa-envelope"></i>
-                                </a>
-                                <small style="display:block; color:var(--gray); font-size:.72rem; margin-top:4px;">
-                                    <?= htmlspecialchars(substr($p['note'] ?? '', 0, 50)) ?>
-                                </small>
+
+                                <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-start;">
+
+                                    <a href="mailto:<?= htmlspecialchars($p['user_email'] ?? '') ?>?subject=<?= urlencode('پیش‌فاکتور IT4IE - ' . ($p['plan_name'] ?? '')) ?>"
+                                    class="btn-action email"
+                                    title="ارسال پیش‌فاکتور">
+                                        <i class="fas fa-envelope"></i>
+                                        ارسال
+                                    </a>
+
+                                    <form method="POST"
+                                        action="/admin/payments/review/<?= (int)$p['id'] ?>"
+                                        class="review-form"
+                                        style="display:flex; gap:5px; align-items:center;">
+
+                                        <input type="text"
+                                            name="admin_note"
+                                            placeholder="یادداشت..."
+                                            style="width:110px; padding:6px 8px; font-size:.75rem;">
+
+                                        <button type="submit"
+                                                name="action"
+                                                value="approve"
+                                                class="btn-action approve"
+                                                title="تأیید پرداخت و فعال‌سازی"
+                                                style="display:inline-flex !important; width:80px; height:34px; background:#28a745 !important; color:#fff !important; border:0; border-radius:6px; align-items:center; justify-content:center; cursor:pointer;">
+                                            تأیید
+                                        </button>
+
+                                        <button type="submit"
+                                                name="action"
+                                                value="reject"
+                                                class="btn-action reject"
+                                                title="رد درخواست"
+                                                onclick="return confirm('این درخواست پیش‌فاکتور رد شود؟');"
+                                                style="display:inline-flex !important; width:55px; height:34px; background:#dc3545 !important; color:#fff !important; border:0; border-radius:6px; align-items:center; justify-content:center; cursor:pointer;">
+                                            رد
+                                        </button>
+
+                                    </form>
+
+                                    <small style="display:block; color:var(--gray); font-size:.72rem; max-width:260px;">
+                                        <?= htmlspecialchars($p['note'] ?? '') ?>
+                                    </small>
+
+                                </div>
                             <?php else: ?>
                                 <span class="text-muted">-</span>
                             <?php endif; ?>

@@ -80,7 +80,18 @@ class BillingController extends Controller
             return;
         }
 
-        $paymentId = $this->payModel->createForSubscription((int)$_SESSION['user_id'], $subId, $amount);
+        $isOrganization = (
+            strtolower(trim((string)($plan['slug'] ?? ''))) === 'organization' ||
+            strtolower(trim((string)($plan['slug'] ?? ''))) === 'organizational' ||
+            trim((string)($plan['name'] ?? '')) === 'سازمانی'
+        );
+
+        $paymentId = $this->payModel->createForSubscription(
+            (int)$_SESSION['user_id'],
+            $subId,
+            $amount,
+            !$isOrganization
+        );
         if (!$paymentId) {
             $_SESSION['error'] = 'خطا در ایجاد رکورد پرداخت.';
             $this->redirect('/pricing');
@@ -168,22 +179,93 @@ class BillingController extends Controller
             return;
         }
 
-        $plan = $this->subModel->getPlan((int)($_POST['plan_id'] ?? 0));
-        if (!$plan) {
+        $userId = (int)$_SESSION['user_id'];
+        $planId = (int)($_POST['plan_id'] ?? 0);
+
+        $company = trim($_POST['company'] ?? '');
+        $nationalId = trim($_POST['national_id'] ?? '');
+        $contact = trim($_POST['contact'] ?? '');
+
+        if ($planId <= 0) {
+            $_SESSION['error'] = 'طرح اشتراک انتخاب نشده است.';
             $this->redirect('/pricing');
             return;
         }
 
-        $period = (($_POST['period'] ?? 'yearly') === 'monthly') ? 'monthly' : 'yearly';
-        $amount = ($period === 'yearly') ? (int)$plan['price_yearly'] : (int)$plan['price_monthly'];
+        if ($company === '' || $nationalId === '' || $contact === '') {
+            $_SESSION['error'] = 'لطفاً اطلاعات سازمان را کامل وارد کنید.';
+            $this->redirect('/pricing');
+            return;
+        }
 
-        $note = 'شرکت: ' . trim($_POST['company'] ?? '') .
-                ' | شناسه ملی: ' . trim($_POST['national_id'] ?? '') .
-                ' | تماس: ' . trim($_POST['contact'] ?? '');
+        $plan = $this->subModel->getPlan($planId);
 
-        $this->payModel->createInvoiceRequest((int)$_SESSION['user_id'], $amount, $note);
+        if (!$plan || (int)$plan['is_active'] !== 1) {
+            $_SESSION['error'] = 'طرح انتخاب‌شده در دسترس نیست.';
+            $this->redirect('/pricing');
+            return;
+        }
 
-        $_SESSION['message'] = '📄 درخواست پیش‌فاکتور ثبت شد؛ حداکثر تا یک روز کاری با شما تماس می‌گیریم.';
+        /*
+        * پیش‌فاکتور سازمانی در حال حاضر سالانه است.
+        * مبلغ در Subscription ذخیره می‌شود تا اگر قیمت طرح
+        * بعداً تغییر کرد، مبلغ این درخواست تغییر نکند.
+        */
+        $period = 'yearly';
+        $amount = (int)$plan['price_yearly'];
+
+        if ($amount <= 0) {
+            $_SESSION['error'] = 'برای این طرح امکان صدور پیش‌فاکتور سازمانی وجود ندارد.';
+            $this->redirect('/pricing');
+            return;
+        }
+
+        /*
+        * ابتدا یک اشتراک pending ایجاد می‌کنیم.
+        * این رکورد هنوز فعال نیست و فقط به عنوان مرجع
+        * پیش‌فاکتور/خرید استفاده می‌شود.
+        */
+        $subId = $this->subModel->createPending(
+            $userId,
+            (int)$plan['id'],
+            $period,
+            $amount
+        );
+
+        if (!$subId) {
+            $_SESSION['error'] = 'خطا در ایجاد درخواست اشتراک سازمانی.';
+            $this->redirect('/pricing');
+            return;
+        }
+
+        $note = 'شرکت: ' . $company .
+                ' | شناسه ملی: ' . $nationalId .
+                ' | تماس: ' . $contact .
+                ' | طرح: ' . ($plan['name'] ?? '') .
+                ' | دوره: سالانه';
+
+        $paymentId = $this->payModel->createInvoiceRequest(
+            $userId,
+            $subId,
+            $amount,
+            $note
+        );
+
+        if (!$paymentId) {
+            /*
+            * اگر Payment ساخته نشد، Subscription pending
+            * باقی می‌ماند ولی فعال نمی‌شود.
+            */
+            $_SESSION['error'] = 'خطا در ثبت درخواست پیش‌فاکتور.';
+            $this->redirect('/pricing');
+            return;
+        }
+
+        $_SESSION['message'] =
+            '📄 درخواست پیش‌فاکتور طرح «' .
+            ($plan['name'] ?? '') .
+            '» با موفقیت ثبت شد؛ حداکثر تا یک روز کاری با شما تماس می‌گیریم.';
+
         $this->redirect('/billing/my');
     }
 
@@ -249,23 +331,43 @@ class BillingController extends Controller
             return;
         }
 
+        if (!in_array($payment['status'] ?? '', ['pending_review', 'awaiting_contact'], true)) {
+            $_SESSION['error'] = 'این درخواست قبلاً تعیین تکلیف شده است.';
+            $this->redirect('/admin/payments');
+            return;
+        }
+
         $action = $_POST['action'] ?? '';
         $adminNote = trim($_POST['admin_note'] ?? '');
 
         if ($action === 'approve') {
-            $this->payModel->setStatus((int)$id, 'approved', (int)$_SESSION['user_id'], $adminNote);
+
+            $this->payModel->setStatus(
+                (int)$id,
+                'approved',
+                (int)$_SESSION['user_id'],
+                $adminNote
+            );
+
             if (!empty($payment['subscription_id'])) {
-                $this->subModel->markActive((int)$payment['subscription_id'], 'CARD:' . ($payment['ref_code'] ?? ''), $payment['period'] ?? 'monthly');
+
+                $refTag = ($payment['method'] ?? '') === 'invoice'
+                    ? 'INVOICE:' . (int)$payment['id']
+                    : 'CARD:' . ($payment['ref_code'] ?? '');
+
+                $this->subModel->markActive(
+                    (int)$payment['subscription_id'],
+                    $refTag,
+                    $payment['period'] ?? 'monthly'
+                );
             }
-            $_SESSION['message'] = 'پرداخت تأیید و اشتراک فعال شد.';
-        } elseif ($action === 'reject') {
-            $this->payModel->setStatus((int)$id, 'rejected', (int)$_SESSION['user_id'], $adminNote);
-            if (!empty($payment['subscription_id'])) {
-                $this->subModel->markFailed((int)$payment['subscription_id']);
+
+            if (($payment['method'] ?? '') === 'invoice') {
+                $_SESSION['message'] = 'پیش‌فاکتور تأیید و اشتراک سازمانی فعال شد.';
+            } else {
+                $_SESSION['message'] = 'پرداخت تأیید و اشتراک فعال شد.';
             }
-            $_SESSION['message'] = 'پرداخت رد شد.';
-        } else {
-            $_SESSION['error'] = 'عملیات نامعتبر.';
+
         }
 
         $this->redirect('/admin/payments');
@@ -294,5 +396,216 @@ class BillingController extends Controller
             'vouchers' => $this->payModel->getVouchers(),
             'plans'    => $this->subModel->getAllPlans(false),
         ]);
+    }
+
+    // ============================================
+    // مدیریت طرح‌های اشتراک
+    // ============================================
+
+    /**
+     * لیست طرح‌های اشتراک
+     */
+    public function adminPlans()
+    {
+        $this->requireAdminAuth();
+
+        $this->renderAdmin('admin/plans', [
+            'title' => 'مدیریت طرح‌های اشتراک - پنل مدیریت',
+            'plans' => $this->subModel->getAllPlans(false),
+        ]);
+    }
+
+    /**
+     * ایجاد طرح جدید
+     */
+    public function createPlan()
+    {
+        $this->requireAdminAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->renderAdmin('admin/plan-form', [
+                'title' => 'ایجاد طرح اشتراک - پنل مدیریت',
+                'plan' => null,
+                'isEdit' => false,
+            ]);
+            return;
+        }
+
+        $data = $this->getPlanFormData();
+
+        if ($data['name'] === '') {
+            $_SESSION['error'] = 'نام طرح الزامی است.';
+            $this->redirect('/admin/plans/create');
+            return;
+        }
+
+        if ($data['slug'] === '') {
+            $_SESSION['error'] = 'Slug طرح الزامی است.';
+            $this->redirect('/admin/plans/create');
+            return;
+        }
+
+        if ($this->subModel->planSlugExists($data['slug'])) {
+            $_SESSION['error'] = 'این Slug قبلاً استفاده شده است.';
+            $this->redirect('/admin/plans/create');
+            return;
+        }
+
+        if ($data['price_monthly'] < 0 || $data['price_yearly'] < 0) {
+            $_SESSION['error'] = 'قیمت نمی‌تواند منفی باشد.';
+            $this->redirect('/admin/plans/create');
+            return;
+        }
+
+        $id = $this->subModel->createPlan($data);
+
+        if ($id > 0) {
+            $_SESSION['message'] = 'طرح اشتراک با موفقیت ایجاد شد.';
+            $this->redirect('/admin/plans');
+            return;
+        }
+
+        $_SESSION['error'] = 'خطا در ایجاد طرح اشتراک.';
+        $this->redirect('/admin/plans/create');
+    }
+
+    /**
+     * فرم ویرایش طرح
+     */
+    public function editPlan($id)
+    {
+        $this->requireAdminAuth();
+
+        $plan = $this->subModel->getPlan((int)$id);
+
+        if (!$plan) {
+            $_SESSION['error'] = 'طرح اشتراک یافت نشد.';
+            $this->redirect('/admin/plans');
+            return;
+        }
+
+        $this->renderAdmin('admin/plan-form', [
+            'title' => 'ویرایش طرح اشتراک - پنل مدیریت',
+            'plan' => $plan,
+            'isEdit' => true,
+        ]);
+    }
+
+    /**
+     * ذخیره تغییرات طرح
+     */
+    public function updatePlan($id)
+    {
+        $this->requireAdminAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/admin/plans');
+            return;
+        }
+
+        $id = (int)$id;
+
+        $plan = $this->subModel->getPlan($id);
+
+        if (!$plan) {
+            $_SESSION['error'] = 'طرح اشتراک یافت نشد.';
+            $this->redirect('/admin/plans');
+            return;
+        }
+
+        $data = $this->getPlanFormData();
+
+        if ($data['name'] === '') {
+            $_SESSION['error'] = 'نام طرح الزامی است.';
+            $this->redirect('/admin/plans/edit/' . $id);
+            return;
+        }
+
+        if ($data['slug'] === '') {
+            $_SESSION['error'] = 'Slug طرح الزامی است.';
+            $this->redirect('/admin/plans/edit/' . $id);
+            return;
+        }
+
+        if ($this->subModel->planSlugExists($data['slug'], $id)) {
+            $_SESSION['error'] = 'این Slug قبلاً توسط طرح دیگری استفاده شده است.';
+            $this->redirect('/admin/plans/edit/' . $id);
+            return;
+        }
+
+        if ($data['price_monthly'] < 0 || $data['price_yearly'] < 0) {
+            $_SESSION['error'] = 'قیمت نمی‌تواند منفی باشد.';
+            $this->redirect('/admin/plans/edit/' . $id);
+            return;
+        }
+
+        if ($this->subModel->updatePlan($id, $data)) {
+            $_SESSION['message'] = 'طرح اشتراک با موفقیت به‌روزرسانی شد.';
+            $this->redirect('/admin/plans');
+            return;
+        }
+
+        $_SESSION['error'] = 'خطا در به‌روزرسانی طرح.';
+        $this->redirect('/admin/plans/edit/' . $id);
+    }
+
+    /**
+     * دریافت و پاک‌سازی اطلاعات فرم طرح
+     */
+    private function getPlanFormData()
+    {
+        $name = trim($_POST['name'] ?? '');
+        $slug = trim($_POST['slug'] ?? '');
+
+        // فقط حروف انگلیسی، عدد و -
+        $slug = strtolower($slug);
+        $slug = preg_replace('/[^a-z0-9\-]/', '-', $slug);
+        $slug = preg_replace('/-+/', '-', $slug);
+        $slug = trim($slug, '-');
+
+        $description = trim($_POST['description'] ?? '');
+
+        $featuresInput = trim($_POST['features'] ?? '');
+
+        $features = [];
+
+        if ($featuresInput !== '') {
+            $lines = preg_split('/\r\n|\r|\n/', $featuresInput);
+
+            foreach ($lines as $line) {
+                $line = trim($line);
+
+                if ($line !== '') {
+                    $features[] = $line;
+                }
+            }
+        }
+
+        return [
+            'name' => $name,
+            'slug' => $slug,
+            'description' => $description,
+            'features' => json_encode(
+                $features,
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+            ),
+            'price_monthly' => (int)preg_replace(
+                '/\D/',
+                '',
+                $_POST['price_monthly'] ?? '0'
+            ),
+            'price_yearly' => (int)preg_replace(
+                '/\D/',
+                '',
+                $_POST['price_yearly'] ?? '0'
+            ),
+            'checklist_limit_monthly' => max(
+                0,
+                (int)($_POST['checklist_limit_monthly'] ?? 0)
+            ),
+            'is_featured' => isset($_POST['is_featured']) ? 1 : 0,
+            'is_active' => isset($_POST['is_active']) ? 1 : 0,
+            'sort_order' => (int)($_POST['sort_order'] ?? 0),
+        ];
     }
 }
