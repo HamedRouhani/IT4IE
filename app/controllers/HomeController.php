@@ -17,9 +17,10 @@ class HomeController extends Controller
         $settings = $settingModel->getAll();
         
         $this->render('home/index', [
-            'title' => 'IT4IE - مشاوره بین‌رشته‌ای',
+            'title' => 'IT4IE - پلتفرم هوشمند حل مسائل مهندسی صنایع',
             'posts' => $posts,
-            'settings' => $settings
+            'settings' => $settings,
+            'problemSolverCsrf' => $this->csrfToken()
         ]);
     }
     

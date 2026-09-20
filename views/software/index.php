@@ -48,12 +48,72 @@
                     $iconColor = '#3B82F6';
                 }
                 
-                // رنگ خاص هر ماژول برای دکمه
-                $primaryBtnGradient = 'linear-gradient(135deg, #667eea, #764ba2)';
-                if (stripos($nameLower, 'pmbok') !== false || stripos($slugLower, 'pmbok') !== false) {
-                    $primaryBtnGradient = 'linear-gradient(135deg, #ed8936, #dd6b20)';
-                } elseif (stripos($nameLower, 'itil') !== false) {
-                    $primaryBtnGradient = 'linear-gradient(135deg, #10B981, #059669)';
+                // ============================================
+                // تم اختصاصی هر نرم‌افزار
+                // ============================================
+
+                $softwareTheme = [
+                    'primary' => '#667eea',
+                    'dark'    => '#5a67d8',
+                    'gradient' => 'linear-gradient(135deg, #667eea, #764ba2)',
+                    'shadow'  => 'rgba(102, 126, 234, 0.25)'
+                ];
+
+                if (
+                    stripos($nameLower, 'babok') !== false ||
+                    stripos($slugLower, 'babok') !== false
+                ) {
+
+                    $iconClass = 'fas fa-robot';
+                    $iconColor = '#0891B2';
+
+                } elseif (
+                    stripos($nameLower, 'pmbok') !== false ||
+                    stripos($slugLower, 'pmbok') !== false
+                ) {
+
+                    $iconClass = 'fas fa-project-diagram';
+                    $iconColor = '#7C3AED';
+
+                } elseif (
+                    stripos($nameLower, 'or') !== false ||
+                    stripos($slugLower, 'or') !== false
+                ) {
+
+                    $iconClass = 'fas fa-gears';
+                    $iconColor = '#EA580C';
+
+                } elseif (
+                    stripos($nameLower, 'mcdm') !== false ||
+                    stripos($slugLower, 'mcdm') !== false
+                ) {
+
+                    $iconClass = 'fas fa-scale-balanced';
+                    $iconColor = '#059669';
+
+                } elseif (
+                    stripos($nameLower, 'statlab') !== false ||
+                    stripos($slugLower, 'statlab') !== false
+                ) {
+
+                    $iconClass = 'fas fa-chart-line';
+                    $iconColor = '#2563EB';
+
+                } elseif (
+                    stripos($nameLower, 'itil') !== false ||
+                    stripos($slugLower, 'itil') !== false
+                ) {
+
+                    $iconClass = 'fas fa-server';
+                    $iconColor = '#10B981';
+
+                } elseif (
+                    stripos($nameLower, 'togaf') !== false ||
+                    stripos($slugLower, 'togaf') !== false
+                ) {
+
+                    $iconClass = 'fas fa-network-wired';
+                    $iconColor = '#3B82F6';
                 }
                 ?>
                 <div class="project-card" style="padding: 25px; transition: all 0.3s ease; position: relative; display: flex; flex-direction: column; justify-content: space-between;">
@@ -121,7 +181,7 @@
                                         align-items: center;
                                         justify-content: center;
                                         gap: 8px;
-                                        background: <?php echo $primaryBtnGradient; ?>;
+                                        background: <?php echo $softwareTheme['gradient']; ?>;
                                         color: white;
                                         border: none;
                                         border-radius: 10px;
@@ -130,11 +190,18 @@
                                         font-weight: 600;
                                         font-family: 'Vazirmatn', 'Tahoma', sans-serif;
                                         cursor: pointer;
-                                        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+                                        box-shadow: 0 4px 12px <?php echo $softwareTheme['shadow']; ?>;
                                         transition: all 0.3s ease;
                                     "
-                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)';"
-                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.25)';">
+                                    onmouseover="
+                                        this.style.transform='translateY(-2px)';
+                                        this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)';
+                                    "
+
+                                    onmouseout="
+                                        this.style.transform='translateY(0)';
+                                        this.style.boxShadow='0 4px 12px <?php echo $softwareTheme['shadow']; ?>';
+                                    "
                                 <i class="fas fa-play-circle"></i>
                                 <span>ورود و اجرا</span>
                             </button>

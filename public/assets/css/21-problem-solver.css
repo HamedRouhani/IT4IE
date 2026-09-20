@@ -1,0 +1,892 @@
+/* =========================================================
+   IT4IE - PROBLEM SOLVER
+   File: public/assets/css/21-problem-solver.css
+   ========================================================= */
+
+
+/* =========================================================
+   PROBLEM SOLVER SECTION
+   ========================================================= */
+
+.problem-solver-section {
+    width: 100%;
+    margin: 60px 0;
+    box-sizing: border-box;
+}
+
+.problem-solver-section .problem-solver-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.problem-solver-section .problem-solver-badge {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 6px 14px;
+
+    background: rgba(108, 60, 225, 0.08);
+    color: var(--primary);
+
+    border: 1px solid rgba(108, 60, 225, 0.12);
+    border-radius: var(--radius-full);
+
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.problem-solver-section .problem-solver-header h2 {
+    margin: 0 0 12px;
+
+    color: var(--dark);
+
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.problem-solver-section .problem-solver-header p {
+    max-width: 760px;
+    margin: 0 auto;
+
+    color: var(--gray-dark);
+
+    line-height: 1.9;
+}
+
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.problem-solver-section .problem-solver-form {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.problem-solver-section #problemSolverInput {
+    display: block;
+
+    width: 100%;
+    min-height: 170px;
+
+    box-sizing: border-box;
+
+    padding: 18px 20px;
+
+    background: var(--white);
+    color: var(--dark);
+
+    border: 1px solid var(--gray-light);
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow);
+
+    font-family: var(--font-family);
+    font-size: 1rem;
+    line-height: 1.9;
+
+    resize: vertical;
+
+    outline: none;
+
+    transition: var(--transition);
+}
+
+.problem-solver-section #problemSolverInput::placeholder {
+    color: var(--gray);
+}
+
+.problem-solver-section #problemSolverInput:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(108, 60, 225, 0.10),
+        var(--shadow);
+}
+
+.problem-solver-section .problem-solver-form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-top: 16px;
+}
+
+.problem-solver-section .problem-solver-hint {
+    color: var(--gray);
+
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.problem-solver-section .problem-solver-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 12px 22px;
+
+    background: var(--primary-gradient);
+    color: var(--white);
+
+    border: none;
+    border-radius: var(--radius-full);
+
+    box-shadow: 0 4px 16px rgba(108, 60, 225, 0.20);
+
+    cursor: pointer;
+
+    font-family: var(--font-family);
+    font-size: 0.95rem;
+    font-weight: 700;
+
+    transition: var(--transition);
+}
+
+.problem-solver-section .problem-solver-button:hover {
+    color: var(--white);
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 7px 22px rgba(108, 60, 225, 0.28);
+}
+
+.problem-solver-section .problem-solver-button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.problem-solver-section .problem-solver-loading {
+    margin: 20px auto 0;
+
+    text-align: center;
+
+    color: var(--primary);
+
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+
+.problem-solver-section .problem-solver-loading i {
+    margin-left: 8px;
+}
+
+
+/* =========================================================
+   MODAL OVERLAY
+   ========================================================= */
+
+#problem-solver-modal {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 99999;
+
+    /*
+     * حالت پیش‌فرض بسته
+     */
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    height: 100%;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+}
+
+
+/*
+ * باز شدن Popup
+ *
+ * هم is-open را پشتیبانی می‌کنیم
+ * هم aria-hidden="false"
+ * تا اگر JS یکی از این دو روش را استفاده کند،
+ * Popup درست نمایش داده شود.
+ */
+#problem-solver-modal.is-open,
+#problem-solver-modal[aria-hidden="false"] {
+    display: flex;
+}
+
+
+/* =========================================================
+   MODAL BACKDROP
+   ========================================================= */
+
+#problem-solver-modal .problem-solver-modal-backdrop {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(15, 23, 42, 0.62);
+
+    backdrop-filter: blur(3px);
+}
+
+
+/* =========================================================
+   MODAL DIALOG
+   ========================================================= */
+
+#problem-solver-modal .problem-solver-modal-dialog {
+    position: relative;
+
+    z-index: 1;
+
+    width: 100%;
+    max-width: 850px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    box-sizing: border-box;
+
+    background: var(--white);
+
+    color: var(--dark);
+
+    border: 1px solid rgba(108, 60, 225, 0.08);
+
+    border-radius: var(--radius-xl);
+
+    box-shadow: var(--shadow-xl);
+
+    direction: rtl;
+}
+
+
+/* =========================================================
+   MODAL CLOSE
+   ========================================================= */
+
+#problem-solver-modal .problem-solver-modal-close {
+    position: absolute;
+
+    top: 14px;
+    left: 14px;
+
+    z-index: 3;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+
+    padding: 0;
+
+    background: var(--gray-lighter);
+    color: var(--gray-dark);
+
+    border: 1px solid var(--gray-light);
+    border-radius: 50%;
+
+    cursor: pointer;
+
+    font-family: var(--font-family);
+    font-size: 1.5rem;
+    line-height: 1;
+
+    transition: var(--transition);
+}
+
+#problem-solver-modal .problem-solver-modal-close:hover {
+    background: var(--primary);
+    color: var(--white);
+
+    border-color: var(--primary);
+
+    transform: rotate(90deg);
+}
+
+
+/* =========================================================
+   MODAL HEADER
+   ========================================================= */
+
+#problem-solver-modal .problem-solver-modal-header {
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 28px 30px 20px;
+
+    border-bottom: 1px solid var(--gray-light);
+}
+
+#problem-solver-modal .problem-solver-success-icon {
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 50px;
+    height: 50px;
+
+    background: rgba(34, 197, 94, 0.10);
+    color: var(--success);
+
+    border: 1px solid rgba(34, 197, 94, 0.18);
+    border-radius: 50%;
+
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+#problem-solver-modal .problem-solver-modal-header h2 {
+    margin: 0 0 6px;
+
+    color: var(--dark);
+
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+#problem-solver-modal .problem-solver-modal-header p {
+    margin: 0;
+
+    color: var(--gray-dark);
+
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   MODAL BODY
+   ========================================================= */
+
+#problem-solver-modal .problem-solver-modal-body {
+    padding: 24px 30px 10px;
+}
+
+
+/* =========================================================
+   RESULT SECTIONS
+   ========================================================= */
+
+#problem-solver-modal .problem-result-section {
+    margin-bottom: 22px;
+}
+
+#problem-solver-modal .problem-result-section-title {
+    margin-bottom: 9px;
+
+    color: var(--dark);
+
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+#problem-solver-modal .problem-result-problem-text {
+    padding: 14px 16px;
+
+    background: var(--gray-lighter);
+
+    color: var(--gray-dark);
+
+    border-right: 3px solid var(--primary);
+    border-radius: 10px;
+
+    line-height: 1.9;
+
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+#problem-solver-modal .problem-result-path {
+    color: var(--gray-dark);
+
+    line-height: 1.9;
+}
+
+
+/* =========================================================
+   RESULT DOMAINS
+   ========================================================= */
+
+#problem-solver-modal .problem-result-domains {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+
+/*
+ * اگر JS برای domainها span بسازد
+ */
+#problem-solver-modal .problem-result-domains span {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 6px 12px;
+
+    background: rgba(108, 60, 225, 0.08);
+    color: var(--primary);
+
+    border: 1px solid rgba(108, 60, 225, 0.12);
+    border-radius: var(--radius-full);
+
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   RESULT METHODS
+   ========================================================= */
+
+#problem-solver-modal .problem-result-tags {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+#problem-solver-modal .problem-result-tags span {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 6px 12px;
+
+    background: #F3F0FF;
+    color: var(--primary-dark);
+
+    border: 1px solid rgba(108, 60, 225, 0.12);
+    border-radius: var(--radius-full);
+
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   RECOMMENDED TOOL
+   ========================================================= */
+
+#problem-solver-modal .problem-result-tool {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 16px;
+
+    margin-top: 24px;
+    padding: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(108, 60, 225, 0.07),
+            rgba(139, 111, 232, 0.04)
+        );
+
+    border: 1px solid rgba(108, 60, 225, 0.12);
+
+    border-radius: var(--radius-lg);
+}
+
+#problem-solver-modal .problem-result-tool-icon {
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 46px;
+    height: 46px;
+
+    background: rgba(108, 60, 225, 0.10);
+    color: var(--primary);
+
+    border-radius: 12px;
+
+    font-size: 1.2rem;
+}
+
+#problem-solver-modal .problem-result-tool-content {
+    flex: 1;
+
+    min-width: 0;
+}
+
+#problem-solver-modal .problem-result-tool-label {
+    margin-bottom: 4px;
+
+    color: var(--gray);
+
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+#problem-solver-modal .problem-result-tool-title {
+    margin-bottom: 6px;
+
+    color: var(--dark);
+
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+#problem-solver-modal .problem-result-tool-description {
+    margin-bottom: 14px;
+
+    color: var(--gray-dark);
+
+    line-height: 1.8;
+    font-size: 0.9rem;
+}
+
+#problem-solver-modal .problem-result-tool-button {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 10px 16px;
+
+    background: var(--primary-gradient);
+    color: var(--white);
+
+    border-radius: var(--radius-full);
+
+    text-decoration: none;
+
+    font-size: 0.9rem;
+    font-weight: 700;
+
+    box-shadow: 0 4px 12px rgba(108, 60, 225, 0.18);
+
+    transition: var(--transition);
+}
+
+#problem-solver-modal .problem-result-tool-button:hover {
+    color: var(--white);
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 6px 18px rgba(108, 60, 225, 0.28);
+}
+
+
+/* =========================================================
+   NOTE
+   ========================================================= */
+
+#problem-solver-modal .problem-result-note {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 10px;
+
+    margin-top: 20px;
+    padding: 14px 16px;
+
+    background: #FFFBEB;
+    color: #92400E;
+
+    border: 1px solid #FDE68A;
+    border-radius: 12px;
+}
+
+#problem-solver-modal .problem-result-note > span {
+    flex: 0 0 auto;
+
+    color: #D97706;
+}
+
+#problem-solver-modal .problem-result-note p {
+    margin: 0;
+
+    color: #92400E;
+
+    line-height: 1.8;
+    font-size: 0.88rem;
+}
+
+
+/* =========================================================
+   MODAL FOOTER
+   ========================================================= */
+
+#problem-solver-modal .problem-solver-modal-footer {
+    display: flex;
+    justify-content: flex-start;
+
+    padding: 18px 30px 24px;
+
+    border-top: 1px solid var(--gray-light);
+}
+
+#problem-solver-modal .problem-solver-modal-secondary-button {
+    padding: 10px 18px;
+
+    background: var(--gray-lighter);
+    color: var(--gray-dark);
+
+    border: 1px solid var(--gray-light);
+    border-radius: var(--radius-full);
+
+    cursor: pointer;
+
+    font-family: var(--font-family);
+    font-size: 0.9rem;
+    font-weight: 700;
+
+    transition: var(--transition);
+}
+
+#problem-solver-modal .problem-solver-modal-secondary-button:hover {
+    background: var(--primary);
+    color: var(--white);
+
+    border-color: var(--primary);
+}
+
+
+/* =========================================================
+   IT4IE ECOSYSTEM
+   ========================================================= */
+
+.it4ie-ecosystem-section {
+    width: 100%;
+    margin: 60px 0;
+    box-sizing: border-box;
+}
+
+.it4ie-ecosystem-section .it4ie-ecosystem-header {
+    text-align: center;
+
+    margin-bottom: 32px;
+}
+
+.it4ie-ecosystem-section .it4ie-ecosystem-header h2 {
+    margin: 0 0 12px;
+
+    color: var(--dark);
+
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.it4ie-ecosystem-section .it4ie-ecosystem-header p {
+    max-width: 700px;
+
+    margin: 0 auto;
+
+    color: var(--gray-dark);
+
+    line-height: 1.9;
+}
+
+
+/* =========================================================
+   ECOSYSTEM GRID
+   ========================================================= */
+
+.it4ie-ecosystem-section .it4ie-ecosystem-grid {
+    display: grid;
+
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+
+    gap: 20px;
+
+    width: 100%;
+}
+
+
+/* =========================================================
+   ECOSYSTEM CARD
+   ========================================================= */
+
+.it4ie-ecosystem-section .ecosystem-card {
+    box-sizing: border-box;
+
+    min-width: 0;
+    width: 100%;
+
+    padding: 24px 20px;
+
+    background: var(--white);
+    color: var(--dark);
+
+    border: 1px solid rgba(108, 60, 225, 0.08);
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow);
+
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    transition: var(--transition);
+}
+
+.it4ie-ecosystem-section .ecosystem-card:hover {
+    transform: translateY(-5px);
+
+    border-color: rgba(108, 60, 225, 0.16);
+
+    box-shadow: var(--shadow-lg);
+}
+
+.it4ie-ecosystem-section .ecosystem-card i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 56px;
+    height: 56px;
+
+    margin-bottom: 16px;
+
+    background: rgba(108, 60, 225, 0.08);
+    color: var(--primary);
+
+    border-radius: var(--radius-lg);
+
+    font-size: 1.6rem;
+}
+
+.it4ie-ecosystem-section .ecosystem-card h3 {
+    margin: 0 0 8px;
+
+    color: var(--dark);
+
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.it4ie-ecosystem-section .ecosystem-card p {
+    margin: 0;
+
+    color: var(--gray-dark);
+
+    line-height: 1.8;
+    font-size: 0.9rem;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .it4ie-ecosystem-section .it4ie-ecosystem-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .problem-solver-section .problem-solver-form-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .problem-solver-section .problem-solver-button {
+        width: 100%;
+    }
+
+    #problem-solver-modal {
+        padding: 12px;
+    }
+
+    #problem-solver-modal .problem-solver-modal-dialog {
+        width: 100%;
+        max-height: 94vh;
+
+        border-radius: var(--radius-lg);
+    }
+
+    #problem-solver-modal .problem-solver-modal-header {
+        padding: 24px 20px 16px;
+
+        padding-left: 58px;
+    }
+
+    #problem-solver-modal .problem-solver-modal-body {
+        padding: 20px 20px 10px;
+    }
+
+    #problem-solver-modal .problem-solver-modal-footer {
+        padding: 16px 20px 20px;
+    }
+
+    #problem-solver-modal .problem-result-tool {
+        flex-direction: column;
+    }
+
+    .it4ie-ecosystem-section {
+        margin: 40px 0;
+    }
+
+    .it4ie-ecosystem-section .it4ie-ecosystem-grid {
+        grid-template-columns: 1fr;
+
+        gap: 16px;
+    }
+
+    .it4ie-ecosystem-section .ecosystem-card {
+        padding: 20px 18px;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+    .problem-solver-section {
+        margin: 40px 0;
+    }
+
+    .problem-solver-section .problem-solver-header h2 {
+        font-size: 1.6rem;
+    }
+
+    .problem-solver-section #problemSolverInput {
+        min-height: 140px;
+
+        padding: 15px;
+    }
+
+    .it4ie-ecosystem-section .it4ie-ecosystem-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .it4ie-ecosystem-section .ecosystem-card {
+        padding: 18px 16px;
+    }
+}

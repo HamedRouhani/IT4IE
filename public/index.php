@@ -41,43 +41,78 @@ $moduleSlugs = [
 ];
 
 // ============================================
-// AUTOLOADER (نسخه نهایی و ماژولار)
+// AUTOLOADER
 // ============================================
 spl_autoload_register(function ($class) {
+
     $prefix = 'App\\';
-    
+
     if (strpos($class, $prefix) !== 0) {
         return false;
     }
-    
-    $relative_class = substr($class, strlen($prefix));
-    $classPath = str_replace('\\', '/', $relative_class) . '.php';
-    
-    // 1. جستجو در app/ اصلی
+
+    // حذف App\
+    $relativeClass = substr($class, strlen($prefix));
+
+    // تبدیل Namespace به مسیر
+    $classPath = str_replace('\\', '/', $relativeClass) . '.php';
+
+    // ========================================
+    // 1. مسیر استاندارد
+    // ========================================
     $mainFile = APP_PATH . '/' . $classPath;
+
     if (file_exists($mainFile)) {
-        require $mainFile;
+        require_once $mainFile;
         return true;
     }
-    
-    // 2. جستجو در ماژول نرم‌افزاری (در صورت فعال بودن)
+
+    // ========================================
+    // 2. پشتیبانی از پوشه services موجود پروژه
+    // ========================================
+    if (strpos($classPath, 'Services/') === 0) {
+
+        $serviceFile = APP_PATH . '/services/' .
+                       substr($classPath, strlen('Services/'));
+
+        if (file_exists($serviceFile)) {
+            require_once $serviceFile;
+            return true;
+        }
+    }
+
+    // ========================================
+    // 3. جستجو در ماژول نرم‌افزاری
+    // ========================================
     if (defined('MODULAR_APP_PATH')) {
+
         $moduleFile = MODULAR_APP_PATH . '/app/' . $classPath;
+
         if (file_exists($moduleFile)) {
-            require $moduleFile;
+            require_once $moduleFile;
             return true;
         }
     }
-    
-    // 3. جستجو از طریق $_ENV (برای سازگاری با کدهای قدیمی)
-    if (isset($_ENV['CURRENT_SOFTWARE_PATH']) && !empty($_ENV['CURRENT_SOFTWARE_PATH'])) {
-        $moduleFile = $_ENV['CURRENT_SOFTWARE_PATH'] . '/app/' . $classPath;
+
+    // ========================================
+    // 4. سازگاری با کدهای قدیمی
+    // ========================================
+    if (
+        isset($_ENV['CURRENT_SOFTWARE_PATH']) &&
+        !empty($_ENV['CURRENT_SOFTWARE_PATH'])
+    ) {
+
+        $moduleFile =
+            $_ENV['CURRENT_SOFTWARE_PATH'] .
+            '/app/' .
+            $classPath;
+
         if (file_exists($moduleFile)) {
-            require $moduleFile;
+            require_once $moduleFile;
             return true;
         }
     }
-    
+
     return false;
 });
 
@@ -620,6 +655,15 @@ if (preg_match('#^admin/checklist/view/(\d+)$#', $url, $m)) {
 if ($url === 'admin/checklist/update-status') {
     require_once APP_PATH . '/controllers/ChecklistController.php';
     (new App\Controllers\ChecklistController())->adminUpdateStatus();
+    exit;
+}
+
+// ============================================
+// PROBLEM SOLVER
+// ============================================
+if ($url === 'problem-solver/analyze') {
+    require_once APP_PATH . '/controllers/ProblemSolverController.php';
+    (new App\Controllers\ProblemSolverController())->analyze();
     exit;
 }
 
