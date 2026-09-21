@@ -1,0 +1,783 @@
+/**
+ * ============================================================
+ * PdM Analyzer - استایل‌های کامل و خودکفا
+ * ============================================================
+ * مسیر: public/assets/css/modules/pdm.css
+ * نسخه: 2.0
+ * تم: Teal (#0F766E)
+ * 
+ * این فایل شامل تمام کلاس‌های ساختاری مورد نیاز ماژول PdM است
+ * تا مستقل از software.css کار کند.
+ * ============================================================
+ */
+
+/* ═══════════════════════════════════════════════════════
+   🎨 متغیرهای رنگ و تم
+   ═══════════════════════════════════════════════════════ */
+:root {
+    --pdm-primary:       #0F766E;
+    --pdm-primary-dark:  #115E59;
+    --pdm-primary-light: #14B8A6;
+    --pdm-secondary:     #6c757d;
+    --pdm-success:       #198754;
+    --pdm-info:          #0d6efd;
+    --pdm-warning:       #f59e0b;
+    --pdm-danger:        #dc3545;
+    --pdm-light:         #F0FDFA;
+    --pdm-border-radius: 0.5rem;
+    --pdm-shadow:        0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --pdm-shadow-lg:     0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* ═══════════════════════════════════════════════════════
+   📦 Wrapper اصلی ماژول
+   ═══════════════════════════════════════════════════════ */
+.software-content.pdm-fade-in {
+    padding: 1.5rem;
+    direction: rtl;
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+}
+
+/* ═══════════════════════════════════════════════════════
+   📊 گریدهای ساختاری (stats-grid و main-grid)
+   ═══════════════════════════════════════════════════════ */
+
+/* گرید کارت‌های آماری - ۴ ستونه */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+/* گرید اصلی - دو ستونه (محتوا + ساید) */
+.main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+}
+
+@media (max-width: 991px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   🃏 کارت‌های عمومی
+   ═══════════════════════════════════════════════════════ */
+.card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--pdm-border-radius);
+    box-shadow: var(--pdm-shadow);
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: var(--pdm-light);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--pdm-primary-dark);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   📊 کارت‌های آماری PdM
+   ═══════════════════════════════════════════════════════ */
+.pdm-stat-card {
+    border: 0;
+    border-radius: var(--pdm-border-radius);
+    box-shadow: var(--pdm-shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-right: 4px solid var(--pdm-primary);
+    background: #fff;
+    padding: 1.25rem;
+}
+
+.pdm-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--pdm-shadow-lg);
+}
+
+.pdm-stat-card h3 {
+    font-weight: 700;
+    margin: 0.5rem 0 0;
+    color: var(--pdm-primary);
+    font-size: 1.75rem;
+}
+
+.pdm-stat-card small {
+    font-size: 0.85rem;
+    color: var(--pdm-secondary);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.pdm-stat-card .pdm-stat-icon {
+    font-size: 2rem;
+    color: var(--pdm-primary-light);
+    opacity: 0.7;
+}
+
+/* رنگ‌بندی بر اساس بحرانیت */
+.pdm-stat-card.critical { border-right-color: var(--pdm-danger); }
+.pdm-stat-card.critical h3 { color: var(--pdm-danger); }
+.pdm-stat-card.warning  { border-right-color: var(--pdm-warning); }
+.pdm-stat-card.warning h3 { color: var(--pdm-warning); }
+.pdm-stat-card.success  { border-right-color: var(--pdm-success); }
+.pdm-stat-card.success h3 { color: var(--pdm-success); }
+
+/* ═══════════════════════════════════════════════════════
+   🏷️ نشان‌های بحرانیت و وضعیت
+   ═══════════════════════════════════════════════════════ */
+.pdm-criticality-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.pdm-criticality-low      { background: #d1fae5; color: #065f46; }
+.pdm-criticality-medium   { background: #dbeafe; color: #1e40af; }
+.pdm-criticality-high     { background: #fef3c7; color: #92400e; }
+.pdm-criticality-critical { background: #fee2e2; color: #991b1b; }
+
+.pdm-status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.pdm-status-active      { background: #d1fae5; color: #065f46; }
+.pdm-status-inactive    { background: #e5e7eb; color: #374151; }
+.pdm-status-maintenance { background: #fef3c7; color: #92400e; }
+.pdm-status-retired     { background: #f3f4f6; color: #6b7280; }
+
+.pdm-wo-status-open        { background: #dbeafe; color: #1e40af; }
+.pdm-wo-status-in_progress { background: #fef3c7; color: #92400e; }
+.pdm-wo-status-completed   { background: #d1fae5; color: #065f46; }
+.pdm-wo-status-cancelled   { background: #fee2e2; color: #991b1b; }
+
+/* ═══════════════════════════════════════════════════════
+   📋 جداول
+   ═══════════════════════════════════════════════════════ */
+.pdm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.pdm-table th {
+    background: var(--pdm-light);
+    color: var(--pdm-primary-dark);
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    text-align: right;
+    border-bottom: 2px solid var(--pdm-primary);
+}
+
+.pdm-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+.pdm-table tbody tr:hover {
+    background: var(--pdm-light);
+}
+
+/* ═══════════════════════════════════════════════════════
+   🎯 دکمه‌های اختصاصی PdM
+   ═══════════════════════════════════════════════════════ */
+.btn-pdm-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--pdm-primary);
+    border: 1px solid var(--pdm-primary);
+    color: #fff;
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--pdm-border-radius);
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-pdm-primary:hover {
+    background-color: var(--pdm-primary-dark);
+    border-color: var(--pdm-primary-dark);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3);
+}
+
+.btn-pdm-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: transparent;
+    border: 1px solid var(--pdm-primary);
+    color: var(--pdm-primary);
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--pdm-border-radius);
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-pdm-outline:hover {
+    background-color: var(--pdm-primary);
+    color: #fff;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   📝 فرم‌ها
+   ═══════════════════════════════════════════════════════ */
+.pdm-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.pdm-form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--pdm-primary-dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.pdm-form-control {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: var(--pdm-border-radius);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.2s;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.pdm-form-control:focus {
+    border-color: var(--pdm-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+.pdm-form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   🔔 هشدارها
+   ═══════════════════════════════════════════════════════ */
+.pdm-alert {
+    padding: 1rem 1.25rem;
+    border-radius: var(--pdm-border-radius);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.92rem;
+    animation: pdmFadeIn 0.4s ease;
+}
+
+.pdm-alert.success { background: #d1fae5; color: #065f46; border-right: 4px solid #10b981; }
+.pdm-alert.danger  { background: #fee2e2; color: #991b1b; border-right: 4px solid #ef4444; }
+.pdm-alert.warning { background: #fef3c7; color: #92400e; border-right: 4px solid #f59e0b; }
+.pdm-alert.info    { background: #dbeafe; color: #1e40af; border-right: 4px solid #3b82f6; }
+
+/* ═══════════════════════════════════════════════════════
+   📊 Empty State
+   ═══════════════════════════════════════════════════════ */
+.pdm-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--pdm-secondary);
+}
+
+.pdm-empty-state i {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.pdm-empty-state h4 {
+    color: var(--pdm-primary-dark);
+    margin-bottom: 0.5rem;
+}
+
+.pdm-empty-state p {
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   🔧 Utility
+   ═══════════════════════════════════════════════════════ */
+.pdm-flex         { display: flex; }
+.pdm-flex-between { display: flex; justify-content: space-between; align-items: center; }
+.pdm-gap-2        { gap: 0.5rem; }
+.pdm-gap-3        { gap: 1rem; }
+.pdm-mb-2         { margin-bottom: 0.5rem; }
+.pdm-mb-3         { margin-bottom: 1rem; }
+.pdm-mb-4         { margin-bottom: 1.5rem; }
+.pdm-mt-2         { margin-top: 0.5rem; }
+.pdm-mt-3         { margin-top: 1rem; }
+.pdm-text-center  { text-align: center; }
+.pdm-text-muted   { color: var(--pdm-secondary); }
+
+/* ═══════════════════════════════════════════════════════
+   📱 ریسپانسیو
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 767px) {
+    .software-content.pdm-fade-in {
+        padding: 1rem;
+    }
+    .pdm-stat-card {
+        padding: 1rem;
+    }
+    .pdm-stat-card h3 {
+        font-size: 1.5rem;
+    }
+    .pdm-stat-card .pdm-stat-icon {
+        font-size: 1.5rem;
+    }
+    .pdm-table {
+        font-size: 0.8rem;
+    }
+    .pdm-table th,
+    .pdm-table td {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 575px) {
+    .pdm-form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   🖨️ استایل چاپ
+   ═══════════════════════════════════════════════════════ */
+@media print {
+    .pdm-no-print,
+    .btn,
+    .btn-pdm-primary,
+    .btn-pdm-outline {
+        display: none !important;
+    }
+    .pdm-stat-card {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #dee2e6 !important;
+    }
+    body { background: #fff !important; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ⚡ انیمیشن‌ها
+   ═══════════════════════════════════════════════════════ */
+@keyframes pdmFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.pdm-fade-in {
+    animation: pdmFadeIn 0.3s ease-in;
+}
+
+/* ═══════════════════════════════════════════════════════
+   📅 Datepicker شمسی PdM
+   ═══════════════════════════════════════════════════════ */
+.pdm-dp-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.pdm-dp-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: 290px;
+    max-width: 100vw;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    z-index: 10000;        /* ⬅️ بالاتر از همه چیز */
+    direction: rtl;
+    font-family: inherit;
+    padding: 0.5rem;
+    animation: pdmFadeIn 0.15s ease;
+    box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+    .pdm-dp-panel {
+        width: 280px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+.pdm-dp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 0.5rem;
+    gap: 0.25rem;
+}
+
+.pdm-dp-title {
+    font-weight: 700;
+    color: var(--pdm-primary-dark, #115E59);
+    font-size: 0.95rem;
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.pdm-dp-nav {
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    color: var(--pdm-primary, #0F766E);
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    font-family: inherit;
+}
+
+.pdm-dp-nav:hover {
+    background: var(--pdm-primary, #0F766E);
+    color: #fff;
+    border-color: var(--pdm-primary, #0F766E);
+}
+
+.pdm-dp-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    padding: 0.25rem 0;
+}
+
+.pdm-dp-dow {
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: var(--pdm-primary-dark, #115E59);
+    padding: 0.4rem 0;
+    background: var(--pdm-light, #F0FDFA);
+    border-radius: 0.25rem;
+}
+
+.pdm-dp-day {
+    text-align: center;
+    padding: 0.45rem 0;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    transition: all 0.15s;
+    user-select: none;
+    color: #374151;
+}
+
+.pdm-dp-day:hover {
+    background: var(--pdm-light, #F0FDFA);
+    color: var(--pdm-primary-dark, #115E59);
+}
+
+.pdm-dp-day.pdm-dp-empty {
+    cursor: default;
+}
+
+.pdm-dp-day.pdm-dp-empty:hover {
+    background: transparent;
+}
+
+.pdm-dp-footer {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 0 0;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 0.5rem;
+}
+
+.pdm-dp-btn {
+    flex: 1;
+    background: var(--pdm-light, #F0FDFA);
+    border: 1px solid var(--pdm-primary, #0F766E);
+    color: var(--pdm-primary-dark, #115E59);
+    padding: 0.4rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    font-weight: 600;
+}
+
+.pdm-dp-btn:hover {
+    background: var(--pdm-primary, #0F766E);
+    color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════
+   🖨️ صفحات چاپ (Print Views)
+   ═══════════════════════════════════════════════════════
+   این استایل‌ها برای صفحات چاپ گزارش‌ها استفاده می‌شوند
+   (printWorkOrders, printFailures, printKPI)
+   ═══════════════════════════════════════════════════════ */
+
+body.pdm-print-body {
+    font-family: Tahoma, 'Vazirmatn', sans-serif;
+    padding: 20px;
+    direction: rtl;
+    background: #fff;
+    color: #1e293b;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body.pdm-print-body * {
+    box-sizing: border-box;
+}
+
+/* هدر چاپ */
+.pdm-print-header {
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--pdm-primary, #0F766E);
+    padding-bottom: 10px;
+}
+
+.pdm-print-header h1 {
+    color: var(--pdm-primary, #0F766E);
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.pdm-print-header p {
+    color: #666;
+    margin: 5px 0 0 0;
+    font-size: 13px;
+}
+
+/* نوار اطلاعات */
+.pdm-print-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 12px;
+    color: #666;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* دکمه‌های چاپ */
+.pdm-print-actions {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.pdm-print-btn,
+.pdm-close-btn {
+    padding: 10px 30px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.pdm-print-btn {
+    background: var(--pdm-primary, #0F766E);
+    color: #fff;
+}
+
+.pdm-print-btn:hover {
+    background: var(--pdm-primary-dark, #115E59);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+}
+
+.pdm-close-btn {
+    background: #6c757d;
+    color: #fff;
+    margin-right: 10px;
+}
+
+.pdm-close-btn:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.25);
+}
+
+/* گرید KPIها در گزارش چاپ */
+.pdm-print-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.pdm-print-kpi-box {
+    border: 1px solid #d1d5db;
+    padding: 15px;
+    text-align: center;
+    border-radius: 8px;
+    background: var(--pdm-light, #F0FDFA);
+}
+
+.pdm-print-kpi-box small {
+    color: #666;
+    font-size: 12px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.pdm-print-kpi-box h3 {
+    color: var(--pdm-primary, #0F766E);
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+/* عنوان بخش در چاپ */
+.pdm-print-section-title {
+    color: var(--pdm-primary, #0F766E);
+    margin-top: 25px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* جدول در حالت چاپ (فونت کوچک‌تر) */
+.pdm-print-body .pdm-table {
+    font-size: 11px;
+}
+
+.pdm-print-body .pdm-table th,
+.pdm-print-body .pdm-table td {
+    padding: 0.5rem 0.75rem;
+}
+
+/* پیام خالی */
+.pdm-print-empty {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   📱 Responsive برای چاپ
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+    .pdm-print-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .pdm-print-header h1 {
+        font-size: 20px;
+    }
+    
+    .pdm-print-btn,
+    .pdm-close-btn {
+        padding: 8px 20px;
+        font-size: 13px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   🖨️ استایل واقعی چاپ (Media Print)
+   ═══════════════════════════════════════════════════════ */
+@media print {
+    .pdm-no-print,
+    .pdm-print-actions {
+        display: none !important;
+    }
+    
+    body.pdm-print-body {
+        padding: 0;
+        background: #fff;
+    }
+    
+    .pdm-print-header {
+        margin-bottom: 15px;
+    }
+    
+    .pdm-print-kpi-box {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        break-inside: avoid;
+    }
+    
+    .pdm-table {
+        page-break-inside: auto;
+    }
+    
+    .pdm-table tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+    
+    .pdm-table thead {
+        display: table-header-group;
+    }
+    
+    .pdm-print-section-title {
+        page-break-after: avoid;
+    }
+}

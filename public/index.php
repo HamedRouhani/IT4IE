@@ -38,6 +38,7 @@ $moduleSlugs = [
     'mcdm-analyzer'  => 'mcdm',
     'or-analyzer'    => 'or',
     'statlab-analyzer'  => 'statlab',
+    'pdm-analyzer'   => 'pdm',
 ];
 
 // ============================================

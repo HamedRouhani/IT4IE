@@ -101,6 +101,27 @@ $moduleMenus = [
             ['route' => 'report',             'icon' => 'fas fa-chart-bar',          'label' => 'گزارش‌ها'],
         ]
     ],
+
+    // -------- PdM Analyzer --------
+    'pdm' => [
+        'name'  => 'PdM Analyzer',
+        'icon'  => 'fas fa-industry',
+        'param' => 'controller',
+        'menus' => [
+
+            ['route' => 'dashboard',        'icon'  => 'fas fa-home',                   'label' => 'داشبورد'],
+            ['route' => 'system',           'icon'  => 'fas fa-building',               'label' => 'سیستم شرکت'],
+            ['route' => 'location',         'icon' => 'fas fa-map-marked-alt',          'label' => 'مکان‌ها'],
+            ['route' => 'asset_category',   'icon' => 'fas fa-tags',                    'label' => 'دسته‌بندی دارایی'],
+            ['route' => 'asset',            'icon'  => 'fas fa-cogs',                   'label' => 'تجهیزات و دارایی‌ها'],
+            ['route' => 'maintenance',      'icon'  => 'fas fa-calendar-check',         'label' => 'برنامه‌های نت'],
+            ['route' => 'workorder',        'icon'  => 'fas fa-clipboard-list',         'label' => 'دستورکارها'],
+            ['route' => 'failure',          'icon' => 'fas fa-exclamation-triangle',    'label' => 'خرابی‌ها و FMEA'],
+            ['route' => 'spare_part',       'icon' => 'fas fa-puzzle-piece',            'label' => 'قطعات یدکی'],
+            ['route' => 'kpi',              'icon' => 'fas fa-chart-line',              'label' => 'شاخص‌ها (KPI)'],
+            ['route' => 'report',           'icon'  => 'fas fa-chart-line',             'label' => 'گزارش‌ها'],
+        ]
+    ],
 ];
 
 // ============================================================
