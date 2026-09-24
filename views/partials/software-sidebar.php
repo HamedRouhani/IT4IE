@@ -122,6 +122,30 @@ $moduleMenus = [
             ['route' => 'report',           'icon'  => 'fas fa-chart-line',             'label' => 'گزارش‌ها'],
         ]
     ],
+
+    // -------- HR Analyzer --------
+    'hr' => [
+        'name'  => 'HR Analyzer',
+        'icon'  => 'fas fa-users',
+        'param' => 'controller',
+        'menus' => [
+            ['route' => 'dashboard',    'icon' => 'fas fa-home',              'label' => 'داشبورد'],
+            ['route' => 'system',       'icon' => 'fas fa-building',          'label' => 'سیستم شرکت'],
+            ['route' => 'department',   'icon' => 'fas fa-sitemap',           'label' => 'دپارتمان‌ها'],
+            ['route' => 'position',     'icon' => 'fas fa-briefcase',         'label' => 'پست‌ها'],
+            ['route' => 'job_grade',    'icon' => 'fas fa-layer-group',       'label' => 'طبقه‌بندی شغلی'],
+            ['route' => 'employee',     'icon' => 'fas fa-user-tie',          'label' => 'کارکنان'],
+            ['route' => 'recruitment',  'icon' => 'fas fa-user-plus',         'label' => 'جذب و استخدام'],
+            ['route' => 'candidate',    'icon' => 'fas fa-users',             'label' => 'متقاضیان'],
+            ['route' => 'interview',    'icon' => 'fas fa-comments',          'label' => 'مصاحبه‌ها'],
+            ['route' => 'performance',  'icon' => 'fas fa-chart-line',        'label' => 'ارزیابی عملکرد'],
+            ['route' => 'training',     'icon' => 'fas fa-graduation-cap',    'label' => 'آموزش'],
+            ['route' => 'competency',   'icon' => 'fas fa-award',             'label' => 'شایستگی‌ها'],
+            ['route' => 'compensation', 'icon' => 'fas fa-money-bill-wave',   'label' => 'جبران خدمات'],
+            ['route' => 'kpi',          'icon' => 'fas fa-chart-bar',         'label' => 'شاخص‌ها'],
+            ['route' => 'report',       'icon' => 'fas fa-file-alt',          'label' => 'گزارش‌ها'],
+        ]
+    ],
 ];
 
 // ============================================================

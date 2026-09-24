@@ -33,12 +33,13 @@ if (file_exists($envFile)) {
 // نگاشت slug در دیتابیس به نام پوشه فیزیکی
 // ============================================
 $moduleSlugs = [
-    'babok-analyzer' => 'babok',
-    'pmbok-analyzer' => 'pmbok',
-    'mcdm-analyzer'  => 'mcdm',
-    'or-analyzer'    => 'or',
+    'babok-analyzer'    => 'babok',
+    'pmbok-analyzer'    => 'pmbok',
+    'mcdm-analyzer'     => 'mcdm',
+    'or-analyzer'       => 'or',
     'statlab-analyzer'  => 'statlab',
-    'pdm-analyzer'   => 'pdm',
+    'pdm-analyzer'      => 'pdm',
+    'hr-analyzer'       => 'hr',
 ];
 
 // ============================================
