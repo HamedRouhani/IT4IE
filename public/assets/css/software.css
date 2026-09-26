@@ -1,595 +1,559 @@
 /* ================================================================
-   استایل‌های نرم‌افزارهای ماژولار - IT4IE (نسخه 2.0 هماهنگ)
+   IT4IE — Software List Page (نسخه 4.0 — رنگ‌محور)
+   کارت‌های نرم‌افزار با تم اختصاصی هر ماژول
    ================================================================ */
 
-/* ========== متغیرها ========== */
+/* ─── متغیرهای پایه ─── */
 :root {
-    --soft-primary: #2c3e50;
-    --soft-secondary: #3498db;
-    --soft-success: #27ae60;
-    --soft-warning: #f39c12;
-    --soft-danger: #e74c3c;
-    --soft-info: #17a2b8;
-    --soft-light: #ecf0f1;
-    --soft-dark: #2c3e50;
-    --soft-bg: #f4f7f9;
-    --soft-border: #e0e0e0;
-    --soft-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    --soft-shadow-lg: 0 8px 25px rgba(0,0,0,0.12);
-    --soft-radius: 12px;
-    --soft-transition: all 0.3s ease;
-    --soft-sidebar-width: 270px;
+    --swl-bg:         #f4f7f9;
+    --swl-white:      #ffffff;
+    --swl-dark:       #1e293b;
+    --swl-gray:       #64748b;
+    --swl-gray-light: #e2e8f0;
+    --swl-gray-bg:    #f8fafc;
+    --swl-border:     #e2e8f0;
+    --swl-radius:     16px;
+    --swl-radius-sm:  10px;
+    --swl-shadow:     0 2px 12px rgba(15, 23, 42, .06);
+    --swl-shadow-lg:  0 12px 32px rgba(15, 23, 42, .14);
+    --swl-transition: all .35s cubic-bezier(.4, 0, .2, 1);
 }
 
-/* ========== Base ========== */
-body.software-mode {
-    background: var(--soft-bg);
-    font-family: 'Vazirmatn', 'Tahoma', sans-serif;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
+/* ─── رنگ اختصاصی هر ماژول ─── */
+.swl-card[data-theme="babok"]   { --sw-color: #0891B2; --sw-color-dark: #0E7490; --sw-color-rgb: 8, 145, 178; }
+.swl-card[data-theme="pmbok"]   { --sw-color: #7C3AED; --sw-color-dark: #5B21B6; --sw-color-rgb: 124, 58, 237; }
+.swl-card[data-theme="mcdm"]    { --sw-color: #059669; --sw-color-dark: #047857; --sw-color-rgb: 5, 150, 105; }
+.swl-card[data-theme="or"]      { --sw-color: #EA580C; --sw-color-dark: #C2410C; --sw-color-rgb: 234, 88, 12; }
+.swl-card[data-theme="statlab"] { --sw-color: #2563EB; --sw-color-dark: #1D4ED8; --sw-color-rgb: 37, 99, 235; }
+.swl-card[data-theme="pdm"]     { --sw-color: #0F766E; --sw-color-dark: #115E59; --sw-color-rgb: 15, 118, 110; }
+.swl-card[data-theme="hr"]      { --sw-color: #1E40AF; --sw-color-dark: #1E3A8A; --sw-color-rgb: 30, 64, 175; }
+.swl-card[data-theme="quality"] { --sw-color: #059669; --sw-color-dark: #047857; --sw-color-rgb: 5, 150, 105; }
+.swl-card[data-theme="itil"]    { --sw-color: #10B981; --sw-color-dark: #059669; --sw-color-rgb: 16, 185, 129; }
+.swl-card[data-theme="togaf"]   { --sw-color: #3B82F6; --sw-color-dark: #2563EB; --sw-color-rgb: 59, 130, 246; }
+.swl-card[data-theme="default"] { --sw-color: #6366F1; --sw-color-dark: #4F46E5; --sw-color-rgb: 99, 102, 241; }
+
+/* ─── Wrapper ─── */
+.swl-page {
+    background: var(--swl-bg);
+    min-height: 100vh;
+    padding: 30px 20px 60px;
+    direction: rtl;
+    box-sizing: border-box;
 }
+.swl-page * { box-sizing: border-box; }
 
-/* خنثی‌سازی layout اصلی IT4IE */
-body.software-mode .main-content { padding: 0 !important; margin: 0 !important; }
-body.software-mode .content-wrapper { display: block !important; max-width: 100% !important; }
-body.software-mode .sidebar { display: none !important; }
+.swl-container { max-width: 1280px; margin: 0 auto; }
 
-/* ========== Wrapper ========== */
-.software-wrapper {
-    display: flex;
-    align-items: stretch;
-    min-height: calc(100vh - 90px);
-    background: var(--soft-bg);
-}
+/* ─── Header ─── */
+.swl-header { text-align: center; margin-bottom: 32px; }
 
-/* ========== سایدبار (دسکتاپ: عمودی) ========== */
-.software-sidebar {
-    width: var(--soft-sidebar-width);
-    flex-shrink: 0;
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    box-shadow: -2px 0 10px rgba(0,0,0,0.15);
-    z-index: 50;
-}
-
-.software-sidebar::-webkit-scrollbar { width: 6px; }
-.software-sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.2);
-    border-radius: 3px;
-}
-
-/* هدر سایدبار */
-.software-sidebar-header {
-    padding: 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.software-sidebar-header h3 {
-    font-size: 1.1rem;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #fff;
-    font-weight: 700;
-}
-
-.software-sidebar-header h3 i { color: #60a5fa; font-size: 1.3rem; }
-
-.software-sidebar-header .software-subtitle {
-    font-size: 0.75rem;
-    color: #94a3b8;
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* منوی عمودی */
-.software-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 15px 10px;
-    flex: 1;
-}
-
-.software-nav a {
-    color: #cbd5e1;
-    padding: 12px 15px;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: var(--soft-transition);
-    border-right: 3px solid transparent;
-    border-radius: 6px;
-    font-size: 0.9rem;
-}
-
-.software-nav a i { width: 20px; text-align: center; }
-
-.software-nav a:hover {
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    border-right-color: #60a5fa;
-}
-
-.software-nav a.active {
-    background: rgba(96,165,250,0.15);
-    color: #60a5fa;
-    border-right-color: #60a5fa;
-    font-weight: 600;
-}
-
-/* فوتر سایدبار */
-.software-sidebar-footer {
-    padding: 15px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.btn-exit-software,
-.btn-login-software {
+.swl-header h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--swl-dark);
+    margin: 0 0 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 10px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 0.88rem;
-    font-weight: 500;
-    transition: var(--soft-transition);
+    gap: 12px;
+    flex-wrap: wrap;
+    line-height: 1.3;
 }
 
-.btn-exit-software {
-    background: rgba(239,68,68,0.15);
-    color: #fca5a5;
-}
-.btn-exit-software:hover { background: rgba(239,68,68,0.3); color: #fff; }
+.swl-header h1 i { color: #3b82f6; font-size: 2rem; }
 
-.btn-login-software {
-    background: rgba(59,130,246,0.15);
-    color: #93c5fd;
+.swl-header h1 span {
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
-.btn-login-software:hover { background: rgba(59,130,246,0.3); color: #fff; }
 
-/* ========== محتوای اصلی ========== */
-.software-main {
+.swl-header p {
+    font-size: 1rem;
+    color: var(--swl-gray);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.8;
+}
+
+/* ─── Stat Card ─── */
+.swl-stat-wrap { display: flex; justify-content: center; margin-bottom: 32px; }
+
+.swl-stat {
+    background: var(--swl-white);
+    border-radius: var(--swl-radius);
+    padding: 18px 32px;
+    box-shadow: var(--swl-shadow);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-right: 4px solid #6366f1;
+    max-width: 340px;
+}
+
+.swl-stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--swl-radius-sm);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.swl-stat-info h3 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--swl-dark);
+    line-height: 1;
+}
+
+.swl-stat-info p { margin: 4px 0 0; font-size: .82rem; color: var(--swl-gray); }
+
+/* ─── Grid ─── */
+.swl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 22px;
+}
+
+/* ═══════════════════════════════════════════
+   🎨 CARD
+   ═══════════════════════════════════════════ */
+.swl-card {
+    background: var(--swl-white);
+    border-radius: var(--swl-radius);
+    padding: 24px 22px 22px;
+    box-shadow: var(--swl-shadow);
+    transition: var(--swl-transition);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--swl-border);
+    animation: swlFadeIn .5s ease-out backwards;
+}
+
+.swl-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--sw-color), var(--sw-color-dark));
+    transition: height .3s ease;
+}
+
+.swl-card::after {
+    content: '';
+    position: absolute;
+    top: -60px;
+    left: -60px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--sw-color-rgb), .08) 0%, transparent 70%);
+    pointer-events: none;
+    transition: transform .5s ease;
+}
+
+.swl-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--swl-shadow-lg);
+    border-color: transparent;
+}
+
+.swl-card:hover::before { height: 6px; }
+.swl-card:hover::after  { transform: scale(1.3); }
+
+/* ─── Badge وضعیت ─── */
+.swl-badge {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: .7rem;
+    font-weight: 700;
+    white-space: nowrap;
+    z-index: 2;
+}
+
+.swl-badge.beta        { background: #fef3c7; color: #92400e; }
+.swl-badge.stable      { background: #d1fae5; color: #065f46; }
+.swl-badge.development { background: #dbeafe; color: #1e40af; }
+.swl-badge.deprecated  { background: #fee2e2; color: #991b1b; }
+
+/* ─── Head ─── */
+.swl-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding-top: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.swl-icon {
+    flex-shrink: 0;
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--sw-color), var(--sw-color-dark));
+    box-shadow: 0 6px 16px rgba(var(--sw-color-rgb), .3);
+    transition: var(--swl-transition);
+}
+
+.swl-card:hover .swl-icon {
+    transform: scale(1.05) rotate(-3deg);
+    box-shadow: 0 8px 22px rgba(var(--sw-color-rgb), .4);
+}
+
+/* ─── Title ─── */
+.swl-title {
     flex: 1;
     min-width: 0;
-    padding: 25px 30px;
-    background: var(--soft-bg);
+    padding-top: 4px;
 }
 
-.software-content {
-    max-width: 1400px;
-    margin: 0 auto;
+.swl-title h3 {
+    font-size: 1.08rem;
+    font-weight: 800;
+    color: var(--swl-dark);
+    margin: 0 0 6px;
+    line-height: 1.4;
+    word-break: break-word;
 }
 
-/* ========== پیام‌ها ========== */
-.alert-software {
-    padding: 14px 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.92rem;
-    animation: softSlideDown 0.4s ease;
-}
-@keyframes softSlideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.alert-software.success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
-.alert-software.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-.alert-software.warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
-.alert-software.info    { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-.alert-software i { font-size: 1.2rem; }
-
-/* ========== کارت‌ها ========== */
-.software-content .card {
-    background: #fff;
-    border-radius: var(--soft-radius);
-    padding: 25px;
-    box-shadow: var(--soft-shadow);
-    margin-bottom: 25px;
-    transition: var(--soft-transition);
-}
-.software-content .card:hover { box-shadow: var(--soft-shadow-lg); }
-
-.software-content .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid var(--soft-light);
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.software-content .card-title {
-    font-size: 1.2rem;
+.swl-title small {
+    color: var(--sw-color);
+    font-size: .75rem;
     font-weight: 700;
-    color: var(--soft-dark);
-    margin: 0;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 4px;
+    background: rgba(var(--sw-color-rgb), .1);
+    padding: 2px 8px;
+    border-radius: 8px;
 }
-.software-content .card-title i { color: var(--soft-secondary); }
 
-.software-content .card-tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.swl-title small i { font-size: .65rem; }
 
-/* ========== دکمه‌ها ========== */
-.software-content .btn {
+/* ─── Description ─── */
+.swl-desc {
+    color: var(--swl-gray);
+    font-size: .85rem;
+    line-height: 1.8;
+    margin: 0 0 14px;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+/* ─── Tech Stack ─── */
+.swl-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+}
+
+.swl-tech span {
+    background: rgba(var(--sw-color-rgb), .1);
+    color: var(--sw-color-dark);
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: .68rem;
+    font-weight: 700;
+    white-space: nowrap;
+    border: 1px solid rgba(var(--sw-color-rgb), .15);
+}
+
+/* ─── Features ─── */
+.swl-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.swl-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: .82rem;
+    color: var(--swl-gray);
+    margin-bottom: 6px;
+    line-height: 1.6;
+}
+
+.swl-features li i {
+    color: var(--sw-color);
+    font-size: .85rem;
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+.swl-features li.more {
+    font-style: italic;
+    padding-right: 22px;
+    color: var(--sw-color);
+    font-weight: 600;
+    font-size: .78rem;
+}
+
+/* ─── Footer (دکمه‌ها) ─── */
+.swl-foot {
+    margin-top: auto;
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+.swl-foot form {
+    flex: 1;
+    min-width: 130px;
+    margin: 0;
+}
+
+.swl-btn-run {
+    width: 100%;
+    height: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 0.88rem;
-    font-weight: 500;
-    transition: var(--soft-transition);
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-}
-.software-content .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
-.software-content .btn-primary  { background: var(--soft-secondary); color: #fff; }
-.software-content .btn-primary:hover { background: #2980b9; }
-.software-content .btn-success  { background: var(--soft-success); color: #fff; }
-.software-content .btn-success:hover { background: #219a52; }
-.software-content .btn-warning  { background: var(--soft-warning); color: #fff; }
-.software-content .btn-danger   { background: var(--soft-danger); color: #fff; }
-.software-content .btn-danger:hover { background: #c0392b; }
-.software-content .btn-secondary { background: var(--soft-light); color: var(--soft-dark); }
-.software-content .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
-.software-content .btn-lg { padding: 14px 30px; font-size: 1rem; }
-
-/* ========== نشان‌ها ========== */
-.software-content .badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 600;
-}
-.software-content .badge-primary  { background: var(--soft-secondary); color: #fff; }
-.software-content .badge-success  { background: var(--soft-success); color: #fff; }
-.software-content .badge-warning  { background: var(--soft-warning); color: #fff; }
-.software-content .badge-danger   { background: var(--soft-danger); color: #fff; }
-.software-content .badge-secondary { background: var(--soft-light); color: var(--soft-dark); }
-.software-content .badge-info     { background: var(--soft-info); color: #fff; }
-
-/* ========== جدول‌ها ========== */
-.software-content .table-responsive { overflow-x: auto; }
-.software-content .table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-.software-content .table th {
-    background: var(--soft-primary);
+    gap: 8px;
+    background: linear-gradient(135deg, var(--sw-color), var(--sw-color-dark));
     color: #fff;
-    padding: 12px 15px;
-    text-align: right;
-    font-weight: 600;
-}
-.software-content .table td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; }
-.software-content .table tr:hover td { background: #f8f9fa; }
-
-/* ========== فرم‌ها ========== */
-.software-content .form-control {
-    width: 100%;
-    padding: 10px 14px;
-    border: 2px solid var(--soft-border);
-    border-radius: 8px;
-    font-size: 0.95rem;
+    border: none;
+    border-radius: 11px;
+    padding: 0 18px;
+    font-size: .9rem;
+    font-weight: 700;
     font-family: inherit;
-    transition: var(--soft-transition);
-    background: #fff;
-    box-sizing: border-box;
-}
-.software-content .form-control:focus {
-    border-color: var(--soft-secondary);
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
-}
-.software-content .form-label {
-    font-weight: 600;
-    margin-bottom: 8px;
-    display: block;
-    font-size: 0.9rem;
-    color: var(--soft-dark);
-}
-.software-content .form-group { margin-bottom: 18px; }
-.software-content .form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-}
-
-/* ========== گریدها ========== */
-.software-content .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-.software-content .main-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 30px;
-    margin-top: 20px;
-}
-.software-content .row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-/* ========== Progress ========== */
-.software-content .progress {
-    height: 8px;
-    background: var(--soft-light);
-    border-radius: 10px;
-    overflow: hidden;
-}
-.software-content .progress-bar {
-    height: 100%;
-    background: var(--soft-secondary);
-    border-radius: 10px;
-    transition: width 0.5s ease;
-}
-
-/* ========== Utility ========== */
-.software-content .text-muted { color: #95a5a6; }
-.software-content .text-center { text-align: center; }
-.software-content .mt-2 { margin-top: 10px; }
-.software-content .mt-3 { margin-top: 15px; }
-.software-content .mt-4 { margin-top: 20px; }
-.software-content .mb-2 { margin-bottom: 10px; }
-.software-content .mb-3 { margin-bottom: 15px; }
-.software-content .d-flex { display: flex; }
-.software-content .gap-2 { gap: 10px; }
-.software-content .flex-wrap { flex-wrap: wrap; }
-
-/* ================================================================
-   📱 RESPONSIVE - تبلت و موبایل: سایدبار در بالا با Wrap
-   ================================================================ */
-@media (max-width: 991px) {
-    .software-wrapper {
-        flex-direction: column;
-    }
-
-    /* سایدبار در بالای صفحه با ارتفاع خودکار */
-    .software-sidebar {
-        width: 100%;
-        position: static;
-        height: auto;
-        max-height: none;
-        overflow: visible; /* حذف اسکرول داخلی */
-        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-    }
-
-    .software-sidebar-header {
-        padding: 12px 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 8px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .software-sidebar-header h3 {
-        font-size: 1rem;
-    }
-    .software-sidebar-header .software-subtitle {
-        margin-top: 0;
-        font-size: 0.72rem;
-    }
-
-    /* ✅ منوی افقی با Wrap در چند خط (بدون اسکرول) */
-    .software-nav {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap !important;          /* ← کلیدی: wrap به جای اسکرول */
-        justify-content: flex-start;
-        align-items: stretch;
-        overflow: visible !important;        /* ← حذف اسکرول */
-        -webkit-overflow-scrolling: auto;
-        padding: 10px 12px;
-        gap: 6px;                            /* فاصله بین آیتم‌ها */
-        scrollbar-width: none;
-        background: rgba(0,0,0,0.25);
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-    .software-nav::-webkit-scrollbar { display: none; }
-
-    .software-nav a {
-        flex: 0 0 auto;                      /* آیتم‌ها کوچک نشوند */
-        border-right: none;
-        border-bottom: none;
-        border-radius: 20px;                 /* شکل کپسولی */
-        padding: 8px 14px !important;
-        white-space: nowrap;                 /* متن هر آیتم در یک خط */
-        font-size: 0.82rem;
-        background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,255,255,0.1);
-        margin: 0;
-        transition: all 0.2s ease;
-    }
-
-    .software-nav a:hover {
-        background: rgba(96,165,250,0.2);
-        color: #fff;
-        border-color: rgba(96,165,250,0.4);
-        transform: translateY(-1px);
-    }
-
-    .software-nav a.active {
-        background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-        color: #fff;
-        border-color: #60a5fa;
-        box-shadow: 0 2px 8px rgba(96,165,250,0.35);
-        font-weight: 600;
-    }
-
-    .software-nav a i {
-        font-size: 0.85rem;
-    }
-
-    /* فوتر به صورت افقی و جمع‌وجور */
-    .software-sidebar-footer {
-        flex-direction: row;
-        justify-content: center;
-        gap: 8px;
-        padding: 10px 15px;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        flex-wrap: wrap;
-    }
-
-    .btn-exit-software,
-    .btn-login-software {
-        padding: 7px 14px;
-        font-size: 0.78rem;
-        border-radius: 16px;
-    }
-
-    .software-main {
-        padding: 20px 15px;
-        width: 100%;
-    }
-    .software-content .main-grid { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 767px) {
-    .software-main { padding: 15px 10px; }
-    .software-content .card { padding: 18px; }
-    .software-content .card-header { flex-direction: column; align-items: stretch; }
-    .software-content .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-    .software-content .table { font-size: 0.8rem; }
-    .software-content .table th,
-    .software-content .table td { padding: 8px 10px; }
-    
-    /* آیتم‌های منو کمی کوچک‌تر */
-    .software-nav {
-        padding: 8px 10px;
-        gap: 5px;
-    }
-    .software-nav a {
-        padding: 6px 12px !important;
-        font-size: 0.78rem;
-    }
-    .software-nav a i { font-size: 0.8rem; }
-}
-
-@media (max-width: 479px) {
-    .software-content .stats-grid { grid-template-columns: 1fr; }
-    .software-content .row { grid-template-columns: 1fr; }
-    .software-sidebar-header h3 { font-size: 0.95rem; }
-    
-    /* در موبایل خیلی کوچک: آیکون‌ها فشرده‌تر */
-    .software-nav {
-        padding: 6px 8px;
-        gap: 4px;
-    }
-    .software-nav a {
-        padding: 5px 10px !important;
-        font-size: 0.72rem;
-        border-radius: 16px;
-    }
-}
-
-/* ================================================================
-   کاهش فاصله بین منو و فوتر سایدبار (فقط دسکتاپ)
-   ================================================================ */
-@media (min-width: 992px) {
-    /* منو دیگر فضای خالی را پر نمی‌کند */
-    .software-nav {
-        flex: none;
-    }
-
-    /* فوتر بلافاصله بعد از منو با فاصله کم */
-    .software-sidebar-footer {
-        margin-top: 10px;
-    }
-}
-
-/* دکمه اجرای نرم‌افزار */
-.btn-run-software {
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(var(--sw-color-rgb), .3);
+    transition: var(--swl-transition);
     position: relative;
     overflow: hidden;
 }
 
-.btn-run-software::before {
+.swl-btn-run::before {
     content: '';
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-    );
-    transition: left 0.5s;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+    transition: left .5s;
 }
 
-.btn-run-software:hover::before {
-    left: 100%;
+.swl-btn-run:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(var(--sw-color-rgb), .45);
+    color: #fff;
 }
 
-.btn-run-software:active {
-    transform: scale(0.98) !important;
+.swl-btn-run:hover::before { left: 100%; }
+.swl-btn-run:active        { transform: scale(.98); }
+
+/* ─── دکمه ثانویه ─── */
+.swl-btn-sec {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 44px;
+    padding: 0 16px;
+    background: var(--swl-gray-bg);
+    color: var(--swl-dark);
+    border: 1px solid var(--swl-border);
+    border-radius: 11px;
+    text-decoration: none;
+    font-size: .85rem;
+    font-weight: 600;
+    transition: var(--swl-transition);
+    white-space: nowrap;
+    font-family: inherit;
 }
 
-/* انیمیشن ورود کارت‌ها */
-.project-card {
-    animation: fadeInUp 0.5s ease-out;
+.swl-btn-sec:hover {
+    background: rgba(var(--sw-color-rgb), .08);
+    color: var(--sw-color-dark);
+    border-color: var(--sw-color);
+    transform: translateY(-2px);
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.swl-btn-ico {
+    width: 44px;
+    padding: 0;
+    font-size: 1.15rem;
+    flex-shrink: 0;
 }
 
-.project-card:nth-child(1) { animation-delay: 0.1s; }
-.project-card:nth-child(2) { animation-delay: 0.2s; }
-.project-card:nth-child(3) { animation-delay: 0.3s; }
+/* ─── Empty State ─── */
+.swl-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--swl-gray);
+}
 
-/* Responsive */
-@media (max-width: 480px) {
-    .btn-run-software {
-        font-size: 0.85rem !important;
+.swl-empty i {
+    font-size: 4rem;
+    opacity: .25;
+    display: block;
+    margin-bottom: 16px;
+}
+
+.swl-empty p { font-size: 1.1rem; margin: 0; }
+
+/* ─── Animation ─── */
+@keyframes swlFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.swl-card:nth-child(1)  { animation-delay: .05s; }
+.swl-card:nth-child(2)  { animation-delay: .1s; }
+.swl-card:nth-child(3)  { animation-delay: .15s; }
+.swl-card:nth-child(4)  { animation-delay: .2s; }
+.swl-card:nth-child(5)  { animation-delay: .25s; }
+.swl-card:nth-child(6)  { animation-delay: .3s; }
+.swl-card:nth-child(7)  { animation-delay: .35s; }
+.swl-card:nth-child(8)  { animation-delay: .4s; }
+.swl-card:nth-child(9)  { animation-delay: .45s; }
+.swl-card:nth-child(10) { animation-delay: .5s; }
+
+/* ═════════════════════════════════════════════
+   RESPONSIVE
+   ═════════════════════════════════════════════ */
+
+@media (max-width: 992px) {
+    .swl-page { padding: 24px 16px 50px; }
+    .swl-header h1 { font-size: 1.8rem; }
+    .swl-header h1 i { font-size: 1.6rem; }
+    .swl-header p { font-size: .92rem; }
+
+    .swl-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 18px;
     }
-    
-    .btn-babok-secondary span {
-        display: none; /* در موبایل فقط آیکون دمو */
+
+    .swl-card { padding: 22px 18px 18px; }
+    .swl-icon { width: 52px; height: 52px; font-size: 1.3rem; }
+}
+
+@media (max-width: 640px) {
+    .swl-page { padding: 16px 12px 40px; }
+
+    .swl-header { margin-bottom: 22px; }
+    .swl-header h1 {
+        font-size: 1.4rem;
+        gap: 8px;
+        padding: 0 10px;
     }
-    
-    .btn-babok-secondary {
-        width: 44px !important;
-        padding: 0 !important;
+    .swl-header h1 i { font-size: 1.3rem; }
+    .swl-header p { font-size: .85rem; padding: 0 12px; }
+
+    .swl-stat-wrap { margin-bottom: 22px; }
+    .swl-stat { padding: 14px 20px; gap: 12px; max-width: 100%; }
+    .swl-stat-icon { width: 44px; height: 44px; font-size: 1.2rem; }
+    .swl-stat-info h3 { font-size: 1.4rem; }
+
+    .swl-grid { grid-template-columns: 1fr; gap: 14px; }
+
+    .swl-card {
+        padding: 20px 16px 16px;
+        border-radius: 14px;
     }
+
+    .swl-badge {
+        top: 14px;
+        left: 14px;
+        padding: 3px 10px;
+        font-size: .65rem;
+    }
+
+    .swl-head {
+        gap: 12px;
+        margin-bottom: 12px;
+        padding-top: 8px;
+    }
+
+    .swl-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+        border-radius: 12px;
+    }
+
+    .swl-title h3 { font-size: .98rem; }
+    .swl-title small { font-size: .7rem; }
+
+    .swl-desc {
+        font-size: .82rem;
+        -webkit-line-clamp: 2;
+        margin-bottom: 12px;
+    }
+
+    .swl-features li {
+        font-size: .78rem;
+        margin-bottom: 4px;
+    }
+
+    .swl-tech span {
+        font-size: .65rem;
+        padding: 2px 8px;
+    }
+
+    .swl-foot { gap: 6px; }
+    .swl-foot form { min-width: 100%; flex: 1 0 100%; }
+    .swl-btn-run { height: 46px; font-size: .87rem; }
+    .swl-btn-sec { height: 40px; padding: 0 14px; font-size: .8rem; flex: 1; }
+    .swl-btn-ico { width: 40px; flex: 0 0 40px; }
+}
+
+@media (max-width: 380px) {
+    .swl-header h1 { font-size: 1.2rem; }
+    .swl-card { padding: 16px 14px 14px; }
+    .swl-icon { width: 44px; height: 44px; font-size: 1.05rem; border-radius: 10px; }
+    .swl-title h3 { font-size: .92rem; }
+    .swl-stat { padding: 12px 16px; }
+    .swl-stat-info h3 { font-size: 1.25rem; }
+}
+
+@media print {
+    .swl-foot,
+    .swl-badge { display: none !important; }
+    .swl-card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+    }
+    .swl-card::before,
+    .swl-card::after { display: none; }
 }

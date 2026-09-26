@@ -146,6 +146,25 @@ $moduleMenus = [
             ['route' => 'report',       'icon' => 'fas fa-file-alt',          'label' => 'گزارش‌ها'],
         ]
     ],
+
+    // -------- Quality Analyzer (SPC) --------
+    'quality' => [
+        'name'  => 'Quality Analyzer',
+        'icon'  => 'fas fa-clipboard-check',
+        'param' => 'controller',
+        'menus' => [
+            ['route' => 'dashboard',       'icon' => 'fas fa-home',                  'label' => 'داشبورد'],
+            ['route' => 'system',          'icon' => 'fas fa-building',              'label' => 'سیستم شرکت'],
+            ['route' => 'project',         'icon' => 'fas fa-folder-open',           'label' => 'پروژه‌های کیفیت'],
+            ['route' => 'dataset',         'icon' => 'fas fa-database',              'label' => 'مجموعه داده‌ها'],
+            ['route' => 'control_chart',   'icon' => 'fas fa-chart-line',            'label' => 'نمودارهای کنترل'],
+            ['route' => 'attribute_chart', 'icon' => 'fas fa-chart-bar',             'label' => 'نمودارهای صفتی'],
+            ['route' => 'capability',      'icon' => 'fas fa-bullseye',              'label' => 'قابلیت فرآیند'],
+            ['route' => 'msa',             'icon' => 'fas fa-ruler-combined',        'label' => 'تحلیل MSA (GR&R)'],
+            ['route' => 'sampling',        'icon' => 'fas fa-vials',                 'label' => 'نمونه‌گیری'],
+            ['route' => 'report',          'icon' => 'fas fa-file-alt',              'label' => 'گزارش‌ها'],
+        ]
+    ],
 ];
 
 // ============================================================

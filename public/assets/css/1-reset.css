@@ -1,51 +1,159 @@
-/* ========================================
-   1. RESET & BASE - تم بنفش
-   ======================================== */
-* {
-    margin: 0;
-    padding: 0;
+/* =========================================================
+   IT4IE - RESET & CSS VARIABLES
+   File: public/assets/css/1-reset.css
+   ========================================================= */
+
+:root {
+    /* ---------- Colors ---------- */
+    --primary:          #6C3CE1;
+    --primary-dark:     #5A2FC9;
+    --primary-light:    #8B6FE8;
+    --primary-gradient: linear-gradient(135deg, #6C3CE1 0%, #8B6FE8 100%);
+
+    --success:          #22C55E;
+    --warning:          #F59E0B;
+    --danger:           #EF4444;
+    --info:             #3B82F6;
+
+    --white:            #FFFFFF;
+    --dark:             #0F172A;
+    --gray-dark:        #475569;
+    --gray:             #64748B;
+    --gray-light:       #E2E8F0;
+    --gray-lighter:     #F1F5F9;
+
+    /* ---------- Spacing Scale ---------- */
+    --space-2xs: 4px;
+    --space-xs:  8px;
+    --space-sm:  16px;
+    --space-md:  24px;
+    --space-lg:  40px;
+    --space-xl:  60px;
+    --space-2xl: 80px;
+
+    /* ---------- Typography Scale ---------- */
+    --fs-xs:   0.75rem;
+    --fs-sm:   0.875rem;
+    --fs-base: 1rem;
+    --fs-lg:   1.125rem;
+    --fs-xl:   1.25rem;
+    --fs-2xl:  1.5rem;
+    --fs-3xl:  2rem;
+    --fs-4xl:  2.5rem;
+
+    /* ---------- Border Radius ---------- */
+    --radius-sm:   6px;
+    --radius-md:   10px;
+    --radius-lg:   16px;
+    --radius-xl:   24px;
+    --radius-full: 9999px;
+
+    /* ---------- Shadows ---------- */
+    --shadow:    0 2px 12px rgba(15, 23, 42, 0.06);
+    --shadow-lg: 0 8px 28px rgba(15, 23, 42, 0.10);
+    --shadow-xl: 0 20px 60px rgba(15, 23, 42, 0.18);
+
+    /* ---------- Transitions ---------- */
+    --transition:      all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease;
+
+    /* ---------- Typography ---------- */
+    --font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont,
+                   'Segoe UI', Roboto, sans-serif;
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
-:root {
-    /* رنگ‌های بنفش */
-    --primary: #6C3CE1;
-    --primary-dark: #5A2FD4;
-    --primary-light: #8B6FE8;
-    --primary-rgb: 108, 60, 225;
-    --primary-gradient: linear-gradient(135deg, #6C3CE1, #8B6FE8);
-    
-    --secondary: #F59E0B;
-    --success: #22C55E;
-    --danger: #EF4444;
-    --warning: #F59E0B;
-    
-    --dark: #1E293B;
-    --gray: #94A3B8;
-    --gray-light: #E2E8F0;
-    --gray-lighter: #F8FAFC;
-    --gray-dark: #475569;
-    --white: #FFFFFF;
-    
-    --shadow: 0 4px 24px rgba(108, 60, 225, 0.08);
-    --shadow-lg: 0 8px 40px rgba(108, 60, 225, 0.12);
-    --shadow-xl: 0 12px 56px rgba(108, 60, 225, 0.16);
-    
-    --radius: 12px;
-    --radius-lg: 20px;
-    --radius-xl: 28px;
-    --radius-full: 9999px;
-    
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --font-family: 'Vazirmatn', 'IRANSans', Tahoma, sans-serif;
-    
-    /* فواصل خطوط */
-    --line-height-normal: 1.8;
-    --line-height-reading: 2;
-    --line-height-heading: 1.4;
-    
-    /* فاصله بین پاراگراف‌ها */
-    --paragraph-gap: 1.2rem;
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+    font-size: var(--fs-base);
+    line-height: 1.7;
+    color: var(--dark);
+    background: var(--white);
+    direction: rtl;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    line-height: 1.4;
+}
+
+p {
+    margin: 0 0 var(--space-sm);
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+a:hover {
+    color: var(--primary-dark);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+}
+
+ul, ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* ---------- Focus (دسترس‌پذیری) ---------- */
+:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* ---------- Selection ---------- */
+::selection {
+    background: rgba(108, 60, 225, 0.20);
+    color: var(--primary-dark);
+}
+
+/* ---------- Scrollbar (اختیاری، مدرن) ---------- */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-lighter);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gray-light);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--gray-lighter);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gray);
 }
 
 html {

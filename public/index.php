@@ -40,6 +40,7 @@ $moduleSlugs = [
     'statlab-analyzer'  => 'statlab',
     'pdm-analyzer'      => 'pdm',
     'hr-analyzer'       => 'hr',
+    'quality-analyzer'  => 'quality',
 ];
 
 // ============================================

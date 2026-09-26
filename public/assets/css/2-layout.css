@@ -1,55 +1,81 @@
-/* ========================================
-   2. CONTAINER & LAYOUT
-   ======================================== */
+/* =========================================================
+   IT4IE - LAYOUT & CONTAINER
+   File: public/assets/css/2-layout.css
+   Version: 2.0.0
+   ========================================================= */
+
 .container {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
-    width: 100%;
+    padding: 0 var(--space-md, 24px);
 }
 
 .main-content {
     flex: 1;
-    padding: 30px 0;
+    padding: var(--space-lg, 40px) 0;
 }
 
-/* ============================================
+/* =========================================================
    CONTENT WRAPPER - سایدبار در راست (RTL)
-   ============================================ */
+   ========================================================= */
 .content-wrapper {
     display: flex;
-    gap: 30px;
+    flex-direction: row;
+    gap: var(--space-md, 24px);
     align-items: flex-start;
-    flex-direction: row; /* RTL */
 }
 
-/* سایدبار - در سمت راست */
-.sidebar {
+/* سایدبار - در سمت راست در RTL */
+.content-wrapper > .sidebar {
+    flex: 0 0 260px;
     width: 260px;
-    flex-shrink: 0;
-    order: 1 !important; /* در RTL، سایدبار در راست */
+    order: 1;
 }
 
-/* محتوای اصلی - در سمت چپ */
-.content-main {
-    flex: 1;
+/* محتوای اصلی - در سمت چپ در RTL */
+.content-wrapper > .content-main {
+    flex: 1 1 auto;
     min-width: 0;
-    order: 2 !important; /* در RTL، محتوا در چپ */
+    order: 2;
 }
 
-/* ============================================
-   RESPONSIVE - موبایل
-   ============================================ */
+/* =========================================================
+   RESPONSIVE - Tablet
+   ========================================================= */
+@media (max-width: 992px) {
+    .content-wrapper > .sidebar {
+        flex: 0 0 220px;
+        width: 220px;
+    }
+}
+
+/* =========================================================
+   RESPONSIVE - Mobile (سایدبار پایین)
+   ========================================================= */
 @media (max-width: 768px) {
     .content-wrapper {
         flex-direction: column;
-        gap: 20px;
+        gap: var(--space-sm, 16px);
     }
-    .sidebar {
+
+    .content-wrapper > .sidebar {
+        flex: 1 1 auto;
         width: 100%;
-        order: 2 !important; /* در موبایل، سایدبار پایین */
+        order: 2;
     }
-    .content-main {
-        order: 1 !important; /* در موبایل، محتوا بالا */
+
+    .content-wrapper > .content-main {
+        order: 1;
+    }
+
+    .main-content {
+        padding: var(--space-md, 24px) 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 var(--space-sm, 16px);
     }
 }
