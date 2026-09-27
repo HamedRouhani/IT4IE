@@ -732,3 +732,397 @@
         transform: none;
     }
 }
+
+/* ============================================================
+   Quality Analyzer — Pareto & CAPA Extensions
+   ============================================================ */
+
+/* ─── Form Grid Layouts ─── */
+.qc-form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.qc-form-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .qc-form-grid-2,
+    .qc-form-grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ─── Form Labels ─── */
+.qc-form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+/* ─── Stats Grid ─── */
+.qc-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.qc-stat-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.qc-stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+}
+
+.qc-stat-card.success { border-color: #d1fae5; }
+.qc-stat-card.warning { border-color: #fef3c7; }
+.qc-stat-card.danger  { border-color: #fee2e2; }
+.qc-stat-card.info    { border-color: #dbeafe; }
+
+.qc-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.qc-stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.2;
+}
+
+.qc-stat-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+/* ─── Table ─── */
+.qc-table-wrapper {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.qc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.qc-table thead th {
+    text-align: right;
+    padding: 12px 10px;
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    border-bottom: 2px solid #e2e8f0;
+    font-size: 0.8rem;
+}
+
+.qc-table tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.qc-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.qc-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ─── Status Badges ─── */
+.qc-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.qc-status-info     { background: #dbeafe; color: #1e40af; }
+.qc-status-warning  { background: #fef3c7; color: #92400e; }
+.qc-status-success  { background: #d1fae5; color: #065f46; }
+.qc-status-danger   { background: #fee2e2; color: #991b1b; }
+.qc-status-inactive { background: #f1f5f9; color: #64748b; }
+
+/* ─── Chart Badge ─── */
+.qc-chart-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #ecfdf5;
+    color: #047857;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ─── Buttons ─── */
+.qc-btn-primary,
+.qc-btn-outline,
+.qc-btn-danger,
+.qc-btn-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-family: inherit;
+}
+
+.qc-btn-primary {
+    background: #059669;
+    color: #fff;
+}
+
+.qc-btn-primary:hover {
+    background: #047857;
+    color: #fff;
+}
+
+.qc-btn-outline {
+    background: #fff;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
+.qc-btn-outline:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #1e293b;
+}
+
+.qc-btn-danger {
+    background: #dc2626;
+    color: #fff;
+}
+
+.qc-btn-danger:hover {
+    background: #b91c1c;
+}
+
+.qc-btn-success {
+    background: #10b981;
+    color: #fff;
+}
+
+.qc-btn-success:hover {
+    background: #059669;
+}
+
+/* ─── Alerts ─── */
+.qc-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.qc-alert-success { background: #ecfdf5; color: #065f46; border-right: 4px solid #10b981; }
+.qc-alert-danger  { background: #fef2f2; color: #991b1b; border-right: 4px solid #dc2626; }
+.qc-alert-warning { background: #fffbeb; color: #92400e; border-right: 4px solid #f59e0b; }
+.qc-alert-info    { background: #eff6ff; color: #1e40af; border-right: 4px solid #3b82f6; }
+
+/* ─── Card ─── */
+.qc-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.qc-card-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f1f5f9;
+    background: #fafafa;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.qc-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.qc-card-title i {
+    color: #059669;
+}
+
+.qc-card-body {
+    padding: 18px;
+}
+
+/* ─── Flex helpers ─── */
+.qc-flex {
+    display: flex;
+    align-items: center;
+}
+
+.qc-flex-between {
+    justify-content: space-between;
+}
+
+.qc-gap-1 { gap: 4px; }
+.qc-gap-2 { gap: 8px; }
+.qc-gap-3 { gap: 16px; }
+
+.qc-mb-2 { margin-bottom: 8px; }
+.qc-mb-3 { margin-bottom: 16px; }
+.qc-mb-4 { margin-bottom: 24px; }
+.qc-mt-2 { margin-top: 8px; }
+.qc-mt-3 { margin-top: 16px; }
+
+/* ─── Form controls ─── */
+.qc-form-control,
+.qc-form-select,
+.qc-form-textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: #1e293b;
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-sizing: border-box;
+}
+
+.qc-form-control:focus,
+.qc-form-select:focus,
+.qc-form-textarea:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.qc-form-textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+/* ─── Empty state ─── */
+.qc-empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: #fafafa;
+    border: 2px dashed #e2e8f0;
+    border-radius: 12px;
+}
+
+/* ─── Fade in animation ─── */
+.qc-fade-in {
+    animation: qcFadeIn 0.3s ease-out;
+}
+
+@keyframes qcFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Quick status buttons ─── */
+.qc-quick-status-btn {
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.qc-quick-status-btn:hover {
+    background: #ecfdf5 !important;
+    border-color: #059669 !important;
+    color: #047857 !important;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+    .qc-stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .qc-stat-value {
+        font-size: 1.1rem;
+    }
+
+    .qc-card-body {
+        padding: 12px;
+    }
+
+    .qc-table {
+        font-size: 0.8rem;
+    }
+
+    .qc-table thead th,
+    .qc-table tbody td {
+        padding: 8px 6px;
+    }
+}
+
+/* ─── Persian Datepicker Custom Style ─── */
+.datepicker-plot-area {
+    font-family: inherit !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    z-index: 9999 !important;
+}
+
+.datepicker-plot-area .datepicker-day-view .table-days td.selected span {
+    background-color: #059669 !important;
+    color: #fff !important;
+}
+
+.datepicker-plot-area .datepicker-day-view .table-days td:hover span {
+    background-color: #d1fae5 !important;
+    color: #047857 !important;
+}
+
+.datepicker-plot-area .datepicker-header .btn:hover {
+    color: #059669 !important;
+}
+
+.datepicker-plot-area .toolbox .btn.today:hover {
+    color: #059669 !important;
+}

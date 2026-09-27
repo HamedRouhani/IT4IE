@@ -123,6 +123,8 @@ $controllerMap = [
     'capability'      => 'CapabilityController',
     'msa'             => 'MsaController',
     'sampling'        => 'SamplingController',
+    'pareto'          => 'ParetoController',
+    'capa'            => 'CapaController',
     'report'          => 'ReportController', 
 ];
 

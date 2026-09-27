@@ -162,6 +162,8 @@ $moduleMenus = [
             ['route' => 'capability',      'icon' => 'fas fa-bullseye',              'label' => 'قابلیت فرآیند'],
             ['route' => 'msa',             'icon' => 'fas fa-ruler-combined',        'label' => 'تحلیل MSA (GR&R)'],
             ['route' => 'sampling',        'icon' => 'fas fa-vials',                 'label' => 'نمونه‌گیری'],
+            ['route' => 'pareto', 'label' => 'تحلیل Pareto',   'icon' => 'fas fa-chart-bar'],
+            ['route' => 'capa',   'label' => 'اقدامات اصلاحی', 'icon' => 'fas fa-tasks'],
             ['route' => 'report',          'icon' => 'fas fa-file-alt',              'label' => 'گزارش‌ها'],
         ]
     ],
