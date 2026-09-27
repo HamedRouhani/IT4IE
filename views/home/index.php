@@ -304,6 +304,15 @@
 
 </section>
 
+<section class="research-home-cta" aria-labelledby="research-home-title">
+    <div>
+        <p class="research-eyebrow">ویژهٔ دانشجوها و پژوهشگرها</p>
+        <h2 id="research-home-title">روش تحلیل را با یک مثال واقعی یاد بگیر</h2>
+        <p>نمونه‌های آمار و تصمیم‌گیری چندمعیاره را ببین و مسیر اجرای تحلیل را قدم‌به‌قدم دنبال کن.</p>
+    </div>
+    <a class="research-button research-button-primary" href="/research">مشاهدهٔ نمونه‌های پژوهشی</a>
+</section>
+
 <!-- Posts Section -->
 <section class="posts-section">
     <div class="section-header">

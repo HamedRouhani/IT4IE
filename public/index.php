@@ -70,6 +70,19 @@ spl_autoload_register(function ($class) {
         return true;
     }
 
+    // The namespace uses StudlyCase (App\Models), while the project folders
+    // are lowercase (app/models). Linux filesystems distinguish that casing.
+    $namespaceDirectory = strstr($classPath, '/', true);
+    if (in_array($namespaceDirectory, ['Core', 'Models', 'Controllers', 'Helpers', 'Services'], true)) {
+        $lowercaseDirectoryFile = APP_PATH . '/' . strtolower($namespaceDirectory) . '/' .
+                                  substr($classPath, strlen($namespaceDirectory) + 1);
+
+        if (file_exists($lowercaseDirectoryFile)) {
+            require_once $lowercaseDirectoryFile;
+            return true;
+        }
+    }
+
     // ========================================
     // 2. پشتیبانی از پوشه services موجود پروژه
     // ========================================
@@ -244,6 +257,23 @@ if (strpos($url, 'verify/') === 0) {
 }
 
 // ============================================
+// Public research examples for students and researchers.
+if ($url === 'research') {
+    require_once APP_PATH . '/controllers/ResearchController.php';
+    (new App\Controllers\ResearchController())->index();
+    exit;
+}
+if (preg_match('#^research/start/([a-z0-9-]+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/ResearchController.php';
+    (new App\Controllers\ResearchController())->start($m[1]);
+    exit;
+}
+if (preg_match('#^research/([a-z0-9-]+)$#', $url, $m)) {
+    require_once APP_PATH . '/controllers/ResearchController.php';
+    (new App\Controllers\ResearchController())->show($m[1]);
+    exit;
+}
+
 // PROFILE ROUTES
 // ============================================
 if ($url === 'profile') {

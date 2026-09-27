@@ -32,6 +32,13 @@
                     </li>
                     
                     <li class="nav-item">
+                        <a href="/research" class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'] ?? '', '/research') === 0) ? 'active' : ''; ?>">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>نمونه‌های پژوهشی</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
                         <a href="/checklist" class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], '/checklist') === 0) ? 'active' : ''; ?>">
                             <i class="fas fa-clipboard-list"></i>
                             <span>چک‌لیست‌ها</span>
