@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Database;
 use App\Models\Setting;
+use App\Models\SoftwareActivityLog;
 use App\Models\WorkflowTemplate;
 use PDO;
 use Throwable;
@@ -17,6 +18,10 @@ class ResearchController extends Controller
     {
         $toolSlug = $_GET['tool'] ?? null;
         if (!in_array($toolSlug, self::ALLOWED_TOOLS, true)) $toolSlug = null;
+
+        $this->logResearchActivity('research_list_view', null, [
+            'tool_slug' => $toolSlug,
+        ]);
 
         $this->render('research/index', [
             'title' => 'نمونه‌های پژوهشی مهندسی صنایع | IT4IE',
@@ -49,6 +54,10 @@ class ResearchController extends Controller
 
         $payload = json_decode($template['input_payload'] ?? '', true);
         $template['payload'] = is_array($payload) ? $payload : [];
+        $this->logResearchActivity('research_template_view', (int) $template['id'], [
+            'template_slug' => $template['slug'],
+            'tool_slug' => $template['tool_slug'],
+        ]);
         $toolNames = [
             'statlab-analyzer' => 'StatLab · تحلیل آماری',
             'mcdm-analyzer' => 'MCDM · تصمیم‌گیری چندمعیاره',
@@ -83,16 +92,26 @@ class ResearchController extends Controller
             $_SESSION['error'] = 'درخواست معتبر نیست. صفحه را تازه‌سازی کنید و دوباره تلاش کنید.';
             $this->redirect('/research/' . rawurlencode($slug));
         }
-        if (!isset($_SESSION['user_id'])) {
-            $_SESSION['redirect_after_login'] = '/research/' . rawurlencode($slug);
-            $_SESSION['auth_message'] = 'برای ساخت پروژه از نمونه، ابتدا وارد حساب خود شوید.';
-            $this->redirect('/login');
-        }
 
         $template = (new WorkflowTemplate())->findPublishedBySlug($slug);
         if (!$template || !in_array($template['tool_slug'], self::ALLOWED_TOOLS, true)) {
             http_response_code(404);
             $this->redirect('/research');
+        }
+
+        $templateId = (int) $template['id'];
+        $this->logResearchActivity('research_project_requested', $templateId, [
+            'template_slug' => $template['slug'],
+            'tool_slug' => $template['tool_slug'],
+        ]);
+        if (!isset($_SESSION['user_id'])) {
+            $this->logResearchActivity('research_login_required', $templateId, [
+                'template_slug' => $template['slug'],
+                'tool_slug' => $template['tool_slug'],
+            ]);
+            $_SESSION['redirect_after_login'] = '/research/' . rawurlencode($slug);
+            $_SESSION['auth_message'] = 'برای ساخت پروژه از نمونه، ابتدا وارد حساب خود شوید.';
+            $this->redirect('/login');
         }
 
         $previousHrSystem = $_SESSION['hr_active_system'] ?? null;
@@ -141,14 +160,40 @@ class ResearchController extends Controller
             }
 
             $db->commit();
+            $this->logResearchActivity('research_project_created', $templateId, [
+                'template_slug' => $template['slug'],
+                'tool_slug' => $template['tool_slug'],
+                'project_id' => (int) $projectId,
+            ]);
             $this->redirect($target);
         } catch (Throwable $e) {
             if (isset($db) && $db instanceof PDO && $db->inTransaction()) $db->rollBack();
             if ($previousHrSystem === null) unset($_SESSION['hr_active_system']); else $_SESSION['hr_active_system'] = $previousHrSystem;
             if ($previousPdmSystem === null) unset($_SESSION['pdm_active_system']); else $_SESSION['pdm_active_system'] = $previousPdmSystem;
             error_log('ResearchController::start: ' . $e->getMessage());
+            $this->logResearchActivity('research_project_failed', $templateId, [
+                'template_slug' => $template['slug'],
+                'tool_slug' => $template['tool_slug'],
+            ]);
             $_SESSION['error'] = 'ساخت پروژه از نمونه انجام نشد. لطفاً دوباره تلاش کنید.';
             $this->redirect('/research/' . rawurlencode($slug));
+        }
+    }
+
+    private function logResearchActivity(string $action, ?int $templateId = null, array $details = []): void
+    {
+        try {
+            (new SoftwareActivityLog())->log(
+                'research',
+                $action,
+                $templateId === null ? 'research' : 'research_template',
+                $templateId,
+                null,
+                $details
+            );
+        } catch (Throwable $e) {
+            // Analytics must never interrupt browsing or project creation.
+            error_log('ResearchController activity log: ' . $e->getMessage());
         }
     }
 

@@ -31,6 +31,10 @@ $moduleCssVersion = $moduleName === 'mcdm' ? '2.1' : '2.0';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Vazirmatn Font -->
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <?php if ($moduleName === 'statlab'): ?>
+    <!-- Load Bootstrap before site styles so IT4IE header colors and navigation remain authoritative. -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.rtl.min.css" rel="stylesheet" integrity="sha384-CfCrinSRH2IR6a4e6fy2q6ioOX7O6Mtm1L9vRvFZ1trBncWmMePhzvafv7oIcWiW" crossorigin="anonymous">
+    <?php endif; ?>
     <!-- IT4IE Base Styles -->
     <link rel="stylesheet" href="/assets/css/style.css">
     <!-- Software Styles (با نسخه برای شکستن کش) -->
@@ -89,6 +93,9 @@ $moduleCssVersion = $moduleName === 'mcdm' ? '2.1' : '2.0';
         </main>
     </div>
 
+    <?php if ($moduleName === 'statlab'): ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <?php endif; ?>
     <script src="/assets/js/script.js"></script>
 </body>
 </html>

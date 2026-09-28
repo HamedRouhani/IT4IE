@@ -375,12 +375,31 @@ class AdminController extends Controller
 
             $stats = $logModel->getStats($softwareSlug ?: null);
             $statsByAction = $logModel->getStatsByAction($softwareSlug ?: null);
+            $researchFunnel = [];
+            if ($softwareSlug === 'research') {
+                $researchFunnel = $logModel->query(
+                    "SELECT t.id AS template_id, t.title, t.slug, t.tool_slug, t.sort_order,
+                            SUM(CASE WHEN l.action = 'research_template_view' THEN 1 ELSE 0 END) AS detail_views,
+                            SUM(CASE WHEN l.action = 'research_project_requested' THEN 1 ELSE 0 END) AS project_requests,
+                            SUM(CASE WHEN l.action = 'research_login_required' THEN 1 ELSE 0 END) AS login_required,
+                            SUM(CASE WHEN l.action = 'research_project_created' THEN 1 ELSE 0 END) AS projects_created,
+                            COUNT(DISTINCT CASE WHEN l.action = 'research_template_view' AND l.user_id IS NOT NULL THEN l.user_id END) AS signed_in_viewers,
+                            COUNT(DISTINCT CASE WHEN l.action = 'research_project_created' AND l.user_id IS NOT NULL THEN l.user_id END) AS signed_in_creators
+                     FROM workflow_templates t
+                     LEFT JOIN `{$tableName}` l
+                       ON l.record_type = 'research_template' AND l.record_id = t.id AND l.software_slug = 'research'
+                     WHERE t.status = 'published'
+                     GROUP BY t.id, t.title, t.slug, t.tool_slug, t.sort_order
+                     ORDER BY t.sort_order ASC, t.id DESC"
+                );
+            }
 
             $this->renderAdmin('admin/software-activity', [
                 'title' => 'آمار استفاده از نرم‌افزارها - IT4IE',
                 'logs' => $logs,
                 'stats' => $stats,
                 'statsByAction' => $statsByAction,
+                'researchFunnel' => $researchFunnel,
                 'currentSoftware' => $softwareSlug
             ]);
         } catch (\PDOException $e) {

@@ -28,12 +28,45 @@ $logModel = new \App\Models\SoftwareActivityLog();
                             <?php echo htmlspecialchars($sw['name']); ?>
                         </option>
                     <?php endforeach; ?>
+                    <option value="research" <?php echo (($currentSoftware ?? '') === 'research') ? 'selected' : ''; ?>>نمونه‌های پژوهشی</option>
                 </select>
                 <button type="submit" class="btn-admin-submit">اعمال فیلتر</button>
             </form>
         </div>
         
         <!-- آمار کلی -->
+        <?php if (($currentSoftware ?? '') === 'research'): ?>
+        <div class="admin-widget" style="margin-bottom: 20px;">
+            <h3><i class="fas fa-flask"></i> قیف استفاده از نمونه‌های پژوهشی</h3>
+            <p style="margin: 8px 0 14px; color: var(--gray-dark);">این آمار از زمان فعال‌سازی سنجش ثبت می‌شود. بازدید و درخواست‌ها شمارش رویداد هستند؛ کاربران یکتا فقط برای کاربران واردشده محاسبه می‌شوند.</p>
+            <div class="admin-table">
+                <table>
+                    <thead><tr><th>نمونه</th><th>بازدید جزئیات</th><th>بیننده‌های واردشده</th><th>درخواست ساخت</th><th>نیازمند ورود</th><th>پروژه ساخته‌شده</th><th>نسبت رویداد ساخت به بازدید</th><th>سازنده‌های واردشده</th></tr></thead>
+                    <tbody>
+                    <?php if (empty($researchFunnel)): ?>
+                        <tr><td colspan="8" style="text-align:center;">هنوز نمونهٔ منتشرشده‌ای وجود ندارد.</td></tr>
+                    <?php else: foreach ($researchFunnel as $funnelRow):
+                        $detailViews = (int) ($funnelRow['detail_views'] ?? 0);
+                        $projectsCreated = (int) ($funnelRow['projects_created'] ?? 0);
+                        $conversion = $detailViews > 0 ? round(($projectsCreated / $detailViews) * 100, 1) : 0;
+                    ?>
+                        <tr>
+                            <td><strong><?php echo htmlspecialchars($funnelRow['title']); ?></strong><br><small><?php echo htmlspecialchars($funnelRow['tool_slug']); ?> · <?php echo htmlspecialchars($funnelRow['slug']); ?></small></td>
+                            <td><?php echo number_format($detailViews); ?></td>
+                            <td><?php echo number_format((int) $funnelRow['signed_in_viewers']); ?></td>
+                            <td><?php echo number_format((int) $funnelRow['project_requests']); ?></td>
+                            <td><?php echo number_format((int) $funnelRow['login_required']); ?></td>
+                            <td><strong><?php echo number_format($projectsCreated); ?></strong></td>
+                            <td><?php echo $conversion; ?>%</td>
+                            <td><?php echo number_format((int) $funnelRow['signed_in_creators']); ?></td>
+                        </tr>
+                    <?php endforeach; endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <div class="admin-stats">
             <div class="stat-card">
                 <div class="stat-icon blue"><i class="fas fa-list"></i></div>

@@ -1,128 +1,96 @@
 <?php
-/**
- * StatLab - داشبورد (نسخه بازنویسی‌شده، ریسپانسیو و پایدار)
- */
 $stats = $stats ?? [];
 $recentProjects = $recentProjects ?? [];
 
 $quickLinks = [
-    ['url' => 'controller=descriptive',        'icon' => 'fas fa-chart-simple',      'color' => '#0d6efd', 'label' => 'آمار توصیفی',        'desc' => 'میانگین، میانه، چولگی، چهارک‌ها و شناسایی داده پرت'],
-    ['url' => 'controller=distribution',       'icon' => 'fas fa-dice',              'color' => '#6f42c1', 'label' => 'توزیع‌های احتمال',     'desc' => 'نرمال، t، کای‌دو، F، پواسون، دوجمله‌ای و ویبول'],
-    ['url' => 'controller=hypothesis',         'icon' => 'fas fa-scale-balanced',    'color' => '#fd7e14', 'label' => 'آزمون فرض',            'desc' => 't تک/دو نمونه، جفتی، Z نسبت، کای‌دو، من-ویتنی'],
-    ['url' => 'controller=regression',         'icon' => 'fas fa-chart-line',        'color' => '#198754', 'label' => 'رگرسیون و همبستگی',    'desc' => 'پیرسون/اسپیرمن، خطی ساده و چندگانه با نمودار'],
-    ['url' => 'controller=smart_statistician', 'icon' => 'fas fa-wand-magic-sparkles','color' => '#d63384', 'label' => 'دستیار هوشمند',        'desc' => 'تشخیص خودکار آزمون مناسب از متن فارسی'],
-    ['url' => 'controller=project',            'icon' => 'fas fa-folder-open',       'color' => '#6c757d', 'label' => 'پروژه‌های آماری',      'desc' => 'مدیریت پروژه‌ها، متغیرها و مجموعه داده‌ها'],
-    ['url' => 'controller=report',             'icon' => 'fas fa-chart-bar',         'color' => '#20c997', 'label' => 'گزارش‌ها',             'desc' => 'گزارش پروژه‌محور قابل چاپ و خروجی PDF'],
+    ['url' => 'controller=descriptive', 'icon' => 'fa-chart-simple', 'color' => '#2563eb', 'label' => 'آمار توصیفی', 'desc' => 'میانگین، میانه، پراکندگی و بررسی داده‌های پرت'],
+    ['url' => 'controller=distribution', 'icon' => 'fa-dice', 'color' => '#7c3aed', 'label' => 'توزیع‌های احتمال', 'desc' => 'توزیع‌های پرکاربرد و محاسبهٔ احتمال'],
+    ['url' => 'controller=hypothesis', 'icon' => 'fa-scale-balanced', 'color' => '#ea580c', 'label' => 'آزمون فرض', 'desc' => 'آزمون‌های آماری برای مقایسه و تصمیم‌گیری'],
+    ['url' => 'controller=regression', 'icon' => 'fa-chart-line', 'color' => '#059669', 'label' => 'رگرسیون و همبستگی', 'desc' => 'بررسی رابطهٔ متغیرها و برازش مدل'],
+    ['url' => 'controller=smart_statistician', 'icon' => 'fa-wand-magic-sparkles', 'color' => '#db2777', 'label' => 'دستیار هوشمند', 'desc' => 'پیشنهاد روش تحلیل بر اساس مسئله'],
+    ['url' => 'controller=project', 'icon' => 'fa-folder-open', 'color' => '#475569', 'label' => 'پروژه‌های آماری', 'desc' => 'مدیریت پروژه‌ها، متغیرها و مجموعه‌داده‌ها'],
+    ['url' => 'controller=report', 'icon' => 'fa-file-lines', 'color' => '#0891b2', 'label' => 'گزارش‌ها', 'desc' => 'مرور و چاپ نتایج تحلیل‌ها'],
 ];
 $catLabels = ['descriptive' => 'توصیفی', 'distribution' => 'توزیع', 'hypothesis' => 'آزمون فرض', 'regression' => 'رگرسیون'];
 ?>
-<div class="container-fluid py-3 py-md-4">
-
-    <!-- ═══ هدر ═══ -->
-    <div class="statlab-page-header">
+<div class="statlab-dashboard">
+    <header class="statlab-dashboard__header">
         <div>
-            <h3 class="mb-1"><i class="fas fa-gauge-high text-success me-2"></i>داشبورد StatLab</h3>
-            <small class="text-muted">مرکز تحلیل‌های آماری مهندسی صنایع</small>
+            <span class="statlab-dashboard__eyebrow">مرکز تحلیل داده</span>
+            <h1><i class="fas fa-chart-pie" aria-hidden="true"></i> داشبورد StatLab</h1>
+            <p>ابزارهای آمار و تحلیل داده برای مهندسی صنایع</p>
         </div>
-        <a href="<?= stat_url('controller=smart_statistician') ?>" class="btn btn-success btn-sm text-nowrap">
-            <i class="fas fa-wand-magic-sparkles me-1"></i> شروع تحلیل هوشمند
+        <a href="<?= stat_url('controller=smart_statistician') ?>" class="statlab-dashboard__primary-action">
+            <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+            <span>شروع تحلیل هوشمند</span>
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
         </a>
-    </div>
+    </header>
 
-    <!-- ═══ کارت‌های آماری ═══ -->
-    <div class="row g-2 g-md-3 mb-3 mb-md-4">
-        <div class="col-6 col-xl-3">
-            <div class="card border-0 shadow-sm text-center p-3">
-                <small class="text-muted d-block">پروژه‌های من</small>
-                <h4 class="mb-0 text-primary"><?= (int)($stats['total_projects'] ?? 0) ?></h4>
-            </div>
-        </div>
-        <div class="col-6 col-xl-3">
-            <div class="card border-0 shadow-sm text-center p-3">
-                <small class="text-muted d-block">تکمیل شده</small>
-                <h4 class="mb-0 text-success"><?= (int)($stats['completed'] ?? 0) ?></h4>
-            </div>
-        </div>
-        <div class="col-6 col-xl-3">
-            <div class="card border-0 shadow-sm text-center p-3">
-                <small class="text-muted d-block">مجموعه داده‌ها</small>
-                <h4 class="mb-0 text-info"><?= (int)($stats['total_datasets'] ?? 0) ?></h4>
-            </div>
-        </div>
-        <div class="col-6 col-xl-3">
-            <div class="card border-0 shadow-sm text-center p-3">
-                <small class="text-muted d-block">تحلیل‌های انجام‌شده</small>
-                <h4 class="mb-0 text-warning"><?= (int)($stats['total_results'] ?? 0) ?></h4>
-            </div>
-        </div>
-    </div>
+    <section class="statlab-dashboard__stats" aria-label="خلاصه فعالیت‌ها">
+        <article class="statlab-dashboard__stat statlab-dashboard__stat--blue">
+            <span class="statlab-dashboard__stat-icon"><i class="fas fa-folder" aria-hidden="true"></i></span>
+            <div><span>پروژه‌های من</span><strong><?= (int) ($stats['total_projects'] ?? 0) ?></strong></div>
+        </article>
+        <article class="statlab-dashboard__stat statlab-dashboard__stat--green">
+            <span class="statlab-dashboard__stat-icon"><i class="fas fa-circle-check" aria-hidden="true"></i></span>
+            <div><span>پروژه‌های تکمیل‌شده</span><strong><?= (int) ($stats['completed'] ?? 0) ?></strong></div>
+        </article>
+        <article class="statlab-dashboard__stat statlab-dashboard__stat--cyan">
+            <span class="statlab-dashboard__stat-icon"><i class="fas fa-table" aria-hidden="true"></i></span>
+            <div><span>مجموعه‌داده‌ها</span><strong><?= (int) ($stats['total_datasets'] ?? 0) ?></strong></div>
+        </article>
+        <article class="statlab-dashboard__stat statlab-dashboard__stat--amber">
+            <span class="statlab-dashboard__stat-icon"><i class="fas fa-chart-column" aria-hidden="true"></i></span>
+            <div><span>تحلیل‌های انجام‌شده</span><strong><?= (int) ($stats['total_results'] ?? 0) ?></strong></div>
+        </article>
+    </section>
 
-    <!-- ═══ دسترسی سریع (کارت داخل لینک، با card-body استاندارد) ═══ -->
-    <div class="row g-2 g-md-3 mb-3 mb-md-4">
-        <?php foreach ($quickLinks as $q): ?>
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                <a href="<?= stat_url($q['url']) ?>" class="text-decoration-none d-block h-100">
-                    <div class="card border-0 shadow-sm h-100 statlab-quick-card">
-                        <div class="card-body p-3 text-center">
-                            <i class="<?= $q['icon'] ?> fa-2x mb-2 d-block" style="color:<?= $q['color'] ?>;"></i>
-                            <h6 class="fw-bold mb-1"><?= $q['label'] ?></h6>
-                            <small class="text-muted d-block"><?= $q['desc'] ?></small>
-                        </div>
-                    </div>
+    <section class="statlab-dashboard__section" aria-labelledby="statlab-tools-title">
+        <div class="statlab-dashboard__section-heading">
+            <div><span class="statlab-dashboard__eyebrow">ابزارهای تحلیل</span><h2 id="statlab-tools-title">از کجا شروع کنیم؟</h2></div>
+            <p>یک ابزار را انتخاب کنید تا تحلیل خود را آغاز کنید.</p>
+        </div>
+        <div class="statlab-dashboard__tools">
+            <?php foreach ($quickLinks as $link): ?>
+                <a href="<?= stat_url($link['url']) ?>" class="statlab-dashboard__tool">
+                    <span class="statlab-dashboard__tool-icon" style="--tool-color: <?= htmlspecialchars($link['color'], ENT_QUOTES, 'UTF-8') ?>"><i class="fas <?= htmlspecialchars($link['icon'], ENT_QUOTES, 'UTF-8') ?>" aria-hidden="true"></i></span>
+                    <span class="statlab-dashboard__tool-copy"><strong><?= htmlspecialchars($link['label'], ENT_QUOTES, 'UTF-8') ?></strong><small><?= htmlspecialchars($link['desc'], ENT_QUOTES, 'UTF-8') ?></small></span>
+                    <i class="fas fa-arrow-left statlab-dashboard__tool-arrow" aria-hidden="true"></i>
                 </a>
-            </div>
-        <?php endforeach; ?>
-    </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
 
-    <!-- ═══ آخرین پروژه‌ها ═══ -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-2 py-md-3 d-flex justify-content-between align-items-center">
-            <h6 class="mb-0"><i class="fas fa-clock-rotate-left me-2"></i>آخرین پروژه‌ها</h6>
-            <a href="<?= stat_url('controller=project') ?>" class="btn btn-sm btn-outline-secondary">همه پروژه‌ها</a>
+    <section class="statlab-dashboard__section statlab-dashboard__recent" aria-labelledby="statlab-recent-title">
+        <div class="statlab-dashboard__section-heading">
+            <div><span class="statlab-dashboard__eyebrow">ادامهٔ کار</span><h2 id="statlab-recent-title">آخرین پروژه‌ها</h2></div>
+            <a href="<?= stat_url('controller=project') ?>" class="statlab-dashboard__text-link">مشاهدهٔ همهٔ پروژه‌ها <i class="fas fa-arrow-left" aria-hidden="true"></i></a>
         </div>
-        <div class="card-body p-0">
-            <?php if (empty($recentProjects)): ?>
-                <div class="text-center text-muted py-4 small">
-                    هنوز پروژه‌ای ایجاد نکرده‌اید.
-                    <a href="<?= stat_url('controller=descriptive') ?>" class="alert-link">اولین تحلیل را شروع کنید</a>
-                </div>
-            <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 small">
-                        <thead class="table-light">
-                            <tr>
-                                <th>پروژه</th>
-                                <th class="d-none d-md-table-cell">دسته</th>
-                                <th>وضعیت</th>
-                                <th class="d-none d-sm-table-cell">به‌روزرسانی</th>
-                                <th class="text-center">عملیات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($recentProjects as $p): ?>
-                                <tr>
-                                    <td class="fw-bold"><?= stat_e($p['name']) ?></td>
-                                    <td class="d-none d-md-table-cell">
-                                        <span class="badge bg-light text-dark border"><?= $catLabels[$p['category_code']] ?? stat_e($p['category_code']) ?></span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-<?= $p['status'] === 'completed' ? 'success' : 'secondary' ?>">
-                                            <?= stat_getStatusLabel($p['status']) ?>
-                                        </span>
-                                    </td>
-                                    <td class="d-none d-sm-table-cell text-muted"><?= stat_e($p['updated_at']) ?></td>
-                                    <td class="text-center">
-                                        <a href="<?= stat_url('controller=project&action=show&id=' . (int)$p['id']) ?>"
-                                           class="btn btn-sm btn-outline-success py-0">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
+        <?php if (empty($recentProjects)): ?>
+            <div class="statlab-dashboard__empty">
+                <span><i class="fas fa-folder-open" aria-hidden="true"></i></span>
+                <strong>هنوز پروژه‌ای نساخته‌اید</strong>
+                <p>برای شروع، یک ابزار تحلیل را انتخاب کنید یا داده‌های خود را در آمار توصیفی بررسی کنید.</p>
+                <a href="<?= stat_url('controller=descriptive') ?>">رفتن به آمار توصیفی <i class="fas fa-arrow-left" aria-hidden="true"></i></a>
+            </div>
+        <?php else: ?>
+            <div class="statlab-dashboard__table-wrap">
+                <table class="statlab-dashboard__table">
+                    <thead><tr><th>نام پروژه</th><th>دسته</th><th>وضعیت</th><th>آخرین به‌روزرسانی</th><th><span class="visually-hidden">عملیات</span></th></tr></thead>
+                    <tbody>
+                    <?php foreach ($recentProjects as $project): ?>
+                        <tr>
+                            <td data-label="پروژه"><strong><?= stat_e($project['name']) ?></strong></td>
+                            <td data-label="دسته"><span class="statlab-dashboard__category"><?= htmlspecialchars($catLabels[$project['category_code']] ?? $project['category_code'], ENT_QUOTES, 'UTF-8') ?></span></td>
+                            <td data-label="وضعیت"><span class="statlab-dashboard__status <?= $project['status'] === 'completed' ? 'is-complete' : '' ?>"><?= htmlspecialchars(stat_getStatusLabel($project['status']), ENT_QUOTES, 'UTF-8') ?></span></td>
+                            <td data-label="به‌روزرسانی" class="statlab-dashboard__date"><?= stat_e($project['updated_at']) ?></td>
+                            <td data-label="عملیات"><a class="statlab-dashboard__open" href="<?= stat_url('controller=project&action=show&id=' . (int) $project['id']) ?>"><span>بازکردن</span><i class="fas fa-arrow-left" aria-hidden="true"></i></a></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </section>
 </div>
