@@ -530,6 +530,7 @@ if (strpos($url, 'admin') === 0) {
         '#^checklist/question/edit/(\d+)$#'   => 'editChecklistQuestion',
         '#^checklist/question/move/(\d+)$#'   => 'moveChecklistQuestion',
         '#^checklist/result/(\d+)$#' => 'viewChecklistResult',
+        '#^leads/status/(\d+)$#'      => 'updateLeadStatus',
     ];
 
     foreach ($paramRoutes as $pattern => $method) {
@@ -563,6 +564,7 @@ if (strpos($url, 'admin') === 0) {
         'software-activity'   => 'softwareActivity',
         'software-limits'     => 'softwareLimits',
         'software-usage'      => 'softwareUsage',
+        'leads'                => 'leads',
         'checklist'           => 'checklist',
         'checklists'          => 'checklists',
         'checklist/create'    => 'createChecklist',

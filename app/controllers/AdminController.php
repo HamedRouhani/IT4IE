@@ -989,6 +989,54 @@ class AdminController extends Controller
     // مدیریت چک‌لیست‌ها
     // ============================================
 
+    public function leads()
+    {
+        $this->requireAdmin();
+        require_once APP_PATH . '/models/Subscription.php';
+
+        $minScore = (int) ($_GET['min'] ?? 0);
+        if (!in_array($minScore, [0, 50, 75], true)) $minScore = 0;
+        $statusFilter = (string) ($_GET['status'] ?? '');
+        if (!in_array($statusFilter, ['', 'new', 'contacted', 'converted', 'archived'], true)) $statusFilter = '';
+
+        $this->renderAdmin('admin/leads', [
+            'title' => 'مدیریت لیدها - IT4IE',
+            'leads' => (new \App\Models\Subscription())->getLeads(200, $minScore, $statusFilter),
+            'minScore' => $minScore,
+            'statusFilter' => $statusFilter,
+            'csrfField' => $this->csrfField(),
+        ]);
+    }
+
+    public function updateLeadStatus($id)
+    {
+        $this->requireAdmin();
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            http_response_code(405);
+            $this->redirect('/admin/leads');
+            return;
+        }
+        if (!$this->verifyCsrf()) {
+            $_SESSION['error'] = 'درخواست معتبر نیست؛ صفحه را تازه کنید و دوباره تلاش کنید.';
+            $this->redirect('/admin/leads');
+            return;
+        }
+
+        require_once APP_PATH . '/models/Subscription.php';
+        $updated = (new \App\Models\Subscription())->updateLeadStatus((int) $id, (string) ($_POST['lead_status'] ?? ''));
+        $_SESSION[$updated ? 'message' : 'error'] = $updated
+            ? 'وضعیت لید به‌روزرسانی شد.'
+            : 'به‌روزرسانی وضعیت لید انجام نشد.';
+
+        $minScore = (int) ($_POST['min_score'] ?? 0);
+        $statusFilter = (string) ($_POST['status_filter'] ?? '');
+        $query = http_build_query([
+            'min' => in_array($minScore, [0, 50, 75], true) ? $minScore : 0,
+            'status' => in_array($statusFilter, ['', 'new', 'contacted', 'converted', 'archived'], true) ? $statusFilter : '',
+        ]);
+        $this->redirect('/admin/leads?' . $query);
+    }
+
     public function checklists()
     {
         $this->requireAdmin();

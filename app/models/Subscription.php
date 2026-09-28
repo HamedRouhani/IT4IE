@@ -7,6 +7,56 @@ class Subscription extends Model
 {
     protected $table = 'subscriptions';
 
+    /**
+     * Return checklist submissions scored as leads for the admin panel.
+     */
+    public function getLeads($limit = 100, $minScore = 0, $status = '')
+    {
+        $allowedStatuses = ['', 'new', 'contacted', 'converted', 'archived'];
+        $status = in_array($status, $allowedStatuses, true) ? $status : '';
+        $limit = max(1, min(500, (int) $limit));
+        $minScore = max(0, min(100, (int) $minScore));
+
+        $sql = "SELECT s.id, s.name, s.email, s.phone, s.company, s.risk_level,
+                       COALESCE(s.lead_score, 0) AS lead_score,
+                       s.status AS lead_status, s.created_at,
+                       c.title AS checklist_title
+                FROM checklist_submissions s
+                LEFT JOIN checklists c ON c.id = s.checklist_id
+                WHERE COALESCE(s.lead_score, 0) >= :min_score";
+        $params = [':min_score' => $minScore];
+
+        if ($status !== '') {
+            $sql .= ' AND s.status = :status';
+            $params[':status'] = $status;
+        }
+
+        $sql .= " ORDER BY COALESCE(s.lead_score, 0) DESC, s.created_at DESC LIMIT {$limit}";
+        $rows = $this->query($sql, $params);
+        return is_array($rows) ? $rows : [];
+    }
+
+    public function updateLeadStatus($id, $status)
+    {
+        $allowedStatuses = ['new', 'contacted', 'converted', 'archived'];
+        $id = (int) $id;
+        if ($id <= 0 || !in_array($status, $allowedStatuses, true)) return false;
+
+        try {
+            $lead = $this->queryOne('SELECT id FROM checklist_submissions WHERE id = :id LIMIT 1', [':id' => $id]);
+            if (!$lead) return false;
+
+            $this->query(
+                'UPDATE checklist_submissions SET status = :status WHERE id = :id',
+                [':status' => $status, ':id' => $id]
+            );
+            return true;
+        } catch (\Throwable $e) {
+            error_log('Subscription::updateLeadStatus ERROR: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     // ============================================
     // تعرفه‌ها
     // ============================================

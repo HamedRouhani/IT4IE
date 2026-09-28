@@ -2,8 +2,9 @@
 // views/admin/leads.php
 $scoreStats = ['hot' => 0, 'warm' => 0, 'cold' => 0];
 foreach ($leads as $l) {
-    if ($l['lead_score'] >= 75) $scoreStats['hot']++;
-    elseif ($l['lead_score'] >= 50) $scoreStats['warm']++;
+    $leadScore = (int) ($l['lead_score'] ?? 0);
+    if ($leadScore >= 75) $scoreStats['hot']++;
+    elseif ($leadScore >= 50) $scoreStats['warm']++;
     else $scoreStats['cold']++;
 }
 ?>
@@ -56,8 +57,8 @@ foreach ($leads as $l) {
                     <option value="" <?= $statusFilter === '' ? 'selected' : '' ?>>همه وضعیت‌ها</option>
                     <option value="new" <?= $statusFilter === 'new' ? 'selected' : '' ?>>جدید</option>
                     <option value="contacted" <?= $statusFilter === 'contacted' ? 'selected' : '' ?>>تماس گرفته‌شده</option>
-                    <option value="qualified" <?= $statusFilter === 'qualified' ? 'selected' : '' ?>>صلاحیت‌دار</option>
-                    <option value="closed" <?= $statusFilter === 'closed' ? 'selected' : '' ?>>بسته</option>
+                    <option value="converted" <?= $statusFilter === 'converted' ? 'selected' : '' ?>>تبدیل‌شده</option>
+                    <option value="archived" <?= $statusFilter === 'archived' ? 'selected' : '' ?>>بایگانی‌شده</option>
                 </select>
             </form>
         </div>
@@ -79,6 +80,7 @@ foreach ($leads as $l) {
                 <tbody>
                 <?php foreach ($leads as $lead):
                     $score = (int)$lead['lead_score'];
+                    $riskLevel = (string) ($lead['risk_level'] ?? 'low');
                     if ($score >= 75) {
                         $scoreColor = '#dc3545';
                         $scoreLabel = 'داغ 🔥';
@@ -104,29 +106,32 @@ foreach ($leads as $l) {
                             <small><?= $scoreLabel ?></small>
                         </td>
                         <td>
-                            <strong><?= htmlspecialchars($lead['name']) ?></strong>
+                            <strong><?= htmlspecialchars((string) ($lead['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?></strong>
                             <br>
                             <small style="color:var(--gray)">
-                                <i class="fas fa-building"></i> <?= htmlspecialchars($lead['company'] ?: '-') ?>
+                                <i class="fas fa-building"></i> <?= htmlspecialchars((string) (($lead['company'] ?? '') ?: '-'), ENT_QUOTES, 'UTF-8') ?>
                             </small>
                             <?php if (!empty($lead['email'])): ?>
-                                <br><small style="color:var(--gray)"><?= htmlspecialchars($lead['email']) ?></small>
+                                <br><small style="color:var(--gray)"><?= htmlspecialchars((string) $lead['email'], ENT_QUOTES, 'UTF-8') ?></small>
                             <?php endif; ?>
                         </td>
-                        <td><?= htmlspecialchars($lead['checklist_title'] ?? '-') ?></td>
+                        <td><?= htmlspecialchars((string) ($lead['checklist_title'] ?? '-'), ENT_QUOTES, 'UTF-8') ?></td>
                         <td>
-                            <span class="risk-badge" style="background: <?= $riskColors[$lead['risk_level']] ?? '#ccc' ?>">
-                                <?= htmlspecialchars($lead['risk_level']) ?>
+                            <span class="risk-badge" style="background: <?= $riskColors[$riskLevel] ?? '#ccc' ?>">
+                                <?= htmlspecialchars($riskLevel, ENT_QUOTES, 'UTF-8') ?>
                             </span>
                         </td>
-                        <td><small><?= jdate($lead['created_at'], 'j F') ?></small></td>
+                        <td><small><?= jdate($lead['created_at'] ?? '', 'j F') ?></small></td>
                         <td>
-                            <form method="POST" action="/admin/leads/status/<?= $lead['id'] ?>" class="status-form">
+                            <form method="POST" action="/admin/leads/status/<?= (int) $lead['id'] ?>" class="status-form">
+                                <?= $csrfField ?>
+                                <input type="hidden" name="min_score" value="<?= (int) $minScore ?>">
+                                <input type="hidden" name="status_filter" value="<?= htmlspecialchars($statusFilter, ENT_QUOTES, 'UTF-8') ?>">
                                 <select name="lead_status" onchange="this.form.submit()">
                                     <option value="new" <?= $lead['lead_status'] === 'new' ? 'selected' : '' ?>>جدید</option>
                                     <option value="contacted" <?= $lead['lead_status'] === 'contacted' ? 'selected' : '' ?>>تماس گرفته‌شده</option>
-                                    <option value="qualified" <?= $lead['lead_status'] === 'qualified' ? 'selected' : '' ?>>صلاحیت‌دار</option>
-                                    <option value="closed" <?= $lead['lead_status'] === 'closed' ? 'selected' : '' ?>>بسته</option>
+                                    <option value="converted" <?= $lead['lead_status'] === 'converted' ? 'selected' : '' ?>>تبدیل‌شده</option>
+                                    <option value="archived" <?= $lead['lead_status'] === 'archived' ? 'selected' : '' ?>>بایگانی‌شده</option>
                                 </select>
                             </form>
                         </td>
