@@ -2,6 +2,12 @@
 $toolLabels = [
     'statlab-analyzer' => 'آمار و تحلیل داده',
     'mcdm-analyzer' => 'تصمیم‌گیری چندمعیاره',
+    'babok-analyzer' => 'تحلیل کسب‌وکار BABOK',
+    'pmbok-analyzer' => 'مدیریت پروژه PMBOK',
+    'or-analyzer' => 'تحقیق در عملیات',
+    'hr-analyzer' => 'مدیریت منابع انسانی',
+    'pdm-analyzer' => 'نگهداری و تعمیرات',
+    'quality-analyzer' => 'مدیریت کیفیت',
 ];
 $difficultyLabels = ['beginner' => 'مقدماتی', 'intermediate' => 'متوسط', 'advanced' => 'پیشرفته'];
 $methodLabels = ['summary_stats' => 'آمار توصیفی', 'one_sample_t' => 'آزمون t تک‌نمونه‌ای', 'TOPSIS' => 'TOPSIS', 'AHP' => 'AHP'];
