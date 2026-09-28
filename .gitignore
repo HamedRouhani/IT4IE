@@ -1,1 +1,4 @@
 .env
+
+# Keep SQL dumps, schemas, and migrations out of GitHub.
+*.sql

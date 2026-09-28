@@ -39,6 +39,9 @@ class CalculatorController extends Controller
         $payload = json_decode($raw, true) ?: $_POST;
 
         $projectId = (int)$id;
+        $project = $this->model->getWithDetails($projectId);
+        if (!$project) $this->json(['success' => false, 'error' => 'پروژه یافت نشد.'], 404);
+        if (!$this->authorizeOwnership($project['user_id'])) return;
         $criteria = $this->model->getCriteria($projectId);
         $n = count($criteria);
 
@@ -87,6 +90,7 @@ class CalculatorController extends Controller
         if (!$project) {
             $this->json(['success' => false, 'error' => 'پروژه یافت نشد.'], 404);
         }
+        if (!$this->authorizeOwnership($project['user_id'])) return;
 
         $criteria = $this->model->getCriteria($projectId);
         $alternatives = $this->model->getAlternatives($projectId);
@@ -99,6 +103,9 @@ class CalculatorController extends Controller
         $weights = array_map(fn($c) => (float)($c['weight'] ?? 0), $criteria);
         $types = array_map(fn($c) => $c['type'] ?? 'benefit', $criteria);
         $matrix = $this->buildDecisionMatrix($criteria, $alternatives, $evaluations);
+        if ($matrix === null) {
+            $this->json(['success' => false, 'error' => 'برای هر گزینه و معیار باید یک ارزیابی عددی ثبت شود.'], 422);
+        }
 
         $methodCode = strtoupper($project['method_code'] ?? 'SAW');
 
@@ -129,17 +136,23 @@ class CalculatorController extends Controller
                 $r['alternative_name'] = $altNames[$r['alternative_id']] ?? '';
             }
             $result['ranking_detail'] = $dbResults;
+            if ($methodCode === 'VIKOR' && isset($result['compromise_alternative_indices'])) {
+                $result['compromise_alternative_names'] = array_map(
+                    fn($index) => $alternatives[$index]['name'] ?? '',
+                    $result['compromise_alternative_indices']
+                );
+            }
         }
 
         $result['success'] = (($result['status'] ?? 'error') === 'success');
         $this->json($result);
     }
 
-    private function buildDecisionMatrix(array $criteria, array $alternatives, array $evaluations): array
+    private function buildDecisionMatrix(array $criteria, array $alternatives, array $evaluations): ?array
     {
         $n = count($alternatives);
         $m = count($criteria);
-        $matrix = array_fill(0, $n, array_fill(0, $m, 0.0));
+        $matrix = array_fill(0, $n, array_fill(0, $m, null));
 
         $altIndex = array_flip(array_column($alternatives, 'id'));
         $critIndex = array_flip(array_column($criteria, 'id'));
@@ -148,9 +161,12 @@ class CalculatorController extends Controller
             $row = $altIndex[$e['alternative_id']] ?? null;
             $col = $critIndex[$e['criterion_id']] ?? null;
             if ($row !== null && $col !== null) {
+                if (!is_numeric($e['value']) || !is_finite((float)$e['value'])) return null;
                 $matrix[$row][$col] = (float)$e['value'];
             }
         }
+
+        foreach ($matrix as $row) foreach ($row as $value) if ($value === null) return null;
 
         return $matrix;
     }

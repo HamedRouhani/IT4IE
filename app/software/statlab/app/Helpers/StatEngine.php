@@ -70,7 +70,8 @@ class StatEngine
         $n = count($data);
         if ($n < 3) return 0.0;
         $m = self::mean($data);
-        $s = self::std($data, false);
+        // The finite-sample correction below is defined using the sample SD.
+        $s = self::std($data, true);
         if ($s == 0.0) return 0.0;
         $sum = 0.0;
         foreach ($data as $x) $sum += (($x - $m) / $s) ** 3;

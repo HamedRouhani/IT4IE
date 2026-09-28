@@ -31,6 +31,7 @@ class AnalyticsService
         $budgetAtCompletion = (float)$project['budget'];
         $totalPlannedHours = array_sum(array_column($tasks, 'planned_hours'));
         $totalActualHours = array_sum(array_column($tasks, 'actual_hours'));
+        $taskCount = count($tasks);
 
         // محاسبه BAC (Budget at Completion) بر اساس ساعات
         $bac = $budgetAtCompletion;
@@ -46,17 +47,17 @@ class AnalyticsService
                 
                 if ($now >= $end) {
                     // وظیفه باید کامل می‌شد
-                    $pv += $this->calculateTaskBudget($task, $totalPlannedHours, $bac);
+                    $pv += $this->calculateTaskBudget($task, $totalPlannedHours, $bac, $taskCount);
                 } elseif ($now >= $start) {
                     // وظیفه در حال انجام است (نسبت زمانی)
                     $totalDays = ($end - $start) / 86400;
                     $elapsedDays = ($now - $start) / 86400;
                     $progress = $totalDays > 0 ? $elapsedDays / $totalDays : 0;
-                    $pv += $this->calculateTaskBudget($task, $totalPlannedHours, $bac) * $progress;
+                    $pv += $this->calculateTaskBudget($task, $totalPlannedHours, $bac, $taskCount) * $progress;
                 }
             } else {
                 // اگر تاریخ برنامه‌ریزی نشده، بر اساس درصد تکمیل محاسبه کن
-                $pv += $this->calculateTaskBudget($task, $totalPlannedHours, $bac);
+                $pv += $this->calculateTaskBudget($task, $totalPlannedHours, $bac, $taskCount);
             }
         }
 
@@ -64,38 +65,35 @@ class AnalyticsService
         $ev = 0;
         foreach ($tasks as $task) {
             $percentComplete = (float)$task['percent_complete'];
-            $ev += $this->calculateTaskBudget($task, $totalPlannedHours, $bac) * ($percentComplete / 100);
+            $percentComplete = max(0.0, min(100.0, $percentComplete));
+            $ev += $this->calculateTaskBudget($task, $totalPlannedHours, $bac, $taskCount) * ($percentComplete / 100);
         }
 
         // محاسبه AC (Actual Cost) - هزینه واقعی
         // بر اساس ساعات واقعی × نرخ ساعتی
         $hourlyRate = $totalPlannedHours > 0 ? $bac / $totalPlannedHours : 0;
-        $ac = $totalActualHours * $hourlyRate;
-        
-        // اگر ساعات واقعی ثبت نشده، از درصد پیشرفت استفاده کن
-        if ($ac == 0 && $ev > 0) {
-            $ac = $ev; // فرض: هزینه واقعی = ارزش کسب‌شده
-        }
+        $actualCostAvailable = $totalActualHours > 0 && $hourlyRate > 0;
+        $ac = $actualCostAvailable ? $totalActualHours * $hourlyRate : null;
 
         // محاسبات مشتق‌شده EVM
         $sv = $ev - $pv;                    // Schedule Variance
-        $cv = $ev - $ac;                    // Cost Variance
-        $spi = $pv > 0 ? $ev / $pv : 0;     // Schedule Performance Index
-        $cpi = $ac > 0 ? $ev / $ac : 0;     // Cost Performance Index
+        $cv = $ac !== null ? $ev - $ac : null; // Cost Variance
+        $spi = $pv > 0 ? $ev / $pv : null;     // Schedule Performance Index
+        $cpi = $ac !== null && $ac > 0 ? $ev / $ac : null; // Cost Performance Index
         
-        $eac = $cpi > 0 ? $bac / $cpi : $bac;      // Estimate at Completion
-        $etc = $eac - $ac;                          // Estimate to Complete
-        $vac = $bac - $eac;                         // Variance at Completion
-        $tcpi = ($bac - $ev) > 0 && ($bac - $ac) > 0 
+        $eac = $cpi !== null && $cpi > 0 ? $bac / $cpi : null; // Estimate at Completion
+        $etc = $eac !== null && $ac !== null ? $eac - $ac : null; // Estimate to Complete
+        $vac = $eac !== null ? $bac - $eac : null; // Variance at Completion
+        $tcpi = $ac !== null && ($bac - $ev) > 0 && ($bac - $ac) > 0
             ? ($bac - $ev) / ($bac - $ac) 
-            : 0;                                     // To-Complete Performance Index
+            : null;                                  // To-Complete Performance Index
 
         // درصد پیشرفت کلی
         $overallProgress = $bac > 0 ? ($ev / $bac) * 100 : 0;
 
         // زمان تکمیل پیش‌بینی‌شده
         $estimatedCompletionDate = null;
-        if ($project['planned_start'] && $spi > 0) {
+        if ($project['planned_start'] && $project['planned_end'] && $spi !== null && $spi > 0) {
             $plannedDays = (strtotime($project['planned_end']) - strtotime($project['planned_start'])) / 86400;
             $estimatedDays = $plannedDays / $spi;
             $estimatedCompletionDate = date('Y-m-d', strtotime($project['planned_start'] . ' + ' . round($estimatedDays) . ' days'));
@@ -106,14 +104,15 @@ class AnalyticsService
             'pv' => $pv,
             'ev' => $ev,
             'ac' => $ac,
+            'actual_cost_available' => $actualCostAvailable,
             'sv' => $sv,
             'cv' => $cv,
-            'spi' => round($spi, 3),
-            'cpi' => round($cpi, 3),
+            'spi' => $spi !== null ? round($spi, 3) : null,
+            'cpi' => $cpi !== null ? round($cpi, 3) : null,
             'eac' => $eac,
             'etc' => $etc,
             'vac' => $vac,
-            'tcpi' => round($tcpi, 3),
+            'tcpi' => $tcpi !== null ? round($tcpi, 3) : null,
             'overall_progress' => round($overallProgress, 1),
             'estimated_completion_date' => $estimatedCompletionDate,
             'total_tasks' => count($tasks),
@@ -133,20 +132,10 @@ class AnalyticsService
         if (!$evmData) return 0;
 
         // امتیاز زمان‌بندی (بر اساس SPI)
-        $spiScore = 0;
-        if ($evmData['spi'] >= 1.0) $spiScore = 100;
-        elseif ($evmData['spi'] >= 0.9) $spiScore = 80;
-        elseif ($evmData['spi'] >= 0.8) $spiScore = 60;
-        elseif ($evmData['spi'] >= 0.7) $spiScore = 40;
-        else $spiScore = 20;
+        $spiScore = $evmData['spi'] !== null ? $this->performanceScore((float)$evmData['spi']) : null;
 
         // امتیاز هزینه (بر اساس CPI)
-        $cpiScore = 0;
-        if ($evmData['cpi'] >= 1.0) $cpiScore = 100;
-        elseif ($evmData['cpi'] >= 0.9) $cpiScore = 80;
-        elseif ($evmData['cpi'] >= 0.8) $cpiScore = 60;
-        elseif ($evmData['cpi'] >= 0.7) $cpiScore = 40;
-        else $cpiScore = 20;
+        $cpiScore = $evmData['cpi'] !== null ? $this->performanceScore((float)$evmData['cpi']) : null;
 
         // امتیاز ریسک (بر اساس تعداد و شدت ریسک‌ها)
         $riskScore = $this->calculateRiskScore($projectId);
@@ -155,12 +144,11 @@ class AnalyticsService
         $qualityScore = $this->calculateQualityScore($projectId);
 
         // شاخص سلامت نهایی (میانگین وزنی)
-        $healthIndex = (
-            ($spiScore * 0.30) +    // ۳۰٪ زمان‌بندی
-            ($cpiScore * 0.30) +    // ۳۰٪ هزینه
-            ($riskScore * 0.20) +   // ۲۰٪ ریسک
-            ($qualityScore * 0.20)  // ۲۰٪ کیفیت
-        );
+        $weightedScore = ($riskScore * 0.20) + ($qualityScore * 0.20);
+        $availableWeight = 0.40;
+        if ($spiScore !== null) { $weightedScore += $spiScore * 0.30; $availableWeight += 0.30; }
+        if ($cpiScore !== null) { $weightedScore += $cpiScore * 0.30; $availableWeight += 0.30; }
+        $healthIndex = $availableWeight > 0 ? $weightedScore / $availableWeight : 50.0;
 
         return [
             'health_index' => round($healthIndex, 1),
@@ -223,7 +211,7 @@ class AnalyticsService
         
         // ترکیب نسبت تکمیل و فعالیت
         $score = ($completionRatio * 70) + ($activeRatio * 30);
-        return max(0, min(100, round($score * 100)));
+        return max(0, min(100, round($score)));
     }
 
     /**
@@ -250,12 +238,21 @@ class AnalyticsService
         return '#991B1B'; // قرمز تیره
     }
 
+    private function performanceScore(float $index): int
+    {
+        if ($index >= 1.0) return 100;
+        if ($index >= 0.9) return 80;
+        if ($index >= 0.8) return 60;
+        if ($index >= 0.7) return 40;
+        return 20;
+    }
+
     /**
      * محاسبه بودجه تخصیص‌یافته به یک وظیفه
      */
-    private function calculateTaskBudget($task, $totalPlannedHours, $totalBudget)
+    private function calculateTaskBudget($task, $totalPlannedHours, $totalBudget, int $taskCount)
     {
-        if ($totalPlannedHours == 0) return $totalBudget / 100; // توزیع مساوی
+        if ($totalPlannedHours <= 0) return $taskCount > 0 ? $totalBudget / $taskCount : 0.0;
         $ratio = (float)$task['planned_hours'] / $totalPlannedHours;
         return $totalBudget * $ratio;
     }

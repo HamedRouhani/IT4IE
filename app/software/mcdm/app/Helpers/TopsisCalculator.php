@@ -12,6 +12,18 @@ class TopsisCalculator
         if ($n === 0 || $m === 0) {
             return ['status' => 'error', 'message' => 'ماتریس تصمیم خالی است.'];
         }
+        if (count($types) !== $m || count($matrix) !== $n) {
+            return ['status' => 'error', 'message' => 'ابعاد داده‌های تصمیم با معیارها سازگار نیست.'];
+        }
+        foreach ($matrix as $row) {
+            if (!is_array($row) || count($row) !== $m) return ['status' => 'error', 'message' => 'ماتریس تصمیم باید مستطیلی و کامل باشد.'];
+            foreach ($row as $value) if (!is_numeric($value) || !is_finite((float)$value)) return ['status' => 'error', 'message' => 'مقادیر ماتریس باید عددی و متناهی باشند.'];
+        }
+        foreach ($weights as $weight) if (!is_numeric($weight) || !is_finite((float)$weight) || (float)$weight < 0) return ['status' => 'error', 'message' => 'وزن معیارها باید نامنفی و متناهی باشند.'];
+        $weightTotal = array_sum($weights);
+        if ($weightTotal <= 0) return ['status' => 'error', 'message' => 'مجموع وزن معیارها باید مثبت باشد.'];
+        $weights = array_map(fn($weight) => (float)$weight / $weightTotal, $weights);
+        foreach ($types as $type) if (!in_array($type, ['benefit', 'cost'], true)) return ['status' => 'error', 'message' => 'نوع معیار باید سودی یا هزینه‌ای باشد.'];
 
         // ۱. نرمال‌سازی برداری
         $normalized = [];

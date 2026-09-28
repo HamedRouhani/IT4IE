@@ -19,6 +19,31 @@ class AhpCalculator
             return ['status' => 'error', 'message' => 'حداقل دو معیار لازم است.'];
         }
 
+        foreach ($matrix as $i => $row) {
+            if (!is_array($row) || count($row) !== $n) {
+                return ['status' => 'error', 'message' => 'ماتریس مقایسه باید مربعی باشد.'];
+            }
+            foreach ($row as $j => $value) {
+                if (!is_numeric($value) || !is_finite((float)$value) || (float)$value <= 0) {
+                    return ['status' => 'error', 'message' => 'همهٔ مقایسه‌ها باید عدد مثبت و متناهی باشند.'];
+                }
+                $matrix[$i][$j] = (float)$value;
+            }
+        }
+        if ($n > 15) {
+            return ['status' => 'error', 'message' => 'برای بیش از ۱۵ معیار، شاخص RI این نسخه تعریف نشده است.'];
+        }
+        for ($i = 0; $i < $n; $i++) {
+            if (abs($matrix[$i][$i] - 1.0) > 1e-8) {
+                return ['status' => 'error', 'message' => 'خانه‌های قطر اصلی ماتریس AHP باید برابر ۱ باشند.'];
+            }
+            for ($j = $i + 1; $j < $n; $j++) {
+                if (abs($matrix[$i][$j] * $matrix[$j][$i] - 1.0) > 1e-6) {
+                    return ['status' => 'error', 'message' => 'ماتریس AHP باید متقابل باشد؛ هر مقایسه باید معکوس خانهٔ متناظر باشد.'];
+                }
+            }
+        }
+
         // ۱. نرمال‌سازی ستونی
         $normalized = array_fill(0, $n, array_fill(0, $n, 0));
         for ($j = 0; $j < $n; $j++) {
@@ -40,12 +65,12 @@ class AhpCalculator
 
         // ۳. محاسبه λmax
         $lambdaMax = 0;
-        for ($j = 0; $j < $n; $j++) {
+        for ($i = 0; $i < $n; $i++) {
             $weightedSum = 0;
-            for ($i = 0; $i < $n; $i++) {
-                $weightedSum += $matrix[$i][$j] * $weights[$i];
+            for ($j = 0; $j < $n; $j++) {
+                $weightedSum += $matrix[$i][$j] * $weights[$j];
             }
-            $lambdaMax += ($weights[$j] > 0) ? ($weightedSum / $weights[$j]) : 0;
+            $lambdaMax += ($weights[$i] > 0) ? ($weightedSum / $weights[$i]) : 0;
         }
         $lambdaMax /= $n;
 

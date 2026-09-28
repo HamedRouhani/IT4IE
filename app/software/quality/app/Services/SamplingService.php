@@ -78,6 +78,9 @@ class SamplingService
      */
     public function acceptanceProbability(int $n, int $c, float $p): float
     {
+        if ($n < 1 || $c < 0 || $c > $n || !is_finite($p) || $p < 0 || $p > 1) {
+            throw new \InvalidArgumentException('پارامترهای طرح نمونه‌گیری باید در دامنهٔ معتبر باشند.');
+        }
         $pa = 0.0;
         for ($k = 0; $k <= $c; $k++) {
             $pa += $this->binomialPmf($k, $n, $p);
@@ -92,6 +95,7 @@ class SamplingService
      */
     public function computeOcCurve(int $n, int $c, int $points = 51): array
     {
+        if ($points < 2) throw new \InvalidArgumentException('برای رسم منحنی OC دست‌کم دو نقطه لازم است.');
         $curve = [];
         for ($i = 0; $i < $points; $i++) {
             $p = $i / ($points - 1);  // 0 تا 1
@@ -114,6 +118,9 @@ class SamplingService
      */
     public function computeRisks(int $n, int $c, float $aqlPercent, float $ltpdPercent): array
     {
+        if (!is_finite($aqlPercent) || !is_finite($ltpdPercent) || $aqlPercent < 0 || $ltpdPercent > 100 || $aqlPercent >= $ltpdPercent) {
+            throw new \InvalidArgumentException('درصدهای AQL و LTPD باید معتبر باشند و LTPD از AQL بزرگ‌تر باشد.');
+        }
         $aql  = $aqlPercent  / 100.0;
         $ltpd = $ltpdPercent / 100.0;
 
@@ -133,6 +140,7 @@ class SamplingService
      */
     public function computeAoql(int $n, int $c, int $lotSize): float
     {
+        if ($lotSize < $n) throw new \InvalidArgumentException('اندازهٔ محموله باید بزرگ‌تر یا مساوی حجم نمونه باشد.');
         $maxAoq = 0.0;
         $step = 0.005;
         for ($p = 0.0; $p <= 1.0; $p += $step) {
@@ -149,6 +157,7 @@ class SamplingService
      */
     public function computeAti(int $n, int $c, int $lotSize, float $p): float
     {
+        if ($lotSize < $n || !is_finite($p) || $p < 0 || $p > 1) throw new \InvalidArgumentException('اندازهٔ محموله یا نسبت معیوب معتبر نیست.');
         $pa = $this->acceptanceProbability($n, $c, $p);
         return round($n + (1 - $pa) * ($lotSize - $n), 2);
     }
@@ -159,6 +168,9 @@ class SamplingService
      */
     public function findPlan(float $aqlPercent, float $ltpdPercent, float $alpha = 0.05, float $beta = 0.10): array
     {
+        if (!is_finite($aqlPercent) || !is_finite($ltpdPercent) || $aqlPercent < 0 || $ltpdPercent > 100 || $aqlPercent >= $ltpdPercent || !is_finite($alpha) || !is_finite($beta) || $alpha <= 0 || $alpha >= 1 || $beta <= 0 || $beta >= 1) {
+            throw new \InvalidArgumentException('AQL، LTPD و ریسک‌های هدف باید در دامنهٔ معتبر باشند.');
+        }
         $best = null;
         $bestScore = INF;
 

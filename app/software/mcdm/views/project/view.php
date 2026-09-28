@@ -1,14 +1,18 @@
 <?php
 $projectId = (int)$project['id'];
 $baseUrl = mcdm_url('controller=project&action=show&id=' . $projectId);
+$evaluationValues = [];
+foreach ($evaluations ?? [] as $evaluation) {
+    $evaluationValues[(int)$evaluation['alternative_id']][(int)$evaluation['criterion_id']] = $evaluation['value'];
+}
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="mcdm-project-heading d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3 mb-0"><?= mcdm_e($project['name']) ?></h1>
     <a href="<?= mcdm_url('controller=project') ?>" class="btn btn-outline-secondary btn-sm">بازگشت</a>
 </div>
 
-<ul class="nav nav-tabs mb-3">
+<ul class="nav nav-tabs mcdm-project-tabs mb-3">
     <?php
     $tabs = [
         'info'         => 'اطلاعات',
@@ -116,8 +120,8 @@ $baseUrl = mcdm_url('controller=project&action=show&id=' . $projectId);
     <?php else: ?>
         <div class="card"><div class="card-body">
             <div class="alert alert-info">امتیاز هر گزینه را نسبت به هر معیار وارد کنید (عدد).</div>
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle text-center">
+            <div class="table-responsive mcdm-matrix-scroll">
+                <table class="table table-bordered align-middle text-center mcdm-evaluation-table">
                     <thead>
                         <tr>
                             <th>گزینه \ معیار</th>
@@ -136,7 +140,7 @@ $baseUrl = mcdm_url('controller=project&action=show&id=' . $projectId);
                                                data-project="<?= $projectId ?>"
                                                data-criterion="<?= (int)$c['id'] ?>"
                                                data-alternative="<?= (int)$a['id'] ?>"
-                                               value="">
+                                               value="<?= isset($evaluationValues[(int)$a['id']][(int)$c['id']]) ? htmlspecialchars((string)$evaluationValues[(int)$a['id']][(int)$c['id']], ENT_QUOTES, 'UTF-8') : '' ?>">
                                     </td>
                                 <?php endforeach; ?>
                             </tr>
@@ -144,8 +148,8 @@ $baseUrl = mcdm_url('controller=project&action=show&id=' . $projectId);
                     </tbody>
                 </table>
             </div>
-            <div class="mt-3">
-                <button id="run-ranking" class="btn btn-success">
+            <div class="mcdm-matrix-actions mt-3">
+                <button id="run-ranking" class="btn btn-success" disabled>
                     <i class="fas fa-calculator"></i> محاسبه رتبه‌بندی
                 </button>
                 <span id="run-status" class="ms-2 text-muted"></span>
@@ -158,22 +162,35 @@ $baseUrl = mcdm_url('controller=project&action=show&id=' . $projectId);
             const evalUrl = <?= json_encode(mcdm_url('controller=project&action=setEvaluation&id=' . $projectId)) ?>;
             const runUrl  = <?= json_encode(mcdm_url('controller=calculator&action=run&id=' . $projectId)) ?>;
 
-            document.querySelectorAll('.eval-cell').forEach(function (input) {
+            let pendingSaves = Promise.resolve();
+            const cells = Array.from(document.querySelectorAll('.eval-cell'));
+            const runBtn = document.getElementById('run-ranking');
+            function refreshRunState() {
+                runBtn.disabled = cells.some(cell => cell.value.trim() === '');
+            }
+            cells.forEach(function (input) {
+                input.required = true;
                 input.addEventListener('change', function () {
                     const fd = new FormData();
                     fd.append('criterion_id', input.dataset.criterion);
                     fd.append('alternative_id', input.dataset.alternative);
-                    fd.append('value', input.value || 0);
+                    fd.append('value', input.value);
 
-                    fetch(evalUrl, {
-                        method: 'POST',
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                        body: fd
+                    pendingSaves = pendingSaves.catch(() => {}).then(async () => {
+                        const response = await fetch(evalUrl, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            body: fd
+                        });
+                        const result = await response.json();
+                        if (!response.ok || !result.success) throw new Error(result.error || 'ذخیره انجام نشد');
                     });
+                    pendingSaves.catch(error => { document.getElementById('run-status').textContent = error.message; });
+                    refreshRunState();
                 });
             });
+            refreshRunState();
 
-            const runBtn = document.getElementById('run-ranking');
             if (runBtn) {
                 runBtn.addEventListener('click', async function () {
                     const status = document.getElementById('run-status');
@@ -182,28 +199,37 @@ $baseUrl = mcdm_url('controller=project&action=show&id=' . $projectId);
                     status.textContent = 'در حال محاسبه...';
 
                     try {
+                        if (cells.some(cell => cell.value.trim() === '')) throw new Error('همهٔ خانه‌های ماتریس را تکمیل کنید.');
+                        await pendingSaves;
                         const res = await fetch(runUrl, {
                             method: 'POST',
                             headers: { 'X-Requested-With': 'XMLHttpRequest' }
                         });
                         const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || data.message || 'محاسبه انجام نشد.');
 
                         if (data.success && data.ranking_detail) {
                             let html = '<div class="table-responsive"><table class="table table-bordered">';
                             html += '<thead><tr><th>رتبه</th><th>گزینه</th><th>امتیاز</th></tr></thead><tbody>';
                             data.ranking_detail.forEach(function (r) {
-                                html += '<tr><td>' + r.rank + '</td><td>' + r.alternative_name +
+                                const safeName = String(r.alternative_name).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+                                html += '<tr><td>' + r.rank + '</td><td>' + safeName +
                                         '</td><td>' + Number(r.score).toFixed(4) + '</td></tr>';
                             });
                             html += '</tbody></table></div>';
+                            if (data.conditions) {
+                                const compromiseNames = (data.compromise_alternative_names || []).map(name => String(name).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))).join('، ');
+                                const checks = (data.conditions.acceptable_advantage ? 'شرط برتری برقرار است' : 'شرط برتری برقرار نیست') + '؛ ' + (data.conditions.acceptable_stability ? 'شرط پایداری برقرار است' : 'شرط پایداری برقرار نیست');
+                                html += '<div class="alert alert-info mt-3"><strong>تفسیر VIKOR:</strong> ' + checks + '. گزینه(های) سازشی پیشنهادی: ' + compromiseNames + '.</div>';
+                            }
                             wrap.innerHTML = html;
                             status.textContent = '✅ محاسبه انجام شد.';
                         } else {
-                            wrap.innerHTML = '<div class="alert alert-danger">' + (data.error || data.message || 'خطا') + '</div>';
+                            wrap.innerHTML = '<div class="alert alert-danger">' + String(data.error || data.message || 'خطا').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])) + '</div>';
                             status.textContent = '';
                         }
                     } catch (e) {
-                        wrap.innerHTML = '<div class="alert alert-danger">خطای ارتباط با سرور.</div>';
+                        wrap.innerHTML = '<div class="alert alert-danger">' + String(e.message || 'خطای ارتباط با سرور.').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])) + '</div>';
                         status.textContent = '';
                     } finally {
                         runBtn.disabled = false;
@@ -307,10 +333,10 @@ $baseUrl = mcdm_url('controller=project&action=show&id=' . $projectId);
                         const cm = data.consistency_metrics;
                         let out = '<div class="alert ' + (cm.is_consistent ? 'alert-success' : 'alert-warning') + '">' + data.smart_feedback + '</div>';
                         out += '<div class="row g-2 mb-3">';
-                        out += '<div class="col-3"><div class="border rounded p-2 text-center bg-light"><div class="small text-muted">λmax</div><b>' + cm.lambda_max + '</b></div></div>';
-                        out += '<div class="col-3"><div class="border rounded p-2 text-center bg-light"><div class="small text-muted">CI</div><b>' + cm.CI + '</b></div></div>';
-                        out += '<div class="col-3"><div class="border rounded p-2 text-center bg-light"><div class="small text-muted">RI</div><b>' + cm.RI + '</b></div></div>';
-                        out += '<div class="col-3"><div class="border rounded p-2 text-center bg-light"><div class="small text-muted">CR</div><b>' + cm.CR + '</b></div></div>';
+                        out += '<div class="col-6 col-md-3"><div class="border rounded p-2 text-center bg-light"><div class="small text-muted">λmax</div><b>' + cm.lambda_max + '</b></div></div>';
+                        out += '<div class="col-6 col-md-3"><div class="border rounded p-2 text-center bg-light"><div class="small text-muted">CI</div><b>' + cm.CI + '</b></div></div>';
+                        out += '<div class="col-6 col-md-3"><div class="border rounded p-2 text-center bg-light"><div class="small text-muted">RI</div><b>' + cm.RI + '</b></div></div>';
+                        out += '<div class="col-6 col-md-3"><div class="border rounded p-2 text-center bg-light"><div class="small text-muted">CR</div><b>' + cm.CR + '</b></div></div>';
                         out += '</div>';
                         out += '<table class="table table-bordered"><thead><tr><th>معیار</th><th>وزن</th><th style="width:40%">نمودار</th></tr></thead><tbody>';
                         (data.criteria || criteria.map(c => c.name)).forEach((name, idx) => {

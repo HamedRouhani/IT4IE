@@ -70,6 +70,12 @@ class Project extends Model
         return $this->query($sql, [$projectId, $criterionId, $alternativeId, $value, $value]);
     }
 
+    public function clearEvaluation($projectId, $criterionId, $alternativeId)
+    {
+        $table = $this->tablePrefix . 'project_evaluations';
+        return $this->query("DELETE FROM {$table} WHERE project_id = ? AND criterion_id = ? AND alternative_id = ?", [$projectId, $criterionId, $alternativeId]);
+    }
+
     public function updateCriterionWeight($criterionId, $weight)
     {
         $table = $this->tablePrefix . 'project_criteria';

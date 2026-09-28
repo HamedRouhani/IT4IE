@@ -210,9 +210,7 @@ class KPI extends BaseModel
                 return null;
 
             case 'OEE':
-                if ($mtbf !== null && $mttr !== null && ($mtbf + $mttr) > 0) {
-                    return round(($mtbf / ($mtbf + $mttr)) * 100, 2);
-                }
+                // OEE needs availability, performance, and quality inputs; MTBF/MTTR only supply availability.
                 return null;
 
             case 'FailureRate':
@@ -223,7 +221,7 @@ class KPI extends BaseModel
 
             case 'Reliability':
                 if ($mtbf !== null && $mtbf > 0) {
-                    return round(exp(-100 / $mtbf) * 100, 2);
+                    return round(exp(-100.0 / $mtbf) * 100, 2); // Built-in KPI's stated horizon is 100 operating hours.
                 }
                 return null;
 

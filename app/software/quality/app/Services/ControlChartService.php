@@ -84,15 +84,8 @@ class ControlChartService
 
     private function computeXbarR(array $subgroups): array
     {
+        $n = $this->validateSubgroups($subgroups, 2, 10);
         $k = count($subgroups);
-        if ($k < 2) {
-            throw new \RuntimeException('حداقل ۲ زیرگروه لازم است');
-        }
-
-        $n = count($subgroups[0]);
-        if ($n < 2 || $n > 10) {
-            throw new \RuntimeException('اندازه زیرگروه باید بین ۲ و ۱۰ باشد');
-        }
 
         $xbar = [];
         $r    = [];
@@ -130,15 +123,8 @@ class ControlChartService
 
     private function computeXbarS(array $subgroups): array
     {
+        $n = $this->validateSubgroups($subgroups, 2, 10);
         $k = count($subgroups);
-        if ($k < 2) {
-            throw new \RuntimeException('حداقل ۲ زیرگروه لازم است');
-        }
-
-        $n = count($subgroups[0]);
-        if ($n < 2 || $n > 10) {
-            throw new \RuntimeException('اندازه زیرگروه باید بین ۲ و ۱۰ باشد');
-        }
 
         $xbar = [];
         $s    = [];
@@ -191,8 +177,12 @@ class ControlChartService
         $values = [];
         foreach ($subgroups as $sg) {
             if (is_array($sg)) {
+                if (count($sg) !== 1 || !is_numeric($sg[0]) || !is_finite((float)$sg[0])) {
+                    throw new \RuntimeException('در نمودار I-MR هر زیرگروه باید دقیقاً یک مقدار متناهی داشته باشد.');
+                }
                 $values[] = (float) $sg[0];
             } else {
+                if (!is_numeric($sg) || !is_finite((float)$sg)) throw new \RuntimeException('مقادیر نمودار I-MR باید عددی و متناهی باشند.');
                 $values[] = (float) $sg;
             }
         }
@@ -240,8 +230,10 @@ class ControlChartService
         $totalN = 0;
         $totalD = 0;
         foreach ($data as $row) {
-            $totalN += (int) $row['sample_size'];
-            $totalD += (int) $row['defectives'];
+            [$n, $d] = $this->validateAttributeCounts($row, 'defectives');
+            if ($d > $n) throw new \RuntimeException('تعداد اقلام معیوب نمی‌تواند از حجم نمونه بیشتر باشد.');
+            $totalN += $n;
+            $totalD += $d;
         }
 
         if ($totalN === 0) {
@@ -263,7 +255,7 @@ class ControlChartService
 
             if ($n > 0) {
                 $sigma = sqrt($pBar * (1 - $pBar) / $n);
-                $uclList[] = round($pBar + 3.0 * $sigma, 6);
+                $uclList[] = round(min(1.0, $pBar + 3.0 * $sigma), 6);
                 $lclList[] = round(max(0.0, $pBar - 3.0 * $sigma), 6);
             } else {
                 $uclList[] = round($pBar, 6);
@@ -277,7 +269,7 @@ class ControlChartService
 
         return [
             'center_line' => round($pBar, 6),
-            'ucl'         => round($pBar + 3.0 * $sigmaAvg, 6),
+            'ucl'         => round(min(1.0, $pBar + 3.0 * $sigmaAvg), 6),
             'lcl'         => round(max(0.0, $pBar - 3.0 * $sigmaAvg), 6),
             'p_bar'       => round($pBar, 6),
             'sigma_hat'   => round($sigmaAvg, 6),
@@ -300,9 +292,14 @@ class ControlChartService
         $k = count($data);
         $totalN = 0;
         $totalD = 0;
+        $fixedN = null;
         foreach ($data as $row) {
-            $totalN += (int) $row['sample_size'];
-            $totalD += (int) $row['defectives'];
+            [$n, $d] = $this->validateAttributeCounts($row, 'defectives');
+            if ($d > $n) throw new \RuntimeException('تعداد اقلام معیوب نمی‌تواند از حجم نمونه بیشتر باشد.');
+            if ($fixedN !== null && $n !== $fixedN) throw new \RuntimeException('نمودار np فقط برای حجم نمونهٔ ثابت معتبر است؛ برای حجم متغیر از نمودار p استفاده کنید.');
+            $fixedN = $n;
+            $totalN += $n;
+            $totalD += $d;
         }
 
         $nBar  = $totalN / $k;
@@ -312,7 +309,7 @@ class ControlChartService
 
         return [
             'center_line' => round($npBar, 6),
-            'ucl'         => round($npBar + 3.0 * $sigma, 6),
+            'ucl'         => round(min((float)$fixedN, $npBar + 3.0 * $sigma), 6),
             'lcl'         => round(max(0.0, $npBar - 3.0 * $sigma), 6),
             'np_bar'      => round($npBar, 6),
             'sigma_hat'   => round($sigma, 6),
@@ -333,7 +330,8 @@ class ControlChartService
         $k = count($data);
         $totalC = 0;
         foreach ($data as $row) {
-            $totalC += (int) $row['defects'];
+            $count = $this->validateCount($row['defects'] ?? null, 'defects');
+            $totalC += $count;
         }
 
         $cBar  = $totalC / $k;
@@ -362,8 +360,9 @@ class ControlChartService
         $totalC = 0;
         $totalN = 0;
         foreach ($data as $row) {
-            $totalC += (int) $row['defects'];
-            $totalN += (int) $row['sample_size'];
+            [$n, $count] = $this->validateAttributeCounts($row, 'defects');
+            $totalC += $count;
+            $totalN += $n;
         }
 
         if ($totalN === 0) {
@@ -377,8 +376,7 @@ class ControlChartService
         $lclList = [];
 
         foreach ($data as $row) {
-            $n = (int) $row['sample_size'];
-            $c = (int) $row['defects'];
+            [$n, $c] = $this->validateAttributeCounts($row, 'defects');
 
             $u = $n > 0 ? $c / $n : 0.0;
             $series[] = round($u, 6);
@@ -406,5 +404,36 @@ class ControlChartService
             'ucl_series'  => $uclList,
             'lcl_series'  => $lclList,
         ];
+    }
+
+    private function validateSubgroups(array $subgroups, int $minSize, int $maxSize): int
+    {
+        if (count($subgroups) < 2) throw new \RuntimeException('حداقل ۲ زیرگروه لازم است.');
+        $size = null;
+        foreach ($subgroups as $subgroup) {
+            if (!is_array($subgroup)) throw new \RuntimeException('دادهٔ هر زیرگروه باید آرایه باشد.');
+            $currentSize = count($subgroup);
+            if ($currentSize < $minSize || $currentSize > $maxSize) throw new \RuntimeException("اندازهٔ هر زیرگروه باید بین {$minSize} و {$maxSize} باشد.");
+            if ($size !== null && $currentSize !== $size) throw new \RuntimeException('اندازهٔ همهٔ زیرگروه‌ها باید یکسان باشد.');
+            foreach ($subgroup as $value) if (!is_numeric($value) || !is_finite((float)$value)) throw new \RuntimeException('مقادیر زیرگروه‌ها باید عددی و متناهی باشند.');
+            $size = $currentSize;
+        }
+        return (int)$size;
+    }
+
+    private function validateAttributeCounts(array $row, string $countField): array
+    {
+        $sampleSize = $this->validateCount($row['sample_size'] ?? null, 'sample_size');
+        $count = $this->validateCount($row[$countField] ?? null, $countField);
+        if ($sampleSize < 1) throw new \RuntimeException('حجم نمونه باید مثبت باشد.');
+        return [$sampleSize, $count];
+    }
+
+    private function validateCount($value, string $label): int
+    {
+        if (!is_numeric($value) || !is_finite((float)$value) || (float)$value < 0 || floor((float)$value) !== (float)$value) {
+            throw new \RuntimeException("{$label} باید عدد صحیح نامنفی باشد.");
+        }
+        return (int)$value;
     }
 }

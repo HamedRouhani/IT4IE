@@ -99,6 +99,7 @@ class ProjectController extends Controller
             'tab'          => $tab,
             'criteria'     => $this->model->getCriteria((int)$id),
             'alternatives' => $this->model->getAlternatives((int)$id),
+            'evaluations'  => $this->model->getEvaluations((int)$id),
             'results'      => $this->model->getResults((int)$id),
         ]);
     }
@@ -163,10 +164,24 @@ class ProjectController extends Controller
 
         $criterionId = (int)($_POST['criterion_id'] ?? 0);
         $alternativeId = (int)($_POST['alternative_id'] ?? 0);
-        $value = (float)($_POST['value'] ?? 0);
+        $projectId = (int)$id;
+        $project = $this->model->getWithDetails($projectId);
+        if (!$project) $this->json(['success' => false, 'error' => 'پروژه یافت نشد.'], 404);
+        if (!$this->authorizeOwnership($project['user_id'])) return;
+        if (!$criterionId || !$alternativeId) $this->json(['success' => false, 'error' => 'معیار یا گزینه معتبر نیست.'], 422);
+        $criterionIds = array_map('intval', array_column($this->model->getCriteria($projectId), 'id'));
+        $alternativeIds = array_map('intval', array_column($this->model->getAlternatives($projectId), 'id'));
+        if (!in_array($criterionId, $criterionIds, true) || !in_array($alternativeId, $alternativeIds, true)) {
+            $this->json(['success' => false, 'error' => 'معیار و گزینه باید متعلق به همین پروژه و فعال باشند.'], 422);
+        }
 
-        if ($criterionId && $alternativeId) {
-            $this->model->setEvaluation((int)$id, $criterionId, $alternativeId, $value);
+        $rawValue = trim((string)($_POST['value'] ?? ''));
+        if ($rawValue === '') {
+            $this->model->clearEvaluation($projectId, $criterionId, $alternativeId);
+        } elseif (!is_numeric($rawValue) || !is_finite((float)$rawValue)) {
+            $this->json(['success' => false, 'error' => 'ارزیابی باید عددی و متناهی باشد.'], 422);
+        } else {
+            $this->model->setEvaluation($projectId, $criterionId, $alternativeId, (float)$rawValue);
         }
 
         $this->json(['success' => true]);

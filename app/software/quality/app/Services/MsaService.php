@@ -34,6 +34,14 @@ class MsaService
         if ($p < 2 || $o < 2 || $r < 2) {
             throw new \RuntimeException('حداقل ۲ قطعه، ۲ اپراتور و ۲ تکرار لازم است');
         }
+        if (!is_array($values)) throw new \InvalidArgumentException('ساختار دادهٔ Gage R&R معتبر نیست.');
+        for ($op = 0; $op < $o; $op++) {
+            for ($pt = 0; $pt < $p; $pt++) {
+                $cell = $values[$op][$pt] ?? null;
+                if (!is_array($cell) || count($cell) !== $r) throw new \InvalidArgumentException('روش ANOVA اینجا به دادهٔ متوازن با تعداد تکرار یکسان برای هر اپراتور و قطعه نیاز دارد.');
+                foreach ($cell as $value) if (!is_numeric($value) || !is_finite((float)$value)) throw new \InvalidArgumentException('اندازه‌گیری‌های Gage R&R باید عددی و متناهی باشند.');
+            }
+        }
 
         // ── میانگین‌ها
         $grandSum = 0.0;

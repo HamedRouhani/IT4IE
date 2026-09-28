@@ -36,8 +36,13 @@ class CapabilityService
         $allValues      = [];
         $subgroupRanges = [];
         $subgroupStds   = [];
+        $subgroupSize   = null;
 
         foreach ($subgroups as $sg) {
+            if (!is_array($sg) || count($sg) === 0) throw new \InvalidArgumentException('زیرگروه‌ها باید آرایه‌های غیرخالی باشند.');
+            if ($subgroupSize !== null && count($sg) !== $subgroupSize) throw new \InvalidArgumentException('اندازهٔ زیرگروه‌ها باید یکسان باشد تا انحراف معیار درون‌گروهی محاسبه شود.');
+            $subgroupSize = count($sg);
+            foreach ($sg as $value) if (!is_numeric($value) || !is_finite((float)$value)) throw new \InvalidArgumentException('داده‌های قابلیت باید عددی و متناهی باشند.');
             $sg = array_map('floatval', $sg);
             $n  = count($sg);
             if ($n === 0) continue;
@@ -62,7 +67,8 @@ class CapabilityService
             throw new \RuntimeException('حداقل ۲ مقدار لازم است');
         }
 
-        $n = count($subgroups[0]);
+        $n = (int)$subgroupSize;
+        if ($n > 10) throw new \InvalidArgumentException('برای زیرگروه‌های بیش از ۱۰ مشاهده، ثابت برآورد σ در این نسخه موجود نیست.');
 
         // میانگین کل
         $grandMean = array_sum($allValues) / $totalN;
@@ -77,14 +83,18 @@ class CapabilityService
 
         // انحراف معیار درون (Within / Short-term)
         $stdWithin = 0.0;
-        if (!empty($subgroupRanges) && isset($this->d2()[$n])) {
+        if ($n === 1) {
+            $movingRanges = [];
+            for ($i = 1; $i < count($allValues); $i++) $movingRanges[] = abs($allValues[$i] - $allValues[$i - 1]);
+            $stdWithin = array_sum($movingRanges) / count($movingRanges) / $this->d2()[2];
+        } elseif (!empty($subgroupRanges) && isset($this->d2()[$n])) {
             $rBar = array_sum($subgroupRanges) / count($subgroupRanges);
             $stdWithin = $rBar / $this->d2()[$n];
         } elseif (!empty($subgroupStds) && isset($this->c4()[$n])) {
             $sBar = array_sum($subgroupStds) / count($subgroupStds);
             $stdWithin = $sBar / $this->c4()[$n];
         } else {
-            $stdWithin = $stdOverall;
+            throw new \RuntimeException('برای این ساختار داده، انحراف معیار درون‌گروهی قابل برآورد نیست.');
         }
 
         // شاخص‌های قابلیت (Short-term)

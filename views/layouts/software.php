@@ -15,7 +15,8 @@ if (!isset($settings) || empty($settings)) {
 $moduleName = $moduleName ?? 'babok';
 $softwareName = $softwareName ?? 'BABOK Analyzer';
 $title = $title ?? ($softwareName . ' - IT4IE');
-$cssVersion = '2.0'; // برای شکستن کش مرورگر
+$cssVersion = '2.0'; // نسخهٔ پایهٔ CSS نرم‌افزارها
+$moduleCssVersion = $moduleName === 'mcdm' ? '2.1' : $cssVersion;
 ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -36,7 +37,7 @@ $cssVersion = '2.0'; // برای شکستن کش مرورگر
     <link rel="stylesheet" href="/assets/css/software.css?v=<?php echo $cssVersion; ?>">
     <!-- Module Styles -->
     <?php if ($moduleName): ?>
-    <link rel="stylesheet" href="/assets/css/modules/<?php echo $moduleName; ?>.css?v=<?php echo $cssVersion; ?>">
+    <link rel="stylesheet" href="/assets/css/modules/<?php echo $moduleName; ?>.css?v=<?php echo $moduleCssVersion; ?>">
     <?php endif; ?>
     <?php
     echo '<link rel="stylesheet" href="/assets/css/modules/statlab.css?v=' . time() . '">';

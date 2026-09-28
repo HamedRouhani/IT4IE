@@ -84,7 +84,7 @@ function getPerformanceColor($value) {
     </div>
     <div class="card" style="text-align: center;">
         <div style="font-size: 0.85rem; color: var(--gray);">هزینه واقعی (AC)</div>
-        <div style="font-size: 1.5rem; font-weight: 700; color: #F59E0B;"><?= formatCurrency($evm['ac']) ?></div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: #F59E0B;"><?= $evm['ac'] !== null ? formatCurrency($evm['ac']) : '—' ?></div>
     </div>
     <div class="card" style="text-align: center;">
         <div style="font-size: 0.85rem; color: var(--gray);">بودجه کل (BAC)</div>
@@ -102,19 +102,19 @@ function getPerformanceColor($value) {
             <div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                     <span>شاخص عملکرد زمان‌بندی (SPI)</span>
-                    <strong style="color: <?= getPerformanceColor($evm['spi']) ?>;"><?= $evm['spi'] ?></strong>
+                    <strong style="color: <?= $evm['spi'] !== null ? getPerformanceColor($evm['spi']) : '#64748B' ?>;"><?= $evm['spi'] !== null ? $evm['spi'] : '—' ?></strong>
                 </div>
                 <div style="background: #e5e7eb; border-radius: 9999px; height: 8px; overflow: hidden;">
-                    <div style="width: <?= min(100, $evm['spi'] * 100) ?>%; background: <?= getPerformanceColor($evm['spi']) ?>; height: 100%;"></div>
+                    <div style="width: <?= $evm['spi'] !== null ? min(100, max(0, $evm['spi'] * 100)) : 0 ?>%; background: <?= $evm['spi'] !== null ? getPerformanceColor($evm['spi']) : '#94A3B8' ?>; height: 100%;"></div>
                 </div>
             </div>
             <div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                     <span>شاخص عملکرد هزینه (CPI)</span>
-                    <strong style="color: <?= getPerformanceColor($evm['cpi']) ?>;"><?= $evm['cpi'] ?></strong>
+                    <strong style="color: <?= $evm['cpi'] !== null ? getPerformanceColor($evm['cpi']) : '#64748B' ?>;"><?= $evm['cpi'] !== null ? $evm['cpi'] : '—' ?></strong>
                 </div>
                 <div style="background: #e5e7eb; border-radius: 9999px; height: 8px; overflow: hidden;">
-                    <div style="width: <?= min(100, $evm['cpi'] * 100) ?>%; background: <?= getPerformanceColor($evm['cpi']) ?>; height: 100%;"></div>
+                    <div style="width: <?= $evm['cpi'] !== null ? min(100, max(0, $evm['cpi'] * 100)) : 0 ?>%; background: <?= $evm['cpi'] !== null ? getPerformanceColor($evm['cpi']) : '#94A3B8' ?>; height: 100%;"></div>
                 </div>
             </div>
         </div>
@@ -127,16 +127,16 @@ function getPerformanceColor($value) {
         <div style="display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; justify-content: space-between;">
                 <span>تخمین هزینه در تکمیل (EAC)</span>
-                <strong><?= formatCurrency($evm['eac']) ?></strong>
+                <strong><?= $evm['eac'] !== null ? formatCurrency($evm['eac']) : '—' ?></strong>
             </div>
             <div style="display: flex; justify-content: space-between;">
                 <span>هزینه باقی‌مانده (ETC)</span>
-                <strong><?= formatCurrency($evm['etc']) ?></strong>
+                <strong><?= $evm['etc'] !== null ? formatCurrency($evm['etc']) : '—' ?></strong>
             </div>
             <div style="display: flex; justify-content: space-between;">
                 <span>انحراف در تکمیل (VAC)</span>
-                <strong style="color: <?= $evm['vac'] >= 0 ? '#10B981' : '#EF4444' ?>;">
-                    <?= formatCurrency(abs($evm['vac'])) ?> <?= $evm['vac'] >= 0 ? '(صرفه‌جویی)' : '(مازاد)' ?>
+                <strong style="color: <?= $evm['vac'] !== null ? ($evm['vac'] >= 0 ? '#10B981' : '#EF4444') : '#64748B' ?>;">
+                    <?= $evm['vac'] !== null ? formatCurrency(abs($evm['vac'])) . ' ' . ($evm['vac'] >= 0 ? '(صرفه‌جویی)' : '(مازاد)') : '—' ?>
                 </strong>
             </div>
             <div style="display: flex; justify-content: space-between;">
@@ -205,7 +205,7 @@ new Chart(sCurveCtx, {
             data: [
                 <?= round($evm['pv'] / 1000000, 1) ?>,
                 <?= round($evm['ev'] / 1000000, 1) ?>,
-                <?= round($evm['ac'] / 1000000, 1) ?>
+                <?= $evm['ac'] !== null ? round($evm['ac'] / 1000000, 1) : 'null' ?>
             ],
             backgroundColor: ['rgba(59, 130, 246, 0.2)', 'rgba(16, 185, 129, 0.2)', 'rgba(245, 158, 11, 0.2)'],
             borderColor: ['#3B82F6', '#10B981', '#F59E0B'],
