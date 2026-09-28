@@ -15,8 +15,8 @@ if (!isset($settings) || empty($settings)) {
 $moduleName = $moduleName ?? 'babok';
 $softwareName = $softwareName ?? 'BABOK Analyzer';
 $title = $title ?? ($softwareName . ' - IT4IE');
-$cssVersion = '2.0'; // نسخهٔ پایهٔ CSS نرم‌افزارها
-$moduleCssVersion = $moduleName === 'mcdm' ? '2.1' : $cssVersion;
+$cssVersion = '2.2'; // نسخهٔ کش CSS پوستهٔ نرم‌افزارها
+$moduleCssVersion = $moduleName === 'mcdm' ? '2.1' : '2.0';
 ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">

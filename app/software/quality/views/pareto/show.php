@@ -250,10 +250,10 @@ $statusMeta = $statusLabels[$analysis['status']] ?? ['label' => $analysis['statu
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="/public/assets/js/software/quality.js"></script>
+<script src="/assets/js/software/quality.js"></script>
 
 <script>
 window.PARETO_CHART_DATA = <?= json_encode($chart, JSON_UNESCAPED_UNICODE) ?>;
 window.PARETO_UNIT = <?= json_encode($analysis['unit'] ?? '', JSON_UNESCAPED_UNICODE) ?>;
 </script>
-<script src="/public/assets/js/software/pareto.js?v=<?= time() ?>"></script>
+<script src="/assets/js/software/pareto.js?v=<?= time() ?>"></script>

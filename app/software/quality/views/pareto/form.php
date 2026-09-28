@@ -255,7 +255,7 @@ if (!empty($items)) {
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="/public/assets/js/software/quality.js"></script>
+<script src="/assets/js/software/quality.js"></script>
 
 <script>
 // داده‌ی اولیه
@@ -264,4 +264,4 @@ window.PARETO_PREVIEW_URL   = '<?= CURRENT_MODULE_URL ?>?controller=pareto&actio
 window.QC_CSRF_TOKEN        = '<?= $this->csrfToken() ?>';
 </script>
 
-<script src="/public/assets/js/software/pareto.js?v=<?= time() ?>"></script>
+<script src="/assets/js/software/pareto.js?v=<?= time() ?>"></script>

@@ -427,6 +427,7 @@ class ParetoController extends Controller
                 if (!isset($titles[$idx])) {
                     continue;
                 }
+                $dueDate = trim((string)($dueDates[$idx] ?? ''));
                 $this->capaModel->create([
                     'system_id'            => $system['id'],
                     'project_id'           => $analysis['project_id'],
@@ -436,7 +437,7 @@ class ParetoController extends Controller
                     'title'                => trim($titles[$idx]),
                     'problem_description'  => 'برخاسته از تحلیل Pareto: ' . $analysis['title'],
                     'priority'             => $priorities[$idx] ?? 'high',
-                    'due_date'             => $dueDates[$idx] ?? null,
+                    'due_date'             => $dueDate !== '' ? $dueDate : null,
                     'responsible_person'   => $responsibles[$idx] ?? null,
                     'status'               => 'open',
                     'effectiveness'        => 'pending',

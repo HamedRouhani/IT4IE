@@ -245,15 +245,10 @@ $sourceLabels = [
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <select class="qc-form-select qc-quick-status"
-                                            style="padding:4px 8px; font-size:0.8rem; width:auto;"
-                                            data-id="<?= $c['id'] ?>">
-                                        <?php foreach ($statusLabels as $k => $m): ?>
-                                            <option value="<?= $k ?>" <?= $c['status'] === $k ? 'selected' : '' ?>>
-                                                <?= $m['label'] ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
+                                    <?php $statusMeta = $statusLabels[$c['status']] ?? ['label' => $c['status'], 'class' => 'inactive']; ?>
+                                    <span class="qc-status-badge qc-status-<?= htmlspecialchars($statusMeta['class'], ENT_QUOTES, 'UTF-8') ?>">
+                                        <?= htmlspecialchars($statusMeta['label'], ENT_QUOTES, 'UTF-8') ?>
+                                    </span>
                                 </td>
                                 <td>
                                     <div style="display:flex; gap:6px;">
@@ -265,14 +260,18 @@ $sourceLabels = [
                                            class="qc-btn-outline" style="padding:4px 10px; font-size:0.8rem;">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button"
-                                                class="qc-btn-danger qc-confirm-delete"
-                                                style="padding:4px 10px; font-size:0.8rem;"
-                                                data-url="<?= CURRENT_MODULE_URL ?>?controller=capa&action=delete"
-                                                data-id="<?= $c['id'] ?>"
-                                                data-message="این CAPA حذف خواهد شد. مطمئنی؟">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <form method="POST"
+                                              action="<?= CURRENT_MODULE_URL ?>?controller=capa&action=delete"
+                                              style="display:inline; margin:0;">
+                                            <input type="hidden" name="id" value="<?= (int)$c['id'] ?>">
+                                            <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars($this->csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
+                                            <button type="submit"
+                                                    class="qc-btn-danger qc-confirm-delete"
+                                                    style="padding:4px 10px; font-size:0.8rem;"
+                                                    data-message="این CAPA حذف خواهد شد. مطمئنی؟">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -285,7 +284,3 @@ $sourceLabels = [
 </div>
 
 <script src="/public/assets/js/software/quality.js"></script>
-<script>
-window.QC_QUICK_STATUS_URL = '<?= CURRENT_MODULE_URL ?>?controller=capa&action=quickStatus';
-window.QC_CSRF_TOKEN = '<?= $this->csrfToken() ?>';
-</script>
