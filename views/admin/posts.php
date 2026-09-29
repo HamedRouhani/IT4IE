@@ -95,7 +95,7 @@
                                 </td>
                                 <td><?php echo date('Y/m/d H:i', strtotime($post['created_at'])); ?></td>
                                 <td class="actions">
-                                    <a href="/post/<?php echo htmlspecialchars($post['slug']); ?>" class="btn-view" target="_blank" title="مشاهده در سایت">
+                                    <a href="<?php echo $post['status'] === 'published' ? '/post/' . htmlspecialchars($post['slug'], ENT_QUOTES, 'UTF-8') : '/admin/posts/preview/' . (int) $post['id']; ?>" class="btn-view" target="_blank" rel="noopener" title="مشاهده پیش‌نمایش">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <a href="/admin/posts/edit/<?php echo $post['id']; ?>" class="btn-edit" title="ویرایش">

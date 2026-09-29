@@ -151,6 +151,34 @@ class AdminController extends Controller
         ]);
     }
     
+    /** Render a post privately for an authenticated administrator without publishing it. */
+    public function previewPost($id)
+    {
+        $postModel = new Post();
+        $post = $postModel->queryOne(
+            "SELECT p.*, c.name AS category_name, c.slug AS category_slug, u.name AS author_name
+             FROM posts p
+             LEFT JOIN categories c ON p.category_id = c.id
+             LEFT JOIN users u ON p.author_id = u.id
+             WHERE p.id = ?
+             LIMIT 1",
+            [(int) $id]
+        );
+
+        if (!$post) {
+            http_response_code(404);
+            echo '404 Not Found';
+            return;
+        }
+
+        $this->render('home/post', [
+            'title' => $post['title'] . ' - پیش‌نمایش',
+            'post' => $post,
+            'previewMode' => true,
+            'settings' => (new Setting())->getAll(),
+        ]);
+    }
+
     public function editPost($id)
     {
         $postModel = new Post();

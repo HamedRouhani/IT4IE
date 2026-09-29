@@ -1,3 +1,9 @@
+<?php if (!empty($previewMode)): ?>
+    <div role="status" style="margin:0 0 20px;padding:14px 18px;border:1px solid #f3d28a;border-radius:10px;background:#fff8e7;color:#744b00;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <span><i class="fas fa-eye"></i> پیش‌نمایش خصوصی — این مطلب هنوز برای عموم منتشر نشده است.</span>
+        <a href="/admin/posts/edit/<?php echo (int) $post['id']; ?>" style="font-weight:700;color:#6141c8">ویرایش مطلب</a>
+    </div>
+<?php endif; ?>
 <div class="single-post">
     <div class="post-header">
         <h1 class="post-title"><?php echo $post['title']; ?></h1>

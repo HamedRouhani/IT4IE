@@ -507,6 +507,7 @@ if (strpos($url, 'admin') === 0) {
     // ۱) مسیرهای با پارامتر عددی
     // ----------------------------------------
     $paramRoutes = [
+        '#^posts/preview/(\d+)$#'    => 'previewPost',
         '#^posts/edit/(\d+)$#'       => 'editPost',
         '#^posts/delete/(\d+)$#'     => 'deletePost',
         '#^messages/view/(\d+)$#'    => 'viewMessage',
