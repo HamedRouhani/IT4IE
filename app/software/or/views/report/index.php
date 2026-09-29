@@ -46,12 +46,27 @@
                         </thead>
                         <tbody>
                             <?php foreach ($projects as $index => $project): ?>
+                                <?php
+                                $problemTypeName = trim((string) ($project['problem_type_name'] ?? ''));
+                                $problemTypeCode = strtoupper(trim((string) ($project['problem_type_code'] ?? '')));
+                                $problemTypeLabels = [
+                                    'TRANS' => 'مسئله حمل‌ونقل',
+                                    'ASSIGN' => 'مسئله تخصیص',
+                                    'TRANSSHIP' => 'مسئله ترانشیپ',
+                                    'TRANSSHIPMENT' => 'مسئله ترانشیپ',
+                                    'SHORTEST' => 'کوتاه‌ترین مسیر',
+                                    'LP' => 'برنامه‌ریزی خطی',
+                                ];
+                                $problemTypeLabel = $problemTypeName !== ''
+                                    ? $problemTypeName
+                                    : ($problemTypeLabels[$problemTypeCode] ?? ($problemTypeCode !== '' ? $problemTypeCode : 'نامشخص'));
+                                ?>
                                 <tr>
                                     <td class="ps-4 fw-bold text-muted"><?= $index + 1 ?></td>
                                     <td class="fw-bold"><?= htmlspecialchars($project['name']) ?></td>
                                     <td>
-                                        <span class="badge bg-info bg-opacity-10 text-info">
-                                            <?= htmlspecialchars($project['problem_type_name'] ?: 'نامشخص') ?>
+                                        <span class="or-report-type-badge">
+                                            <?= htmlspecialchars($problemTypeLabel, ENT_QUOTES, 'UTF-8') ?>
                                         </span>
                                     </td>
                                     <td>

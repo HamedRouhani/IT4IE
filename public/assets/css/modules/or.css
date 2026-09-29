@@ -550,6 +550,24 @@ html {
 .text-info { color: #0dcaf0 !important; }
 .bg-info { background-color: #0dcaf0 !important; }
 
+/* Report labels need their own contrast because module utility overrides are global. */
+.or-report-type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid #7dd3fc;
+    border-radius: 999px;
+    background-color: #e0f2fe;
+    color: #075985;
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 /* Responsive adjustments */
 @media (max-width: 576px) {
     .stat-box {

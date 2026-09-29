@@ -48,14 +48,16 @@ $iconMap = [
 
     <!-- کارت‌های آماری -->
     <div class="row g-3 mb-4">
-        <div class="card border-0 shadow-sm" style="cursor: pointer;" onclick="window.location.href='?controller=smart_modeler'">
-            <div class="card-body text-center">
-                <i class="fas fa-brain fa-3x text-primary mb-3"></i>
-                <h5>مدلسازی هوشمند</h5>
-                <p class="text-muted small mb-0">توصیف مسئله به فارسی و تشخیص خودکار</p>
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100" style="cursor: pointer;" onclick="window.location.href='?controller=smart_modeler'">
+                <div class="card-body text-center">
+                    <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                    <h5>مدلسازی هوشمند</h5>
+                    <p class="text-muted small mb-0">توصیف مسئله به فارسی و تشخیص خودکار</p>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -72,7 +74,7 @@ $iconMap = [
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -89,7 +91,7 @@ $iconMap = [
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -106,7 +108,7 @@ $iconMap = [
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-12">
             <div class="or-stat-card text-center">
                 <h6 class="text-muted mb-2">روش‌های حل</h6>
                 <h3 class="mb-0 text-info fw-bold"><?= number_format($stats['methods']) ?></h3>

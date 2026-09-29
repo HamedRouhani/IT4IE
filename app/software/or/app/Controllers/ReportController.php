@@ -19,8 +19,10 @@ class ReportController extends Controller
      */
     public function index()
     {
+        $this->requireAuth();
+        $userId = (int) $this->currentUserId;
         // دریافت لیست پروژه‌ها از طریق مدل
-        $projects = $this->projectModel->getAllWithProblemType();
+        $projects = $userId > 0 ? $this->projectModel->getWithType($userId) : [];
 
         $this->view('report/index', [
             'pageTitle'   => 'گزارش‌ها و آمار پروژه‌ها',
@@ -34,9 +36,10 @@ class ReportController extends Controller
      */
     public function show($id)
     {
+        $this->requireAuth();
         $project = $this->projectModel->getByIdWithProblemType((int)$id);
 
-        if (!$project) {
+        if (!$project || (int) $project['user_id'] !== (int) $this->currentUserId) {
             $this->flashError('پروژه مورد نظر یافت نشد.');
             $this->redirect('controller=report');
         }
