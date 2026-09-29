@@ -9,7 +9,7 @@ foreach ($leads as $l) {
 }
 ?>
 
-<div class="admin-container">
+<div class="admin-container admin-leads-page">
     <?php include VIEWS_PATH . '/admin/partials/sidebar.php'; ?>
 
     <div class="admin-content">
@@ -135,15 +135,21 @@ foreach ($leads as $l) {
                                 </select>
                             </form>
                         </td>
-                        <td class="actions">
-                            <a href="/admin/checklist/result/<?= $lead['id'] ?>" class="btn-action view" title="مشاهده نتیجه">
+                        <td class="actions lead-actions">
+                            <a href="/admin/checklist/result/<?= (int) $lead['id'] ?>" class="btn-action view" title="مشاهده نتیجه" aria-label="مشاهده نتیجه">
                                 <i class="fas fa-poll"></i>
                             </a>
-                            <a href="/admin/checklist/message/<?= $lead['id'] ?>" class="btn-action email" title="ارسال پیام">
-                                <i class="fas fa-paper-plane"></i>
-                            </a>
+                            <?php if (!empty($lead['user_id'])): ?>
+                                <a href="/admin/checklist/message/<?= (int) $lead['id'] ?>" class="btn-action message" title="ارسال پیام درون‌برنامه‌ای" aria-label="ارسال پیام درون‌برنامه‌ای">
+                                    <i class="fas fa-comment-dots"></i>
+                                </a>
+                            <?php else: ?>
+                                <span class="btn-action message-disabled" title="به حساب کاربری متصل نیست" aria-label="کاربر حساب متصل ندارد">
+                                    <i class="fas fa-comment-slash"></i>
+                                </span>
+                            <?php endif; ?>
                             <?php if (!empty($lead['phone'])): ?>
-                                <a href="tel:<?= htmlspecialchars($lead['phone']) ?>" class="btn-action call" title="تماس">
+                                <a href="tel:<?= htmlspecialchars((string) $lead['phone'], ENT_QUOTES, 'UTF-8') ?>" class="btn-action call" title="تماس" aria-label="تماس">
                                     <i class="fas fa-phone"></i>
                                 </a>
                             <?php endif; ?>

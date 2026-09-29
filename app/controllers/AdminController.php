@@ -396,6 +396,7 @@ class AdminController extends Controller
                     "SELECT l.*, u.name as user_name_from_db, u.email as user_email
                      FROM `{$tableName}` l
                      LEFT JOIN users u ON l.user_id = u.id
+                     WHERE NOT " . \App\Models\SoftwareActivityLog::EXCLUDED_ACTIVITY_CONDITION . "
                      ORDER BY l.created_at DESC 
                      LIMIT 50"
                 );
@@ -416,6 +417,7 @@ class AdminController extends Controller
                      FROM workflow_templates t
                      LEFT JOIN `{$tableName}` l
                        ON l.record_type = 'research_template' AND l.record_id = t.id AND l.software_slug = 'research'
+                       AND NOT " . \App\Models\SoftwareActivityLog::EXCLUDED_ACTIVITY_CONDITION . "
                      WHERE t.status = 'published'
                      GROUP BY t.id, t.title, t.slug, t.tool_slug, t.sort_order
                      ORDER BY t.sort_order ASC, t.id DESC"
@@ -894,7 +896,7 @@ class AdminController extends Controller
         $submission['answers_decoded'] = json_decode($submission['answers'], true) ?? [];
         $submission['recommendations_decoded'] = json_decode($submission['recommendations'], true) ?? [];
 
-        $questions = $checklistModel->getActiveQuestions();
+        $questions = $checklistModel->getQuestionsForChecklist((int) ($submission['checklist_id'] ?? 0));
 
         $this->renderAdmin('admin/checklist-view', [
             'title' => 'جزئیات چک‌لیست #' . $id . ' - IT4IE',
@@ -960,6 +962,12 @@ class AdminController extends Controller
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!$this->verifyCsrf()) {
+                $_SESSION['error'] = 'درخواست معتبر نیست؛ صفحه را تازه کنید و دوباره تلاش کنید.';
+                $this->redirect('/admin/checklist/message/' . (int) $id);
+                return;
+            }
+
             $subject = trim($_POST['subject'] ?? '');
             $content = trim($_POST['message'] ?? '');
 
@@ -1010,6 +1018,7 @@ class AdminController extends Controller
             'title'          => 'ارسال پیام به کاربر - IT4IE',
             'submission'     => $submission,
             'defaultSubject' => 'نتیجه ارزیابی چک‌لیست #' . $id . ' و پیشنهاد مشاوره',
+            'csrfField'      => $this->csrfField(),
         ]);
     }
 

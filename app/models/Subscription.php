@@ -17,7 +17,7 @@ class Subscription extends Model
         $limit = max(1, min(500, (int) $limit));
         $minScore = max(0, min(100, (int) $minScore));
 
-        $sql = "SELECT s.id, s.name, s.email, s.phone, s.company, s.risk_level,
+        $sql = "SELECT s.id, s.user_id, s.name, s.email, s.phone, s.company, s.risk_level,
                        COALESCE(s.lead_score, 0) AS lead_score,
                        s.status AS lead_status, s.created_at,
                        c.title AS checklist_title

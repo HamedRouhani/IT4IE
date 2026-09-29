@@ -164,21 +164,44 @@ $url = isset($_GET['url']) ? rtrim($_GET['url'], '/') : '';
 $url = trim($url, '/');
 
 // ============================================
-// 📊 ثبت بازدید (فقط صفحات عمومی سایت)
+// 📊 ثبت بازدید صفحات عمومیِ واقعی (فقط GET موفق و مسیر بدون پسوند فایل)
 // ============================================
 try {
     $isAjaxRequest = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                      strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $requestFileName = basename(rtrim($requestPath, '/'));
+    $isFileRequest = preg_match('/\.[a-z0-9]{1,10}$/i', $requestFileName) === 1;
+    $userAgent = strtolower($_SERVER['HTTP_USER_AGENT'] ?? '');
+    $isAutomatedRequest = preg_match('/bot|crawler|spider|slurp|headless|lighthouse|pagespeed|uptime|monitor|python-requests|curl|wget|facebookexternalhit|preview/i', $userAgent) === 1;
 
-    if ($_SERVER['REQUEST_METHOD'] === 'GET'
+    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'GET'
         && !$isAjaxRequest
+        && !$isFileRequest
+        && !$isAutomatedRequest
         && strpos($url, 'admin') !== 0) {
 
         require_once APP_PATH . '/models/Visit.php';
         $visitModel = new \App\Models\Visit();
-        $visitModel->record();
+        register_shutdown_function(static function () use ($visitModel) {
+            // Do not count missing routes, denied requests, redirects, or failed responses.
+            if (http_response_code() !== 200) {
+                return;
+            }
+
+            $lastError = error_get_last();
+            if ($lastError && in_array($lastError['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR], true)) {
+                return;
+            }
+
+            try {
+                $visitModel->record();
+            } catch (\Throwable $e) {
+                error_log('Visit tracking error: ' . $e->getMessage());
+            }
+        });
     }
-} catch (\Exception $e) {
+} catch (\Throwable $e) {
     // خطای ثبت بازدید هرگز سایت را متوقف نکند
     error_log("Visit tracking error: " . $e->getMessage());
 }

@@ -117,9 +117,15 @@
                                     <a href="/admin/checklist/result/<?= $sub['id'] ?>" class="btn-result" title="مشاهده صفحه نتیجه">
                                         <i class="fas fa-poll"></i>
                                     </a>
-                                    <a href="mailto:<?= htmlspecialchars($sub['email']) ?>" class="btn-edit" title="ارسال ایمیل">
-                                        <i class="fas fa-envelope"></i>
-                                    </a>
+                                    <?php if (!empty($sub['user_id'])): ?>
+                                        <a href="/admin/checklist/message/<?= (int) $sub['id'] ?>" class="btn-message" title="ارسال پیام درون‌برنامه‌ای" aria-label="ارسال پیام درون‌برنامه‌ای">
+                                            <i class="fas fa-comment-dots"></i>
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="btn-message-disabled" title="این ارزیابی به حساب کاربری متصل نیست؛ پیام درون‌برنامه‌ای در دسترس نیست" aria-label="کاربر حساب متصل ندارد">
+                                            <i class="fas fa-comment-slash"></i>
+                                        </span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

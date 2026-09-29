@@ -716,3 +716,108 @@
 .admin-table .actions .btn-result:hover {
     background: rgba(49, 130, 206, 0.10);
 }
+
+/* Lead actions need solid contrast against the admin table's white cells. */
+.admin-leads-page .lead-actions {
+    min-width: 132px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.admin-leads-page .lead-actions a.btn-action {
+    display: inline-flex;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    color: #fff;
+    opacity: 1;
+    visibility: visible;
+}
+
+.admin-leads-page .lead-actions a.btn-action.view { background: #5b43c4; }
+.admin-leads-page .lead-actions a.btn-action.message { background: #087f8c; }
+.admin-leads-page .lead-actions a.btn-action.call { background: #16834a; }
+.admin-leads-page .lead-actions .btn-action.message-disabled {
+    display: inline-flex;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    background: #e2e8f0;
+    cursor: not-allowed;
+}
+
+.admin-leads-page .lead-actions a.btn-action:hover {
+    color: #fff;
+    filter: brightness(.9);
+    transform: translateY(-1px);
+}
+
+.admin-leads-page .lead-actions a.btn-action:focus-visible {
+    outline: 3px solid #d5c8ff;
+    outline-offset: 2px;
+}
+
+.admin-table .actions .btn-message,
+.admin-table .actions .btn-message-disabled {
+    display: inline-flex;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+.admin-table .actions .btn-message {
+    color: #fff;
+    background: #087f8c;
+}
+
+.admin-table .actions .btn-message:hover {
+    color: #fff;
+    background: #066672;
+}
+
+.admin-table .actions .btn-message-disabled {
+    color: #64748b;
+    background: #e2e8f0;
+    cursor: not-allowed;
+}
+
+.checklist-message-form .message-template-select {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid #d9d4ef;
+    border-radius: 10px;
+    color: var(--dark);
+    background: #fff;
+    font: inherit;
+}
+
+.checklist-message-form .message-template-hint {
+    display: block;
+    margin-top: 8px;
+    color: var(--gray-dark);
+    line-height: 1.8;
+}
+
+.checklist-message-form textarea[name="message"] {
+    min-height: 190px;
+    line-height: 1.9;
+    resize: vertical;
+}

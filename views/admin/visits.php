@@ -70,8 +70,8 @@ function detectDevice($ua) {
             <div class="stat-card">
                 <div class="stat-icon red"><i class="fas fa-users"></i></div>
                 <div class="stat-info">
-                    <h3><?php echo number_format($stats['unique_ips'] ?? 0); ?></h3>
-                    <p>بازدیدکننده یکتا</p>
+                    <h3><?php echo number_format($stats['week_unique_sessions'] ?? 0); ?></h3>
+                    <p title="بر پایهٔ شناسهٔ نشست؛ یک نفر ممکن است چند نشست داشته باشد">نشست یکتای ۷ روز اخیر</p>
                 </div>
             </div>
         </div>

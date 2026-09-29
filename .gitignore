@@ -2,3 +2,5 @@
 
 # Keep SQL dumps, schemas, and migrations out of GitHub.
 *.sql
+
+/itieir_maindb_cleaned.txt
