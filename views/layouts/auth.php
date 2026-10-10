@@ -11,7 +11,7 @@
     <!-- Vazirmatn Font -->
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
     <!-- IT4IE Styles -->
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20261010">
 </head>
 <body class="<?php echo htmlspecialchars($bodyClass ?? 'auth-page'); ?>">
     

@@ -36,7 +36,7 @@ $moduleCssVersion = $moduleName === 'mcdm' ? '2.1' : '2.0';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.rtl.min.css" rel="stylesheet" integrity="sha384-CfCrinSRH2IR6a4e6fy2q6ioOX7O6Mtm1L9vRvFZ1trBncWmMePhzvafv7oIcWiW" crossorigin="anonymous">
     <?php endif; ?>
     <!-- IT4IE Base Styles -->
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20261010">
     <!-- Software Styles (با نسخه برای شکستن کش) -->
     <link rel="stylesheet" href="/assets/css/software.css?v=<?php echo $cssVersion; ?>">
     <!-- Module Styles -->
@@ -46,8 +46,9 @@ $moduleCssVersion = $moduleName === 'mcdm' ? '2.1' : '2.0';
     <?php if ($moduleName === 'statlab'): ?>
     <link rel="stylesheet" href="/assets/css/modules/statlab.css?v=<?php echo time(); ?>">
     <?php endif; ?>
+    <link rel="stylesheet" href="/assets/css/software-refinement.css?v=20261010">
 </head>
-<body class="software-mode">
+<body class="software-mode" data-module="<?php echo htmlspecialchars($moduleName, ENT_QUOTES, 'UTF-8'); ?>">
 
     <!-- Header IT4IE -->
     <?php include VIEWS_PATH . '/partials/header.php'; ?>

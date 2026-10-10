@@ -1,0 +1,84 @@
+/* Shared visual polish for public pages. Keep module colors in their own stylesheets. */
+:root {
+    --surface-page: #f6f8fc;
+    --surface-card: #ffffff;
+    --surface-border: #dce5f0;
+    --surface-ink: #17263e;
+    --surface-muted: #536782;
+    --surface-ring: rgba(108, 60, 225, .20);
+}
+
+body:not(.software-mode) { color: var(--surface-ink); background: var(--surface-page); }
+body:not(.software-mode) .main-content { min-width: 0; }
+body:not(.software-mode) .content-wrapper,
+body:not(.software-mode) .content-main { min-width: 0; }
+
+/* Header stays consistent when the content and browser width change. */
+.header { background: #fff; border-bottom: 1px solid var(--surface-border); }
+.header .header-wrapper { min-width: 0; }
+.header .nav-link { min-height: 40px; }
+.header .nav-link:hover { background: #f2edff; }
+.header .nav-link.active { color: #fff; }
+.header .user-dropdown-btn { max-width: 100%; }
+
+/* Shared content surfaces and text wrapping for Persian and long Latin labels. */
+body:not(.software-mode) :is(.post-card, .single-post, .posts-section, .sidebar-widget, .detail-card) {
+    border-color: var(--surface-border);
+    box-shadow: 0 6px 24px rgba(23, 38, 62, .055);
+}
+body:not(.software-mode) :is(.post-card, .software-card, .swl-card, .research-card) {
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+body:not(.software-mode) :is(.post-card, .software-card, .swl-card, .research-card):hover {
+    box-shadow: 0 12px 32px rgba(23, 38, 62, .11);
+}
+body:not(.software-mode) :is(.post-content, .post-summary, .research-library, .software-page) {
+    overflow-wrap: anywhere;
+}
+body:not(.software-mode) :is(input, textarea, select, button) { font: inherit; }
+body:not(.software-mode) :is(input, textarea, select):focus-visible {
+    outline: 3px solid var(--surface-ring);
+    outline-offset: 1px;
+}
+body:not(.software-mode) :is(.research-button, .btn-start, .btn-launch-software, .btn-register) {
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Articles can contain user-authored HTML with wide tables and images. */
+.single-post, .single-post .post-content { min-width: 0; max-width: 100%; }
+.single-post .post-content :is(img, video, iframe, svg) { max-width: 100%; height: auto; }
+.single-post .post-content :is(pre, code) { white-space: pre-wrap; overflow-wrap: anywhere; }
+.single-post .post-content :is(table, .table-responsive) { max-width: 100%; }
+.single-post .post-content table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Make dense layouts breathe on small desktops, tablets and phones. */
+@media (max-width: 1024px) {
+    body:not(.software-mode) .content-wrapper > .sidebar { flex-basis: 220px; }
+    .header .header-wrapper { gap: 12px; }
+}
+@media (max-width: 768px) {
+    body:not(.software-mode) .content-wrapper > .content-main,
+    body:not(.software-mode) .content-wrapper > .sidebar { width: 100%; }
+    .header .nav { max-height: min(72vh, 600px); overflow-y: auto; }
+    .header .nav-link { min-height: 44px; }
+    .software-grid, .swl-grid, .research-card-grid { min-width: 0; }
+    .software-grid > *, .swl-grid > *, .research-card-grid > * { min-width: 0; }
+}
+@media (max-width: 480px) {
+    .header .header-wrapper { gap: 8px; }
+    .header .header-actions { min-width: 0; }
+    body:not(.software-mode) .main-content > .container { padding-inline: 12px; }
+    .single-post .post-content { font-size: .94rem; line-height: 1.95; }
+    .single-post .post-content :is(h2, h3) { line-height: 1.55; }
+    .single-post .post-content table { font-size: .85rem; }
+    .single-post .post-content table :is(th, td) { min-width: 120px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    body:not(.software-mode) :is(.post-card, .software-card, .swl-card, .research-card) {
+        transition: none;
+        animation: none;
+    }
+}

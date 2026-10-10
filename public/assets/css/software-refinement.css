@@ -1,0 +1,120 @@
+/* Shared finishing layer: loaded after each software module's own palette. */
+body.software-mode {
+    --module-accent: #3b82f6;
+    --module-accent-soft: rgba(96, 165, 250, .15);
+    --module-surface: #f5f7fb;
+    --module-border: #dce5ef;
+    color: #17263e;
+    background: var(--module-surface);
+}
+body.software-mode[data-module="babok"] { --module-accent: #22d3ee; --module-accent-soft: rgba(34, 211, 238, .18); }
+body.software-mode[data-module="pmbok"] { --module-accent: #a78bfa; --module-accent-soft: rgba(167, 139, 250, .18); }
+body.software-mode[data-module="mcdm"] { --module-accent: #a3c976; --module-accent-soft: rgba(163, 201, 118, .18); --module-surface: #f4f7f0; }
+body.software-mode[data-module="or"] { --module-accent: #fb923c; --module-accent-soft: rgba(251, 146, 60, .18); }
+body.software-mode[data-module="statlab"] { --module-accent: #86efac; --module-accent-soft: rgba(134, 239, 172, .17); --module-surface: #f3f8f5; }
+body.software-mode[data-module="pdm"] { --module-accent: #5eead4; --module-accent-soft: rgba(94, 234, 212, .16); --module-surface: #f2f8f7; }
+body.software-mode[data-module="quality"] { --module-accent: #6ee7b7; --module-accent-soft: rgba(110, 231, 183, .17); --module-surface: #f3f8f6; }
+body.software-mode[data-module="hr"] { --module-accent: #93c5fd; --module-accent-soft: rgba(147, 197, 253, .18); }
+
+body.software-mode .software-wrapper,
+body.software-mode .software-main { min-width: 0; background: var(--module-surface); }
+body.software-mode .software-sidebar {
+    background: linear-gradient(170deg, #1c2b43, #101b30 75%);
+    border-left: 1px solid rgba(255,255,255,.07);
+}
+body.software-mode .software-sidebar-header { min-width: 0; }
+body.software-mode .software-sidebar-header h3 { line-height: 1.45; }
+body.software-mode .software-sidebar-header h3 i { color: var(--module-accent); }
+body.software-mode .software-nav a {
+    min-height: 42px;
+    line-height: 1.45;
+    border-radius: 10px;
+}
+body.software-mode .software-nav a:hover {
+    background: var(--module-accent-soft);
+    border-right-color: var(--module-accent);
+}
+body.software-mode .software-nav a.active {
+    color: #fff;
+    background: var(--module-accent-soft);
+    border-right-color: var(--module-accent);
+}
+body.software-mode .software-nav a.active i { color: var(--module-accent); }
+body.software-mode :is(.software-nav a, .btn-exit-software, .btn-login-software):focus-visible {
+    outline: 2px solid var(--module-accent);
+    outline-offset: 2px;
+}
+body.software-mode .software-content { width: 100%; max-width: 1480px; min-width: 0; }
+body.software-mode .software-content :is(.row, .card, .card-body, .container, .container-fluid) { min-width: 0; }
+body.software-mode .software-content :is(h1, h2, h3, h4, p, label, .card-title) { overflow-wrap: anywhere; }
+body.software-mode .software-content :is(img, svg, video, canvas) { max-width: 100%; }
+body.software-mode .software-content :is(input, select, textarea, button) { font-family: inherit; }
+body.software-mode .software-content :is(input, select, textarea) { max-width: 100%; }
+body.software-mode .software-content :is(.table-responsive, .table-container, .mcdm-matrix-scroll) {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+}
+body.software-mode .software-content :is(.btn, .btn-hr-primary, .btn-hr-outline, .btn-pdm-primary, .btn-pdm-outline, .btn-qc-primary, .btn-qc-outline) {
+    min-height: 38px;
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.45;
+}
+body.software-mode .software-content :is(.btn, a, button, input, select, textarea):focus-visible {
+    outline: 3px solid var(--module-accent);
+    outline-offset: 2px;
+}
+body.software-mode .software-content .card {
+    border-radius: 14px;
+}
+
+/* Sidebar navigation becomes a compact, horizontally scrollable rail. */
+@media (max-width: 1199px) {
+    body.software-mode .software-main { padding: 22px clamp(14px, 3vw, 30px); }
+}
+@media (max-width: 991px) {
+    body.software-mode .software-wrapper { display: flex; flex-direction: column; }
+    body.software-mode .software-sidebar { width: 100%; flex: none; height: auto; position: static; overflow: visible; }
+    body.software-mode .software-sidebar-header { padding: 12px 18px; }
+    body.software-mode .software-nav {
+        flex: none;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        gap: 8px;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: thin;
+        overscroll-behavior-inline: contain;
+        -webkit-overflow-scrolling: touch;
+        padding: 10px 16px 12px;
+        background: rgba(0, 0, 0, .16);
+    }
+    body.software-mode .software-nav a { flex: 0 0 auto; min-height: 42px; padding: 9px 13px; border: 1px solid rgba(255,255,255,.14); border-radius: 12px; }
+    body.software-mode .software-nav a.active { border-color: var(--module-accent); box-shadow: inset 0 -2px 0 var(--module-accent); }
+    body.software-mode .software-sidebar-footer { justify-content: flex-start; padding: 8px 16px; }
+    body.software-mode .software-main { width: 100%; padding: 20px 16px 36px; }
+    body.software-mode .software-content .table { margin-bottom: 0; }
+}
+@media (max-width: 767px) {
+    body.software-mode .software-main { padding: 16px 12px 32px; }
+    body.software-mode .software-content :is(.d-flex.justify-content-between, .mcdm-project-heading) { gap: 10px; flex-wrap: wrap; }
+    body.software-mode .software-content :is(.btn, .btn-hr-primary, .btn-pdm-primary, .btn-qc-primary) { min-height: 42px; }
+    body.software-mode .software-content :is(.form-control, .form-select, .hr-form-control, .qc-form-control) { font-size: 16px; }
+    body.software-mode .software-content .table :is(th, td) { vertical-align: middle; }
+}
+@media (max-width: 479px) {
+    body.software-mode .software-sidebar-header { padding: 10px 12px; }
+    body.software-mode .software-sidebar-header h3 { font-size: .95rem; }
+    body.software-mode .software-nav { padding: 9px 12px 11px; }
+    body.software-mode .software-nav a { font-size: .81rem; min-height: 42px; padding: 8px 11px; }
+    body.software-mode .software-main { padding: 14px 10px 28px; }
+    body.software-mode .software-content .container-fluid { padding-inline: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.software-mode .software-nav a,
+    body.software-mode .software-content .card { transition: none; animation: none; }
+}

@@ -29,7 +29,7 @@ $statusMap = [
 ];
 ?>
 
-<link rel="stylesheet" href="/assets/css/software.css?v=<?= time() ?>">
+<link rel="stylesheet" href="/assets/css/software.css?v=20261010">
 
 <div class="swl-page">
     <div class="swl-container">
