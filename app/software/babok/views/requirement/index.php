@@ -25,7 +25,7 @@ $activePage = 'requirement';
     </div>
 
     <!-- 📝 نمونه‌های متن آماده برای تست سریع -->
-    <div class="card" style="margin-bottom: 20px; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);">
+    <div class="card" style="margin-bottom: 20px; background: linear-gradient(135deg, #0891B215 0%, #0E749015 100%);">
         <h4 class="card-title" style="margin-bottom: 15px;">
             <i class="fas fa-lightbulb" style="color: #f39c12;"></i> 
             نمونه‌های آماده برای تست سریع
@@ -108,10 +108,10 @@ $activePage = 'requirement';
     }
 
     .sample-text-btn:hover {
-        border-color: #3498db;
+        border-color: #0891B2;
         background: #f0f7ff;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+        box-shadow: 0 4px 12px rgba(8, 145, 178, 0.15);
     }
 
     .sample-text-btn:active {
@@ -123,7 +123,7 @@ $activePage = 'requirement';
         flex-shrink: 0;
         width: 50px;
         height: 50px;
-        background: linear-gradient(135deg, #667eea15, #764ba215);
+        background: linear-gradient(135deg, #0891B215, #0E749015);
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -137,7 +137,7 @@ $activePage = 'requirement';
 
     .sample-info strong {
         display: block;
-        color: #2c3e50;
+        color: #164E63;
         font-size: 0.95rem;
         margin-bottom: 3px;
     }
@@ -602,7 +602,7 @@ function renderResults(data) {
             <h3 class="card-title"><i class="fas fa-chart-bar"></i> خلاصه تحلیل</h3>
             <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
                 <div style="text-align:center; padding:15px; background:#e8f4fd; border-radius:8px;">
-                    <div style="font-size:2rem; font-weight:700; color:#3498db;">${data.stats.total}</div>
+                    <div style="font-size:2rem; font-weight:700; color:#0891B2;">${data.stats.total}</div>
                     <div class="text-muted">کل نیازمندی‌ها</div>
                 </div>
                 <div style="text-align:center; padding:15px; background:#d4edda; border-radius:8px;">
@@ -624,7 +624,7 @@ function renderResults(data) {
 
     if (data.suggestion) {
         html += `
-            <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:#fff;">
+            <div class="card" style="background: linear-gradient(135deg, #0891B2 0%, #0E7490 100%); color:#fff;">
                 <h3 style="margin-bottom:10px;"><i class="fas fa-lightbulb"></i> پیشنهاد سیستم</h3>
                 <h4 style="margin:0 0 8px 0;">${data.suggestion.title}</h4>
                 <p style="margin:0; opacity:0.9;">${data.suggestion.description}</p>
@@ -635,7 +635,7 @@ function renderResults(data) {
     html += `<div class="card"><h3 class="card-title"><i class="fas fa-list-check"></i> نیازمندی‌های استخراج‌شده</h3>`;
 
     if (data.requirements.functional.length > 0) {
-        html += `<h4 style="margin:15px 0 10px 0; color:#3498db;">نیازمندی‌های عملکردی</h4>`;
+        html += `<h4 style="margin:15px 0 10px 0; color:#0891B2;">نیازمندی‌های عملکردی</h4>`;
         data.requirements.functional.forEach(req => {
             html += `
                 <div class="requirement-item functional">
@@ -665,7 +665,7 @@ function renderResults(data) {
         data.techniques.forEach((item, index) => {
             const tech = item.technique;
             html += `
-                <div class="technique-card" style="border-right: 4px solid ${index < 3 ? '#27ae60' : '#3498db'};">
+                <div class="technique-card" style="border-right: 4px solid ${index < 3 ? '#27ae60' : '#0891B2'};">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px;">
                         <div style="flex:1;">
                             <span class="badge badge-${index < 3 ? 'success' : 'primary'}">پیشنهاد #${index + 1}</span>
@@ -674,7 +674,7 @@ function renderResults(data) {
                             ${item.reason ? `<div class="technique-reason"><i class="fas fa-info-circle"></i> ${item.reason}</div>` : ''}
                         </div>
                         <div style="text-align:center;">
-                            <div style="font-size:1.8rem; font-weight:700; color:#3498db;">${item.score_percent}%</div>
+                            <div style="font-size:1.8rem; font-weight:700; color:#0891B2;">${item.score_percent}%</div>
                             <div class="text-muted" style="font-size:0.7rem;">تطابق</div>
                         </div>
                     </div>

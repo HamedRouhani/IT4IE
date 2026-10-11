@@ -4,15 +4,15 @@
 
 /* رنگ‌های اصلی ماژول OR */
 :root {
-    --or-primary: #6366f1;      /* Indigo */
-    --or-primary-dark: #4f46e5;
-    --or-primary-light: #a5b4fc;
+    --or-primary: #EA580C;      /* Indigo */
+    --or-primary-dark: #C2410C;
+    --or-primary-light: #FDBA74;
     --or-accent: #06b6d4;       /* Cyan */
     --or-success: #10b981;
     --or-warning: #f59e0b;
     --or-danger: #ef4444;
-    --or-bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --or-card-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+    --or-bg-gradient: linear-gradient(135deg, #EA580C 0%, #C2410C 100%);
+    --or-card-shadow: 0 4px 20px rgba(234, 88, 12, 0.1);
 }
 
 /* -------- هدر سایدبار OR -------- */
@@ -42,12 +42,12 @@
 }
 
 .or-theme .software-nav a:hover {
-    background: linear-gradient(90deg, rgba(99, 102, 241, 0.1), transparent);
+    background: linear-gradient(90deg, rgba(234, 88, 12, 0.1), transparent);
     border-right-color: var(--or-primary);
 }
 
 .or-theme .software-nav a.active {
-    background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), transparent);
+    background: linear-gradient(90deg, rgba(234, 88, 12, 0.15), transparent);
     border-right-color: var(--or-primary);
     color: var(--or-primary);
     font-weight: 600;
@@ -59,13 +59,13 @@
     border-radius: 1rem;
     padding: 1.5rem;
     box-shadow: var(--or-card-shadow);
-    border: 1px solid rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(234, 88, 12, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .or-stat-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 8px 30px rgba(234, 88, 12, 0.2);
 }
 
 .or-stat-card .stat-icon {
@@ -79,7 +79,7 @@
     color: white;
 }
 
-.or-stat-card .stat-icon.indigo  { background: linear-gradient(135deg, #667eea, #764ba2); }
+.or-stat-card .stat-icon.indigo  { background: linear-gradient(135deg, #EA580C, #C2410C); }
 .or-stat-card .stat-icon.cyan    { background: linear-gradient(135deg, #06b6d4, #0891b2); }
 .or-stat-card .stat-icon.green   { background: linear-gradient(135deg, #10b981, #059669); }
 .or-stat-card .stat-icon.amber   { background: linear-gradient(135deg, #f59e0b, #d97706); }
@@ -121,11 +121,11 @@
 .or-matrix input:focus {
     outline: none;
     border-color: var(--or-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
 }
 
 .or-matrix .supply-demand-cell {
-    background: rgba(99, 102, 241, 0.08);
+    background: rgba(234, 88, 12, 0.08);
     font-weight: 600;
     color: var(--or-primary);
 }
@@ -138,7 +138,7 @@
 }
 
 .or-matrix .basic-cell {
-    background: rgba(99, 102, 241, 0.08);
+    background: rgba(234, 88, 12, 0.08);
     border: 2px solid var(--or-primary);
 }
 
@@ -184,7 +184,7 @@
 }
 
 .or-simplex-tableau .pivot-col {
-    background: rgba(99, 102, 241, 0.15);
+    background: rgba(234, 88, 12, 0.15);
 }
 
 .or-simplex-tableau .pivot-cell {
@@ -208,12 +208,12 @@
     border-radius: 0.5rem;
     font-weight: 600;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
 }
 
 .btn-or-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
 }
 
 .btn-or-success {
@@ -633,7 +633,7 @@ html {
 }
 
 .or-problem-card .btn-or-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #EA580C 0%, #C2410C 100%);
     border: none;
     color: white;
     padding: 0.5rem 1.5rem;
@@ -644,7 +644,7 @@ html {
 
 .or-problem-card .btn-or-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
     color: white;
 }
 

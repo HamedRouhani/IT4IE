@@ -8,7 +8,7 @@
    🎨 متغیرهای رنگ و تم
    ═══════════════════════════════════════════════════════ */
 :root {
-    --statlab-primary: #198754;
+    --statlab-primary: #2563EB;
     --statlab-secondary: #6c757d;
     --statlab-success: #28a745;
     --statlab-info: #17a2b8;
@@ -73,7 +73,7 @@
 .var-name-input:focus {
     border-color: var(--statlab-primary);
     background: white;
-    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
 }
 
 .data-textarea {
@@ -112,7 +112,7 @@
 }
 
 .accordion-button:focus {
-    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
 }
 
 .accordion-body {
@@ -157,7 +157,7 @@
 }
 
 .btn-statlab-primary:hover {
-    background-color: #146c43;
+    background-color: #1D4ED8;
     border-color: #13653f;
     color: white;
 }
@@ -315,7 +315,7 @@
 .form-control:focus,
 .form-select:focus {
     border-color: var(--statlab-primary);
-    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
 }
 
 /* ═══════════════════════════════════════════════════════

@@ -39,7 +39,7 @@ $priorityColors = [
 <div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
     
     <!-- هدر صفحه -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+    <div style="background: linear-gradient(135deg, #0891B2 0%, #0E7490 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div>
                 <h2 style="margin: 0 0 10px 0; font-size: 1.8rem;">

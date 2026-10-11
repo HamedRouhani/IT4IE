@@ -7,7 +7,7 @@
 
 <div class="container-fluid py-4">
     <!-- هدر -->
-    <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #EA580C 0%, #C2410C 100%); color: white;">
         <div class="card-body p-4">
             <h2 class="mb-2">
                 <i class="fas fa-brain"></i> مدلسازی هوشمند مسائل تحقیق در عملیات

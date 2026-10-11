@@ -11,15 +11,15 @@
     <!-- Vazirmatn Font -->
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
     <!-- IT4IE Styles -->
-    <link rel="stylesheet" href="/assets/css/style.css?v=20261010">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20261011">
 </head>
-<body class="<?php echo htmlspecialchars($bodyClass ?? 'auth-page'); ?>">
+<body class="ui2 <?php echo htmlspecialchars($bodyClass ?? 'auth-page'); ?>">
     
     <!-- Header اصلی (مشابه صفحه خانه) -->
     <?php include VIEWS_PATH . '/partials/header.php'; ?>
     
     <!-- Main Content -->
-    <main class="auth-main">
+    <main class="auth-main" id="main">
         <div class="container auth-container">
             <?php echo $content ?? ''; ?>
         </div>

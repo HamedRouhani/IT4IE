@@ -64,7 +64,7 @@ $progressPercentage = $progress['completion_percentage'] ?? 0;
             margin-bottom: 20px;
         }
         .kpi-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0891B2 0%, #0E7490 100%);
             color: white;
             padding: 20px;
             border-radius: 10px;

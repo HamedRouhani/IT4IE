@@ -65,7 +65,7 @@ $title = $method['name_fa'] ?? $method['name'] ?? 'جزئیات روش';
     <div class="card-body p-0">
         <div class="list-group list-group-flush">
             <?php foreach ($steps as $index => $step): ?>
-            <div class="list-group-item p-4" style="border-bottom: 1px solid var(--mcdm-olive-100, #E8EDE0);">
+            <div class="list-group-item p-4" style="border-bottom: 1px solid var(--mcdm-olive-100, #ECFCCB);">
                 <div class="d-flex align-items-start" style="direction: rtl; text-align: right;">
                     <!-- شماره گام -->
                     <div class="flex-shrink-0">

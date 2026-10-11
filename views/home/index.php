@@ -1,25 +1,59 @@
 <!-- Hero Section - داخل content-main و بالای پست‌ها -->
 <section class="it4ie-purpose">
-    <div class="it4ie-purpose-content">
+    <div class="it4ie-purpose-inner">
 
-        <span class="it4ie-eyebrow">
-            IT4IE · Industrial Engineering Intelligence
-        </span>
+        <div class="it4ie-purpose-content">
 
-        <h1>
-            پلتفرم هوشمند حل مسائل مهندسی صنایع
-        </h1>
+            <span class="it4ie-eyebrow">
+                IT4IE · Industrial Engineering Intelligence
+            </span>
 
-        <p class="it4ie-purpose-text">
-            IT4IE با ترکیب دانش مهندسی صنایع، تحلیل داده،
-            هوش مصنوعی، بهینه‌سازی و ابزارهای تخصصی،
-            به شما کمک می‌کند مسئله خود را بهتر تعریف کنید،
-            روش مناسب حل آن را پیدا کنید و به یک تصمیم قابل اجرا برسید.
-        </p>
+            <h1>
+                پلتفرم هوشمند حل مسائل مهندسی صنایع
+            </h1>
 
-        <div class="it4ie-purpose-tagline">
-            مسئله‌ات را بگو؛ مسیر حل آن را پیدا کن.
+            <p class="it4ie-purpose-text">
+                IT4IE با ترکیب دانش مهندسی صنایع، تحلیل داده،
+                هوش مصنوعی، بهینه‌سازی و ابزارهای تخصصی،
+                به شما کمک می‌کند مسئله خود را بهتر تعریف کنید،
+                روش مناسب حل آن را پیدا کنید و به یک تصمیم قابل اجرا برسید.
+            </p>
+
+            <div class="it4ie-purpose-tagline">
+                مسئله‌ات را بگو؛ مسیر حل آن را پیدا کن.
+            </div>
+
         </div>
+
+        <?php
+        // نمودار کنترل نمونه (تزئینی) - مقادیر ثابت، بدون وابستگی به دیتابیس
+        $spcVals = [48,51,47,53,50,49,54,46,52,51,48,55,50,47,53,52,49,66,57,54,51,48,52,50];
+        $spcX = fn($i) => 44 + $i * (500 - 44) / (count($spcVals) - 1);
+        $spcY = fn($v) => 222 - ($v - 30) / 40 * (222 - 18);
+        $spcPath = '';
+        foreach ($spcVals as $i => $v) {
+            $spcPath .= ($i ? 'L' : 'M') . round($spcX($i), 1) . ' ' . round($spcY($v), 1);
+        }
+        ?>
+        <figure class="it4ie-purpose-visual">
+            <svg class="spc" viewBox="0 0 520 250" role="img"
+                 aria-label="نمودار کنترل: نقطهٔ هجدهم از حد کنترل بالا عبور کرده است">
+                <?php foreach ([['UCL', 62, 'spc-lim'], ['CL', 50, 'spc-cl'], ['LCL', 38, 'spc-lim']] as $l): ?>
+                    <line class="<?= $l[2] ?>" x1="44" x2="500" y1="<?= round($spcY($l[1]), 1) ?>" y2="<?= round($spcY($l[1]), 1) ?>"/>
+                    <text class="spc-lbl" x="4" y="<?= round($spcY($l[1]) + 4, 1) ?>"><?= $l[0] ?></text>
+                <?php endforeach; ?>
+                <path class="spc-line" pathLength="1" d="<?= $spcPath ?>"/>
+                <?php foreach ($spcVals as $i => $v): $spcOut = $v > 62 || $v < 38; ?>
+                    <circle class="spc-pt<?= $spcOut ? ' spc-out' : '' ?>" style="--i:<?= $i ?>"
+                            cx="<?= round($spcX($i), 1) ?>" cy="<?= round($spcY($v), 1) ?>" r="<?= $spcOut ? 5.5 : 3.2 ?>"/>
+                    <?php if ($spcOut): ?>
+                        <circle class="spc-ring" cx="<?= round($spcX($i), 1) ?>" cy="<?= round($spcY($v), 1) ?>" r="12"/>
+                        <text class="spc-flag" text-anchor="middle" x="<?= round($spcX($i) - 4, 1) ?>" y="<?= round($spcY($v) - 16, 1) ?>">خارج از کنترل</text>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </svg>
+            <figcaption>نمونه‌ای از تشخیص الگو در نمودار کنترل کیفیت</figcaption>
+        </figure>
 
     </div>
 </section>

@@ -556,7 +556,7 @@ try {
                 echo '<li><a href="' . CURRENT_MODULE_URL . '?route=knowledge_areas">📊 حوزه‌های دانشی</a></li>';
                 echo '<li><a href="' . CURRENT_MODULE_URL . '?route=requirement">🤖 استخراج و تحلیل نیازمندی</a></li>';
                 echo '</ul>';
-                echo '<a href="' . CURRENT_MODULE_URL . '?route=home" style="color: #3498db;">بازگشت به داشبورد</a>';
+                echo '<a href="' . CURRENT_MODULE_URL . '?route=home" style="color: #0891B2;">بازگشت به داشبورد</a>';
                 echo '</div>';
             }
             break;
@@ -587,7 +587,7 @@ try {
             echo '<pre style="text-align: left; direction: ltr; background: #f8f9fa; padding: 15px; border-radius: 8px; overflow-x: auto;">' . $e->getTraceAsString() . '</pre>';
         }
         
-        echo '<a href="' . CURRENT_MODULE_URL . '?route=home" style="color: #3498db; display: inline-block; margin-top: 20px;">بازگشت به داشبورد</a>';
+        echo '<a href="' . CURRENT_MODULE_URL . '?route=home" style="color: #0891B2; display: inline-block; margin-top: 20px;">بازگشت به داشبورد</a>';
         echo '</div>';
     }
 }

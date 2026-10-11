@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.toggle('active');
             nav.classList.toggle('open');
             document.body.classList.toggle('menu-open');
+            this.setAttribute('aria-expanded', String(nav.classList.contains('open')));
         });
     }
     
@@ -60,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     navLinks.forEach(function(link) {
         link.addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
+            if (window.innerWidth <= 1024) {
                 if (mobileToggle) mobileToggle.classList.remove('active');
                 if (nav) nav.classList.remove('open');
                 document.body.classList.remove('menu-open');

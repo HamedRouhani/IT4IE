@@ -93,7 +93,7 @@ $progressPercentage = $progress['completion_percentage'] ?? 0;
 </div>
 
 <?php if (!empty($advancedAnalytics)): ?>
-<div class="babok-advanced-analytics" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 25px; margin-bottom: 25px; color: white; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">
+<div class="babok-advanced-analytics" style="background: linear-gradient(135deg, #0891B2 0%, #0E7490 100%); border-radius: 12px; padding: 25px; margin-bottom: 25px; color: white; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">
     <h4 style="margin-top: 0; margin-bottom: 20px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
         <i class="fas fa-chart-line"></i>
         داشبورد تحلیلی پیشرفته پروژه

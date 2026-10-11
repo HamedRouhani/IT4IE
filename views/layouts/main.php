@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title ?? 'IT4IE - مشاوره بین‌رشته‌ای'; ?></title>
+    <meta name="theme-color" content="#4f28b8">
     <meta name="description" content="<?php echo $settings['site_description'] ?? 'لنگرگاه دیجیتال برای مشاوره و اجرای پروژه‌های بین‌رشته‌ای'; ?>">
     
     <!-- Font Awesome -->
@@ -13,17 +14,18 @@
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/assets/css/style.css?v=20261010">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20261011">
 
     <link rel="icon" type="image/png" href="/assets/images/logo-it4ie.png">
 </head>
-<body>
+<body class="ui2">
+    <a class="skip-link" href="#main">پرش به محتوای اصلی</a>
     
     <!-- Header -->
     <?php include VIEWS_PATH . '/partials/header.php'; ?>
     
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content" id="main">
         <div class="container">
             <!-- محتوا با سایدبار -->
             <div class="content-wrapper">

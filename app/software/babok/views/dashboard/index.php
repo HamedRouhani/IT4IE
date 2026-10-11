@@ -9,8 +9,8 @@ $activePage = 'home';
 
 <!-- ✅ کارت‌های آمار - با عناوین کامل -->
 <div class="stats-grid">
-    <div class="card stat-card-full" style="border-right: 5px solid var(--soft-secondary, #764ba2); text-align: center; padding: 25px 20px;">
-        <div class="stat-icon" style="color: var(--soft-secondary, #764ba2); font-size: 1.9rem; margin-bottom: 12px;">
+    <div class="card stat-card-full" style="border-right: 5px solid var(--soft-secondary, #0E7490); text-align: center; padding: 25px 20px;">
+        <div class="stat-icon" style="color: var(--soft-secondary, #0E7490); font-size: 1.9rem; margin-bottom: 12px;">
             <i class="fas fa-sitemap"></i>
         </div>
         <div class="stat-value" style="font-size: 2rem; font-weight: 800; color: #2D3748; line-height: 1.2;">

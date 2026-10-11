@@ -5,8 +5,8 @@
 
 /* ========== رنگ‌بندی اختصاصی BABOK ========== */
 .babok-module {
-    --babok-primary: #2c3e50;
-    --babok-secondary: #3498db;
+    --babok-primary: #164E63;
+    --babok-secondary: #0891B2;
     --babok-success: #27ae60;
     --babok-warning: #f39c12;
     --babok-danger: #e74c3c;
@@ -14,7 +14,7 @@
 
 /* ========== آیکون و عنوان BABOK ========== */
 .babok-module .software-sidebar-header h3 i {
-    color: #3498db;
+    color: #0891B2;
 }
 
 /* ========== استایل‌های خاص داشبورد BABOK ========== */
@@ -193,7 +193,7 @@
 
 /* ========== صفحه تحلیل نیازمندی ========== */
 .babok-module .requirement-analyzer {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0891B2 0%, #0E7490 100%);
     border-radius: var(--soft-radius);
     padding: 30px;
     color: #fff;
@@ -306,7 +306,7 @@
 
 .babok-module .technique-card:hover {
     border-color: var(--babok-secondary);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+    box-shadow: 0 4px 12px rgba(8, 145, 178, 0.15);
 }
 
 .babok-module .technique-card h4 {
@@ -408,7 +408,7 @@
 
 /* دکمه توقف (تیره + پالس) */
 .voice-stop {
-    background: linear-gradient(135deg, #2c3e50, #1a252f);
+    background: linear-gradient(135deg, #164E63, #083344);
     color: #fff;
     box-shadow: 0 6px 18px rgba(44, 62, 80, 0.35);
     animation: stopPulse 1.6s infinite;
@@ -428,7 +428,7 @@
 
 .voice-title {
     font-weight: 700;
-    color: #2c3e50;
+    color: #164E63;
     margin-bottom: 4px;
     display: flex;
     align-items: center;

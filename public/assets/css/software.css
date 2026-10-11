@@ -22,7 +22,7 @@
 /* ─── رنگ اختصاصی هر ماژول ─── */
 .swl-card[data-theme="babok"]   { --sw-color: #0891B2; --sw-color-dark: #0E7490; --sw-color-rgb: 8, 145, 178; }
 .swl-card[data-theme="pmbok"]   { --sw-color: #7C3AED; --sw-color-dark: #5B21B6; --sw-color-rgb: 124, 58, 237; }
-.swl-card[data-theme="mcdm"]    { --sw-color: #059669; --sw-color-dark: #047857; --sw-color-rgb: 5, 150, 105; }
+.swl-card[data-theme="mcdm"]    { --sw-color: #4D7C0F; --sw-color-dark: #3F6212; --sw-color-rgb: 77, 124, 15; }
 .swl-card[data-theme="or"]      { --sw-color: #EA580C; --sw-color-dark: #C2410C; --sw-color-rgb: 234, 88, 12; }
 .swl-card[data-theme="statlab"] { --sw-color: #2563EB; --sw-color-dark: #1D4ED8; --sw-color-rgb: 37, 99, 235; }
 .swl-card[data-theme="pdm"]     { --sw-color: #0F766E; --sw-color-dark: #115E59; --sw-color-rgb: 15, 118, 110; }

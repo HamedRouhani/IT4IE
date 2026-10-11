@@ -15,7 +15,7 @@
             </div>
             
             <!-- Navigation -->
-            <nav class="nav" id="mainNav">
+            <nav class="nav" id="mainNav" aria-label="منوی اصلی">
                 <ul class="nav-list">
                     <li class="nav-item">
                         <a href="/" class="nav-link <?php echo ($_SERVER['REQUEST_URI'] == '/' || $_SERVER['REQUEST_URI'] == '/home') ? 'active' : ''; ?>">
@@ -72,7 +72,7 @@
             <div class="header-actions">
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <div class="user-menu">
-                        <button class="user-dropdown-btn" id="userDropdownBtn">
+                        <button class="user-dropdown-btn" id="userDropdownBtn" type="button" aria-haspopup="true">
                             <div class="user-avatar">
                                 <?php echo substr($_SESSION['user_name'] ?? 'کاربر', 0, 1); ?>
                             </div>
@@ -118,7 +118,7 @@
             </div>
             
             <!-- Mobile Toggle -->
-            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+            <button class="mobile-toggle" id="mobileToggle" type="button" aria-label="باز و بسته کردن منو" aria-controls="mainNav" aria-expanded="false">
                 <span class="bar"></span>
                 <span class="bar"></span>
                 <span class="bar"></span>

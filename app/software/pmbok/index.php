@@ -182,7 +182,7 @@ try {
         echo '<div style="font-family: Vazirmatn, Tahoma; direction: rtl; padding: 50px; text-align: center;">';
         echo '<h1 style="color: #e74c3c;">❌ خطا در پردازش</h1>';
         echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
-        echo '<a href="' . CURRENT_MODULE_URL . '" style="color: #3498db;">بازگشت به داشبورد</a>';
+        echo '<a href="' . CURRENT_MODULE_URL . '" style="color: #7C3AED;">بازگشت به داشبورد</a>';
         echo '</div>';
     }
 }

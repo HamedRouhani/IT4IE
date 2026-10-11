@@ -22,7 +22,7 @@ $activeProjects = $activeProjects ?? []; // ✅ رفع مستقیم خطای گ�
 
 <!-- کارت‌های آمار -->
 <div class="stats-grid">
-    <div class="card stat-card" style="border-right: 5px solid var(--soft-primary, #667eea);">
+    <div class="card stat-card" style="border-right: 5px solid var(--soft-primary, #7C3AED);">
         <div class="stat-icon"><i class="fas fa-sitemap"></i></div>
         <div class="stat-info">
             <div class="stat-value"><?= $stats['knowledge_areas'] ?? 0 ?></div>

@@ -244,7 +244,7 @@ function drawScatter(r){
     for(let i=0;i<=5;i++){const v=mnX+(mxX-mnX)*i/5;x.fillText(Number(v.toFixed(1)),sx(v),H-pB+14);}
     x.textAlign='right';
     for(let i=0;i<=4;i++){const v=mnY+(mxY-mnY)*i/4;x.fillText(Number(v.toFixed(1)),pL-6,sy(v)+3);}
-    x.strokeStyle='#198754';x.lineWidth=2;x.beginPath();
+    x.strokeStyle='#2563EB';x.lineWidth=2;x.beginPath();
     x.moveTo(sx(mnX),sy(r.intercept+r.slope*mnX));x.lineTo(sx(mxX),sy(r.intercept+r.slope*mxX));x.stroke();
     x.fillStyle='#0d6efd';
     pts.forEach(p=>{x.beginPath();x.arc(sx(p.x),sy(p.y),4,0,Math.PI*2);x.fill();});

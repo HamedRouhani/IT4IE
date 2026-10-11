@@ -1,0 +1,139 @@
+/* =========================================================================
+   IT4IE - Software themes (single source of truth for module colours)
+   Loaded LAST in views/layouts/software.php, after module CSS and
+   software-refinement.css. Every colour here is keyed by
+   body.software-mode[data-module="..."], so modules never leak into
+   each other. The list page (software.css .swl-card[data-theme]) uses
+   the SAME hex values.
+
+   Tokens per module:
+     --mt        main colour        --mt-dark   hover / gradient end
+     --mt-rgb    r,g,b of --mt      --mt-accent light tint for the dark sidebar
+     --mt-soft   page surface       --mt-tint   light badge / row background
+     --mt-ink    dark text on tint
+   ========================================================================= */
+
+body.software-mode[data-module="babok"]   { --mt:#0891B2; --mt-dark:#0E7490; --mt-rgb:8,145,178;   --mt-accent:#22d3ee; --mt-soft:#f1f9fb; --mt-tint:#cffafe; --mt-ink:#164E63; }
+body.software-mode[data-module="pmbok"]   { --mt:#7C3AED; --mt-dark:#5B21B6; --mt-rgb:124,58,237;  --mt-accent:#a78bfa; --mt-soft:#f7f5fd; --mt-tint:#ede9fe; --mt-ink:#3b0f8c; }
+body.software-mode[data-module="mcdm"]    { --mt:#4D7C0F; --mt-dark:#3F6212; --mt-rgb:77,124,15;    --mt-accent:#bef264; --mt-soft:#f7fbee; --mt-tint:#ecfccb; --mt-ink:#1A2E05; }
+body.software-mode[data-module="or"]      { --mt:#EA580C; --mt-dark:#C2410C; --mt-rgb:234,88,12;    --mt-accent:#fb923c; --mt-soft:#fdf7f2; --mt-tint:#ffedd5; --mt-ink:#7c2d12; }
+body.software-mode[data-module="statlab"] { --mt:#2563EB; --mt-dark:#1D4ED8; --mt-rgb:37,99,235;   --mt-accent:#60a5fa; --mt-soft:#f3f7fe; --mt-tint:#dbeafe; --mt-ink:#1e3a8a; }
+body.software-mode[data-module="pdm"]     { --mt:#0F766E; --mt-dark:#115E59; --mt-rgb:15,118,110;   --mt-accent:#5eead4; --mt-soft:#f2f8f7; --mt-tint:#ccfbf1; --mt-ink:#134e4a; }
+body.software-mode[data-module="hr"]      { --mt:#1E40AF; --mt-dark:#1E3A8A; --mt-rgb:30,64,175;    --mt-accent:#93c5fd; --mt-soft:#f3f6fc; --mt-tint:#dbeafe; --mt-ink:#172554; }
+body.software-mode[data-module="quality"] { --mt:#059669; --mt-dark:#047857; --mt-rgb:5,150,105;    --mt-accent:#6ee7b7; --mt-soft:#f3f8f6; --mt-tint:#d1fae5; --mt-ink:#064e3b; }
+
+/* ---- Shared shell: sidebar, nav, focus, surface use the module tokens ---- */
+body.software-mode[data-module] {
+    --module-accent: var(--mt-accent);
+    --module-accent-soft: rgba(var(--mt-rgb), .28);
+    --module-surface: var(--mt-soft);
+    --bs-link-color: var(--mt);
+    --bs-link-hover-color: var(--mt-dark);
+    --bs-link-color-rgb: var(--mt-rgb);
+    --bs-primary: var(--mt);
+    --bs-primary-rgb: var(--mt-rgb);
+}
+body.software-mode[data-module] .software-sidebar {
+    background: linear-gradient(170deg, #1c2b43, #101b30 75%);
+    border-top: 4px solid var(--mt);
+}
+body.software-mode[data-module] .software-sidebar-header h3 i { color: var(--mt-accent); }
+body.software-mode[data-module] .software-nav a.active {
+    color: #fff; background: rgba(var(--mt-rgb), .32); border-right-color: var(--mt-accent);
+}
+body.software-mode[data-module] .software-nav a:hover { background: rgba(var(--mt-rgb), .22); border-right-color: var(--mt-accent); }
+body.software-mode[data-module] .software-nav a.active i { color: var(--mt-accent); }
+body.software-mode[data-module] .btn-login-software { color: var(--mt-accent); background: rgba(var(--mt-rgb), .2); }
+body.software-mode[data-module] .btn-login-software:hover { color: #fff; background: rgba(var(--mt-rgb), .4); }
+
+/* ---- Bootstrap "primary" inside a module = that module's colour ---- */
+body.software-mode[data-module] .software-content :is(.btn-primary) {
+    --bs-btn-bg: var(--mt); --bs-btn-border-color: var(--mt); --bs-btn-color: #fff;
+    --bs-btn-hover-bg: var(--mt-dark); --bs-btn-hover-border-color: var(--mt-dark); --bs-btn-hover-color: #fff;
+    --bs-btn-active-bg: var(--mt-dark); --bs-btn-active-border-color: var(--mt-dark); --bs-btn-active-color: #fff;
+    --bs-btn-disabled-bg: var(--mt); --bs-btn-disabled-border-color: var(--mt);
+    --bs-btn-focus-shadow-rgb: var(--mt-rgb);
+}
+body.software-mode[data-module] .software-content :is(.btn-outline-primary) {
+    --bs-btn-color: var(--mt); --bs-btn-border-color: var(--mt);
+    --bs-btn-hover-bg: var(--mt); --bs-btn-hover-border-color: var(--mt); --bs-btn-hover-color: #fff;
+    --bs-btn-active-bg: var(--mt-dark); --bs-btn-active-border-color: var(--mt-dark); --bs-btn-active-color: #fff;
+    --bs-btn-focus-shadow-rgb: var(--mt-rgb);
+}
+body.software-mode[data-module] .software-content .text-primary { color: var(--mt) !important; }
+body.software-mode[data-module] .software-content .bg-primary { background-color: var(--mt) !important; }
+body.software-mode[data-module] .software-content .border-primary { border-color: var(--mt) !important; }
+body.software-mode[data-module] .software-content .progress-bar { background-color: var(--mt); }
+body.software-mode[data-module] .software-content :is(.form-control, .form-select):focus {
+    border-color: var(--mt); box-shadow: 0 0 0 .25rem rgba(var(--mt-rgb), .22);
+}
+body.software-mode[data-module] .software-content .form-check-input:checked { background-color: var(--mt); border-color: var(--mt); }
+body.software-mode[data-module] .software-content .nav-pills .nav-link.active,
+body.software-mode[data-module] .software-content .page-item.active .page-link { background-color: var(--mt); border-color: var(--mt); color: #fff; }
+body.software-mode[data-module] .software-content .page-link { color: var(--mt); }
+
+/* StatLab used green .btn-success as its main action; in the blue theme it follows the module colour.
+   (Badges and alerts keep their semantic success green.) */
+body.software-mode[data-module="statlab"] .software-content :is(.btn-success) {
+    --bs-btn-bg: var(--mt); --bs-btn-border-color: var(--mt); --bs-btn-color: #fff;
+    --bs-btn-hover-bg: var(--mt-dark); --bs-btn-hover-border-color: var(--mt-dark); --bs-btn-hover-color: #fff;
+    --bs-btn-active-bg: var(--mt-dark); --bs-btn-active-border-color: var(--mt-dark); --bs-btn-active-color: #fff;
+    --bs-btn-focus-shadow-rgb: var(--mt-rgb);
+}
+body.software-mode[data-module="statlab"] .software-content :is(.btn-outline-success) {
+    --bs-btn-color: var(--mt); --bs-btn-border-color: var(--mt);
+    --bs-btn-hover-bg: var(--mt); --bs-btn-hover-border-color: var(--mt); --bs-btn-hover-color: #fff;
+    --bs-btn-active-bg: var(--mt-dark); --bs-btn-active-border-color: var(--mt-dark);
+}
+
+/* ---- Module variables mapped onto the tokens (so var()-based CSS follows) ---- */
+body.software-mode[data-module="babok"]   { --babok-primary: var(--mt-ink); --babok-secondary: var(--mt); }
+body.software-mode[data-module="pmbok"]   { --soft-primary: var(--mt); --soft-secondary: var(--mt-dark); }
+body.software-mode[data-module="or"]      { --or-primary: var(--mt); --or-primary-dark: var(--mt-dark); --or-primary-light: #FDBA74; }
+body.software-mode[data-module="statlab"] { --statlab-primary: var(--mt); }
+body.software-mode[data-module="mcdm"]    { --mcdm-olive-900: var(--mt-ink); --mcdm-olive-700: var(--mt); --mcdm-olive-600: var(--mt-dark); --mcdm-olive-100: var(--mt-tint); --mcdm-olive-50: var(--mt-soft); }
+body.software-mode[data-module="hr"]      { --hr-primary: var(--mt); --hr-primary-dark: var(--mt-dark); }
+body.software-mode[data-module="pdm"]     { --pdm-primary: var(--mt); --pdm-primary-dark: var(--mt-dark); }
+body.software-mode[data-module="quality"] { --qc-primary: var(--mt); --qc-primary-dark: var(--mt-dark); }
+
+/* =========================================================================
+   Mobile / tablet: the software menu shows ALL items at the top, wrapped
+   onto several rows. No horizontal scrolling rail.
+   ========================================================================= */
+@media (max-width: 991px) {
+    body.software-mode .software-nav {
+        display: flex;
+        flex-wrap: wrap;
+        overflow: visible;
+        overflow-x: visible;
+        max-width: 100%;
+        gap: 6px;
+        padding: 10px 12px;
+    }
+    body.software-mode .software-nav a {
+        flex: 1 1 auto;
+        min-width: 0;
+        min-height: 42px;
+        justify-content: center;
+        white-space: normal;
+        text-align: center;
+        padding: 8px 12px;
+        font-size: .84rem;
+        line-height: 1.5;
+    }
+    body.software-mode[data-module] .software-nav a.active {
+        background: var(--mt);
+        border-color: var(--mt-accent);
+        box-shadow: none;
+    }
+}
+@media (max-width: 479px) {
+    /* two equal columns on phones: every item stays visible and tappable */
+    body.software-mode .software-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+    body.software-mode .software-nav a { padding: 8px 8px; font-size: .8rem; gap: 6px; }
+    body.software-mode .software-nav a i { width: auto; flex: none; }
+}
+
+/* Never let the software shell scroll sideways */
+body.software-mode { overflow-x: hidden; }
+body.software-mode .software-wrapper, body.software-mode .software-sidebar, body.software-mode .software-main { max-width: 100%; }

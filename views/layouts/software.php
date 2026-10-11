@@ -15,8 +15,8 @@ if (!isset($settings) || empty($settings)) {
 $moduleName = $moduleName ?? 'babok';
 $softwareName = $softwareName ?? 'BABOK Analyzer';
 $title = $title ?? ($softwareName . ' - IT4IE');
-$cssVersion = '2.2'; // نسخهٔ کش CSS پوستهٔ نرم‌افزارها
-$moduleCssVersion = $moduleName === 'mcdm' ? '2.1' : '2.0';
+$cssVersion = '2.3'; // نسخهٔ کش CSS پوستهٔ نرم‌افزارها
+$moduleCssVersion = '2.3';
 ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -26,6 +26,7 @@ $moduleCssVersion = $moduleName === 'mcdm' ? '2.1' : '2.0';
     <title><?php echo htmlspecialchars($title); ?></title>
     <meta name="description" content="<?php echo htmlspecialchars($settings['site_description'] ?? 'نرم‌افزار تخصصی IT4IE'); ?>">
     <meta name="robots" content="noindex, follow">
+    <meta name="theme-color" content="#101b30">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -36,7 +37,7 @@ $moduleCssVersion = $moduleName === 'mcdm' ? '2.1' : '2.0';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.rtl.min.css" rel="stylesheet" integrity="sha384-CfCrinSRH2IR6a4e6fy2q6ioOX7O6Mtm1L9vRvFZ1trBncWmMePhzvafv7oIcWiW" crossorigin="anonymous">
     <?php endif; ?>
     <!-- IT4IE Base Styles -->
-    <link rel="stylesheet" href="/assets/css/style.css?v=20261010">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20261011">
     <!-- Software Styles (با نسخه برای شکستن کش) -->
     <link rel="stylesheet" href="/assets/css/software.css?v=<?php echo $cssVersion; ?>">
     <!-- Module Styles -->
@@ -47,8 +48,10 @@ $moduleCssVersion = $moduleName === 'mcdm' ? '2.1' : '2.0';
     <link rel="stylesheet" href="/assets/css/modules/statlab.css?v=<?php echo time(); ?>">
     <?php endif; ?>
     <link rel="stylesheet" href="/assets/css/software-refinement.css?v=20261010">
+    <!-- Module colour themes: must stay LAST -->
+    <link rel="stylesheet" href="/assets/css/software-themes.css?v=20261011">
 </head>
-<body class="software-mode" data-module="<?php echo htmlspecialchars($moduleName, ENT_QUOTES, 'UTF-8'); ?>">
+<body class="software-mode ui2-shell" data-module="<?php echo htmlspecialchars($moduleName, ENT_QUOTES, 'UTF-8'); ?>">
 
     <!-- Header IT4IE -->
     <?php include VIEWS_PATH . '/partials/header.php'; ?>

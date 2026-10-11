@@ -3,11 +3,11 @@
  */
 :root {
     /* پالت رنگی زیتونی با کنتراست بالا برای متن سفید */
-    --mcdm-olive-900: #2C3A16; /* برای متن روی پس‌زمینه روشن */
-    --mcdm-olive-700: #4A5D23; /* سبز اصلی (تیره enough برای متن سفید) */
-    --mcdm-olive-600: #5A7230; /* سبز هاور */
-    --mcdm-olive-100: #E8EDE0; /* پس‌زمینه روشن جداول و کارت‌ها */
-    --mcdm-olive-50:  #F4F7F0; /* پس‌زمینه کلی صفحه */
+    --mcdm-olive-900: #1A2E05; /* برای متن روی پس‌زمینه روشن */
+    --mcdm-olive-700: #4D7C0F; /* سبز اصلی (تیره enough برای متن سفید) */
+    --mcdm-olive-600: #3F6212; /* سبز هاور */
+    --mcdm-olive-100: #ECFCCB; /* پس‌زمینه روشن جداول و کارت‌ها */
+    --mcdm-olive-50:  #F7FEE7; /* پس‌زمینه کلی صفحه */
     --mcdm-gold:      #C5A028; /* رنگ تاکیدی طلایی */
     
     /* قانون طلایی: متن روی سبز همیشه سفید باشد */
@@ -62,7 +62,7 @@ body {
 
 .badge.bg-warning {
     background-color: var(--mcdm-gold) !important;
-    color: #2C3A16 !important; /* متن تیره روی طلایی برای خوانایی */
+    color: #1A2E05 !important; /* متن تیره روی طلایی برای خوانایی */
     font-weight: 700;
 }
 
@@ -284,7 +284,7 @@ body {
 .step-number {
     width: 44px;
     height: 44px;
-    background: linear-gradient(135deg, var(--mcdm-olive-700, #4A5D23), var(--mcdm-olive-600, #5A7230));
+    background: linear-gradient(135deg, var(--mcdm-olive-700, #4D7C0F), var(--mcdm-olive-600, #3F6212));
     color: #FFFFFF !important;
     border-radius: 50%;
     display: flex;
@@ -308,7 +308,7 @@ body {
 .step-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--mcdm-olive-900, #2C3A16);
+    color: var(--mcdm-olive-900, #1A2E05);
     margin-bottom: 10px;
     display: flex;
     align-items: center;
@@ -357,7 +357,7 @@ body {
 
 /* کد گام (مثل 2.1.1) */
 .step-code {
-    background: var(--mcdm-olive-700, #4A5D23) !important;
+    background: var(--mcdm-olive-700, #4D7C0F) !important;
     color: #FFFFFF !important;
     font-weight: normal;
     font-size: 0.75rem;
@@ -389,7 +389,7 @@ body {
 
 /* هدر پنل AI - متن سفید روی سبز تیره */
 .ai-head {
-    background: linear-gradient(135deg, var(--mcdm-olive-700, #4A5D23), var(--mcdm-olive-600, #5A7230)) !important;
+    background: linear-gradient(135deg, var(--mcdm-olive-700, #4D7C0F), var(--mcdm-olive-600, #3F6212)) !important;
     color: #FFFFFF !important;
 }
 
@@ -403,67 +403,67 @@ body {
 
 /* برچسب‌های Chip - حالت عادی و هاور */
 .ai-chip {
-    background-color: var(--mcdm-olive-100, #E8EDE0) !important;
-    color: var(--mcdm-olive-900, #2C3A16) !important;
+    background-color: var(--mcdm-olive-100, #ECFCCB) !important;
+    color: var(--mcdm-olive-900, #1A2E05) !important;
     border: 1px solid var(--mcdm-olive-300, #A3B88F) !important;
 }
 
 .ai-chip:hover {
-    background-color: var(--mcdm-olive-700, #4A5D23) !important;
+    background-color: var(--mcdm-olive-700, #4D7C0F) !important;
     color: #FFFFFF !important;
-    border-color: var(--mcdm-olive-700, #4A5D23) !important;
+    border-color: var(--mcdm-olive-700, #4D7C0F) !important;
 }
 
 /* اینسایت‌های AI */
 .ai-insight {
-    background-color: var(--mcdm-olive-50, #F4F7F0) !important;
-    color: var(--mcdm-olive-900, #2C3A16) !important;
+    background-color: var(--mcdm-olive-50, #F7FEE7) !important;
+    color: var(--mcdm-olive-900, #1A2E05) !important;
     border-right: 4px solid var(--mcdm-gold, #C5A028) !important;
 }
 
 .ai-insight strong {
-    color: var(--mcdm-olive-900, #2C3A16) !important;
+    color: var(--mcdm-olive-900, #1A2E05) !important;
 }
 
 /* دکمه ارسال فرم */
 .btn[type="submit"] {
-    background-color: var(--mcdm-olive-700, #4A5D23) !important;
+    background-color: var(--mcdm-olive-700, #4D7C0F) !important;
     color: #FFFFFF !important;
     border: none !important;
 }
 
 .btn[type="submit"]:hover {
-    background-color: var(--mcdm-olive-600, #5A7230) !important;
+    background-color: var(--mcdm-olive-600, #3F6212) !important;
     color: #FFFFFF !important;
 }
 
 /* برچسب‌های فرم */
 .form-label {
-    color: var(--mcdm-olive-900, #2C3A16) !important;
+    color: var(--mcdm-olive-900, #1A2E05) !important;
     font-weight: 600;
 }
 
 /* ورودی‌های فرم */
 .form-control, .form-select {
     border: 2px solid var(--mcdm-olive-200, #D5E0C8) !important;
-    color: var(--mcdm-olive-900, #2C3A16) !important;
+    color: var(--mcdm-olive-900, #1A2E05) !important;
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: var(--mcdm-olive-600, #5A7230) !important;
+    border-color: var(--mcdm-olive-600, #3F6212) !important;
     background-color: #FFFFFF !important;
-    color: var(--mcdm-olive-900, #2C3A16) !important;
+    color: var(--mcdm-olive-900, #1A2E05) !important;
 }
 
 /* badgeهای داخل فرم */
 .badge.bg-primary {
-    background-color: var(--mcdm-olive-700, #4A5D23) !important;
+    background-color: var(--mcdm-olive-700, #4D7C0F) !important;
     color: #FFFFFF !important;
 }
 
 /* عنوان‌های بخش‌ها */
 h4 {
-    color: var(--mcdm-olive-900, #2C3A16) !important;
+    color: var(--mcdm-olive-900, #1A2E05) !important;
 }
 
 /* Responsive project screens and wide decision matrices. */

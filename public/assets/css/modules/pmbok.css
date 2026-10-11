@@ -3,8 +3,8 @@
  */
 
 :root {
-    --soft-primary: #667eea;
-    --soft-secondary: #764ba2;
+    --soft-primary: #7C3AED;
+    --soft-secondary: #5B21B6;
     --soft-success: #48bb78;
     --soft-warning: #ed8936;
     --soft-danger: #f56565;
@@ -93,7 +93,7 @@
     color: #4A5568;
 }
 
-.badge-primary { background: #E0E7FF; color: #4F46E5; }
+.badge-primary { background: #EDE9FE; color: #5B21B6; }
 .badge-success { background: #D1FAE5; color: #065F46; }
 .badge-warning { background: #FEF3C7; color: #92400E; }
 .badge-danger { background: #FEE2E2; color: #991B1B; }
@@ -126,7 +126,7 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #7C3AED, #5B21B6);
     color: white;
 }
 
@@ -173,8 +173,8 @@
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #7C3AED;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
     outline: none;
 }
 
@@ -206,7 +206,7 @@
 }
 
 .page-header h2 i {
-    color: var(--soft-primary, #667eea);
+    color: var(--soft-primary, #7C3AED);
     margin-right: 8px;
 }
 
@@ -218,7 +218,7 @@
 }
 
 .breadcrumb a {
-    color: var(--soft-primary, #667eea);
+    color: var(--soft-primary, #7C3AED);
     text-decoration: none;
 }
 
@@ -275,7 +275,7 @@
 }
 
 .list-item-link:hover {
-    color: var(--soft-primary, #667eea);
+    color: var(--soft-primary, #7C3AED);
 }
 
 /* Filter Card */
@@ -319,12 +319,12 @@
 }
 
 .tab-btn:hover {
-    color: var(--soft-primary, #667eea);
+    color: var(--soft-primary, #7C3AED);
 }
 
 .tab-btn.active {
-    color: var(--soft-primary, #667eea);
-    border-bottom-color: var(--soft-primary, #667eea);
+    color: var(--soft-primary, #7C3AED);
+    border-bottom-color: var(--soft-primary, #7C3AED);
     font-weight: 600;
 }
 
@@ -409,7 +409,7 @@
 }
 
 .technique-card:hover {
-    border-color: var(--soft-primary, #667eea);
+    border-color: var(--soft-primary, #7C3AED);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
@@ -417,7 +417,7 @@
 .technique-icon {
     width: 40px;
     height: 40px;
-    background: var(--soft-primary, #667eea);
+    background: var(--soft-primary, #7C3AED);
     color: white;
     border-radius: 10px;
     display: flex;
@@ -482,7 +482,7 @@
 }
 
 .ka-stat i {
-    color: var(--soft-primary, #667eea);
+    color: var(--soft-primary, #7C3AED);
 }
 
 /* Responsive */
