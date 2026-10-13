@@ -60,6 +60,25 @@ body.software-mode[data-module] .software-content :is(.btn-outline-primary) {
     --bs-btn-active-bg: var(--mt-dark); --bs-btn-active-border-color: var(--mt-dark); --bs-btn-active-color: #fff;
     --bs-btn-focus-shadow-rgb: var(--mt-rgb);
 }
+/* The site-wide 16-profile.css hard-codes .btn-primary (#3498db) and friends, which leaked a generic
+   blue into every module. These rules set the real properties, not just Bootstrap variables. */
+body.software-mode[data-module] .software-content .btn-primary {
+    background: var(--mt); border: 1px solid var(--mt); color: #fff;
+}
+body.software-mode[data-module] .software-content .btn-primary:hover,
+body.software-mode[data-module] .software-content .btn-primary:focus-visible { background: var(--mt-dark); border-color: var(--mt-dark); color: #fff; }
+body.software-mode[data-module] .software-content .btn-outline-primary {
+    background: transparent; border: 1px solid var(--mt); color: var(--mt);
+}
+body.software-mode[data-module] .software-content .btn-outline-primary:hover { background: var(--mt); color: #fff; }
+body.software-mode[data-module="statlab"] .software-content .btn-success {
+    background: var(--mt); border: 1px solid var(--mt); color: #fff;
+}
+body.software-mode[data-module="statlab"] .software-content .btn-success:hover { background: var(--mt-dark); border-color: var(--mt-dark); color: #fff; }
+body.software-mode[data-module="statlab"] .software-content .btn-outline-success { background: transparent; border: 1px solid var(--mt); color: var(--mt); }
+body.software-mode[data-module="statlab"] .software-content .btn-outline-success:hover { background: var(--mt); color: #fff; }
+body.software-mode[data-module] .software-content .form-control:focus { border-color: var(--mt); }
+
 body.software-mode[data-module] .software-content .text-primary { color: var(--mt) !important; }
 body.software-mode[data-module] .software-content .bg-primary { background-color: var(--mt) !important; }
 body.software-mode[data-module] .software-content .border-primary { border-color: var(--mt) !important; }
