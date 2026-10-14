@@ -3,7 +3,7 @@
  * Asset helpers
  *  - automatic cache busting (?v=filemtime) instead of hand-edited version numbers
  *  - optional CSS bundles produced by `php tools/build-css.php`
- *    (used only while they are fresh; otherwise the source files are linked, so a forgotten
+ *    (used only while their source hashes match; otherwise the source files are linked, so a forgotten
  *     rebuild can never serve stale CSS)
  */
 if (!function_exists('it4ie_asset_url')) {
@@ -31,7 +31,7 @@ if (!function_exists('it4ie_asset_url')) {
         return '<link rel="stylesheet" href="' . htmlspecialchars(it4ie_asset_url($rel), ENT_QUOTES, 'UTF-8') . '">';
     }
 
-    /** True when dist/manifest.json exists and no source file changed since the last build. */
+    /** True when dist/manifest.json exists and its source content hashes match. */
     function it4ie_bundles_fresh(): bool
     {
         static $fresh = null;
@@ -47,18 +47,30 @@ if (!function_exists('it4ie_asset_url')) {
         if (!is_array($data) || empty($data['files']) || !is_array($data['files'])) {
             return $fresh;
         }
-        foreach ($data['files'] as $rel => $mtime) {
+        // Cache the content check briefly across PHP requests when APCu is available.
+        // A source edit is picked up within 60 seconds; a new manifest gets a new key.
+        $cacheKey = 'it4ie-css-bundle-v2:' . $manifest . ':' . filemtime($manifest) . ':' . filesize($manifest);
+        if (function_exists('apcu_fetch') && function_exists('apcu_store')) {
+            $cached = apcu_fetch($cacheKey, $found);
+            if ($found) {
+                return $fresh = (bool) $cached;
+            }
+        }
+        foreach ($data['files'] as $rel => $hash) {
             $file = it4ie_public_path() . '/assets/' . $rel;
-            if (!is_file($file) || (int) filemtime($file) !== (int) $mtime) {
+            if (!is_file($file) || hash_file('sha256', $file) !== (string) $hash) {
                 return $fresh;
             }
         }
         // the list of design-system modules decides what goes into each software bundle
         $cfgFile = (defined('CONFIG_PATH') ? CONFIG_PATH : dirname(__DIR__, 2) . '/app/config') . '/design-system.php';
-        if (isset($data['config']) && (!is_file($cfgFile) || (int) filemtime($cfgFile) !== (int) $data['config'])) {
+        if (isset($data['config']) && (!is_file($cfgFile) || hash_file('sha256', $cfgFile) !== (string) $data['config'])) {
             return $fresh;
         }
         $fresh = true;
+        if (function_exists('apcu_store')) {
+            apcu_store($cacheKey, true, 60);
+        }
         return $fresh;
     }
 
@@ -98,7 +110,7 @@ if (!function_exists('it4ie_asset_url')) {
         if (it4ie_bundles_fresh() && it4ie_asset_exists($bundle)) {
             return it4ie_css_link($bundle);
         }
-        $files = ['css/style.css', 'css/software.css'];
+        $files = [(it4ie_bundles_fresh() && it4ie_asset_exists('dist/app.min.css')) ? 'dist/app.min.css' : 'css/style.css', 'css/software.css'];
         if (it4ie_is_ds($module)) {
             $files[] = 'css/ds/it4ie-ds.css';
         }

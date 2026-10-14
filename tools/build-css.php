@@ -8,8 +8,8 @@
  * Output
  *   dist/app.min.css                 everything style.css @imports   (public/auth/profile/admin pages)
  *   dist/software-<module>.min.css   style + software + [ds] + module + refinement + themes
- *   dist/manifest.json               source mtimes; views/partials/asset-helper.php ignores a bundle
- *                                    automatically if any source changed after the build.
+ *   dist/manifest.json               source content hashes; views/partials/asset-helper.php ignores a bundle
+ *                                    automatically if source content differs from the build.
  *
  * Run it as part of every deploy (after editing any CSS).
  */
@@ -57,7 +57,7 @@ function min_css(string $css): string
     return strtr(trim($css), $keep);
 }
 
-$used = [];   // rel path (relative to /assets/) => mtime
+$used = [];   // rel path (relative to /assets/) => sha256
 function load(string $rel): string
 {
     global $assets, $used;
@@ -66,7 +66,7 @@ function load(string $rel): string
         fwrite(STDERR, "  ! missing $rel (skipped)\n");
         return '';
     }
-    $used[$rel] = filemtime($file);
+    $used[$rel] = hash_file('sha256', $file);
     return read_css($file);
 }
 
@@ -117,7 +117,7 @@ foreach ($bundles as $name => $raw) {
 ksort($used);
 file_put_contents($dist . '/manifest.json', json_encode([
     'built'  => time(),
-    'config' => is_file($cfgFile) ? filemtime($cfgFile) : 0,
+    'config' => is_file($cfgFile) ? hash_file('sha256', $cfgFile) : '',
     'files'  => $used,
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 echo "\nDone: " . count($bundles) . " bundles, " . count($used) . " source files tracked.\n";
