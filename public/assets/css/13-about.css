@@ -505,3 +505,114 @@
     .resume-avatar { width: 56px; height: 56px; font-size: 1.4rem; }
     .resume-title h2 { font-size: 1.2rem; }
 }
+
+
+/* ==========================================
+   IT4IE - About Page Contrast Fix
+   Scope: Public About Page Only
+   ========================================== */
+
+body.ui2 .about-page .about-hero {
+    background: linear-gradient(
+        135deg,
+        #4f28b8 0%,
+        #402091 55%,
+        #27135f 100%
+    );
+    color: #ffffff;
+}
+
+/* Main heading */
+body.ui2 .about-page .about-hero-title {
+    color: #ffffff;
+    line-height: 1.7;
+}
+
+/* Highlight: remove reliance on transparent gradient text */
+body.ui2 .about-page .about-hero-title .highlight {
+    background: none;
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
+}
+
+/* Subtitle */
+body.ui2 .about-page .about-hero-title small {
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
+    opacity: 1;
+    line-height: 1.9;
+}
+
+/* Hero description */
+body.ui2 .about-page .about-hero-text {
+    color: #f8f7ff;
+    line-height: 2.1;
+}
+
+body.ui2 .about-page .about-hero-text strong {
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
+    font-weight: 800;
+}
+
+/* Badge */
+body.ui2 .about-page .about-hero-badge {
+    color: #ffffff;
+    background: rgba(20, 12, 50, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+/* Statistics */
+body.ui2 .about-page .stat-number {
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
+}
+
+body.ui2 .about-page .stat-label {
+    color: #f1edff;
+    -webkit-text-fill-color: #f1edff;
+}
+
+/* Mission and service cards */
+body.ui2 .about-page .mission-card,
+body.ui2 .about-page .service-card,
+body.ui2 .about-page .about-resume {
+    color: #172033;
+    background-color: #ffffff;
+}
+
+body.ui2 .about-page .mission-card h3,
+body.ui2 .about-page .service-card h4,
+body.ui2 .about-page .about-resume h2,
+body.ui2 .about-page .about-resume h4 {
+    color: #172033;
+    -webkit-text-fill-color: #172033;
+}
+
+body.ui2 .about-page .mission-card p,
+body.ui2 .about-page .mission-card li,
+body.ui2 .about-page .service-card p,
+body.ui2 .about-page .resume-subtitle,
+body.ui2 .about-page .resume-bio p,
+body.ui2 .about-page .resume-block ul li p,
+body.ui2 .about-page .cert-list li {
+    color: #475569;
+    -webkit-text-fill-color: #475569;
+}
+
+/* Section heading and description */
+body.ui2 .about-page .section-header h2 {
+    color: #172033;
+    -webkit-text-fill-color: #172033;
+}
+
+body.ui2 .about-page .section-header p {
+    color: #475569;
+    -webkit-text-fill-color: #475569;
+}
+
+/* Keyboard accessibility */
+body.ui2 .about-page a:focus-visible {
+    outline: 3px solid #6c3ce1;
+    outline-offset: 3px;
+}

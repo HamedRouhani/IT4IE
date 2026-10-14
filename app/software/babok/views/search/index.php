@@ -6,14 +6,15 @@
 ?>
 
 <div style="max-width: 800px; margin: 40px auto; padding: 20px; font-family: Tahoma, sans-serif;">
-    <h2 style="text-align: center; color: #6C3CE1;">🔍 جستجوی هوشمند در BABOK</h2>
-    
+    <h2 style="text-align: center; color: var(--mt-dark);">
+        🔍 جستجوی هوشمند در BABOK
+    </h2>
     <!-- فرم جستجو -->
     <form action="" method="GET" style="margin-bottom: 30px;">
         <!-- این خط حیاتی است: مسیر را به صراحت به روتر اعلام می‌کند -->
         <input type="hidden" name="route" value="search_results">
         
-        <div style="display: flex; gap: 10px; box-shadow: 0 4px 12px rgba(108, 60, 225, 0.15); border-radius: 12px; overflow: hidden; border: 2px solid #6C3CE1;">
+        <div style="display: flex; gap: 10px;box-shadow: 0 4px 12px rgba(var(--mt-rgb), 0.15);border: 2px solid var(--mt);">
             <input 
                 type="text" 
                 name="q" 

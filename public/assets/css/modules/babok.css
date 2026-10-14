@@ -76,3 +76,157 @@ body.software-mode[data-module="babok"] .requirement-meta { display: flex; flex-
 @media (max-width: 767px) {
     body.software-mode[data-module="babok"] .requirement-analyzer { border-radius: 20px; }
 }
+
+/* ================================================================
+   BABOK - UI Refinement / Pass 1
+   انسجام بصری، خوانایی و چیدمان ورودی نیازمندی
+   ================================================================ */
+
+/* ---------- Requirement form and sample cards ---------- */
+
+body.software-mode[data-module="babok"] .software-content
+.card:has(.sample-texts-grid) {
+    background: var(--mt-soft);
+    border-color: var(--ds-line);
+}
+
+body.software-mode[data-module="babok"] .sample-text-btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 68px;
+    color: var(--ds-text);
+    background: var(--ds-card);
+    border: 1px solid var(--ds-line);
+    border-radius: 14px;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+body.software-mode[data-module="babok"] .sample-text-btn:hover {
+    color: var(--ds-text);
+    background: #fff;
+    border-color: var(--mt);
+    box-shadow: var(--ds-shadow-hover);
+}
+
+body.software-mode[data-module="babok"] .sample-text-btn:focus-visible {
+    outline: 3px solid var(--mt);
+    outline-offset: 3px;
+}
+
+body.software-mode[data-module="babok"] .sample-info strong {
+    color: var(--mt-ink);
+    line-height: 1.7;
+}
+
+body.software-mode[data-module="babok"] .sample-info small {
+    color: var(--ds-muted);
+    line-height: 1.7;
+}
+
+/* ---------- Requirement textarea ---------- */
+
+body.software-mode[data-module="babok"] .requirement-textarea {
+    width: 100%;
+    min-height: 200px;
+    line-height: 1.9;
+    resize: vertical;
+}
+
+body.software-mode[data-module="babok"] .requirement-textarea::placeholder {
+    color: #64748b;
+    opacity: 1;
+}
+
+/* ---------- Voice recorder controls ---------- */
+
+body.software-mode[data-module="babok"] .voice-recorder {
+    align-items: center;
+    gap: 12px;
+}
+
+body.software-mode[data-module="babok"] .voice-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: auto;
+    min-width: 52px;
+    min-height: 48px;
+    height: auto;
+    padding: 10px 16px;
+    border-radius: 14px;
+    line-height: 1.5;
+    white-space: normal;
+}
+
+body.software-mode[data-module="babok"] .voice-btn:focus-visible {
+    outline: 3px solid var(--mt);
+    outline-offset: 3px;
+}
+
+body.software-mode[data-module="babok"] .voice-info {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+body.software-mode[data-module="babok"] .voice-title {
+    color: var(--mt-ink);
+    font-weight: 800;
+    line-height: 1.7;
+}
+
+body.software-mode[data-module="babok"] .voice-status {
+    color: var(--ds-muted);
+    font-size: .86rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+body.software-mode[data-module="babok"] .voice-timer {
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+}
+
+/* ---------- Responsive adjustments ---------- */
+
+@media (max-width: 576px) {
+    body.software-mode[data-module="babok"] .sample-texts-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.software-mode[data-module="babok"] .sample-text-btn {
+        padding: 12px;
+    }
+
+    body.software-mode[data-module="babok"] .voice-recorder {
+        align-items: stretch;
+    }
+
+    body.software-mode[data-module="babok"] .voice-info {
+        flex-basis: 100%;
+        order: 3;
+    }
+
+    body.software-mode[data-module="babok"] .voice-timer {
+        align-self: center;
+        margin-inline-start: auto;
+    }
+
+    body.software-mode[data-module="babok"] .requirement-analyzer {
+        padding: 20px 16px;
+        border-radius: 18px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.software-mode[data-module="babok"] .sample-text-btn,
+    body.software-mode[data-module="babok"] .voice-btn {
+        transition: none;
+    }
+
+    body.software-mode[data-module="babok"] .voice-btn.recording {
+        animation: none;
+    }
+}
