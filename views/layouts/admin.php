@@ -1,3 +1,4 @@
+<?php require_once VIEWS_PATH . '/partials/asset-helper.php'; ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -13,7 +14,7 @@
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/assets/css/style.css?v=20261010">
+    <?php echo it4ie_css_app(); ?>
     
     <style>
         /* مخفی کردن سایدبار اصلی سایت در پنل ادمین */

@@ -12,11 +12,11 @@ if (!isset($settings) || empty($settings)) {
     }
 }
 
+require_once VIEWS_PATH . '/partials/asset-helper.php';
+
 $moduleName = $moduleName ?? 'babok';
 $softwareName = $softwareName ?? 'BABOK Analyzer';
 $title = $title ?? ($softwareName . ' - IT4IE');
-$cssVersion = '2.3'; // نسخهٔ کش CSS پوستهٔ نرم‌افزارها
-$moduleCssVersion = '2.3';
 ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -36,22 +36,10 @@ $moduleCssVersion = '2.3';
     <!-- Software views share Bootstrap utilities; load it before site and module styles. -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.rtl.min.css" rel="stylesheet" integrity="sha384-CfCrinSRH2IR6a4e6fy2q6ioOX7O6Mtm1L9vRvFZ1trBncWmMePhzvafv7oIcWiW" crossorigin="anonymous">
     <?php endif; ?>
-    <!-- IT4IE Base Styles -->
-    <link rel="stylesheet" href="/assets/css/style.css?v=20261011">
-    <!-- Software Styles (با نسخه برای شکستن کش) -->
-    <link rel="stylesheet" href="/assets/css/software.css?v=<?php echo $cssVersion; ?>">
-    <!-- Module Styles -->
-    <?php if ($moduleName): ?>
-    <link rel="stylesheet" href="/assets/css/modules/<?php echo $moduleName; ?>.css?v=<?php echo $moduleCssVersion; ?>">
-    <?php endif; ?>
-    <?php if ($moduleName === 'statlab'): ?>
-    <link rel="stylesheet" href="/assets/css/modules/statlab.css?v=<?php echo time(); ?>">
-    <?php endif; ?>
-    <link rel="stylesheet" href="/assets/css/software-refinement.css?v=20261010">
-    <!-- Module colour themes: must stay LAST -->
-    <link rel="stylesheet" href="/assets/css/software-themes.css?v=20261011">
+    <!-- IT4IE styles: style + software + [design system] + module + refinement + themes (see asset-helper.php) -->
+    <?php echo it4ie_css_software($moduleName); ?>
 </head>
-<body class="software-mode ui2-shell" data-module="<?php echo htmlspecialchars($moduleName, ENT_QUOTES, 'UTF-8'); ?>">
+<body class="software-mode ui2-shell" data-module="<?php echo htmlspecialchars($moduleName, ENT_QUOTES, 'UTF-8'); ?>"<?php echo it4ie_is_ds($moduleName) ? ' data-ds="1"' : ''; ?>>
 
     <!-- Header IT4IE -->
     <?php include VIEWS_PATH . '/partials/header.php'; ?>

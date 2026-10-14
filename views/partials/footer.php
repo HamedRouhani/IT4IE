@@ -19,9 +19,14 @@
             <div>
                 <h4>تماس با ما</h4>
                 <ul>
-                    <li><i class="fas fa-envelope"></i> <?php echo $settings['admin_email'] ?? 'info@it4ie.ir'; ?></li>
-                    <li><i class="fas fa-phone"></i> <?php echo $settings['contact_phone'] ?? '۰۲۱-۱۲۳۴-۵۶۷۸'; ?></li>
-                    <li><i class="fas fa-map-marker-alt"></i> <?php echo $settings['contact_address'] ?? 'تهران، خیابان ولیعصر، پلاک ۱۲۳'; ?></li>
+                    <li><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($settings['admin_email'] ?? 'info@it4ie.ir', ENT_QUOTES, 'UTF-8'); ?></li>
+                    <?php /* تلفن و نشانی فقط وقتی در تنظیمات سایت ثبت شده باشند نمایش داده می‌شوند (بدون مقدار پیش‌فرض ساختگی) */ ?>
+                    <?php if (!empty($settings['contact_phone'])): ?>
+                    <li><i class="fas fa-phone"></i> <?php echo htmlspecialchars($settings['contact_phone'], ENT_QUOTES, 'UTF-8'); ?></li>
+                    <?php endif; ?>
+                    <?php if (!empty($settings['contact_address'])): ?>
+                    <li><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($settings['contact_address'], ENT_QUOTES, 'UTF-8'); ?></li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>

@@ -1,108 +1,15 @@
 /* ================================================================
-   BABOK Analyzer - module stylesheet (v3)
-   Scope: body.software-mode[data-module="babok"] (the old file was scoped to
-   ".babok-module", a class no view ever used, so none of it applied).
-   Colours come from the theme tokens in software-themes.css (--mt, --mt-dark,
-   --mt-rgb, --mt-tint, --mt-ink, --mt-soft). Only semantic status colours
-   (success / warning / danger) are fixed here.
+   BABOK Analyzer - module-specific styles (v4)
+   Generic components (cards, buttons, tables, forms, stats, hero...) now live in
+   ds/it4ie-ds.css. Only BABOK-only parts remain here.
    ================================================================ */
 
 body.software-mode[data-module="babok"] {
     --babok-primary: var(--mt-ink, #164E63);
     --babok-secondary: var(--mt, #0891B2);
-    --babok-success: #16a34a;
-    --babok-warning: #d97706;
-    --babok-danger: #dc2626;
-    --bk-line: #d7e8ee;
-    --bk-text: #12333f;
-    --bk-muted: #5b7480;
-    --bk-card: #ffffff;
-    --bk-r: 18px;
-    --bk-shadow: 0 1px 2px rgba(8, 51, 68, .05), 0 10px 28px rgba(8, 51, 68, .06);
-    --bk-shadow-hover: 0 2px 4px rgba(8, 51, 68, .06), 0 18px 40px rgba(var(--mt-rgb, 8, 145, 178), .2);
 }
-body.software-mode[data-module="babok"] .software-main { background: var(--mt-soft, #f1f9fb); }
-body.software-mode[data-module="babok"] .software-content { color: var(--bk-text); line-height: 1.85; }
-body.software-mode[data-module="babok"] .software-content :is(h1, h2, h3, h4, h5) { color: var(--bk-text); line-height: 1.5; }
 
-/* ---------- Dashboard hero ---------- */
-body.software-mode[data-module="babok"] .bk-hero {
-    position: relative; overflow: hidden; isolation: isolate;
-    display: grid; gap: 18px; align-items: center;
-    padding: clamp(20px, 3.5vw, 36px); margin-bottom: 20px; color: #fff; border-radius: 26px;
-    background: radial-gradient(120% 150% at 100% 0%, var(--mt) 0%, var(--mt-dark) 48%, #083344 100%);
-    box-shadow: 0 22px 50px rgba(var(--mt-rgb), .28);
-}
-body.software-mode[data-module="babok"] .bk-hero::before, body.software-mode[data-module="babok"] .bk-hero::after { content: ''; position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; }
-body.software-mode[data-module="babok"] .bk-hero::before { width: 320px; height: 320px; inset-block-start: -140px; inset-inline-start: -90px; background: rgba(255, 255, 255, .08); }
-body.software-mode[data-module="babok"] .bk-hero::after { width: 190px; height: 190px; inset-block-end: -90px; inset-inline-end: 30%; background: rgba(255, 255, 255, .06); }
-body.software-mode[data-module="babok"] .bk-hero .bk-eyebrow { display: inline-block; padding: 3px 14px; border-radius: 999px; background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .25); font-size: .78rem; font-weight: 700; direction: ltr; margin-bottom: 10px; }
-body.software-mode[data-module="babok"] .bk-hero h2 { color: #fff; margin: 0 0 6px; font-size: clamp(1.3rem, 3.2vw, 1.9rem); font-weight: 900; }
-body.software-mode[data-module="babok"] .bk-hero p { color: rgba(255, 255, 255, .88); margin: 0; max-width: 40em; font-size: clamp(.9rem, 1.8vw, 1rem); }
-body.software-mode[data-module="babok"] .bk-hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-body.software-mode[data-module="babok"] .bk-hero-actions .btn { min-height: 46px; border-radius: 14px; font-weight: 800; border: 0; display: inline-flex; align-items: center; gap: 8px; }
-body.software-mode[data-module="babok"] .bk-hero-actions .btn-light { background: #fff; color: var(--mt-ink); }
-body.software-mode[data-module="babok"] .bk-hero-actions .btn-light:hover { background: var(--mt-tint); color: var(--mt-ink); }
-body.software-mode[data-module="babok"] .bk-hero-actions .btn-ghost { background: rgba(255, 255, 255, .14); color: #fff; border: 1px solid rgba(255, 255, 255, .3); }
-body.software-mode[data-module="babok"] .bk-hero-actions .btn-ghost:hover { background: rgba(255, 255, 255, .24); color: #fff; }
-@media (min-width: 900px) { body.software-mode[data-module="babok"] .bk-hero { grid-template-columns: 1fr auto; } }
-@media (max-width: 560px) { body.software-mode[data-module="babok"] .bk-hero-actions .btn { flex: 1 1 100%; justify-content: center; } }
-
-/* ---------- Stat cards ---------- */
-body.software-mode[data-module="babok"] .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
-body.software-mode[data-module="babok"] .bk-stat {
-    --c: var(--mt); display: flex; align-items: center; gap: 14px; padding: 18px;
-    background: var(--bk-card); border: 1px solid var(--bk-line); border-radius: var(--bk-r); box-shadow: none;
-    border-top: 4px solid var(--c); transition: transform .2s ease, box-shadow .2s ease;
-}
-body.software-mode[data-module="babok"] .bk-stat:hover { transform: translateY(-3px); box-shadow: var(--bk-shadow-hover); }
-body.software-mode[data-module="babok"] .bk-stat--ka { --c: #0891B2; } body.software-mode[data-module="babok"] .bk-stat--task { --c: #0d9488; } body.software-mode[data-module="babok"] .bk-stat--tech { --c: #d97706; } body.software-mode[data-module="babok"] .bk-stat--proj { --c: #e11d48; }
-body.software-mode[data-module="babok"] .bk-stat-icon { flex: none; width: 52px; height: 52px; display: grid; place-items: center; border-radius: 15px; font-size: 1.35rem; color: var(--c); background: color-mix(in srgb, var(--c) 13%, #fff); }
-body.software-mode[data-module="babok"] .bk-stat-value { font-size: 1.9rem; font-weight: 900; line-height: 1.2; color: var(--bk-text); }
-body.software-mode[data-module="babok"] .bk-stat-label { font-size: .86rem; color: var(--bk-muted); font-weight: 600; }
-@media (max-width: 1100px) { body.software-mode[data-module="babok"] .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 420px) { body.software-mode[data-module="babok"] .bk-stat { padding: 14px 12px; gap: 10px; } body.software-mode[data-module="babok"] .bk-stat-icon { width: 42px; height: 42px; font-size: 1.1rem; border-radius: 12px; } body.software-mode[data-module="babok"] .bk-stat-value { font-size: 1.45rem; } body.software-mode[data-module="babok"] .bk-stat-label { font-size: .78rem; } }
-
-body.software-mode[data-module="babok"] .main-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; margin-bottom: 20px; }
-@media (max-width: 991px) { body.software-mode[data-module="babok"] .main-grid { grid-template-columns: minmax(0, 1fr); } }
-body.software-mode[data-module="babok"] .kpis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
-body.software-mode[data-module="babok"] .kpi-card { padding: 16px; text-align: center; background: var(--mt-soft); border: 1px solid var(--bk-line); border-radius: 16px; }
-body.software-mode[data-module="babok"] .kpi-value { font-size: 1.7rem; font-weight: 900; color: var(--mt); line-height: 1.3; }
-body.software-mode[data-module="babok"] .kpi-label { font-size: .82rem; color: var(--bk-muted); font-weight: 600; }
-
-/* ---------- Cards ---------- */
-body.software-mode[data-module="babok"] .software-content .card { background: var(--bk-card); border: 1px solid var(--bk-line); border-radius: var(--bk-r); box-shadow: var(--bk-shadow); padding: clamp(16px, 2.4vw, 24px); margin-bottom: 16px; overflow-wrap: break-word; }
-body.software-mode[data-module="babok"] .software-content .card:has(> .card-body) { padding: 0; }
-body.software-mode[data-module="babok"] .software-content .card > .card-body { padding: clamp(16px, 2.4vw, 24px); }
-body.software-mode[data-module="babok"] .software-content .card .card { box-shadow: none; background: var(--mt-soft); }
-body.software-mode[data-module="babok"] .software-content .card-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 0 0 16px; margin: 0 0 16px; background: transparent; border: 0; border-bottom: 1px solid var(--bk-line); }
-body.software-mode[data-module="babok"] .software-content .card:has(> .card-body) > .card-header { padding: 18px clamp(16px, 2.4vw, 24px) 14px; margin: 0; }
-body.software-mode[data-module="babok"] .software-content .card-title { margin: 0; font-size: 1.08rem; font-weight: 800; color: var(--bk-text); display: flex; align-items: center; gap: 10px; }
-body.software-mode[data-module="babok"] .software-content .card-title > i:first-child, body.software-mode[data-module="babok"] .software-content h3.card-title > i { color: var(--mt); width: 34px; height: 34px; flex: none; display: inline-grid; place-items: center; border-radius: 10px; background: var(--mt-tint); font-size: .95rem; }
-body.software-mode[data-module="babok"] .software-content .card-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-body.software-mode[data-module="babok"] .software-content .section-title { font-weight: 800; color: var(--mt-ink); margin: 20px 0 12px; display: flex; align-items: center; gap: 8px; }
-
-/* ---------- Buttons ---------- */
-body.software-mode[data-module="babok"] .software-content .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 8px 18px; border-radius: 12px; font-weight: 700; font-size: .92rem; line-height: 1.5; white-space: normal; transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease; }
-body.software-mode[data-module="babok"] .software-content .btn:hover { transform: translateY(-1px); }
-body.software-mode[data-module="babok"] .software-content .btn-sm { min-height: 36px; padding: 5px 14px; font-size: .84rem; border-radius: 10px; }
-body.software-mode[data-module="babok"] .software-content .btn-lg { min-height: 52px; padding: 10px 26px; font-size: 1rem; border-radius: 14px; }
-body.software-mode[data-module="babok"] .software-content .btn-primary { box-shadow: 0 6px 16px rgba(var(--mt-rgb), .28); }
-body.software-mode[data-module="babok"] .software-content .btn-secondary { background: var(--mt-tint); border-color: transparent; color: var(--mt-ink); }
-body.software-mode[data-module="babok"] .software-content .btn-secondary:hover { background: color-mix(in srgb, var(--mt-tint) 70%, var(--mt)); color: var(--mt-ink); }
-body.software-mode[data-module="babok"] .software-content .btn-success { background: #16a34a; border-color: #16a34a; color: #fff; }
-body.software-mode[data-module="babok"] .software-content .btn-danger { background: #dc2626; border-color: #dc2626; color: #fff; }
-body.software-mode[data-module="babok"] .software-content .btn-warning { background: #f59e0b; border-color: #f59e0b; color: #3b2300; }
-body.software-mode[data-module="babok"] .software-content .btn-info { background: #e0f2fe; border-color: #bae6fd; color: #075985; }
-
-/* ---------- Badges / pills ---------- */
-body.software-mode[data-module="babok"] .software-content .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 12px; border-radius: 999px; font-size: .75rem; font-weight: 700; line-height: 1.7; background: #eef2f5; color: #3b4f5a; }
-body.software-mode[data-module="babok"] .software-content .badge-primary { background: var(--mt-tint); color: var(--mt-ink); }
-body.software-mode[data-module="babok"] .software-content .badge-secondary { background: #eef2f5; color: #3b4f5a; }
-body.software-mode[data-module="babok"] .software-content .badge-success { background: #dcfce7; color: #166534; }
-body.software-mode[data-module="babok"] .software-content .badge-warning { background: #fef3c7; color: #92400e; }
-body.software-mode[data-module="babok"] .software-content .badge-info { background: #e0f2fe; color: #075985; }
-body.software-mode[data-module="babok"] .software-content .badge-danger { background: #fee2e2; color: #991b1b; }
+/* ---------- Status / methodology / category pills (BABOK-specific) ---------- */
 body.software-mode[data-module="babok"] .status-badge { padding: 3px 12px; border-radius: 999px; font-size: .75rem; font-weight: 700; }
 body.software-mode[data-module="babok"] .status-not-started { background: #eef2f5; color: #52646e; }
 body.software-mode[data-module="babok"] .status-in-progress { background: #fef3c7; color: #92400e; }
@@ -117,23 +24,6 @@ body.software-mode[data-module="babok"] .category-experimental { background: #fe
 body.software-mode[data-module="babok"] .category-management { background: #e2e8f0; color: #334155; }
 body.software-mode[data-module="babok"] .category-strategic { background: #fee2e2; color: #991b1b; }
 body.software-mode[data-module="babok"] .category-modeling { background: #ede9fe; color: #5b21b6; }
-
-/* ---------- Tables ---------- */
-body.software-mode[data-module="babok"] .software-content .table-responsive { border: 1px solid var(--bk-line); border-radius: 14px; background: #fff; }
-body.software-mode[data-module="babok"] .software-content .table { margin: 0; --bs-table-bg: transparent; --bs-table-hover-bg: var(--mt-soft); width: 100%; min-width: 620px; }
-body.software-mode[data-module="babok"] .software-content .table thead th { background: var(--mt-tint); color: var(--mt-ink); font-weight: 800; font-size: .84rem; white-space: nowrap; border-bottom: 1px solid var(--bk-line); padding: 12px 14px; }
-body.software-mode[data-module="babok"] .software-content .table td { padding: 12px 14px; vertical-align: middle; border-color: #e8f1f4; word-break: normal; overflow-wrap: normal; }
-body.software-mode[data-module="babok"] .software-content .table tbody tr:hover > * { background: var(--mt-soft); }
-
-/* ---------- Forms ---------- */
-body.software-mode[data-module="babok"] .software-content .form-group { margin-bottom: 16px; }
-body.software-mode[data-module="babok"] .software-content :is(.form-label, .form-group > label) { display: block; margin-bottom: 6px; font-weight: 700; font-size: .9rem; color: var(--mt-ink); }
-body.software-mode[data-module="babok"] .software-content :is(.form-control, .form-select) { min-height: 46px; padding: 9px 14px; border: 1.5px solid #cfe2e9; border-radius: 12px; background-color: #fbfeff; color: var(--bk-text); font-size: .95rem; }
-body.software-mode[data-module="babok"] .software-content textarea.form-control { min-height: 120px; line-height: 1.9; }
-body.software-mode[data-module="babok"] .software-content :is(.form-control, .form-select):focus { background-color: #fff; border-color: var(--mt); box-shadow: 0 0 0 4px rgba(var(--mt-rgb), .16); outline: none; }
-body.software-mode[data-module="babok"] .software-content .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
-body.software-mode[data-module="babok"] .software-content .search-section { padding: 16px; background: var(--mt-soft); border: 1px solid var(--bk-line); border-radius: 16px; margin-bottom: 16px; }
-
 /* ---------- Lists, activity ---------- */
 body.software-mode[data-module="babok"] .knowledge-area-list { list-style: none; padding: 0; margin: 0; }
 body.software-mode[data-module="babok"] .knowledge-area-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px; border-radius: 12px; }
@@ -145,16 +35,18 @@ body.software-mode[data-module="babok"] .activity-item:last-child { border-botto
 body.software-mode[data-module="babok"] .activity-icon { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--mt-tint); color: var(--mt); }
 body.software-mode[data-module="babok"] .activity-info { flex: 1; min-width: 0; }
 body.software-mode[data-module="babok"] .activity-title { font-weight: 700; font-size: .92rem; }
-body.software-mode[data-module="babok"] .activity-time { font-size: .76rem; color: var(--bk-muted); }
+body.software-mode[data-module="babok"] .activity-time { font-size: .76rem; color: var(--ds-muted); }
+
 
 /* ---------- Techniques ---------- */
 body.software-mode[data-module="babok"] .techniques-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 14px; }
-body.software-mode[data-module="babok"] .technique-card { position: relative; padding: 18px; background: #fff; border: 1px solid var(--bk-line); border-radius: 16px; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
-body.software-mode[data-module="babok"] .technique-card:hover { transform: translateY(-3px); border-color: var(--mt); box-shadow: var(--bk-shadow-hover); }
-body.software-mode[data-module="babok"] .technique-card h4 { margin: 8px 0 6px; font-size: 1.02rem; font-weight: 800; color: var(--bk-text); }
-body.software-mode[data-module="babok"] .technique-card p { font-size: .88rem; color: var(--bk-muted); margin: 0 0 8px; }
+body.software-mode[data-module="babok"] .technique-card { position: relative; padding: 18px; background: #fff; border: 1px solid var(--ds-line); border-radius: 16px; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+body.software-mode[data-module="babok"] .technique-card:hover { transform: translateY(-3px); border-color: var(--mt); box-shadow: var(--ds-shadow-hover); }
+body.software-mode[data-module="babok"] .technique-card h4 { margin: 8px 0 6px; font-size: 1.02rem; font-weight: 800; color: var(--ds-text); }
+body.software-mode[data-module="babok"] .technique-card p { font-size: .88rem; color: var(--ds-muted); margin: 0 0 8px; }
 body.software-mode[data-module="babok"] .technique-category { display: inline-block; padding: 2px 12px; border-radius: 999px; font-size: .72rem; font-weight: 800; }
-body.software-mode[data-module="babok"] .technique-score, body.software-mode[data-module="babok"] .technique-reason { font-size: .82rem; color: var(--bk-muted); }
+body.software-mode[data-module="babok"] .technique-score, body.software-mode[data-module="babok"] .technique-reason { font-size: .82rem; color: var(--ds-muted); }
+
 
 /* ---------- Requirement analyzer ---------- */
 body.software-mode[data-module="babok"] .requirement-analyzer { position: relative; overflow: hidden; isolation: isolate; padding: clamp(20px, 3.5vw, 34px); margin-bottom: 20px; color: #fff; border-radius: 24px; background: radial-gradient(120% 160% at 100% 0%, var(--mt) 0%, var(--mt-dark) 50%, #083344 100%); box-shadow: 0 20px 44px rgba(var(--mt-rgb), .26); }
@@ -162,40 +54,25 @@ body.software-mode[data-module="babok"] .requirement-analyzer h2 { color: #fff; 
 body.software-mode[data-module="babok"] .requirement-analyzer p { margin: 0; color: rgba(255, 255, 255, .9); }
 body.software-mode[data-module="babok"] .requirement-textarea { min-height: 200px; resize: vertical; }
 body.software-mode[data-module="babok"] .sample-texts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 10px; }
-body.software-mode[data-module="babok"] .sample-text-btn { display: flex; align-items: center; gap: 12px; padding: 12px 14px; text-align: right; background: #fff; border: 1.5px solid var(--bk-line); border-radius: 14px; cursor: pointer; font-family: inherit; color: var(--bk-text); min-height: 64px; transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease; }
-body.software-mode[data-module="babok"] .sample-text-btn:hover { border-color: var(--mt); transform: translateY(-2px); box-shadow: var(--bk-shadow-hover); }
+body.software-mode[data-module="babok"] .sample-text-btn { display: flex; align-items: center; gap: 12px; padding: 12px 14px; text-align: right; background: #fff; border: 1.5px solid var(--ds-line); border-radius: 14px; cursor: pointer; font-family: inherit; color: var(--ds-text); min-height: 64px; transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease; }
+body.software-mode[data-module="babok"] .sample-text-btn:hover { border-color: var(--mt); transform: translateY(-2px); box-shadow: var(--ds-shadow-hover); }
 body.software-mode[data-module="babok"] .sample-icon { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 12px; background: var(--mt-tint); font-size: 1.4rem; }
 body.software-mode[data-module="babok"] .sample-info { display: flex; flex-direction: column; min-width: 0; line-height: 1.5; }
-body.software-mode[data-module="babok"] .sample-info small { color: var(--bk-muted); font-size: .76rem; }
+body.software-mode[data-module="babok"] .sample-info small { color: var(--ds-muted); font-size: .76rem; }
 body.software-mode[data-module="babok"] .voice-recorder { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 14px; background: var(--mt-soft); border: 1px dashed var(--mt); border-radius: 16px; margin-top: 14px; }
 body.software-mode[data-module="babok"] .voice-btn { width: 52px; height: 52px; border-radius: 50%; border: 0; background: #dc2626; color: #fff; font-size: 1.2rem; cursor: pointer; transition: transform .15s ease; }
 body.software-mode[data-module="babok"] .voice-btn:hover { transform: scale(1.08); }
 body.software-mode[data-module="babok"] .voice-btn.recording { animation: bkPulse 1.5s infinite; }
 @keyframes bkPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
-body.software-mode[data-module="babok"] .requirement-result { background: #fff; border-radius: var(--bk-r); padding: 22px; box-shadow: var(--bk-shadow); }
-body.software-mode[data-module="babok"] .requirement-item { padding: 14px 16px; background: #fff; border: 1px solid var(--bk-line); border-radius: 14px; margin-bottom: 10px; }
+body.software-mode[data-module="babok"] .requirement-result { background: #fff; border-radius: var(--ds-r); padding: 22px; box-shadow: var(--ds-shadow); }
+body.software-mode[data-module="babok"] .requirement-item { padding: 14px 16px; background: #fff; border: 1px solid var(--ds-line); border-radius: 14px; margin-bottom: 10px; }
 body.software-mode[data-module="babok"] .requirement-item.functional { border-right: 4px solid var(--mt); }
-body.software-mode[data-module="babok"] .requirement-item.non-functional { border-right: 4px solid var(--babok-warning); }
+body.software-mode[data-module="babok"] .requirement-item.non-functional { border-right: 4px solid var(--ds-warning); }
 body.software-mode[data-module="babok"] .requirement-item h4 { margin: 0 0 6px; font-size: 1rem; color: var(--mt-ink); }
-body.software-mode[data-module="babok"] .requirement-item p { margin: 0; font-size: .86rem; color: var(--bk-muted); line-height: 1.8; }
-body.software-mode[data-module="babok"] .requirement-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; font-size: .76rem; color: var(--bk-muted); }
+body.software-mode[data-module="babok"] .requirement-item p { margin: 0; font-size: .86rem; color: var(--ds-muted); line-height: 1.8; }
+body.software-mode[data-module="babok"] .requirement-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; font-size: .76rem; color: var(--ds-muted); }
 
-/* ---------- Progress, alerts ---------- */
-body.software-mode[data-module="babok"] .software-content .progress { height: 10px; background: #e3f0f4; border-radius: 999px; overflow: hidden; }
-body.software-mode[data-module="babok"] .software-content .progress-bar, body.software-mode[data-module="babok"] .progress-fill { background: var(--mt); border-radius: 999px; }
-body.software-mode[data-module="babok"] .alert-software { display: flex; align-items: center; gap: 10px; padding: 12px 16px; margin-bottom: 14px; border-radius: 14px; border: 1px solid; font-weight: 600; }
-body.software-mode[data-module="babok"] .alert-software.success { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
-body.software-mode[data-module="babok"] .alert-software.error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
-body.software-mode[data-module="babok"] .alert-software.warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
 
-/* ---------- Mobile ---------- */
 @media (max-width: 767px) {
-    body.software-mode[data-module="babok"] .software-content .card { border-radius: 16px; padding: 14px; }
-    body.software-mode[data-module="babok"] .software-content .card-header { flex-direction: column; align-items: stretch; }
-    body.software-mode[data-module="babok"] .software-content .card-header > .btn, body.software-mode[data-module="babok"] .software-content .card-tools > * { width: 100%; }
-    body.software-mode[data-module="babok"] .software-content .card-tools :is(select, input) { width: 100% !important; }
-    body.software-mode[data-module="babok"] .software-content :is(.form-control, .form-select) { font-size: 16px; }
-    body.software-mode[data-module="babok"] .software-content .d-flex.gap-2.flex-wrap > :is(input, select, .btn) { flex: 1 1 100% !important; width: 100% !important; min-width: 0 !important; }
-    body.software-mode[data-module="babok"] .software-content .table thead th, body.software-mode[data-module="babok"] .software-content .table td { padding: 10px; font-size: .86rem; }
     body.software-mode[data-module="babok"] .requirement-analyzer { border-radius: 20px; }
 }

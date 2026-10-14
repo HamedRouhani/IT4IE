@@ -8,13 +8,13 @@ $activePage = 'home';
 ?>
 
 <!-- هیرو داشبورد -->
-<section class="bk-hero">
+<section class="ds-hero">
     <div>
-        <span class="bk-eyebrow">BABOK v3 · Business Analysis</span>
+        <span class="ds-eyebrow">BABOK v3 · Business Analysis</span>
         <h2>داشبورد تحلیل کسب‌وکار<?php if (!empty($_SESSION['user_name'])): ?>، <?= htmlspecialchars($_SESSION['user_name']) ?><?php endif; ?></h2>
         <p>نیازمندی‌ها را استخراج کنید، تکنیک مناسب BABOK را پیدا کنید و چرخهٔ حیات پروژه را در یک‌جا مدیریت کنید.</p>
     </div>
-    <div class="bk-hero-actions">
+    <div class="ds-hero-actions">
         <a href="?route=projects_create" class="btn btn-light"><i class="fas fa-plus-circle"></i> پروژهٔ جدید</a>
         <a href="?route=requirement" class="btn btn-ghost"><i class="fas fa-robot"></i> استخراج نیازمندی</a>
     </div>
@@ -22,32 +22,32 @@ $activePage = 'home';
 
 <!-- کارت‌های آمار -->
 <div class="stats-grid">
-    <div class="bk-stat bk-stat--ka">
-        <span class="bk-stat-icon"><i class="fas fa-sitemap"></i></span>
+    <div class="ds-stat ds-stat--1">
+        <span class="ds-stat-icon"><i class="fas fa-sitemap"></i></span>
         <div>
-            <div class="bk-stat-value"><?= count($knowledgeAreas ?? []) ?></div>
-            <div class="bk-stat-label">حوزه‌های دانشی</div>
+            <div class="ds-stat-value"><?= count($knowledgeAreas ?? []) ?></div>
+            <div class="ds-stat-label">حوزه‌های دانشی</div>
         </div>
     </div>
-    <div class="bk-stat bk-stat--task">
-        <span class="bk-stat-icon"><i class="fas fa-tasks"></i></span>
+    <div class="ds-stat ds-stat--2">
+        <span class="ds-stat-icon"><i class="fas fa-tasks"></i></span>
         <div>
-            <div class="bk-stat-value"><?= $totalTasks ?? 0 ?></div>
-            <div class="bk-stat-label">وظایف BABOK</div>
+            <div class="ds-stat-value"><?= $totalTasks ?? 0 ?></div>
+            <div class="ds-stat-label">وظایف BABOK</div>
         </div>
     </div>
-    <div class="bk-stat bk-stat--tech">
-        <span class="bk-stat-icon"><i class="fas fa-microchip"></i></span>
+    <div class="ds-stat ds-stat--3">
+        <span class="ds-stat-icon"><i class="fas fa-microchip"></i></span>
         <div>
-            <div class="bk-stat-value"><?= $totalTechniques ?? 0 ?></div>
-            <div class="bk-stat-label">تکنیک‌های استاندارد</div>
+            <div class="ds-stat-value"><?= $totalTechniques ?? 0 ?></div>
+            <div class="ds-stat-label">تکنیک‌های استاندارد</div>
         </div>
     </div>
-    <div class="bk-stat bk-stat--proj">
-        <span class="bk-stat-icon"><i class="fas fa-rocket"></i></span>
+    <div class="ds-stat ds-stat--4">
+        <span class="ds-stat-icon"><i class="fas fa-rocket"></i></span>
         <div>
-            <div class="bk-stat-value"><?= $activeProjectsCount ?? 0 ?></div>
-            <div class="bk-stat-label">پروژه‌های فعال</div>
+            <div class="ds-stat-value"><?= $activeProjectsCount ?? 0 ?></div>
+            <div class="ds-stat-label">پروژه‌های فعال</div>
         </div>
     </div>
 </div>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IT4IE Design System - Style guide</title>
+    <!--
+        Living style guide. Open this file in a browser (no server needed).
+        Paths are relative to docs/ in the project. Use the module switcher to check
+        that every component follows its module colour and that colours never mix.
+    -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="../public/assets/css/style.css">
+    <link rel="stylesheet" href="../public/assets/css/software.css">
+    <link rel="stylesheet" href="../public/assets/css/ds/it4ie-ds.css">
+    <link rel="stylesheet" href="../public/assets/css/software-refinement.css">
+    <link rel="stylesheet" href="../public/assets/css/software-themes.css">
+    <style>
+        .sg-bar { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 16px; background: #fff; border-bottom: 1px solid #dfe6ec; }
+        .sg-bar select { min-height: 42px; border-radius: 10px; border: 1.5px solid #cbd5e1; padding: 0 12px; font-family: inherit; }
+        .sg-swatch { display: inline-block; width: 28px; height: 28px; border-radius: 8px; background: var(--mt); vertical-align: middle; margin-inline-end: 6px; }
+        .sg-code { direction: ltr; text-align: left; background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 12px; font-size: .8rem; overflow-x: auto; margin: 12px 0 0; font-family: ui-monospace, Consolas, monospace; }
+        .software-main { min-height: 100vh; }
+        .software-content { max-width: 1180px; margin-inline: auto; padding: 20px 16px 60px; }
+    </style>
+</head>
+<body class="software-mode" data-module="babok" data-ds="1">
+
+<div class="sg-bar">
+    <strong>IT4IE Design System</strong>
+    <label for="mod" class="visually-hidden">ماژول</label>
+    <select id="mod" aria-label="انتخاب ماژول">
+        <option value="babok">BABOK</option><option value="pmbok">PMBOK</option><option value="mcdm">MCDM</option>
+        <option value="or">OR</option><option value="statlab">StatLab</option><option value="pdm">PdM</option>
+        <option value="hr">HR</option><option value="quality">Quality</option>
+    </select>
+    <span><i class="sg-swatch"></i><code id="tok" dir="ltr"></code></span>
+</div>
+
+<main class="software-main"><div class="software-content">
+
+    <h2 class="section-title"><i class="fas fa-flag"></i> Hero (.ds-hero)</h2>
+    <section class="ds-hero">
+        <div>
+            <span class="ds-eyebrow">MODULE · Subtitle</span>
+            <h2>عنوان داشبورد ماژول</h2>
+            <p>یک یا دو جمله دربارهٔ کاری که این ماژول انجام می‌دهد.</p>
+        </div>
+        <div class="ds-hero-actions">
+            <a href="#" class="btn btn-light"><i class="fas fa-plus-circle"></i> اقدام اصلی</a>
+            <a href="#" class="btn btn-ghost"><i class="fas fa-robot"></i> اقدام دوم</a>
+        </div>
+    </section>
+<pre class="sg-code">&lt;section class="ds-hero"&gt; &lt;div&gt; &lt;span class="ds-eyebrow"&gt;…&lt;/span&gt; &lt;h2&gt;…&lt;/h2&gt; &lt;p&gt;…&lt;/p&gt; &lt;/div&gt;
+  &lt;div class="ds-hero-actions"&gt; &lt;a class="btn btn-light"&gt;…&lt;/a&gt; &lt;a class="btn btn-ghost"&gt;…&lt;/a&gt; &lt;/div&gt; &lt;/section&gt;</pre>
+
+    <h2 class="section-title"><i class="fas fa-chart-simple"></i> Stat cards (.stats-grid &gt; .ds-stat--1…4)</h2>
+    <div class="stats-grid">
+        <div class="ds-stat ds-stat--1"><span class="ds-stat-icon"><i class="fas fa-sitemap"></i></span><div><div class="ds-stat-value">۹</div><div class="ds-stat-label">رنگ ماژول</div></div></div>
+        <div class="ds-stat ds-stat--2"><span class="ds-stat-icon"><i class="fas fa-tasks"></i></span><div><div class="ds-stat-value">۳۰</div><div class="ds-stat-label">تأکید ۲</div></div></div>
+        <div class="ds-stat ds-stat--3"><span class="ds-stat-icon"><i class="fas fa-microchip"></i></span><div><div class="ds-stat-value">۵۰</div><div class="ds-stat-label">تأکید ۳</div></div></div>
+        <div class="ds-stat ds-stat--4"><span class="ds-stat-icon"><i class="fas fa-rocket"></i></span><div><div class="ds-stat-value">۴</div><div class="ds-stat-label">تأکید ۴</div></div></div>
+    </div>
+
+    <h2 class="section-title"><i class="fas fa-table-cells-large"></i> Cards, badges, KPI, progress (.main-grid)</h2>
+    <div class="main-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-folder-open"></i> عنوان کارت</h3>
+                <div class="card-tools"><a href="#" class="btn btn-sm btn-primary">دکمهٔ کارت</a></div>
+            </div>
+            <div class="kpis-grid">
+                <div class="kpi-card"><div class="kpi-value">۱۲</div><div class="kpi-label">شاخص</div></div>
+                <div class="kpi-card"><div class="kpi-value">۸۷٪</div><div class="kpi-label">پیشرفت</div></div>
+            </div>
+            <p>
+                <span class="badge badge-primary">اصلی</span>
+                <span class="badge badge-secondary">ثانویه</span>
+                <span class="badge badge-success">موفق</span>
+                <span class="badge badge-warning">هشدار</span>
+                <span class="badge badge-info">اطلاع</span>
+                <span class="badge badge-danger">خطا</span>
+            </p>
+            <div class="progress"><div class="progress-bar" style="width:68%"></div></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-circle-info"></i> پیام‌ها</h3></div>
+            <div class="alert-software success"><i class="fas fa-check-circle"></i> عملیات با موفقیت انجام شد.</div>
+            <div class="alert-software warning"><i class="fas fa-triangle-exclamation"></i> این مورد نیاز به بررسی دارد.</div>
+            <div class="alert-software error"><i class="fas fa-circle-xmark"></i> خطا در ذخیره‌سازی.</div>
+        </div>
+    </div>
+
+    <h2 class="section-title"><i class="fas fa-hand-pointer"></i> Buttons</h2>
+    <div class="card">
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-primary">primary</button>
+            <button class="btn btn-secondary">secondary</button>
+            <button class="btn btn-success">success</button>
+            <button class="btn btn-warning">warning</button>
+            <button class="btn btn-danger">danger</button>
+            <button class="btn btn-info">info</button>
+            <button class="btn btn-outline-primary">outline</button>
+            <button class="btn btn-primary btn-sm">sm</button>
+            <button class="btn btn-primary btn-lg">lg</button>
+        </div>
+    </div>
+
+    <h2 class="section-title"><i class="fas fa-table"></i> Table</h2>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table">
+                <thead><tr><th>#</th><th>نام</th><th>وضعیت</th><th>تاریخ</th><th>عملیات</th></tr></thead>
+                <tbody>
+                    <tr><td>۱</td><td><strong>ردیف نمونه</strong></td><td><span class="badge badge-success">فعال</span></td><td>۱۴۰۵/۰۷/۱۰</td><td><a class="btn btn-sm btn-secondary" href="#">مشاهده</a></td></tr>
+                    <tr><td>۲</td><td><strong>ردیف دوم</strong></td><td><span class="badge badge-warning">در انتظار</span></td><td>۱۴۰۵/۰۷/۱۲</td><td><a class="btn btn-sm btn-secondary" href="#">مشاهده</a></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <h2 class="section-title"><i class="fas fa-pen"></i> Form</h2>
+    <div class="card">
+        <div class="form-row">
+            <div class="form-group"><label for="f1">نام پروژه</label><input id="f1" class="form-control" placeholder="مثلاً پروژهٔ نمونه"></div>
+            <div class="form-group"><label for="f2">دسته</label><select id="f2" class="form-select"><option>یک گزینه</option></select></div>
+        </div>
+        <div class="form-group"><label for="f3">توضیحات</label><textarea id="f3" class="form-control" rows="3"></textarea></div>
+        <button class="btn btn-primary"><i class="fas fa-save"></i> ذخیره</button>
+    </div>
+
+</div></main>
+
+<script>
+    var sel = document.getElementById('mod'), tok = document.getElementById('tok');
+    function apply() {
+        document.body.setAttribute('data-module', sel.value);
+        var cs = getComputedStyle(document.body);
+        tok.textContent = '--mt ' + cs.getPropertyValue('--mt').trim() + '  --mt-dark ' + cs.getPropertyValue('--mt-dark').trim();
+    }
+    sel.addEventListener('change', apply); apply();
+</script>
+</body>
+</html>

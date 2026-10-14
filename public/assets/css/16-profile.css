@@ -1,3 +1,6 @@
+/* NOTE (v2026-10): the generic .btn / .form-* / .form-control rules below are scoped with
+   :where(body:not([data-ds])) -> zero extra specificity, identical behaviour on every page, but they
+   no longer leak into software modules that use the shared design system (body[data-ds]). */
 /* ================================================================
    صفحه پروفایل کاربر - 16-profile.css
    ================================================================ */
@@ -238,24 +241,24 @@
     margin-bottom: 5px;
 }
 
-.form-row {
+:where(body:not([data-ds])) .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
 }
 
-.form-group {
+:where(body:not([data-ds])) .form-group {
     margin-bottom: 20px;
 }
 
-.form-group label {
+:where(body:not([data-ds])) .form-group label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
     color: #2c3e50;
 }
 
-.form-control {
+:where(body:not([data-ds])) .form-control {
     width: 100%;
     padding: 10px 14px;
     border: 2px solid #e0e0e0;
@@ -266,24 +269,24 @@
     box-sizing: border-box;
 }
 
-.form-control:focus {
+:where(body:not([data-ds])) .form-control:focus {
     outline: none;
     border-color: #3498db;
 }
 
-textarea.form-control {
+:where(body:not([data-ds])) textarea.form-control {
     resize: vertical;
     min-height: 100px;
 }
 
-.form-text {
+:where(body:not([data-ds])) .form-text {
     display: block;
     margin-top: 5px;
     font-size: 0.85rem;
     color: #7f8c8d;
 }
 
-.form-actions {
+:where(body:not([data-ds])) .form-actions {
     display: flex;
     gap: 10px;
     margin-top: 20px;
@@ -291,7 +294,7 @@ textarea.form-control {
 }
 
 /* دکمه‌ها */
-.btn {
+:where(body:not([data-ds])) .btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -306,44 +309,44 @@ textarea.form-control {
     font-size: 0.9rem;
 }
 
-.btn:hover {
+:where(body:not([data-ds])) .btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.btn-primary {
+:where(body:not([data-ds])) .btn-primary {
     background: #3498db;
     color: #fff;
 }
 
-.btn-primary:hover {
+:where(body:not([data-ds])) .btn-primary:hover {
     background: #2980b9;
 }
 
-.btn-warning {
+:where(body:not([data-ds])) .btn-warning {
     background: #f39c12;
     color: #fff;
 }
 
-.btn-warning:hover {
+:where(body:not([data-ds])) .btn-warning:hover {
     background: #d68910;
 }
 
-.btn-secondary {
+:where(body:not([data-ds])) .btn-secondary {
     background: #ecf0f1;
     color: #2c3e50;
 }
 
-.btn-secondary:hover {
+:where(body:not([data-ds])) .btn-secondary:hover {
     background: #d5d8dc;
 }
 
-.btn-danger {
+:where(body:not([data-ds])) .btn-danger {
     background: #e74c3c;
     color: #fff;
 }
 
-.btn-danger:hover {
+:where(body:not([data-ds])) .btn-danger:hover {
     background: #c0392b;
 }
 
@@ -372,7 +375,7 @@ textarea.form-control {
         grid-template-columns: 1fr;
     }
     
-    .form-row {
+    :where(body:not([data-ds])) .form-row {
         grid-template-columns: 1fr;
     }
     
