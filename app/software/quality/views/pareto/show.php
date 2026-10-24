@@ -29,7 +29,7 @@ $statusMeta = $statusLabels[$analysis['status']] ?? ['label' => $analysis['statu
                 </span>
                 <?php if ($analysis['analysis_date']): ?>
                     <span style="font-size:0.8rem; color:#64748b;">
-                        <i class="fas fa-calendar"></i> <?= htmlspecialchars($analysis['analysis_date']) ?>
+                        <i class="fas fa-calendar"></i> <?= htmlspecialchars(qc_date($analysis['analysis_date'])) ?>
                     </span>
                 <?php endif; ?>
                 <?php if ($analysis['unit']): ?>
@@ -231,7 +231,7 @@ $statusMeta = $statusLabels[$analysis['status']] ?? ['label' => $analysis['statu
                                 </div>
                                 <?php if ($c['due_date']): ?>
                                     <div style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">
-                                        <i class="fas fa-calendar"></i> سررسید: <?= htmlspecialchars($c['due_date']) ?>
+                                        <i class="fas fa-calendar"></i> سررسید: <?= htmlspecialchars(qc_date($c['due_date'])) ?>
                                     </div>
                                 <?php endif; ?>
                             </div>

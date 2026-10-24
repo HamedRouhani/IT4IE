@@ -62,7 +62,7 @@ $attachProjectId = $attachProjectId ?? 0;
                     </label>
                     <input type="text" id="projectName" class="form-control form-control-sm"
                            placeholder="فقط برای پروژه جدید"
-                           value="تحلیل آماری <?= date('Y-m-d') ?>">
+                           value="تحلیل آماری <?= \App\Helpers\DateHelper::nowJalali('Y-m-d') ?>">
                     <small class="text-muted d-block" style="font-size: 0.7rem;">
                         فقط در حالت «ایجاد پروژه جدید» استفاده می‌شود
                     </small>

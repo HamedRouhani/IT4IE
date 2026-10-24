@@ -11,6 +11,9 @@
 
 namespace App\Helpers;
 
+use DateTimeImmutable;
+use DateTimeZone;
+
 class DateHelper
 {
     /**
@@ -24,47 +27,38 @@ class DateHelper
             return '-';
         }
 
-        $timestamp = strtotime($gregorianDate);
-        if ($timestamp === false) {
+        try {
+            $date = new DateTimeImmutable((string) $gregorianDate, new DateTimeZone('Asia/Tehran'));
+            $date = $date->setTimezone(new DateTimeZone('Asia/Tehran'));
+        } catch (\Throwable $e) {
             return '-';
         }
 
-        $gy = (int) date('Y', $timestamp);
-        $gm = (int) date('m', $timestamp);
-        $gd = (int) date('d', $timestamp);
-
-        $H = date('H', $timestamp);
-        $i = date('i', $timestamp);
-        $s = date('s', $timestamp);
-
-        // استفاده از تابع داخلی (اگر در Functions.php ماژول PdM لود شده باشد)
-        if (function_exists('pdm_gregorian_to_jalali')) {
-            $jDate = pdm_gregorian_to_jalali($gy, $gm, $gd);
-        } else {
-            // فال‌بک: تابع محلی
-            $jDate = self::gregorianToJalali($gy, $gm, $gd);
-        }
-
-        list($jy, $jm, $jd) = $jDate;
-
-        $replacements = [
-            'Y' => (string) $jy,
-            'y' => substr((string) $jy, 2),
-            'm' => str_pad((string) $jm, 2, '0', STR_PAD_LEFT),
-            'n' => (string) $jm,
-            'd' => str_pad((string) $jd, 2, '0', STR_PAD_LEFT),
-            'j' => (string) $jd,
-            'H' => $H,
-            'i' => $i,
-            's' => $s,
+        [$jy, $jm, $jd] = self::gregorianToJalali((int) $date->format('Y'), (int) $date->format('n'), (int) $date->format('j'));
+        $months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+        $weekdays = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
+        $values = [
+            'Y' => (string) $jy, 'y' => substr((string) $jy, -2),
+            'm' => sprintf('%02d', $jm), 'n' => (string) $jm,
+            'd' => sprintf('%02d', $jd), 'j' => (string) $jd,
+            'F' => $months[$jm - 1], 'M' => mb_substr($months[$jm - 1], 0, 3, 'UTF-8'),
+            'H' => $date->format('H'), 'G' => (string) (int) $date->format('G'),
+            'h' => $date->format('h'), 'g' => (string) (int) $date->format('g'),
+            'i' => $date->format('i'), 's' => $date->format('s'),
+            'a' => ((int) $date->format('G') < 12) ? 'ق.ظ' : 'ب.ظ',
+            'A' => ((int) $date->format('G') < 12) ? 'قبل‌ازظهر' : 'بعدازظهر',
+            'l' => $weekdays[(int) $date->format('w')],
+            'D' => mb_substr($weekdays[(int) $date->format('w')], 0, 3, 'UTF-8'),
+            'w' => $date->format('w'),
         ];
-
-        $output = $format;
-        foreach ($replacements as $token => $value) {
-            $output = str_replace($token, $value, $output);
+        $out = '';
+        $escaped = false;
+        foreach (str_split($format) as $char) {
+            if ($escaped) { $out .= $char; $escaped = false; continue; }
+            if ($char === '\\') { $escaped = true; continue; }
+            $out .= $values[$char] ?? $char;
         }
-
-        return $output;
+        return $out . ($escaped ? '\\' : '');
     }
 
     /**

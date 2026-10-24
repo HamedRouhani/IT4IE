@@ -158,7 +158,7 @@
                                                             <i class="fas fa-trash me-1"></i> حذف این متغیر
                                                         </button>
                                                         <small class="text-muted align-self-center" id="dataset_status_<?= $d['id'] ?>">
-                                                            آخرین به‌روزرسانی: <?= stat_e($d['created_at']) ?>
+                                                            آخرین به‌روزرسانی: <?= stat_e(stat_date($d['created_at'])) ?>
                                                         </small>
                                                     </div>
                                                 </div>
@@ -207,7 +207,7 @@
                                                     <?= stat_e($r['conclusion'] ?? 'نامشخص') ?>
                                                 </span>
                                             </td>
-                                            <td class="text-muted small"><?= stat_e($r['created_at']) ?></td>
+                                            <td class="text-muted small"><?= stat_e(stat_date($r['created_at'])) ?></td>
                                             <td class="text-center">
                                                 <button type="button" class="btn btn-outline-danger btn-sm"
                                                         onclick="deleteResult(<?= $r['id'] ?>)">

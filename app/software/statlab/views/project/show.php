@@ -54,7 +54,7 @@ $datasetData = $datasetData ?? [];
                 </div>
                 <div class="col-6 col-lg-3">
                     <small class="text-muted d-block">به‌روزرسانی</small>
-                    <strong class="small"><?= stat_e($project['updated_at']) ?></strong>
+                    <strong class="small"><?= stat_e(stat_date($project['updated_at'])) ?></strong>
                 </div>
             </div>
             <?php if (!empty($project['description'])): ?>
@@ -196,7 +196,7 @@ $datasetData = $datasetData ?? [];
                                             <?= $pval < 0.05 ? '(معنادار)' : '(نامعنادر)' ?>
                                         </span>
                                     <?php endif; ?>
-                                    <small class="text-muted align-self-center"><?= stat_e($r['created_at']) ?></small>
+                                    <small class="text-muted align-self-center"><?= stat_e(stat_date($r['created_at'])) ?></small>
                                 </div>
                             </div>
                         </div>
@@ -231,7 +231,7 @@ $datasetData = $datasetData ?? [];
                         <tr><td class="fw-bold" style="min-width:160px;">شناسه پروژه:</td><td>#<?= (int)$project['id'] ?></td></tr>
                         <tr><td class="fw-bold">هدف تحلیل:</td><td><?= stat_e($project['objective'] ?? '-') ?></td></tr>
                         <tr><td class="fw-bold">نوع تحلیل:</td><td><?= stat_e($project['analysis_type_code'] ?? '-') ?></td></tr>
-                        <tr><td class="fw-bold">تاریخ ایجاد:</td><td><?= stat_e($project['created_at']) ?></td></tr>
+                        <tr><td class="fw-bold">تاریخ ایجاد:</td><td><?= stat_e(stat_date($project['created_at'])) ?></td></tr>
                     </table>
                 </div>
             </div>

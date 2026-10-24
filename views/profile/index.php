@@ -61,11 +61,11 @@
                 </div>
                 <div class="info-item">
                     <label>تاریخ عضویت</label>
-                    <p><?php echo date('Y/m/d', strtotime($user['created_at'])); ?></p>
+                    <p><?php echo jdate($user['created_at'], 'Y/m/d'); ?></p>
                 </div>
                 <div class="info-item">
                     <label>آخرین ورود</label>
-                    <p><?php echo $user['last_login'] ? date('Y/m/d H:i', strtotime($user['last_login'])) : 'ثبت نشده'; ?></p>
+                    <p><?php echo $user['last_login'] ? jdate($user['last_login'], 'Y/m/d H:i') : 'ثبت نشده'; ?></p>
                 </div>
             </div>
         </div>

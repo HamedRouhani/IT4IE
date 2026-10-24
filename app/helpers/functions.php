@@ -15,14 +15,7 @@ if (!function_exists('jdate')) {
         if (empty($datetime)) {
             return '';
         }
-        
-        try {
-            $date = new DateTime($datetime);
-            $date->setTimezone(new DateTimeZone('Asia/Tehran'));
-            return $date->format($format);
-        } catch (Exception $e) {
-            return $datetime;
-        }
+        return \App\Helpers\DateHelper::toJalali($datetime, $format);
     }
 }
 

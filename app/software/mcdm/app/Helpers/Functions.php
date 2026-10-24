@@ -75,8 +75,7 @@ function mcdm_getMethodCategoryLabel($category)
 
 function mcdm_showDate($date, $format = 'Y/m/d')
 {
-    if (empty($date)) return '-';
-    return date($format, strtotime($date));
+    return \App\Helpers\DateHelper::toJalali($date, $format);
 }
 
 function mcdm_truncateText($text, $length = 100, $suffix = '...')

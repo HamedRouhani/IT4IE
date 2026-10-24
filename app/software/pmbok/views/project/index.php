@@ -93,7 +93,7 @@ $activePage = 'project';
                     <option value="adaptive" <?= ($methodology ?? '') === 'adaptive' ? 'selected' : '' ?>>تطبیقی</option>
                 </select>
             </div>
-            <div class="form-group" style="align-self: end;">
+            <div class="form-group filter-actions">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-filter"></i> اعمال فیلتر
                 </button>

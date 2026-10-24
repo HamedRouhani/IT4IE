@@ -69,7 +69,7 @@
                                         <span class="qc-status-badge qc-status-inactive">آرشیو</span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="qc-text-muted" style="font-size:.8rem;"><?= htmlspecialchars($s['created_at']) ?></td>
+                                <td class="qc-text-muted" style="font-size:.8rem;"><?= htmlspecialchars(qc_date_time($s['created_at'] ?? null)) ?></td>
                                 <td>
                                     <a href="<?= CURRENT_MODULE_URL ?>?controller=system&action=edit&id=<?= (int)$s['id'] ?>"
                                        class="btn-qc-outline btn-sm">

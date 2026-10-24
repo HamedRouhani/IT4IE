@@ -17,7 +17,7 @@ function timeAgo($datetime) {
     if ($diff < 86400) return floor($diff / 3600) . ' ساعت پیش';
     if ($diff < 604800) return floor($diff / 86400) . ' روز پیش';
     if ($diff < 2592000) return floor($diff / 604800) . ' هفته پیش';
-    return date('Y/m/d', $time);
+    return \App\Helpers\DateHelper::toJalali(date('Y-m-d H:i:s', $time), 'Y/m/d');
 }
 
 $typeIcons = [

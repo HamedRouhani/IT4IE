@@ -50,3 +50,10 @@ if (!function_exists('stat_format_number')) {
         return number_format((float)$value, $decimals);
     }
 }
+
+if (!function_exists('stat_date')) {
+    function stat_date($value, string $format = 'Y/m/d H:i'): string
+    {
+        return \App\Helpers\DateHelper::toJalali($value, $format);
+    }
+}

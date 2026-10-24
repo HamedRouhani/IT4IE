@@ -128,7 +128,7 @@ $sigCount = count(array_filter($results, fn($r) => $r['p_value'] !== null && (fl
                                 <?= $pval < 0.05 ? '(معنادار)' : '(نامعنادر)' ?>
                             </span>
                         <?php endif; ?>
-                        <small class="text-muted align-self-center"><?= stat_e($r['created_at']) ?></small>
+                        <small class="text-muted align-self-center"><?= stat_e(stat_date($r['created_at'])) ?></small>
                     </div>
                 </div>
             </div>

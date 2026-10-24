@@ -161,9 +161,7 @@ function pmbok_getRiskColor($level)
  */
 function pmbok_showDate($date, $format = 'Y/m/d')
 {
-    if (empty($date)) return '-';
-    $timestamp = strtotime($date);
-    return date($format, $timestamp);
+    return \App\Helpers\DateHelper::toJalali($date, $format);
 }
 
 /**

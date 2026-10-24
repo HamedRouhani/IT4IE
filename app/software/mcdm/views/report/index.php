@@ -56,7 +56,7 @@ $title = 'گزارش‌ها';
                     </td>
                     <td><?= (int)($project['criteria_count'] ?? 0) ?></td>
                     <td><?= (int)($project['alternatives_count'] ?? 0) ?></td>
-                    <td><?= date('Y/m/d', strtotime($project['created_at'])) ?></td>
+                    <td><?= mcdm_showDate($project['created_at'], 'Y/m/d') ?></td>
                     <td>
                         <a href="<?= CURRENT_MODULE_URL ?>?controller=report&action=projectReport&id=<?= $project['id'] ?>" 
                            class="btn btn-sm btn-primary">

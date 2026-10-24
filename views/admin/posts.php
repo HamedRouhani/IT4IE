@@ -93,7 +93,7 @@
                                         <?php echo $statusInfo[0]; ?>
                                     </span>
                                 </td>
-                                <td><?php echo date('Y/m/d H:i', strtotime($post['created_at'])); ?></td>
+                                <td><?php echo jdate($post['created_at'], 'Y/m/d H:i'); ?></td>
                                 <td class="actions">
                                     <a href="<?php echo $post['status'] === 'published' ? '/post/' . htmlspecialchars($post['slug'], ENT_QUOTES, 'UTF-8') : '/admin/posts/preview/' . (int) $post['id']; ?>" class="btn-view" target="_blank" rel="noopener" title="مشاهده پیش‌نمایش">
                                         <i class="fas fa-eye"></i>

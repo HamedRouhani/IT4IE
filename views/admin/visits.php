@@ -83,7 +83,7 @@ function detectDevice($ua) {
                 <?php foreach ($days as $date => $data): ?>
                     <div class="chart-bar-wrap" title="<?php echo $date; ?> — <?php echo $data['visits']; ?> بازدید">
                         <div class="chart-bar" style="height: <?php echo max(3, round(($data['visits'] / $maxVisits) * 100)); ?>%;"></div>
-                        <div class="chart-label"><?php echo date('d', strtotime($date)); ?></div>
+                        <div class="chart-label"><?php echo jdate($date, 'd'); ?></div>
                     </div>
                 <?php endforeach; ?>
             </div>

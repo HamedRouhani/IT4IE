@@ -72,8 +72,7 @@ if (!function_exists('or_getNodeLabel')) {
 
 if (!function_exists('or_showDate')) {
     function or_showDate($date, $format = 'Y/m/d') {
-        if (empty($date)) return '-';
-        return date($format, strtotime($date));
+        return \App\Helpers\DateHelper::toJalali($date, $format);
     }
 }
 

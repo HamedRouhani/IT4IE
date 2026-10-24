@@ -83,7 +83,7 @@ $catColors = ['descriptive' => 'primary', 'distribution' => 'info', 'hypothesis'
                                 <span class="text-success"><i class="fas fa-check-circle me-1"></i><?= (int)$rp['sig_count'] ?> معنادار</span>
                             <?php endif; ?>
                             <span><i class="fas fa-sliders-h me-1"></i>α=<?= number_format((float)$rp['significance_level'], 2) ?></span>
-                            <span><i class="fas fa-clock me-1"></i><?= stat_e($rp['last_analysis']) ?></span>
+                            <span><i class="fas fa-clock me-1"></i><?= stat_e(stat_date($rp['last_analysis'])) ?></span>
                         </div>
                     </div>
                     <!-- دکمه گزارش (هرگز فشرده نمی‌شود) -->

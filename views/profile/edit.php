@@ -113,11 +113,11 @@
                 </div>
                 <div class="info-item">
                     <label>تاریخ عضویت</label>
-                    <p><?php echo date('Y/m/d', strtotime($user['created_at'])); ?></p>
+                    <p><?php echo jdate($user['created_at'], 'Y/m/d'); ?></p>
                 </div>
                 <div class="info-item">
                     <label>آخرین تغییر رمز عبور</label>
-                    <p><?php echo $user['last_password_change'] ? date('Y/m/d', strtotime($user['last_password_change'])) : 'ثبت نشده'; ?></p>
+                    <p><?php echo $user['last_password_change'] ? jdate($user['last_password_change'], 'Y/m/d') : 'ثبت نشده'; ?></p>
                 </div>
             </div>
         </div>

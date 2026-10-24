@@ -81,7 +81,7 @@ $counts = $categoryCounts ?? [];
                             <div class="post-meta">
                                 <span>
                                     <i class="fas fa-calendar-alt"></i>
-                                    <?php echo date('Y/m/d', strtotime($post['created_at'])); ?>
+                                    <?php echo jdate($post['created_at'], 'Y/m/d'); ?>
                                 </span>
                                 <?php if (!empty($post['category_name'])): ?>
                                     <span>

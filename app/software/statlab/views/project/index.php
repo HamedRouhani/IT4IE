@@ -47,7 +47,7 @@
                             </div>
                             <hr>
                             <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted"><?= stat_e($p['updated_at']) ?></small>
+                                <small class="text-muted"><?= stat_e(stat_date($p['updated_at'])) ?></small>
                                 <div class="btn-group btn-group-sm">
                                     <a href="<?= stat_url('controller=project&action=show&id=' . $p['id']) ?>" class="btn btn-outline-primary">
                                         <i class="fas fa-eye"></i>

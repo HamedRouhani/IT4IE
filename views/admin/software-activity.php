@@ -174,7 +174,7 @@ $logModel = new \App\Models\SoftwareActivityLog();
                                     -
                                 <?php endif; ?>
                             </td>
-                            <td><?php echo date('Y/m/d H:i', strtotime($log['created_at'])); ?></td>
+                            <td><?php echo jdate($log['created_at'], 'Y/m/d H:i'); ?></td>
                         </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>

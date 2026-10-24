@@ -95,7 +95,7 @@
                                         <?= $project['optimal_value'] !== null ? orFormatNumber($project['optimal_value']) : '-' ?>
                                     </td>
                                     <td class="text-muted small">
-                                        <?= date('Y/m/d', strtotime($project['created_at'])) ?>
+                                        <?= or_showDate($project['created_at'], 'Y/m/d') ?>
                                     </td>
                                     <td class="text-center">
                                         <a href="<?= or_url('controller=report&action=show&id=' . $project['id']) ?>" 

@@ -201,7 +201,7 @@ $progressPercentage = $progress['completion_percentage'] ?? 0;
         </div>
         <div style="text-align: left; font-size: 0.8rem; color: #64748b;">
             <div><strong>تاریخ تولید:</strong></div>
-            <div><?= date('Y/m/d - H:i', strtotime($generatedAt)) ?></div>
+            <div><?= \App\Helpers\DateHelper::toJalali($generatedAt, 'Y/m/d - H:i') ?></div>
             <div style="margin-top: 8px;"><strong>تهیه‌کننده:</strong></div>
             <div><?= htmlspecialchars($generatedBy) ?></div>
         </div>
@@ -391,7 +391,7 @@ $progressPercentage = $progress['completion_percentage'] ?? 0;
     <!-- پاورقی -->
     <div class="footer-note">
         این گزارش به صورت خودکار توسط سیستم BABOK Analyzer تولید شده است.<br>
-        تاریخ تولید: <?= date('Y/m/d H:i:s') ?> | تهیه‌کننده: <?= htmlspecialchars($generatedBy) ?>
+        تاریخ تولید: <?= \App\Helpers\DateHelper::nowJalali('Y/m/d H:i:s') ?> | تهیه‌کننده: <?= htmlspecialchars($generatedBy) ?>
     </div>
 
 </div>

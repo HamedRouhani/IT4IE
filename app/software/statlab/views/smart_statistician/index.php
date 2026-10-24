@@ -155,7 +155,7 @@ function renderSmart(d) {
     html += `</div>`;
 
     // ═══ ✅ گام دوم: تعریف دقیق پروژه قبل از انتقال ═══
-    const defaultName = 'پروژه ' + d.detected_name + ' - ' + new Date().toLocaleDateString('fa-IR');
+    const defaultName = 'پروژه ' + d.detected_name + ' - ' + new Date().toLocaleDateString('fa-IR', { timeZone: 'Asia/Tehran' });
     html += `
     <h6 class="fw-bold small mb-2"><i class="fas fa-folder-plus me-1 text-success"></i> گام ۲: تعریف دقیق پروژه</h6>
     <div class="border rounded p-2 p-md-3 mb-3" style="background:#f8f9fa;">

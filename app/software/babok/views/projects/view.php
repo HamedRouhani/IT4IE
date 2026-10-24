@@ -46,7 +46,7 @@ $progressPercentage = $progress['completion_percentage'] ?? 0;
         </div>
         <div class="card" style="flex: 1; min-width: 150px; margin-bottom: 0; padding: 15px; text-align: center;">
             <h5 class="text-muted" style="margin: 0 0 10px 0;">تاریخ ایجاد</h5>
-            <strong><?= date('Y-m-d', strtotime($project['created_at'])) ?></strong>
+            <strong><?= \App\Helpers\DateHelper::toJalali($project['created_at'], 'Y/m/d') ?></strong>
         </div>
     </div>
     

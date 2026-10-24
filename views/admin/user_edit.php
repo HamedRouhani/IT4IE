@@ -49,11 +49,11 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                         <div>
                             <small style="color: var(--gray);">تاریخ عضویت</small>
-                            <p><strong><?php echo date('Y/m/d', strtotime($user['created_at'])); ?></strong></p>
+                            <p><strong><?php echo jdate($user['created_at'], 'Y/m/d'); ?></strong></p>
                         </div>
                         <div>
                             <small style="color: var(--gray);">آخرین ورود</small>
-                            <p><strong><?php echo $user['last_login'] ? date('Y/m/d H:i', strtotime($user['last_login'])) : '-'; ?></strong></p>
+                            <p><strong><?php echo $user['last_login'] ? jdate($user['last_login'], 'Y/m/d H:i') : '-'; ?></strong></p>
                         </div>
                         <div>
                             <small style="color: var(--gray);">ایمیل تأیید شده</small>

@@ -98,7 +98,7 @@
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <?php echo $user['last_login'] ? date('Y/m/d H:i', strtotime($user['last_login'])) : '-'; ?>
+                                <?php echo $user['last_login'] ? jdate($user['last_login'], 'Y/m/d H:i') : '-'; ?>
                             </td>
                             <td>
                                 <div class="actions">

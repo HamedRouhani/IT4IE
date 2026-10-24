@@ -1,4 +1,6 @@
 <?php
+require_once VIEWS_PATH . '/partials/asset-helper.php';
+
 /**
  * صفحه لیست نرم‌افزارها — نسخه 4.0 (رنگ‌محور)
  * مسیر: views/software/index.php
@@ -29,7 +31,7 @@ $statusMap = [
 ];
 ?>
 
-<link rel="stylesheet" href="/assets/css/software.css?v=20261010">
+<?= it4ie_css_link('css/software.css') ?>
 
 <div class="swl-page">
     <div class="swl-container">

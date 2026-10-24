@@ -27,6 +27,7 @@ class Database
                     PDO::ATTR_EMULATE_PREPARES => false
                 ]
             );
+            $this->connection->exec("SET time_zone = '+03:30'");
         } catch (PDOException $e) {
             die("Database connection failed: " . $e->getMessage());
         }
@@ -43,7 +44,7 @@ class Database
     public static function getConnection($host, $name, $user, $pass)
     {
         try {
-            return new PDO(
+            $connection = new PDO(
                 "mysql:host=$host;dbname=$name;charset=utf8mb4",
                 $user,
                 $pass,
@@ -53,6 +54,8 @@ class Database
                     PDO::ATTR_EMULATE_PREPARES => false
                 ]
             );
+            $connection->exec("SET time_zone = '+03:30'");
+            return $connection;
         } catch (PDOException $e) {
             throw new \Exception("Database connection failed: " . $e->getMessage());
         }

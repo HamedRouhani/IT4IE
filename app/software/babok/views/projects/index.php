@@ -93,7 +93,7 @@ $activePage = 'projects';
                             </span>
                         </td>
                         <td><?= $project['stakeholder_count'] ?></td>
-                        <td><?= date('Y-m-d', strtotime($project['created_at'])) ?></td>
+                        <td><?= \App\Helpers\DateHelper::toJalali($project['created_at'], 'Y/m/d') ?></td>
                         <td>
                             <div class="d-flex gap-2 flex-wrap">
                                 <a href="?route=projects_view&id=<?= $project['id'] ?>" class="btn btn-sm btn-primary" title="مشاهده">

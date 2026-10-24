@@ -85,7 +85,7 @@ $emptyText   = $isAttribute
                                     <?php endif; ?>
                                 </td>
                                 <td class="qc-text-muted" style="font-size:.78rem;">
-                                    <?= htmlspecialchars($c['computed_at'] ?? '') ?>
+                                    <?= htmlspecialchars(qc_date_time($c['computed_at'] ?? null)) ?>
                                 </td>
                                 <td>
                                     <a href="<?= CURRENT_MODULE_URL ?>?controller=<?= $controller ?>&action=show&id=<?= (int)$c['id'] ?>"

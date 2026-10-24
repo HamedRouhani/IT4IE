@@ -11,6 +11,14 @@
 (function () {
     'use strict';
 
+    function tehranToday() {
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Tehran', year: 'numeric', month: 'numeric', day: 'numeric'
+        }).formatToParts(new Date());
+        const value = Object.fromEntries(parts.map(part => [part.type, part.value]));
+        return { year: Number(value.year), month: Number(value.month), day: Number(value.day) };
+    }
+
     function gregorianToJalali(gy, gm, gd) {
         const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
         let jy = (gy <= 1600) ? 0 : 979;
@@ -82,8 +90,8 @@
             this.wrapper = null;
             this.panel = null;
 
-            const today = new Date();
-            const j = gregorianToJalali(today.getFullYear(), today.getMonth() + 1, today.getDate());
+            const today = tehranToday();
+            const j = gregorianToJalali(today.year, today.month, today.day);
             this.viewYear = j[0];
             this.viewMonth = j[1];
 
@@ -182,8 +190,8 @@
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (btn.dataset.action === 'today') {
-                        const today = new Date();
-                        const j = gregorianToJalali(today.getFullYear(), today.getMonth() + 1, today.getDate());
+                        const today = tehranToday();
+                        const j = gregorianToJalali(today.year, today.month, today.day);
                         this.viewYear = j[0];
                         this.viewMonth = j[1];
                         this.selectDay(j[2]);

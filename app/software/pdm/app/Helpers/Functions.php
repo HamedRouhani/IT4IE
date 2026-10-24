@@ -179,50 +179,7 @@ if (!function_exists('pdm_date')) {
      */
     function pdm_date(?string $datetime, string $format = 'Y/m/d'): string
     {
-        if (empty($datetime) 
-            || $datetime === '0000-00-00' 
-            || $datetime === '0000-00-00 00:00:00') {
-            return '-';
-        }
-
-        $timestamp = strtotime($datetime);
-        if ($timestamp === false) {
-            return '-';
-        }
-
-        // استخراج اجزای تاریخ میلادی
-        $gy = (int) date('Y', $timestamp);
-        $gm = (int) date('m', $timestamp);
-        $gd = (int) date('d', $timestamp);
-
-        $H = date('H', $timestamp);
-        $i = date('i', $timestamp);
-        $s = date('s', $timestamp);
-
-        // تبدیل میلادی → شمسی با تابع داخلی
-        $jDate = pdm_gregorian_to_jalali($gy, $gm, $gd);
-        list($jy, $jm, $jd) = $jDate;
-
-        // جایگزینی توکن‌های فرمت
-        // ⚠️ ترتیب مهم: ابتدا توکن‌های حساس (که ممکن است در هم تداخل کنند)
-        $replacements = [
-            'Y' => (string) $jy,
-            'y' => substr((string) $jy, 2),
-            'm' => str_pad((string) $jm, 2, '0', STR_PAD_LEFT),
-            'n' => (string) $jm,
-            'd' => str_pad((string) $jd, 2, '0', STR_PAD_LEFT),
-            'j' => (string) $jd,
-            'H' => $H,
-            'i' => $i,
-            's' => $s,
-        ];
-
-        $output = $format;
-        foreach ($replacements as $token => $value) {
-            $output = str_replace($token, $value, $output);
-        }
-
-        return $output;
+        return \App\Helpers\DateHelper::toJalali($datetime, $format);
     }
 }
 

@@ -156,7 +156,7 @@ $stats = array_merge([
                                     <?php endif; ?>
                                 </td>
                                 <td class="qc-text-muted" style="font-size:.78rem;">
-                                    <?= htmlspecialchars($c['computed_at'] ?? '—') ?>
+                                    <?= !empty($c['computed_at']) ? htmlspecialchars(qc_date_time($c['computed_at'])) : '—' ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -236,7 +236,7 @@ $stats = array_merge([
                                     </span>
                                 </td>
                                 <td class="qc-text-muted" style="font-size:.78rem;">
-                                    <?= htmlspecialchars($s['created_at'] ?? '—') ?>
+                                    <?= !empty($s['created_at']) ? htmlspecialchars(qc_date_time($s['created_at'])) : '—' ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -408,7 +408,7 @@ $stats = array_merge([
                                 <td><?= $d['spec_lsl'] !== null ? number_format((float)$d['spec_lsl'], 3) : '—' ?></td>
                                 <td><?= $d['spec_usl'] !== null ? number_format((float)$d['spec_usl'], 3) : '—' ?></td>
                                 <td class="qc-text-muted" style="font-size:.78rem;">
-                                    <?= htmlspecialchars($d['created_at'] ?? '—') ?>
+                                    <?= !empty($d['created_at']) ? htmlspecialchars(qc_date_time($d['created_at'])) : '—' ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

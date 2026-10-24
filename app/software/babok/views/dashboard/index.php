@@ -100,7 +100,7 @@ $activePage = 'home';
                         </div>
                         <div class="activity-time">
                             <i class="far fa-calendar-alt"></i>
-                            <?= date('Y-m-d H:i', strtotime($activity['completed_at'] ?? 'now')) ?>
+                            <?= \App\Helpers\DateHelper::toJalali($activity['completed_at'] ?? 'now', 'Y/m/d H:i') ?>
                         </div>
                     </div>
                 </div>

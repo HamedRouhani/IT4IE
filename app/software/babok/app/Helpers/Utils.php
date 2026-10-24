@@ -47,7 +47,7 @@ class Utils
      */
     public static function formatDate($timestamp, $format = 'Y-m-d H:i:s')
     {
-        return date($format, strtotime($timestamp));
+        return \App\Helpers\DateHelper::toJalali($timestamp, $format);
     }
 
     /**
@@ -194,7 +194,7 @@ class Utils
         } elseif ($diff < 604800) {
             return floor($diff / 86400) . ' روز پیش';
         } else {
-            return date('Y-m-d', $timestamp);
+            return \App\Helpers\DateHelper::toJalali(date('Y-m-d H:i:s', $timestamp), 'Y/m/d');
         }
     }
 

@@ -58,7 +58,7 @@ $categories = $categories ?? [];
                         <div class="cat-post-body">
                             <div class="cat-post-meta">
                                 <?php if (!empty($post['created_at'])): ?>
-                                    <span><i class="far fa-calendar-alt"></i> <?php echo date('Y/m/d', strtotime($post['created_at'])); ?></span>
+                                    <span><i class="far fa-calendar-alt"></i> <?php echo jdate($post['created_at'], 'Y/m/d'); ?></span>
                                 <?php endif; ?>
                                 <?php if (!empty($post['category_name'])): ?>
                                     <span class="cat-chip"><?php echo htmlspecialchars($post['category_name']); ?></span>

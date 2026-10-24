@@ -54,7 +54,7 @@ $currentPage = $currentPage ?? 'report';
             <h3 style="margin: 0; color: rgba(255,255,255,0.95);"><?= htmlspecialchars($project['name']) ?></h3>
         </div>
         <div style="text-align: left; font-size: 0.85rem; opacity: 0.9;">
-            <div>تاریخ تولید: <?= date('Y/m/d H:i') ?></div>
+            <div>تاریخ تولید: <?= \App\Helpers\DateHelper::nowJalali('Y/m/d H:i') ?></div>
             <div>تهیه‌کننده: <?= htmlspecialchars($_SESSION['user_name'] ?? 'کاربر سیستم') ?></div>
         </div>
     </div>
@@ -270,7 +270,7 @@ $currentPage = $currentPage ?? 'report';
 <!-- پاورقی -->
 <div class="no-print" style="text-align: center; margin-top: 30px; padding: 20px; color: var(--gray); font-size: 0.85rem; border-top: 1px solid var(--border);">
     این گزارش به صورت خودکار توسط <strong>PMBOK Analyzer</strong> تولید شده است.
-    <br>تاریخ تولید: <?= date('Y/m/d H:i:s') ?>
+    <br>تاریخ تولید: <?= \App\Helpers\DateHelper::nowJalali('Y/m/d H:i:s') ?>
 </div>
 
 <div class="no-print" style="text-align: center; margin-top: 20px;">

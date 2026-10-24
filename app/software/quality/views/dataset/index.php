@@ -69,7 +69,7 @@ $system   = $system   ?? [];
                                 <td><?= $d['spec_target'] !== null ? number_format((float)$d['spec_target'], 3) : '—' ?></td>
                                 <td><?= $d['subgroup_size'] !== null ? (int)$d['subgroup_size'] : '—' ?></td>
                                 <td class="qc-text-muted" style="font-size:.78rem;">
-                                    <?= htmlspecialchars($d['created_at'] ?? '') ?>
+                                    <?= htmlspecialchars(qc_date_time($d['created_at'] ?? null)) ?>
                                 </td>
                                 <td>
                                     <a href="<?= CURRENT_MODULE_URL ?>?controller=dataset&action=data&id=<?= (int)$d['id'] ?>"

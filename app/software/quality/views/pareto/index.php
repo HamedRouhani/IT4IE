@@ -182,7 +182,7 @@ $statusLabels = [
                                 </td>
                                 <td><?= $projectName ? htmlspecialchars($projectName) : '—' ?></td>
                                 <td style="font-size:0.85rem; color:#64748b;">
-                                    <?= htmlspecialchars($a['analysis_date'] ?? '—') ?>
+                                    <?= !empty($a['analysis_date']) ? htmlspecialchars(qc_date($a['analysis_date'])) : '—' ?>
                                 </td>
                                 <td>
                                     <?= number_format((float)$a['total_value'], 0) ?>

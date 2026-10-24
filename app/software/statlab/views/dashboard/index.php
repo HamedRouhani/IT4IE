@@ -84,7 +84,7 @@ $catLabels = ['descriptive' => 'توصیفی', 'distribution' => 'توزیع', '
                             <td data-label="پروژه"><strong><?= stat_e($project['name']) ?></strong></td>
                             <td data-label="دسته"><span class="statlab-dashboard__category"><?= htmlspecialchars($catLabels[$project['category_code']] ?? $project['category_code'], ENT_QUOTES, 'UTF-8') ?></span></td>
                             <td data-label="وضعیت"><span class="statlab-dashboard__status <?= $project['status'] === 'completed' ? 'is-complete' : '' ?>"><?= htmlspecialchars(stat_getStatusLabel($project['status']), ENT_QUOTES, 'UTF-8') ?></span></td>
-                            <td data-label="به‌روزرسانی" class="statlab-dashboard__date"><?= stat_e($project['updated_at']) ?></td>
+                            <td data-label="به‌روزرسانی" class="statlab-dashboard__date"><?= stat_e(stat_date($project['updated_at'])) ?></td>
                             <td data-label="عملیات"><a class="statlab-dashboard__open" href="<?= stat_url('controller=project&action=show&id=' . (int) $project['id']) ?>"><span>بازکردن</span><i class="fas fa-arrow-left" aria-hidden="true"></i></a></td>
                         </tr>
                     <?php endforeach; ?>
