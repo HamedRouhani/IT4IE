@@ -98,8 +98,8 @@
                                         <?= or_showDate($project['created_at'], 'Y/m/d') ?>
                                     </td>
                                     <td class="text-center">
-                                        <a href="<?= or_url('controller=report&action=show&id=' . $project['id']) ?>" 
-                                           class="btn btn-sm btn-primary" 
+                                        <a href="<?= or_url('controller=report&action=show&id=' . $project['id']) ?>"
+                                           class="btn btn-sm btn-primary or-icon-action"
                                            title="مشاهده گزارش تفصیلی">
                                             <i class="fas fa-eye"></i>
                                         </a>

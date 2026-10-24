@@ -59,57 +59,40 @@ $iconMap = [
         </div>
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-primary bg-opacity-10 rounded-3 p-3">
-                                <i class="fas fa-folder-open fa-2x text-primary"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 me-3">
-                            <h6 class="text-muted mb-1">کل پروژه‌ها</h6>
-                            <h3 class="mb-0"><?= $stats['total_projects'] ?? 0 ?></h3>
-                        </div>
+                <div class="card-body or-dashboard-stat">
+                    <span class="or-dashboard-stat__icon is-primary" aria-hidden="true"><i class="fas fa-folder-open"></i></span>
+                    <div class="or-dashboard-stat__content">
+                        <h6 class="text-muted mb-1">کل پروژه‌ها</h6>
+                        <h3 class="mb-0"><?= $stats['total_projects'] ?? 0 ?></h3>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-success bg-opacity-10 rounded-3 p-3">
-                                <i class="fas fa-check-circle fa-2x text-success"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 me-3">
-                            <h6 class="text-muted mb-1">حل شده</h6>
-                            <h3 class="mb-0"><?= $stats['solved_projects'] ?? 0 ?></h3>
-                        </div>
+                <div class="card-body or-dashboard-stat">
+                    <span class="or-dashboard-stat__icon is-success" aria-hidden="true"><i class="fas fa-circle-check"></i></span>
+                    <div class="or-dashboard-stat__content">
+                        <h6 class="text-muted mb-1">حل شده</h6>
+                        <h3 class="mb-0"><?= $stats['solved_projects'] ?? 0 ?></h3>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-info bg-opacity-10 rounded-3 p-3">
-                                <i class="fas fa-cubes fa-2x text-info"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 me-3">
-                            <h6 class="text-muted mb-1">انواع مسئله</h6>
-                            <h3 class="mb-0"><?= $stats['problem_types'] ?? 0 ?></h3>
-                        </div>
+                <div class="card-body or-dashboard-stat">
+                    <span class="or-dashboard-stat__icon is-cyan" aria-hidden="true"><i class="fas fa-cubes"></i></span>
+                    <div class="or-dashboard-stat__content">
+                        <h6 class="text-muted mb-1">انواع مسئله</h6>
+                        <h3 class="mb-0"><?= $stats['problem_types'] ?? 0 ?></h3>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-12">
-            <div class="or-stat-card text-center">
+            <div class="or-stat-card or-dashboard-methods text-center">
+                <span class="or-dashboard-methods__icon" aria-hidden="true"><i class="fas fa-calculator"></i></span>
                 <h6 class="text-muted mb-2">روش‌های حل</h6>
                 <h3 class="mb-0 text-info fw-bold"><?= number_format($stats['methods']) ?></h3>
                 <small class="text-muted">

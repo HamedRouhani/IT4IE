@@ -6,7 +6,7 @@ $quickLinks = [
     ['url' => 'controller=descriptive', 'icon' => 'fa-chart-simple', 'color' => '#2563eb', 'label' => 'آمار توصیفی', 'desc' => 'میانگین، میانه، پراکندگی و بررسی داده‌های پرت'],
     ['url' => 'controller=distribution', 'icon' => 'fa-dice', 'color' => '#7c3aed', 'label' => 'توزیع‌های احتمال', 'desc' => 'توزیع‌های پرکاربرد و محاسبهٔ احتمال'],
     ['url' => 'controller=hypothesis', 'icon' => 'fa-scale-balanced', 'color' => '#ea580c', 'label' => 'آزمون فرض', 'desc' => 'آزمون‌های آماری برای مقایسه و تصمیم‌گیری'],
-    ['url' => 'controller=regression', 'icon' => 'fa-chart-line', 'color' => '#059669', 'label' => 'رگرسیون و همبستگی', 'desc' => 'بررسی رابطهٔ متغیرها و برازش مدل'],
+    ['url' => 'controller=regression', 'icon' => 'fa-chart-line', 'color' => '#2563eb', 'label' => 'رگرسیون و همبستگی', 'desc' => 'بررسی رابطهٔ متغیرها و برازش مدل'],
     ['url' => 'controller=smart_statistician', 'icon' => 'fa-wand-magic-sparkles', 'color' => '#db2777', 'label' => 'دستیار هوشمند', 'desc' => 'پیشنهاد روش تحلیل بر اساس مسئله'],
     ['url' => 'controller=project', 'icon' => 'fa-folder-open', 'color' => '#475569', 'label' => 'پروژه‌های آماری', 'desc' => 'مدیریت پروژه‌ها، متغیرها و مجموعه‌داده‌ها'],
     ['url' => 'controller=report', 'icon' => 'fa-file-lines', 'color' => '#0891b2', 'label' => 'گزارش‌ها', 'desc' => 'مرور و چاپ نتایج تحلیل‌ها'],
@@ -32,7 +32,7 @@ $catLabels = ['descriptive' => 'توصیفی', 'distribution' => 'توزیع', '
             <span class="statlab-dashboard__stat-icon"><i class="fas fa-folder" aria-hidden="true"></i></span>
             <div><span>پروژه‌های من</span><strong><?= (int) ($stats['total_projects'] ?? 0) ?></strong></div>
         </article>
-        <article class="statlab-dashboard__stat statlab-dashboard__stat--green">
+        <article class="statlab-dashboard__stat statlab-dashboard__stat--blue">
             <span class="statlab-dashboard__stat-icon"><i class="fas fa-circle-check" aria-hidden="true"></i></span>
             <div><span>پروژه‌های تکمیل‌شده</span><strong><?= (int) ($stats['completed'] ?? 0) ?></strong></div>
         </article>

@@ -65,11 +65,11 @@ $catColors = ['descriptive' => 'primary', 'distribution' => 'info', 'hypothesis'
     <?php else: ?>
         <?php foreach ($reportProjects as $rp): ?>
             <div class="card border-0 shadow-sm mb-2 statlab-report-row">
-                <div class="card-body p-3 d-flex flex-column flex-md-row align-items-md-center gap-3">
+                <div class="card-body p-3 statlab-report-row__body">
                     <!-- اطلاعات پروژه -->
-                    <div class="flex-grow-1" style="min-width: 0;">
-                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                            <h6 class="fw-bold mb-0">
+                    <div class="statlab-report-row__info">
+                        <div class="statlab-report-row__heading">
+                            <h6 class="fw-bold mb-0 statlab-report-row__title">
                                 <i class="fas fa-file-invoice me-1 text-success"></i>
                                 <?= stat_e($rp['name']) ?>
                             </h6>
@@ -77,7 +77,7 @@ $catColors = ['descriptive' => 'primary', 'distribution' => 'info', 'hypothesis'
                                 <?= $catLabels[$rp['category_code']] ?? stat_e($rp['category_code']) ?>
                             </span>
                         </div>
-                        <div class="d-flex flex-wrap gap-2 small text-muted">
+                        <div class="statlab-report-row__meta small text-muted">
                             <span><i class="fas fa-chart-bar me-1"></i><?= (int)$rp['result_count'] ?> تحلیل</span>
                             <?php if ((int)$rp['sig_count'] > 0): ?>
                                 <span class="text-success"><i class="fas fa-check-circle me-1"></i><?= (int)$rp['sig_count'] ?> معنادار</span>
@@ -88,7 +88,7 @@ $catColors = ['descriptive' => 'primary', 'distribution' => 'info', 'hypothesis'
                     </div>
                     <!-- دکمه گزارش (هرگز فشرده نمی‌شود) -->
                     <a href="<?= stat_url('controller=report&action=show&id=' . (int)$rp['id']) ?>"
-                       class="btn btn-sm btn-success w-100 w-md-auto text-nowrap flex-shrink-0">
+                       class="btn btn-sm btn-success statlab-report-row__action">
                         <i class="fas fa-eye me-1"></i> مشاهده گزارش کامل
                     </a>
                 </div>

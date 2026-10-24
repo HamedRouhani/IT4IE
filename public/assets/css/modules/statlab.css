@@ -409,6 +409,35 @@
 .statlab-report-row {
     transition: transform .15s, box-shadow .15s;
 }
+.statlab-report-row__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+.statlab-report-row__info { min-width: 0; }
+.statlab-report-row__heading,
+.statlab-report-row__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem .75rem;
+}
+.statlab-report-row__title {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.statlab-report-row__action {
+    justify-self: end;
+    width: auto;
+    max-width: 100%;
+    white-space: nowrap;
+}
+@media (max-width: 767.98px) {
+    .statlab-report-row__body { grid-template-columns: minmax(0, 1fr); }
+    .statlab-report-row__action { justify-self: stretch; text-align: center; }
+}
 .statlab-report-row:hover {
     transform: translateY(-2px);
     box-shadow: 0 .5rem 1rem rgba(0,0,0,.12) !important;
@@ -457,9 +486,9 @@
     font-weight: 800;
     line-height: 1.4;
 }
-.statlab-dashboard__header h1 i { color: #16834a; margin-left: 8px; }
+.statlab-dashboard__header h1 i { color: #2563eb; margin-left: 8px; }
 .statlab-dashboard__header p { margin: 0; color: var(--sl-muted); font-size: .95rem; }
-.statlab-dashboard__eyebrow { color: #16834a; font-size: .78rem; font-weight: 800; letter-spacing: .02em; }
+.statlab-dashboard__eyebrow { color: #2563eb; font-size: .78rem; font-weight: 800; letter-spacing: .02em; }
 .statlab-dashboard__primary-action {
     display: inline-flex;
     flex: 0 0 auto;
@@ -469,14 +498,14 @@
     min-height: 48px;
     padding: 11px 17px;
     border-radius: 12px;
-    background: #16834a;
+    background: #2563eb;
     color: white !important;
     font-weight: 700;
     text-decoration: none !important;
-    box-shadow: 0 5px 14px rgba(22,131,74,.18);
+    box-shadow: 0 5px 14px rgba(37,99,235,.2);
     transition: background .18s, transform .18s;
 }
-.statlab-dashboard__primary-action:hover { background: #11683a; transform: translateY(-1px); }
+.statlab-dashboard__primary-action:hover { background: #1d4ed8; transform: translateY(-1px); }
 .statlab-dashboard__stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
@@ -543,13 +572,13 @@
     box-shadow: 0 3px 12px rgba(15,23,42,.04);
     transition: border-color .18s, box-shadow .18s, transform .18s;
 }
-.statlab-dashboard__tool:hover { border-color: #a7d9ba; box-shadow: 0 8px 22px rgba(15,23,42,.09); transform: translateY(-2px); }
+.statlab-dashboard__tool:hover { border-color: #93c5fd; box-shadow: 0 8px 22px rgba(15,23,42,.09); transform: translateY(-2px); }
 .statlab-dashboard__tool-icon { display: grid; flex: 0 0 44px; width: 44px; height: 44px; place-items: center; border-radius: 13px; background: color-mix(in srgb, var(--tool-color) 10%, white); color: var(--tool-color); font-size: 1.15rem; }
 .statlab-dashboard__tool-copy { display: grid; gap: 5px; min-width: 0; }
 .statlab-dashboard__tool-copy strong { font-size: .92rem; line-height: 1.45; }
 .statlab-dashboard__tool-copy small { color: var(--sl-muted); font-size: .77rem; line-height: 1.6; }
 .statlab-dashboard__tool-arrow { flex: 0 0 auto; margin-inline-start: auto; color: #94a3b8; font-size: .78rem; }
-.statlab-dashboard__text-link { color: #16834a !important; font-size: .84rem; font-weight: 700; text-decoration: none !important; }
+.statlab-dashboard__text-link { color: #2563eb !important; font-size: .84rem; font-weight: 700; text-decoration: none !important; }
 .statlab-dashboard__recent { overflow: hidden; border: 1px solid var(--sl-line); border-radius: 16px; background: white; box-shadow: 0 3px 12px rgba(15,23,42,.04); }
 .statlab-dashboard__recent > .statlab-dashboard__section-heading { margin: 0; padding: 18px 20px; border-bottom: 1px solid var(--sl-line); }
 .statlab-dashboard__table-wrap { width: 100%; overflow-x: auto; }
@@ -558,17 +587,17 @@
 .statlab-dashboard__table th { background: #f8fafc; color: #475569; font-size: .78rem; font-weight: 700; white-space: nowrap; }
 .statlab-dashboard__table td { font-size: .84rem; }
 .statlab-dashboard__table tbody tr:last-child td { border-bottom: 0; }
-.statlab-dashboard__table tbody tr:hover { background: #fbfdfc; }
+.statlab-dashboard__table tbody tr:hover { background: #f8fbff; }
 .statlab-dashboard__category, .statlab-dashboard__status { display: inline-flex; align-items: center; min-height: 25px; padding: 3px 9px; border-radius: 999px; background: #f1f5f9; color: #475569; font-size: .74rem; white-space: nowrap; }
 .statlab-dashboard__status.is-complete { background: #dcfce7; color: #166534; }
 .statlab-dashboard__date { color: var(--sl-muted); direction: ltr; text-align: right; white-space: nowrap; }
-.statlab-dashboard__open { display: inline-flex; align-items: center; gap: 7px; color: #16834a !important; font-weight: 700; text-decoration: none !important; white-space: nowrap; }
+.statlab-dashboard__open { display: inline-flex; align-items: center; gap: 7px; color: #2563eb !important; font-weight: 700; text-decoration: none !important; white-space: nowrap; }
 .statlab-dashboard__open i { font-size: .75rem; }
 .statlab-dashboard__empty { display: grid; justify-items: center; gap: 8px; padding: 34px 18px; text-align: center; }
 .statlab-dashboard__empty > span { display: grid; width: 52px; height: 52px; place-items: center; border-radius: 16px; background: #eff6ff; color: #2563eb; font-size: 1.25rem; }
 .statlab-dashboard__empty strong { font-size: 1rem; }
 .statlab-dashboard__empty p { max-width: 460px; margin: 0; color: var(--sl-muted); font-size: .85rem; line-height: 1.8; }
-.statlab-dashboard__empty a { margin-top: 5px; color: #16834a !important; font-size: .85rem; font-weight: 700; text-decoration: none !important; }
+.statlab-dashboard__empty a { margin-top: 5px; color: #2563eb !important; font-size: .85rem; font-weight: 700; text-decoration: none !important; }
 .statlab-dashboard .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @container statlab-dashboard (max-width: 1050px) {
     .statlab-dashboard__header { gap: 18px; }
@@ -602,6 +631,28 @@
     .statlab-dashboard__table td:nth-child(4) { grid-column: 1 / -1; }
     .statlab-dashboard__table td:last-child { grid-column: 1 / -1; justify-content: end; padding-top: 7px; border-top: 1px solid #edf1f5; }
 }
+
+/* StatLab uses blue as its interface accent; green remains reserved for success states. */
+body.software-mode[data-module="statlab"] .btn-success {
+    --bs-btn-bg: #2563eb;
+    --bs-btn-border-color: #2563eb;
+    --bs-btn-hover-bg: #1d4ed8;
+    --bs-btn-hover-border-color: #1d4ed8;
+    --bs-btn-active-bg: #1e40af;
+    --bs-btn-active-border-color: #1e40af;
+    --bs-btn-disabled-bg: #2563eb;
+    --bs-btn-disabled-border-color: #2563eb;
+}
+body.software-mode[data-module="statlab"] .btn-outline-success {
+    --bs-btn-color: #2563eb;
+    --bs-btn-border-color: #2563eb;
+    --bs-btn-hover-bg: #2563eb;
+    --bs-btn-hover-border-color: #2563eb;
+    --bs-btn-active-bg: #1d4ed8;
+    --bs-btn-active-border-color: #1d4ed8;
+}
+body.software-mode[data-module="statlab"] .text-success { color: #2563eb !important; }
+body.software-mode[data-module="statlab"] .card-header.bg-success { background-color: #2563eb !important; }
 @container statlab-dashboard (max-width: 360px) {
     .statlab-dashboard__stats { grid-template-columns: 1fr; }
 }

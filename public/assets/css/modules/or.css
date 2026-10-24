@@ -84,6 +84,31 @@
 .or-stat-card .stat-icon.green   { background: linear-gradient(135deg, #10b981, #059669); }
 .or-stat-card .stat-icon.amber   { background: linear-gradient(135deg, #f59e0b, #d97706); }
 
+.or-dashboard-stat {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 112px;
+}
+.or-dashboard-stat__icon,
+.or-dashboard-methods__icon {
+    display: grid;
+    flex: 0 0 56px;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    border-radius: 14px;
+    font-size: 1.45rem;
+}
+.or-dashboard-stat__icon.is-primary,
+.or-dashboard-methods__icon { color: var(--or-primary); background: #fff1e8; }
+.or-dashboard-stat__icon.is-success { color: #168454; background: #e7f5ee; }
+.or-dashboard-stat__icon.is-cyan { color: #0891b2; background: #e6f9fc; }
+.or-dashboard-stat__content { min-width: 0; }
+.or-dashboard-stat__content h6 { line-height: 1.5; }
+.or-dashboard-stat__content h3 { font-weight: 750; }
+.or-dashboard-methods__icon { margin: 0 auto .75rem; }
+
 /* -------- ماتریس حمل و نقل / تخصیص -------- */
 .or-matrix {
     width: 100%;
@@ -217,12 +242,48 @@
 }
 
 .btn-or-success {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: var(--or-bg-gradient);
     color: white;
     border: none;
     padding: 0.625rem 1.25rem;
     border-radius: 0.5rem;
     font-weight: 600;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.22);
+}
+
+.btn-or-success:hover,
+.btn-or-success:focus-visible {
+    background: linear-gradient(135deg, var(--or-primary-dark), #9a3412);
+    color: white;
+}
+
+.or-icon-action {
+    display: inline-grid;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    place-items: center;
+    border-radius: 10px;
+}
+
+body.software-mode[data-module="or"] .btn-success {
+    --bs-btn-bg: var(--or-primary);
+    --bs-btn-border-color: var(--or-primary);
+    --bs-btn-hover-bg: var(--or-primary-dark);
+    --bs-btn-hover-border-color: var(--or-primary-dark);
+    --bs-btn-active-bg: var(--or-primary-dark);
+    --bs-btn-active-border-color: var(--or-primary-dark);
+    --bs-btn-disabled-bg: var(--or-primary);
+    --bs-btn-disabled-border-color: var(--or-primary);
+}
+
+body.software-mode[data-module="or"] .btn-outline-success {
+    --bs-btn-color: var(--or-primary);
+    --bs-btn-border-color: var(--or-primary);
+    --bs-btn-hover-bg: var(--or-primary);
+    --bs-btn-hover-border-color: var(--or-primary);
+    --bs-btn-active-bg: var(--or-primary-dark);
+    --bs-btn-active-border-color: var(--or-primary-dark);
 }
 
 .btn-or-warning {
