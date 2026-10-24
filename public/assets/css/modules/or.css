@@ -109,6 +109,15 @@
 .or-dashboard-stat__content h3 { font-weight: 750; }
 .or-dashboard-methods__icon { margin: 0 auto .75rem; }
 
+/* Smart modeler controls and score badges need contrast against the OR orange. */
+body.software-mode[data-module="or"] .software-content #analyzeBtn { border-radius: 12px; }
+body.software-mode[data-module="or"] .software-content .or-smart-score {
+    background-color: var(--mt-tint);
+    border: 1px solid rgba(var(--mt-rgb), .24);
+    color: var(--mt-ink);
+    font-weight: 700;
+}
+
 /* -------- ماتریس حمل و نقل / تخصیص -------- */
 .or-matrix {
     width: 100%;

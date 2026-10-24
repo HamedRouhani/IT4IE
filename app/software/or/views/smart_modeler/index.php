@@ -59,22 +59,22 @@
                                 <i class="fas fa-chart-line"></i> برنامه‌ریزی خطی
                             </button>
                             <!-- انواع پیشرفته -->
-                            <button class="btn btn-sm btn-outline-success" onclick="loadSampleText('queueing')">
+                            <button class="btn btn-sm btn-outline-primary" onclick="loadSampleText('queueing')">
                                 <i class="fas fa-line-up"></i> صف
                             </button>
-                            <button class="btn btn-sm btn-outline-success" onclick="loadSampleText('markov')">
+                            <button class="btn btn-sm btn-outline-primary" onclick="loadSampleText('markov')">
                                 <i class="fas fa-random"></i> مارکوف
                             </button>
-                            <button class="btn btn-sm btn-outline-success" onclick="loadSampleText('game')">
+                            <button class="btn btn-sm btn-outline-primary" onclick="loadSampleText('game')">
                                 <i class="fas fa-chess"></i> نظریه بازی‌ها
                             </button>
-                            <button class="btn btn-sm btn-outline-success" onclick="loadSampleText('montecarlo')">
+                            <button class="btn btn-sm btn-outline-primary" onclick="loadSampleText('montecarlo')">
                                 <i class="fas fa-dice"></i> مونت‌کارلو
                             </button>
-                            <button class="btn btn-sm btn-outline-success" onclick="loadSampleText('ilp')">
+                            <button class="btn btn-sm btn-outline-primary" onclick="loadSampleText('ilp')">
                                 <i class="fas fa-hashtag"></i> برنامه‌ریزی صحیح
                             </button>
-                            <button class="btn btn-sm btn-outline-success" onclick="loadSampleText('dual')">
+                            <button class="btn btn-sm btn-outline-primary" onclick="loadSampleText('dual')">
                                 <i class="fas fa-exchange-alt"></i> دوگان
                             </button>
                         </div>
@@ -242,7 +242,7 @@ function displayResults(data) {
                 <div class="mb-2">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <span class="fw-bold ${isActive ? 'text-primary' : 'text-muted'}">${isActive ? '🎯 ' : ''}${typeName}</span>
-                        <span class="badge bg-${barColor} bg-opacity-10 text-${barColor}">${percent.toFixed(1)}%</span>
+                        <span class="badge or-smart-score">${percent.toFixed(1)}%</span>
                     </div>
                     <div class="progress" style="height: 8px; background-color: #e9ecef;">
                         <div class="progress-bar bg-${barColor}" style="width: ${percent}%;"></div>
