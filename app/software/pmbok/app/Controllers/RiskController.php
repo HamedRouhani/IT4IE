@@ -123,7 +123,7 @@ class RiskController extends Controller
             $description = trim($_POST['description'] ?? '');
             $probability = trim($_POST['probability'] ?? 'medium');
             $impact = trim($_POST['impact'] ?? 'medium');
-            $response_strategy = trim($_POST['response_strategy'] ?? '');
+            $response_strategy = $this->normalizeStrategy($_POST['response_strategy'] ?? '');
             $response_plan = trim($_POST['response_plan'] ?? '');
             $owner = trim($_POST['owner'] ?? '');
             
@@ -162,6 +162,7 @@ class RiskController extends Controller
             'pageTitle' => 'ثبت ریسک جدید',
             'currentPage' => 'risk',
             'projects' => $projects,
+            'strategy' => $this->strategyMeta(),
         ]);
     }
     
@@ -182,7 +183,7 @@ class RiskController extends Controller
             $description = trim($_POST['description'] ?? '');
             $probability = trim($_POST['probability'] ?? 'medium');
             $impact = trim($_POST['impact'] ?? 'medium');
-            $response_strategy = trim($_POST['response_strategy'] ?? '');
+            $response_strategy = $this->normalizeStrategy($_POST['response_strategy'] ?? '');
             $response_plan = trim($_POST['response_plan'] ?? '');
             $owner = trim($_POST['owner'] ?? '');
             $status = trim($_POST['status'] ?? 'identified');
@@ -212,6 +213,7 @@ class RiskController extends Controller
             'currentPage' => 'risk',
             'risk' => $risk,
             'projects' => $projects,
+            'strategy' => $this->strategyMeta(),
         ]);
     }
     
@@ -234,6 +236,56 @@ class RiskController extends Controller
         $this->redirect('controller=risk');
     }
     
+    /**
+     * ساختار ستون response_strategy را از دیتابیس می‌خواند (ENUM یا متن آزاد)،
+     * تا مقدار نامعتبر هرگز به دیتابیس نرسد (خطای 1265 Data truncated).
+     */
+    private function strategyMeta()
+    {
+        static $meta = null;
+        if ($meta !== null) {
+            return $meta;
+        }
+        $meta = ['enum' => false, 'options' => [], 'nullable' => true, 'default' => null];
+        try {
+            $row = $this->db->query("SHOW COLUMNS FROM {$this->prefix}risks LIKE 'response_strategy'")->fetch();
+            if ($row) {
+                $row = array_change_key_case($row, CASE_LOWER);
+                $meta['nullable'] = strtoupper((string)($row['null'] ?? 'YES')) === 'YES';
+                $meta['default']  = $row['default'] ?? null;
+                if (preg_match('/^enum\((.*)\)$/i', (string)($row['type'] ?? ''), $m)) {
+                    preg_match_all("/'((?:[^']|'')*)'/", $m[1], $vals);
+                    $meta['options'] = array_map(function ($v) { return str_replace("''", "'", $v); }, $vals[1]);
+                    $meta['enum'] = !empty($meta['options']);
+                }
+            }
+        } catch (\Exception $e) {
+            error_log('PMBOK strategyMeta: ' . $e->getMessage());
+        }
+        return $meta;
+    }
+
+    /**
+     * مقدار ورودی را با نوع ستون هماهنگ می‌کند:
+     *  - ستون متنی: همان متن
+     *  - ENUM: فقط مقدار مجاز؛ در غیر این صورت NULL (اگر ستون اجازه دهد) یا مقدار پیش‌فرض/اولین گزینه
+     */
+    private function normalizeStrategy($value)
+    {
+        $value = trim((string)$value);
+        $meta = $this->strategyMeta();
+        if (!$meta['enum']) {
+            return $value;
+        }
+        if (in_array($value, $meta['options'], true)) {
+            return $value;
+        }
+        if ($meta['nullable']) {
+            return null;
+        }
+        return in_array($meta['default'], $meta['options'], true) ? $meta['default'] : $meta['options'][0];
+    }
+
     private function getUserRisk($id)
     {
         $stmt = $this->db->prepare("

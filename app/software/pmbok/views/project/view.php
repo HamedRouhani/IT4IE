@@ -1,764 +1,436 @@
 <?php
-$pageTitle = ($project['name'] ?? 'پروژه') . ' - PMBOK';
+/**
+ * جزئیات پروژه - PMBOK Analyzer (نسخهٔ بازطراحی‌شده)
+ * - بدون استایل inline و بدون onclick؛ رویدادها با data-attribute
+ * - یک modal استاندارد (<dialog>) و فرم‌ها از روی یک schema ساخته می‌شوند
+ */
+$pageTitle   = ($project['name'] ?? 'پروژه') . ' - PMBOK';
 $currentPage = $currentPage ?? 'project';
+
+$pid          = (int)$project['id'];
+$deliverables = $deliverables ?? [];
+$risks        = $risks ?? [];
+$stakeholders = $stakeholders ?? [];
+$projectTasks = $projectTasks ?? [];
+$allTasks     = $allTasks ?? [];
+
+$e = static fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+
+// داده‌ی ردیف برای دکمهٔ ویرایش (در data-item؛ امن در برابر نقل‌قول‌ها)
+$itemAttr = static fn(array $row) => htmlspecialchars(
+    json_encode($row, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
+    ENT_QUOTES, 'UTF-8'
+);
+
+// سلول عملیات (ویرایش + حذف)
+$rowActions = function (string $type, array $row, string $deleteAction, string $idField, string $confirm) use ($pid, $e, $itemAttr) {
+    ob_start(); ?>
+    <td class="col-actions">
+        <button type="button" class="btn btn-sm btn-info" data-edit="<?= $type ?>"
+                data-item="<?= $itemAttr($row) ?>" title="ویرایش" aria-label="ویرایش">
+            <i class="fas fa-edit"></i>
+        </button>
+        <form method="POST" class="inline-form-btn"
+              action="?controller=project&action=<?= $e($deleteAction) ?>&id=<?= $pid ?>"
+              data-confirm="<?= $e($confirm) ?>">
+            <input type="hidden" name="<?= $e($idField) ?>" value="<?= (int)$row['id'] ?>">
+            <input type="hidden" name="project_id" value="<?= $pid ?>">
+            <button type="submit" class="btn btn-sm btn-danger" title="حذف" aria-label="حذف">
+                <i class="fas fa-trash"></i>
+            </button>
+        </form>
+    </td>
+    <?php return ob_get_clean();
+};
+
+$delStatus  = ['pending' => ['در انتظار', 'secondary'], 'in_progress' => ['در حال انجام', 'warning'], 'completed' => ['تکمیل شده', 'success']];
+$taskStatus = ['not_started' => 'secondary', 'in_progress' => 'warning', 'completed' => 'success', 'deferred' => 'danger'];
+
+// فرآیندهایی که هنوز به پروژه اضافه نشده‌اند (برای modal افزودن)
+$usedTaskIds = array_map('intval', array_column($projectTasks, 'task_id'));
+$availableTasks = [];
+foreach ($allTasks as $t) {
+    if (!in_array((int)$t['id'], $usedTaskIds, true)) {
+        $availableTasks[] = ['id' => (int)$t['id'], 'code' => $t['code'] ?? '', 'name' => $t['name'] ?? '', 'ka' => $t['ka_name'] ?? ''];
+    }
+}
 ?>
 
 <div class="page-header">
     <div>
-        <nav class="breadcrumb">
+        <nav class="breadcrumb" aria-label="مسیر">
             <a href="?controller=project">پروژه‌ها</a> /
-            <span><?= htmlspecialchars($project['name']) ?></span>
+            <span><?= $e($project['name']) ?></span>
         </nav>
-        <h2><i class="fas fa-project-diagram"></i> <?= htmlspecialchars($project['name']) ?></h2>
+        <h2><i class="fas fa-project-diagram"></i> <?= $e($project['name']) ?></h2>
     </div>
-    <div style="display: flex; gap: 10px;">
-        <a href="?controller=project&action=edit&id=<?= $project['id'] ?>" class="btn btn-warning">
-            <i class="fas fa-edit"></i> ویرایش پروژه
-        </a>
-        <a href="?controller=report&action=exportMsProject&id=<?= $project['id'] ?>" class="btn btn-sm btn-success">
-            <i class="fas fa-file-code"></i> خروجی MSP
-        </a>
-        <a href="?controller=report&action=exportPrimavera&id=<?= $project['id'] ?>" class="btn btn-sm btn-info">
-            <i class="fas fa-file-csv"></i> خروجی P6
-        </a>
+    <div class="header-actions">
+        <a href="?controller=project&action=edit&id=<?= $pid ?>" class="btn btn-warning"><i class="fas fa-edit"></i> ویرایش پروژه</a>
+        <a href="?controller=report&action=exportMsProject&id=<?= $pid ?>" class="btn btn-success"><i class="fas fa-file-code"></i> خروجی MSP</a>
+        <a href="?controller=report&action=exportPrimavera&id=<?= $pid ?>" class="btn btn-info"><i class="fas fa-file-csv"></i> خروجی P6</a>
     </div>
 </div>
 
 <!-- اطلاعات پروژه -->
-<div class="card">
+<section class="card">
     <h3 class="card-title"><i class="fas fa-info-circle"></i> اطلاعات پروژه</h3>
     <div class="info-grid">
         <div class="info-item">
-            <span class="info-label">فاز:</span>
+            <span class="info-label">فاز</span>
             <span class="badge badge-<?= pmbok_getPhaseColor($project['phase']) ?>"><?= pmbok_getPhaseLabel($project['phase']) ?></span>
         </div>
         <div class="info-item">
-            <span class="info-label">متدولوژی:</span>
+            <span class="info-label">متدولوژی</span>
             <span class="badge badge-info"><?= pmbok_getMethodologyLabel($project['methodology']) ?></span>
         </div>
         <div class="info-item">
-            <span class="info-label">صنعت:</span>
-            <span class="badge"><?= htmlspecialchars($project['industry'] ?? 'عمومی') ?></span>
+            <span class="info-label">صنعت</span>
+            <span class="badge"><?= $e($project['industry'] ?? 'عمومی') ?></span>
         </div>
         <div class="info-item">
-            <span class="info-label">تاریخ ایجاد:</span>
+            <span class="info-label">تاریخ ایجاد</span>
             <span><?= pmbok_showDate($project['created_at']) ?></span>
         </div>
     </div>
     <?php if (!empty($project['description'])): ?>
-    <div style="margin-top: 15px;">
-        <strong>توضیحات:</strong>
-        <p class="text-muted" style="margin-top: 5px;"><?= nl2br(htmlspecialchars($project['description'])) ?></p>
-    </div>
+        <div class="card-footer">
+            <strong>توضیحات</strong>
+            <p class="text-muted"><?= nl2br($e($project['description'])) ?></p>
+        </div>
     <?php endif; ?>
-</div>
+</section>
 
-<!-- تب‌های جزئیات -->
+<!-- تب‌ها -->
 <div class="tabs-container">
-    <div class="tabs">
-        <button class="tab-btn" data-tab="deliverables" onclick="switchTab(event, 'deliverables')"><i class="fas fa-box"></i> تحویل‌دادنی‌ها (<?= count($deliverables ?? []) ?>)</button>
-        <button class="tab-btn" data-tab="risks" onclick="switchTab(event, 'risks')"><i class="fas fa-exclamation-triangle"></i> ریسک‌ها (<?= count($risks ?? []) ?>)</button>
-        <button class="tab-btn" data-tab="stakeholders" onclick="switchTab(event, 'stakeholders')"><i class="fas fa-users"></i> ذی‌نفعان (<?= count($stakeholders ?? []) ?>)</button>
-        <button class="tab-btn" data-tab="tasks" onclick="switchTab(event, 'tasks')"><i class="fas fa-tasks"></i> فرآیندها (<?= count($projectTasks ?? []) ?>)</button>
+    <div class="tabs" role="tablist">
+        <button type="button" class="tab-btn" role="tab" data-tab="deliverables"><i class="fas fa-box"></i> تحویل‌دادنی‌ها (<?= count($deliverables) ?>)</button>
+        <button type="button" class="tab-btn" role="tab" data-tab="risks"><i class="fas fa-exclamation-triangle"></i> ریسک‌ها (<?= count($risks) ?>)</button>
+        <button type="button" class="tab-btn" role="tab" data-tab="stakeholders"><i class="fas fa-users"></i> ذی‌نفعان (<?= count($stakeholders) ?>)</button>
+        <button type="button" class="tab-btn" role="tab" data-tab="tasks"><i class="fas fa-tasks"></i> فرآیندها (<?= count($projectTasks) ?>)</button>
     </div>
-    
+
     <!-- تب ۱: تحویل‌دادنی‌ها -->
-    <div class="tab-content" id="deliverables">
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 class="card-title" style="margin: 0;"><i class="fas fa-box"></i> تحویل‌دادنی‌ها</h3>
-                <button class="btn btn-primary" onclick="openAddModal('deliverable')">
-                    <i class="fas fa-plus"></i> افزودن تحویل‌دادنی
-                </button>
+    <div class="tab-content" id="deliverables" role="tabpanel">
+        <section class="card">
+            <div class="card-head">
+                <h3 class="card-title"><i class="fas fa-box"></i> تحویل‌دادنی‌ها</h3>
+                <button type="button" class="btn btn-primary" data-add="deliverable"><i class="fas fa-plus"></i> افزودن تحویل‌دادنی</button>
             </div>
-            
             <?php if (empty($deliverables)): ?>
-                <p class="text-muted text-center" style="padding: 20px;">هیچ تحویل‌دادنی ثبت نشده است.</p>
+                <p class="empty-note">هیچ تحویل‌دادنی ثبت نشده است.</p>
             <?php else: ?>
                 <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>نام</th>
-                                <th>توضیحات</th>
-                                <th>وضعیت</th>
-                                <th>تاریخ برنامه‌ریزی</th>
-                                <th style="width: 120px; text-align: center;">عملیات</th>
-                            </tr>
-                        </thead>
+                    <table class="table table-hover">
+                        <thead><tr><th>نام</th><th>توضیحات</th><th>وضعیت</th><th>تاریخ برنامه‌ریزی</th><th class="col-actions">عملیات</th></tr></thead>
                         <tbody>
-                            <?php foreach ($deliverables as $d): ?>
+                        <?php foreach ($deliverables as $d): [$sLabel, $sColor] = $delStatus[$d['status']] ?? [$d['status'], 'secondary']; ?>
                             <tr>
-                                <td><strong><?= htmlspecialchars($d['name']) ?></strong></td>
-                                <td><?= htmlspecialchars(pmbok_truncateText($d['description'] ?? '', 50)) ?></td>
-                                <td>
-                                    <?php 
-                                    $statusColors = ['pending' => 'secondary', 'in_progress' => 'warning', 'completed' => 'success'];
-                                    $statusLabels = ['pending' => 'در انتظار', 'in_progress' => 'در حال انجام', 'completed' => 'تکمیل شده'];
-                                    ?>
-                                    <span class="badge badge-<?= $statusColors[$d['status']] ?? 'secondary' ?>">
-                                        <?= $statusLabels[$d['status']] ?? $d['status'] ?>
-                                    </span>
-                                </td>
+                                <td><strong><?= $e($d['name']) ?></strong></td>
+                                <td><?= $e(pmbok_truncateText($d['description'] ?? '', 50)) ?></td>
+                                <td><span class="badge badge-<?= $sColor ?>"><?= $e($sLabel) ?></span></td>
                                 <td><?= pmbok_showDate($d['planned_date'] ?? '') ?></td>
-                                <td style="text-align: center;">
-                                    <button class="btn btn-sm btn-info" onclick='openEditModal("deliverable", <?= json_encode($d, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)' title="ویرایش">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <form method="POST" action="?controller=project&action=deleteDeliverable&id=<?= $project['id'] ?>" 
-                                          style="display:inline;" onsubmit="return confirm('آیا از حذف این تحویل‌دادنی اطمینان دارید؟')">
-                                        <input type="hidden" name="id" value="<?= $d['id'] ?>">
-                                        <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="حذف">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
+                                <?= $rowActions('deliverable', $d, 'deleteDeliverable', 'id', 'آیا از حذف این تحویل‌دادنی اطمینان دارید؟') ?>
                             </tr>
-                            <?php endforeach; ?>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
             <?php endif; ?>
-        </div>
+        </section>
     </div>
-    
+
     <!-- تب ۲: ریسک‌ها -->
-    <div class="tab-content" id="risks">
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 class="card-title" style="margin: 0;"><i class="fas fa-exclamation-triangle"></i> ریسک‌ها</h3>
-                <button class="btn btn-danger" onclick="openAddModal('risk')">
-                    <i class="fas fa-plus"></i> افزودن ریسک
-                </button>
+    <div class="tab-content" id="risks" role="tabpanel">
+        <section class="card">
+            <div class="card-head">
+                <h3 class="card-title"><i class="fas fa-exclamation-triangle"></i> ریسک‌ها</h3>
+                <button type="button" class="btn btn-danger" data-add="risk"><i class="fas fa-plus"></i> افزودن ریسک</button>
             </div>
-            
             <?php if (empty($risks)): ?>
-                <p class="text-muted text-center" style="padding: 20px;">هیچ ریسکی ثبت نشده است.</p>
+                <p class="empty-note">هیچ ریسکی ثبت نشده است.</p>
             <?php else: ?>
                 <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>عنوان</th>
-                                <th>احتمال</th>
-                                <th>تأثیر</th>
-                                <th>امتیاز</th>
-                                <th>وضعیت</th>
-                                <th style="width: 120px; text-align: center;">عملیات</th>
-                            </tr>
-                        </thead>
+                    <table class="table table-hover">
+                        <thead><tr><th>عنوان</th><th>احتمال</th><th>تأثیر</th><th>امتیاز</th><th>وضعیت</th><th class="col-actions">عملیات</th></tr></thead>
                         <tbody>
-                            <?php foreach ($risks as $r): ?>
+                        <?php foreach ($risks as $r): $score = (int)$r['risk_score']; $tone = $score >= 15 ? 'high' : ($score >= 8 ? 'mid' : 'low'); ?>
                             <tr>
-                                <td><?= htmlspecialchars($r['title']) ?></td>
+                                <td><?= $e($r['title']) ?></td>
                                 <td><span class="badge"><?= pmbok_getProbabilityLabel($r['probability']) ?></span></td>
                                 <td><span class="badge"><?= pmbok_getImpactLabel($r['impact']) ?></span></td>
-                                <td>
-                                    <strong style="color: <?= $r['risk_score'] >= 15 ? '#DC2626' : ($r['risk_score'] >= 8 ? '#F59E0B' : '#10B981') ?>">
-                                        <?= $r['risk_score'] ?>
-                                    </strong>
-                                </td>
+                                <td><strong class="score score--<?= $tone ?>"><?= $score ?></strong></td>
                                 <td><span class="badge badge-info"><?= pmbok_getRiskStatusLabel($r['status']) ?></span></td>
-                                <td style="text-align: center;">
-                                    <button class="btn btn-sm btn-info" onclick='openEditModal("risk", <?= json_encode($r, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)' title="ویرایش">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <form method="POST" action="?controller=project&action=deleteRisk&id=<?= $project['id'] ?>" 
-                                          style="display:inline;" onsubmit="return confirm('آیا از حذف این ریسک اطمینان دارید؟')">
-                                        <input type="hidden" name="risk_id" value="<?= $r['id'] ?>">
-                                        <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="حذف">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
+                                <?= $rowActions('risk', $r, 'deleteRisk', 'risk_id', 'آیا از حذف این ریسک اطمینان دارید؟') ?>
                             </tr>
-                            <?php endforeach; ?>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
             <?php endif; ?>
-        </div>
+        </section>
     </div>
-    
+
     <!-- تب ۳: ذی‌نفعان -->
-    <div class="tab-content" id="stakeholders">
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 class="card-title" style="margin: 0;"><i class="fas fa-users"></i> ذی‌نفعان</h3>
-                <button class="btn btn-primary" onclick="openAddModal('stakeholder')">
-                    <i class="fas fa-user-plus"></i> افزودن ذی‌نفع
-                </button>
+    <div class="tab-content" id="stakeholders" role="tabpanel">
+        <section class="card">
+            <div class="card-head">
+                <h3 class="card-title"><i class="fas fa-users"></i> ذی‌نفعان</h3>
+                <button type="button" class="btn btn-primary" data-add="stakeholder"><i class="fas fa-user-plus"></i> افزودن ذی‌نفع</button>
             </div>
-            
             <?php if (empty($stakeholders)): ?>
-                <p class="text-muted text-center" style="padding: 20px;">هیچ ذی‌نفعی ثبت نشده است.</p>
+                <p class="empty-note">هیچ ذی‌نفعی ثبت نشده است.</p>
             <?php else: ?>
                 <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>نام</th>
-                                <th>نقش</th>
-                                <th>ایمیل</th>
-                                <th>نفوذ</th>
-                                <th>علاقه</th>
-                                <th>وضعیت تعامل</th>
-                                <th style="width: 120px; text-align: center;">عملیات</th>
-                            </tr>
-                        </thead>
+                    <table class="table table-hover">
+                        <thead><tr><th>نام</th><th>نقش</th><th>ایمیل</th><th>نفوذ</th><th>علاقه</th><th>وضعیت تعامل</th><th class="col-actions">عملیات</th></tr></thead>
                         <tbody>
-                            <?php foreach ($stakeholders as $s): ?>
+                        <?php foreach ($stakeholders as $s): ?>
                             <tr>
-                                <td><strong><?= htmlspecialchars($s['name']) ?></strong></td>
-                                <td><?= htmlspecialchars($s['role']) ?></td>
-                                <td><?= htmlspecialchars($s['email'] ?? '-') ?></td>
-                                <td><span class="badge"><?= htmlspecialchars($s['influence']) ?></span></td>
-                                <td><span class="badge"><?= htmlspecialchars($s['interest']) ?></span></td>
-                                <td><span class="badge badge-info"><?= htmlspecialchars($s['engagement_status'] ?? 'neutral') ?></span></td>
-                                <td style="text-align: center;">
-                                    <button class="btn btn-sm btn-info" onclick='openEditModal("stakeholder", <?= json_encode($s, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)' title="ویرایش">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <form method="POST" action="?controller=project&action=deleteStakeholder&id=<?= $project['id'] ?>" 
-                                          style="display:inline;" onsubmit="return confirm('آیا از حذف این ذی‌نفع اطمینان دارید؟')">
-                                        <input type="hidden" name="stakeholder_id" value="<?= $s['id'] ?>">
-                                        <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="حذف">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
+                                <td><strong><?= $e($s['name']) ?></strong></td>
+                                <td><?= $e($s['role']) ?></td>
+                                <td><?= $e($s['email'] ?? '-') ?></td>
+                                <td><span class="badge"><?= $e($s['influence']) ?></span></td>
+                                <td><span class="badge"><?= $e($s['interest']) ?></span></td>
+                                <td><span class="badge badge-info"><?= $e($s['engagement_status'] ?? 'neutral') ?></span></td>
+                                <?= $rowActions('stakeholder', $s, 'deleteStakeholder', 'stakeholder_id', 'آیا از حذف این ذی‌نفع اطمینان دارید؟') ?>
                             </tr>
-                            <?php endforeach; ?>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
             <?php endif; ?>
-        </div>
+        </section>
     </div>
-    
+
     <!-- تب ۴: فرآیندها -->
-    <div class="tab-content" id="tasks">
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 class="card-title" style="margin: 0;"><i class="fas fa-tasks"></i> فرآیندها</h3>
-                <button class="btn btn-success" onclick="openAddModal('task')">
-                    <i class="fas fa-plus"></i> افزودن فرآیند
-                </button>
+    <div class="tab-content" id="tasks" role="tabpanel">
+        <section class="card">
+            <div class="card-head">
+                <h3 class="card-title"><i class="fas fa-tasks"></i> فرآیندها</h3>
+                <button type="button" class="btn btn-success" data-add="task"><i class="fas fa-plus"></i> افزودن فرآیند</button>
             </div>
-            
             <?php if (empty($projectTasks)): ?>
-                <p class="text-muted text-center" style="padding: 20px;">هیچ فرآیندی اضافه نشده است.</p>
+                <p class="empty-note">هیچ فرآیندی اضافه نشده است.</p>
             <?php else: ?>
                 <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>کد</th>
-                                <th>نام فرآیند</th>
-                                <th>حوزه دانشی</th>
-                                <th>وضعیت</th>
-                                <th>یادداشت</th>
-                                <th style="width: 120px; text-align: center;">عملیات</th>
-                            </tr>
-                        </thead>
+                    <table class="table table-hover">
+                        <thead><tr><th>کد</th><th>نام فرآیند</th><th>حوزه دانشی</th><th>وضعیت</th><th>یادداشت</th><th class="col-actions">عملیات</th></tr></thead>
                         <tbody>
-                            <?php foreach ($projectTasks as $pt): ?>
+                        <?php foreach ($projectTasks as $pt): ?>
                             <tr>
-                                <td><code><?= htmlspecialchars($pt['task_code']) ?></code></td>
-                                <td><?= htmlspecialchars($pt['task_name']) ?></td>
-                                <td><?= htmlspecialchars($pt['ka_name']) ?></td>
-                                <td>
-                                    <?php 
-                                    $taskStatusColors = ['not_started' => 'secondary', 'in_progress' => 'warning', 'completed' => 'success', 'deferred' => 'danger'];
-                                    ?>
-                                    <span class="badge badge-<?= $taskStatusColors[$pt['status']] ?? 'secondary' ?>">
-                                        <?= pmbok_getTaskStatusLabel($pt['status']) ?>
-                                    </span>
-                                </td>
-                                <td><?= htmlspecialchars(pmbok_truncateText($pt['notes'] ?? '-', 40)) ?></td>
-                                <td style="text-align: center;">
-                                    <button class="btn btn-sm btn-info" onclick='openEditModal("task", <?= json_encode($pt, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)' title="ویرایش">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <form method="POST" action="?controller=project&action=deleteTask&id=<?= $project['id'] ?>" 
-                                          style="display:inline;" onsubmit="return confirm('آیا از حذف این فرآیند اطمینان دارید؟')">
-                                        <input type="hidden" name="pt_id" value="<?= $pt['id'] ?>">
-                                        <input type="hidden" name="project_id" value="<?= $project['id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-danger" title="حذف">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
+                                <td><code><?= $e($pt['task_code']) ?></code></td>
+                                <td><?= $e($pt['task_name']) ?></td>
+                                <td><?= $e($pt['ka_name']) ?></td>
+                                <td><span class="badge badge-<?= $taskStatus[$pt['status']] ?? 'secondary' ?>"><?= pmbok_getTaskStatusLabel($pt['status']) ?></span></td>
+                                <td><?= $e(pmbok_truncateText($pt['notes'] ?? '-', 40)) ?></td>
+                                <?= $rowActions('task', $pt, 'deleteTask', 'pt_id', 'آیا از حذف این فرآیند اطمینان دارید؟') ?>
                             </tr>
-                            <?php endforeach; ?>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
             <?php endif; ?>
-        </div>
+        </section>
     </div>
 </div>
 
-<!-- Modal عمومی -->
-<div id="itemModal" class="modal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);">
-    <div class="modal-content" style="background-color: #fefefe; margin: 5% auto; padding: 0; border-radius: 12px; width: 90%; max-width: 650px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); animation: modalSlideIn 0.3s;">
-        <div style="padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #6C3CE1 0%, #8B5CF6 100%); color: white; border-radius: 12px 12px 0 0;">
-            <h3 id="modalTitle" style="margin: 0;">افزودن</h3>
-            <button onclick="closeModal()" style="background: none; border: none; font-size: 28px; font-weight: bold; color: white; cursor: pointer;">&times;</button>
-        </div>
-        <form id="modalForm" method="POST" style="padding: 25px;">
-            <div id="modalFields"></div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-                <button type="button" onclick="closeModal()" class="btn btn-secondary">
-                    <i class="fas fa-times"></i> انصراف
-                </button>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> ذخیره
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<style>
-@keyframes modalSlideIn {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.tab-btn.active { 
-    border-bottom: 3px solid #6C3CE1 !important; 
-    color: #6C3CE1 !important; 
-    font-weight: bold;
-}
-.modal .form-group { margin-bottom: 15px; }
-.modal .form-label { display: block; margin-bottom: 5px; font-weight: 600; color: #374151; }
-.modal .form-control, .modal .form-select { 
-    width: 100%; padding: 8px 12px; 
-    border: 1px solid #d1d5db; border-radius: 6px; 
-    font-size: 14px;
-}
-.modal .form-control:focus, .modal .form-select:focus { 
-    outline: none; border-color: #6C3CE1; 
-    box-shadow: 0 0 0 3px rgba(108, 60, 225, 0.1);
-}
-.modal .form-row-grid { 
-    display: grid; grid-template-columns: 1fr 1fr; gap: 15px; 
-}
-</style>
+<!-- Modal عمومی (native dialog: Esc، focus-trap و backdrop داخلی) -->
+<dialog id="itemModal" class="pm-modal" aria-labelledby="modalTitle">
+    <form id="modalForm" method="POST">
+        <header class="pm-modal-head">
+            <h3 id="modalTitle">افزودن</h3>
+            <button type="button" class="pm-modal-close" data-close aria-label="بستن">&times;</button>
+        </header>
+        <div id="modalFields" class="pm-modal-body"></div>
+        <footer class="pm-modal-foot">
+            <button type="button" class="btn btn-secondary" data-close><i class="fas fa-times"></i> انصراف</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> ذخیره</button>
+        </footer>
+    </form>
+</dialog>
 
 <script>
-// ============================================================
-// مدیریت تب‌ها با حفظ وضعیت در localStorage و URL
-// ============================================================
-function switchTab(event, tabId) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    
-    event.currentTarget.classList.add('active');
-    document.getElementById(tabId).classList.add('active');
-    
-    // ذخیره تب فعال در localStorage
-    localStorage.setItem('pmbok_active_tab', tabId);
-    
-    // بروزرسانی URL با پارامتر tab
-    const url = new URL(window.location);
-    url.searchParams.set('tab', tabId);
-    window.history.replaceState({}, '', url);
-}
+(function () {
+    'use strict';
+    var PID = <?= $pid ?>;
+    var AVAILABLE_TASKS = <?= json_encode($availableTasks, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
-// بازیابی تب فعال هنگام بارگذاری صفحه
-function restoreActiveTab() {
-    // اولویت 1: پارامتر tab از URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabFromUrl = urlParams.get('tab');
-    
-    // اولویت 2: localStorage
-    const savedTab = tabFromUrl || localStorage.getItem('pmbok_active_tab') || 'deliverables';
-    
-    const tabBtn = document.querySelector(`.tab-btn[data-tab="${savedTab}"]`);
-    const tabContent = document.getElementById(savedTab);
-    
-    if (tabBtn && tabContent) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        
-        tabBtn.classList.add('active');
-        tabContent.classList.add('active');
-    } else {
-        // fallback به اولین تب
-        document.querySelector('.tab-btn').classList.add('active');
-        document.getElementById('deliverables').classList.add('active');
+    /* ---------- گزینه‌های مشترک ---------- */
+    var LEVEL5 = [['very_low','بسیار کم'],['low','کم'],['medium','متوسط'],['high','بالا'],['very_high','بسیار بالا']];
+    var LEVEL3 = [['low','کم'],['medium','متوسط'],['high','بالا']];
+    var ENGAGE = [['unaware','ناآگاه'],['resistant','مقاوم'],['neutral','خنثی'],['supportive','حامی'],['leading','رهبر']];
+    var TASK_STATUS = [['not_started','شروع نشده'],['in_progress','در حال انجام'],['completed','تکمیل شده'],['deferred','تعویق‌شده']];
+
+    /* ---------- schema فرم‌ها ----------
+       key = نام ستون/فیلد در ویرایش | add = نام فیلد POST در افزودن | full = تمام‌عرض */
+    var FORMS = {
+        deliverable: {
+            addTitle: 'افزودن تحویل‌دادنی جدید', editTitle: 'ویرایش تحویل‌دادنی',
+            addAction: 'addDeliverable&id=' + PID, editAction: 'updateDeliverable',
+            fields: [
+                { key: 'name', add: 'deliverable_name', label: 'نام *', type: 'text', req: true, full: true },
+                { key: 'description', add: 'deliverable_description', label: 'توضیحات', type: 'textarea', full: true },
+                { key: 'status', add: 'deliverable_status', label: 'وضعیت', type: 'select', def: 'pending',
+                  opts: [['pending','در انتظار'],['in_progress','در حال انجام'],['completed','تکمیل شده']] },
+                { key: 'planned_date', add: 'deliverable_planned_date', label: 'تاریخ برنامه‌ریزی', type: 'date' }
+            ]
+        },
+        risk: {
+            addTitle: 'افزودن ریسک جدید', editTitle: 'ویرایش ریسک',
+            addAction: 'addRisk&id=' + PID, editAction: 'updateRisk',
+            fields: [
+                { key: 'title', add: 'risk_title', label: 'عنوان ریسک *', type: 'text', req: true, full: true },
+                { key: 'probability', add: 'risk_probability', label: 'احتمال', type: 'select', opts: LEVEL5, def: 'medium' },
+                { key: 'impact', add: 'risk_impact', label: 'تأثیر', type: 'select', opts: LEVEL5, def: 'medium' }
+            ]
+        },
+        stakeholder: {
+            addTitle: 'افزودن ذی‌نفع جدید', editTitle: 'ویرایش ذی‌نفع',
+            addAction: 'addStakeholder&id=' + PID, editAction: 'updateStakeholder',
+            fields: [
+                { key: 'name', add: 'stakeholder_name', label: 'نام *', type: 'text', req: true },
+                { key: 'role', add: 'stakeholder_role', label: 'نقش *', type: 'text', req: true },
+                { key: 'email', add: 'stakeholder_email', label: 'ایمیل', type: 'email', full: true },
+                { key: 'influence', add: 'stakeholder_influence', label: 'نفوذ', type: 'select', opts: LEVEL3, def: 'medium' },
+                { key: 'interest', add: 'stakeholder_interest', label: 'علاقه‌مندی', type: 'select', opts: LEVEL3, def: 'medium' },
+                { key: 'engagement_status', add: 'stakeholder_engagement', label: 'وضعیت تعامل', type: 'select', opts: ENGAGE, def: 'neutral', full: true }
+            ]
+        },
+        task: {
+            addTitle: 'افزودن فرآیند', editTitle: 'ویرایش فرآیند',
+            addAction: 'addTask&id=' + PID, editAction: 'updateProcess',
+            addFields: [
+                { add: 'task_id', label: 'فرآیند *', type: 'select', req: true, full: true, placeholder: 'یک فرآیند انتخاب کنید…',
+                  opts: AVAILABLE_TASKS.map(function (t) { return [String(t.id), t.code + ' - ' + t.name + ' (' + t.ka + ')']; }) },
+                { add: 'task_status', label: 'وضعیت', type: 'select', def: 'not_started', full: true, opts: TASK_STATUS }
+            ],
+            editFields: [
+                { label: 'فرآیند', type: 'text', disabled: true, full: true,
+                  value: function (d) { return (d.task_code || '') + ' - ' + (d.task_name || ''); } },
+                { key: 'status', label: 'وضعیت', type: 'select', full: true, opts: TASK_STATUS },
+                { key: 'notes', label: 'یادداشت', type: 'textarea', full: true, placeholder: 'یادداشت‌های مربوط به این فرآیند…' }
+            ]
+        }
+    };
+
+    /* ---------- ساخت DOM (بدون innerHTML برای مقادیر کاربر؛ XSS-safe) ---------- */
+    function el(tag, attrs, children) {
+        var n = document.createElement(tag);
+        Object.keys(attrs || {}).forEach(function (k) {
+            var v = attrs[k];
+            if (v === false || v == null) return;
+            if (k === 'text') n.textContent = v; else n.setAttribute(k, v === true ? '' : v);
+        });
+        (children || []).forEach(function (c) { n.appendChild(c); });
+        return n;
     }
-}
+    function hidden(name, value) { return el('input', { type: 'hidden', name: name, value: value }); }
 
-// ============================================================
-// مدیریت Modal
-// ============================================================
-function openModal() {
-    document.getElementById('itemModal').style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
+    var uid = 0;
+    function buildField(f, data, mode) {
+        var name = mode === 'edit' ? (f.key || null) : (f.add || null);
+        var id = 'f_' + (++uid);
+        var val = f.value ? f.value(data || {}) : (mode === 'edit' && data && f.key ? data[f.key] : f.def);
+        if (val == null) val = f.def != null ? f.def : '';
+        if (f.type === 'date') val = String(val).slice(0, 10);
 
-function closeModal() {
-    document.getElementById('itemModal').style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
-window.onclick = function(event) {
-    const modal = document.getElementById('itemModal');
-    if (event.target == modal) closeModal();
-}
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeModal();
-});
-
-// ============================================================
-// باز کردن Modal برای افزودن
-// ============================================================
-function openAddModal(type) {
-    const form = document.getElementById('modalForm');
-    const title = document.getElementById('modalTitle');
-    const fields = document.getElementById('modalFields');
-    const projectId = <?= $project['id'] ?>;
-    
-    let action = '', html = '';
-    
-    switch(type) {
-        case 'deliverable':
-            action = `?controller=project&action=addDeliverable&id=${projectId}`;
-            title.textContent = 'افزودن تحویل‌دادنی جدید';
-            html = `
-                <div class="form-group">
-                    <label class="form-label">نام تحویل‌دادنی *</label>
-                    <input type="text" name="deliverable_name" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">توضیحات</label>
-                    <textarea name="deliverable_description" class="form-control" rows="3"></textarea>
-                </div>
-                <div class="form-row-grid">
-                    <div class="form-group">
-                        <label class="form-label">وضعیت</label>
-                        <select name="deliverable_status" class="form-select">
-                            <option value="pending">در انتظار</option>
-                            <option value="in_progress">در حال انجام</option>
-                            <option value="completed">تکمیل شده</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">تاریخ برنامه‌ریزی</label>
-                        <input type="date" name="deliverable_planned_date" class="form-control">
-                    </div>
-                </div>`;
-            break;
-            
-        case 'risk':
-            action = `?controller=project&action=addRisk&id=${projectId}`;
-            title.textContent = 'افزودن ریسک جدید';
-            html = `
-                <div class="form-group">
-                    <label class="form-label">عنوان ریسک *</label>
-                    <input type="text" name="risk_title" class="form-control" required>
-                </div>
-                <div class="form-row-grid">
-                    <div class="form-group">
-                        <label class="form-label">احتمال</label>
-                        <select name="risk_probability" class="form-select">
-                            <option value="very_low">بسیار کم</option>
-                            <option value="low">کم</option>
-                            <option value="medium" selected>متوسط</option>
-                            <option value="high">بالا</option>
-                            <option value="very_high">بسیار بالا</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">تأثیر</label>
-                        <select name="risk_impact" class="form-select">
-                            <option value="very_low">بسیار کم</option>
-                            <option value="low">کم</option>
-                            <option value="medium" selected>متوسط</option>
-                            <option value="high">بالا</option>
-                            <option value="very_high">بسیار بالا</option>
-                        </select>
-                    </div>
-                </div>`;
-            break;
-            
-        case 'stakeholder':
-            action = `?controller=project&action=addStakeholder&id=${projectId}`;
-            title.textContent = 'افزودن ذی‌نفع جدید';
-            html = `
-                <div class="form-row-grid">
-                    <div class="form-group">
-                        <label class="form-label">نام *</label>
-                        <input type="text" name="stakeholder_name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">نقش *</label>
-                        <input type="text" name="stakeholder_role" class="form-control" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ایمیل</label>
-                    <input type="email" name="stakeholder_email" class="form-control">
-                </div>
-                <div class="form-row-grid">
-                    <div class="form-group">
-                        <label class="form-label">نفوذ</label>
-                        <select name="stakeholder_influence" class="form-select">
-                            <option value="low">کم</option>
-                            <option value="medium" selected>متوسط</option>
-                            <option value="high">بالا</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">علاقه‌مندی</label>
-                        <select name="stakeholder_interest" class="form-select">
-                            <option value="low">کم</option>
-                            <option value="medium" selected>متوسط</option>
-                            <option value="high">بالا</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">وضعیت تعامل</label>
-                    <select name="stakeholder_engagement" class="form-select">
-                        <option value="unaware">ناآگاه</option>
-                        <option value="resistant">مقاوم</option>
-                        <option value="neutral" selected>خنثی</option>
-                        <option value="supportive">حامی</option>
-                        <option value="leading">رهبر</option>
-                    </select>
-                </div>`;
-            break;
-            
-            case 'task':
-            action = `?controller=project&action=updateProcess`;
-            title.textContent = 'ویرایش فرآیند';
-            
-            // استخراج شناسه صحیح فرآیند (پوشش تمام حالت‌های ممکن نام‌گذاری در کوئری)
-            const processId = data.process_id || data.task_id || data.id;
-            
-            html = `
-                <input type="hidden" name="id" value="${data.id}">
-                <input type="hidden" name="process_id" value="${processId}">
-                <input type="hidden" name="task_id" value="${processId}">
-                <input type="hidden" name="project_id" value="${projectId}">
-                
-                <div class="form-group">
-                    <label class="form-label">فرآیند</label>
-                    <input type="text" class="form-control" value="${escapeHtml(data.task_code)} - ${escapeHtml(data.task_name)}" disabled>
-                </div>
-                
-                <div class="form-row-grid">
-                    <div class="form-group">
-                        <label class="form-label">وضعیت</label>
-                        <select name="status" class="form-select">
-                            <option value="not_started" ${data.status === 'not_started' ? 'selected' : ''}>شروع نشده</option>
-                            <option value="in_progress" ${data.status === 'in_progress' ? 'selected' : ''}>در حال انجام</option>
-                            <option value="completed" ${data.status === 'completed' ? 'selected' : ''}>تکمیل شده</option>
-                            <option value="deferred" ${data.status === 'deferred' ? 'selected' : ''}>تعویق‌شده</option>
-                            <option value="na" ${data.status === 'na' ? 'selected' : ''}>نامرتبط (N/A)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">امتیاز کیفیت (0-100)</label>
-                        <input type="number" name="quality_score" class="form-control" min="0" max="100" value="${data.quality_score || 0}">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">مسئول اجرا</label>
-                    <input type="text" name="responsible_person" class="form-control" value="${escapeHtml(data.responsible_person || '')}" placeholder="نام شخص یا تیم مسئول">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">یادداشت / توضیحات</label>
-                    <textarea name="notes" class="form-control" rows="3" placeholder="یادداشت‌های مربوط به این فرآیند...">${escapeHtml(data.notes || '')}</textarea>
-                </div>`;
-            break;
+        var ctrl;
+        if (f.type === 'select') {
+            ctrl = el('select', { id: id, name: name, class: 'form-select', required: !!f.req });
+            if (f.placeholder) ctrl.appendChild(el('option', { value: '', text: f.placeholder }));
+            f.opts.forEach(function (o) {
+                var opt = el('option', { value: o[0], text: o[1] });
+                if (String(o[0]) === String(val)) opt.selected = true;
+                ctrl.appendChild(opt);
+            });
+        } else if (f.type === 'textarea') {
+            ctrl = el('textarea', { id: id, name: name, class: 'form-control', rows: 3, placeholder: f.placeholder });
+            ctrl.value = val;
+        } else {
+            ctrl = el('input', { id: id, type: f.type, name: f.disabled ? null : name, class: 'form-control',
+                                 required: !!f.req, disabled: !!f.disabled });
+            ctrl.value = val;
+        }
+        return el('div', { class: 'form-group' + (f.full ? ' form-group--full' : '') }, [
+            el('label', { class: 'form-label', for: id, text: f.label }), ctrl
+        ]);
     }
-    
-    form.action = action;
-    fields.innerHTML = html;
-    openModal();
-}
 
-// ============================================================
-// باز کردن Modal برای ویرایش - ✅ اصلاح شده
-// ============================================================
-function openEditModal(type, data) {
-    const form = document.getElementById('modalForm');
-    const title = document.getElementById('modalTitle');
-    const fields = document.getElementById('modalFields');
-    const projectId = <?= $project['id'] ?>;
-    
-    let action = '', html = '';
-    
-    switch(type) {
-        case 'deliverable':
-            action = `?controller=project&action=updateDeliverable`;
-            title.textContent = 'ویرایش تحویل‌دادنی';
-            html = `
-                <input type="hidden" name="id" value="${data.id}">
-                <input type="hidden" name="project_id" value="${projectId}">
-                <div class="form-group">
-                    <label class="form-label">نام *</label>
-                    <input type="text" name="name" class="form-control" value="${escapeHtml(data.name || '')}" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">توضیحات</label>
-                    <textarea name="description" class="form-control" rows="3">${escapeHtml(data.description || '')}</textarea>
-                </div>
-                <div class="form-row-grid">
-                    <div class="form-group">
-                        <label class="form-label">وضعیت</label>
-                        <select name="status" class="form-select">
-                            <option value="pending" ${data.status === 'pending' ? 'selected' : ''}>در انتظار</option>
-                            <option value="in_progress" ${data.status === 'in_progress' ? 'selected' : ''}>در حال انجام</option>
-                            <option value="completed" ${data.status === 'completed' ? 'selected' : ''}>تکمیل شده</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">تاریخ برنامه‌ریزی</label>
-                        <input type="date" name="planned_date" class="form-control" value="${data.planned_date || ''}">
-                    </div>
-                </div>`;
-            break;
-            
-        case 'risk':
-            action = `?controller=project&action=updateRisk`;
-            title.textContent = 'ویرایش ریسک';
-            html = `
-                <input type="hidden" name="id" value="${data.id}">
-                <input type="hidden" name="project_id" value="${projectId}">
-                <div class="form-group">
-                    <label class="form-label">عنوان ریسک *</label>
-                    <input type="text" name="title" class="form-control" value="${escapeHtml(data.title || '')}" required>
-                </div>
-                <div class="form-row-grid">
-                    <div class="form-group">
-                        <label class="form-label">احتمال</label>
-                        <select name="probability" class="form-select">
-                            <option value="very_low" ${data.probability === 'very_low' ? 'selected' : ''}>بسیار کم</option>
-                            <option value="low" ${data.probability === 'low' ? 'selected' : ''}>کم</option>
-                            <option value="medium" ${data.probability === 'medium' ? 'selected' : ''}>متوسط</option>
-                            <option value="high" ${data.probability === 'high' ? 'selected' : ''}>بالا</option>
-                            <option value="very_high" ${data.probability === 'very_high' ? 'selected' : ''}>بسیار بالا</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">تأثیر</label>
-                        <select name="impact" class="form-select">
-                            <option value="very_low" ${data.impact === 'very_low' ? 'selected' : ''}>بسیار کم</option>
-                            <option value="low" ${data.impact === 'low' ? 'selected' : ''}>کم</option>
-                            <option value="medium" ${data.impact === 'medium' ? 'selected' : ''}>متوسط</option>
-                            <option value="high" ${data.impact === 'high' ? 'selected' : ''}>بالا</option>
-                            <option value="very_high" ${data.impact === 'very_high' ? 'selected' : ''}>بسیار بالا</option>
-                        </select>
-                    </div>
-                </div>`;
-            break;
-            
-        case 'stakeholder':
-            action = `?controller=project&action=updateStakeholder`;
-            title.textContent = 'ویرایش ذی‌نفع';
-            html = `
-                <input type="hidden" name="id" value="${data.id}">
-                <input type="hidden" name="project_id" value="${projectId}">
-                <div class="form-row-grid">
-                    <div class="form-group">
-                        <label class="form-label">نام *</label>
-                        <input type="text" name="name" class="form-control" value="${escapeHtml(data.name || '')}" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">نقش *</label>
-                        <input type="text" name="role" class="form-control" value="${escapeHtml(data.role || '')}" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">ایمیل</label>
-                    <input type="email" name="email" class="form-control" value="${escapeHtml(data.email || '')}">
-                </div>
-                <div class="form-row-grid">
-                    <div class="form-group">
-                        <label class="form-label">نفوذ</label>
-                        <select name="influence" class="form-select">
-                            <option value="low" ${data.influence === 'low' ? 'selected' : ''}>کم</option>
-                            <option value="medium" ${data.influence === 'medium' ? 'selected' : ''}>متوسط</option>
-                            <option value="high" ${data.influence === 'high' ? 'selected' : ''}>بالا</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">علاقه‌مندی</label>
-                        <select name="interest" class="form-select">
-                            <option value="low" ${data.interest === 'low' ? 'selected' : ''}>کم</option>
-                            <option value="medium" ${data.interest === 'medium' ? 'selected' : ''}>متوسط</option>
-                            <option value="high" ${data.interest === 'high' ? 'selected' : ''}>بالا</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">وضعیت تعامل</label>
-                    <select name="engagement_status" class="form-select">
-                        <option value="unaware" ${data.engagement_status === 'unaware' ? 'selected' : ''}>ناآگاه</option>
-                        <option value="resistant" ${data.engagement_status === 'resistant' ? 'selected' : ''}>مقاوم</option>
-                        <option value="neutral" ${data.engagement_status === 'neutral' ? 'selected' : ''}>خنثی</option>
-                        <option value="supportive" ${data.engagement_status === 'supportive' ? 'selected' : ''}>حامی</option>
-                        <option value="leading" ${data.engagement_status === 'leading' ? 'selected' : ''}>رهبر</option>
-                    </select>
-                </div>`;
-            break;
-            
-        case 'task':
-            action = `?controller=project&action=updateProcess`;
-            title.textContent = 'ویرایش فرآیند';
-            html = `
-                <input type="hidden" name="id" value="${data.id}">
-                <input type="hidden" name="project_id" value="${projectId}">
-                <div class="form-group">
-                    <label class="form-label">فرآیند</label>
-                    <input type="text" class="form-control" value="${escapeHtml(data.task_code)} - ${escapeHtml(data.task_name)}" disabled>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">وضعیت</label>
-                    <select name="status" class="form-select">
-                        <option value="not_started" ${data.status === 'not_started' ? 'selected' : ''}>شروع نشده</option>
-                        <option value="in_progress" ${data.status === 'in_progress' ? 'selected' : ''}>در حال انجام</option>
-                        <option value="completed" ${data.status === 'completed' ? 'selected' : ''}>تکمیل شده</option>
-                        <option value="deferred" ${data.status === 'deferred' ? 'selected' : ''}>تعویق‌شده</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">یادداشت</label>
-                    <textarea name="notes" class="form-control" rows="3" placeholder="یادداشت‌های مربوط به این فرآیند...">${escapeHtml(data.notes || '')}</textarea>
-                </div>`;
-            break;
+    /* ---------- Modal ---------- */
+    var modal = document.getElementById('itemModal');
+    var form = document.getElementById('modalForm');
+    var fieldsBox = document.getElementById('modalFields');
+    var titleEl = document.getElementById('modalTitle');
+
+    function openForm(type, mode, data) {
+        var cfg = FORMS[type];
+        var fields = mode === 'edit' ? (cfg.editFields || cfg.fields) : (cfg.addFields || cfg.fields);
+        fieldsBox.textContent = '';
+        titleEl.textContent = mode === 'edit' ? cfg.editTitle : cfg.addTitle;
+        form.action = '?controller=project&action=' + (mode === 'edit' ? cfg.editAction : cfg.addAction);
+
+        if (mode === 'edit') {
+            fieldsBox.appendChild(hidden('id', data.id));
+            fieldsBox.appendChild(hidden('project_id', PID));
+        }
+        if (type === 'task' && mode === 'add' && !AVAILABLE_TASKS.length) {
+            fieldsBox.appendChild(el('p', { class: 'text-muted form-group--full', text: 'همهٔ فرآیندها قبلاً به این پروژه اضافه شده‌اند.' }));
+        } else {
+            fields.forEach(function (f) { fieldsBox.appendChild(buildField(f, data, mode)); });
+        }
+        modal.showModal();
+        var first = fieldsBox.querySelector('input:not([type=hidden]):not([disabled]), select, textarea');
+        if (first) first.focus();
     }
-    
-    form.action = action;
-    fields.innerHTML = html;
-    openModal();
-}
 
-// تابع کمکی برای جلوگیری از XSS
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+    document.addEventListener('click', function (ev) {
+        var add = ev.target.closest('[data-add]');
+        if (add) return openForm(add.getAttribute('data-add'), 'add', null);
 
-// ============================================================
-// اجرا هنگام بارگذاری صفحه
-// ============================================================
-document.addEventListener('DOMContentLoaded', function() {
-    restoreActiveTab();
-});
+        var edit = ev.target.closest('[data-edit]');
+        if (edit) {
+            var item = {};
+            try { item = JSON.parse(edit.getAttribute('data-item')); } catch (e) { /* داده خراب */ }
+            return openForm(edit.getAttribute('data-edit'), 'edit', item);
+        }
+        if (ev.target.closest('[data-close]') || ev.target === modal) modal.close();
+    });
+
+    // تأیید حذف
+    document.addEventListener('submit', function (ev) {
+        var msg = ev.target.getAttribute && ev.target.getAttribute('data-confirm');
+        if (msg && !window.confirm(msg)) ev.preventDefault();
+    });
+
+    /* ---------- تب‌ها (URL ← localStorage ← پیش‌فرض) ---------- */
+    var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab-btn[data-tab]'));
+
+    function activate(id, persist) {
+        var btn = tabBtns.filter(function (b) { return b.getAttribute('data-tab') === id; })[0];
+        var panel = id ? document.getElementById(id) : null;
+        if (!btn || !panel) return false;
+        tabBtns.forEach(function (b) {
+            var on = b === btn;
+            b.classList.toggle('active', on);
+            b.setAttribute('aria-selected', String(on));
+        });
+        document.querySelectorAll('.tab-content').forEach(function (p) { p.classList.toggle('active', p === panel); });
+        if (persist) {
+            try { localStorage.setItem('pmbok_active_tab', id); } catch (e) { /* storage ممکن است در دسترس نباشد */ }
+            var url = new URL(window.location);
+            url.searchParams.set('tab', id);
+            window.history.replaceState({}, '', url);
+        }
+        return true;
+    }
+
+    tabBtns.forEach(function (b) {
+        b.addEventListener('click', function () { activate(b.getAttribute('data-tab'), true); });
+    });
+
+    var saved = null;
+    try { saved = localStorage.getItem('pmbok_active_tab'); } catch (e) { /* ignore */ }
+    var fromUrl = new URLSearchParams(window.location.search).get('tab');
+    activate(fromUrl, false) || activate(saved, false) || activate('deliverables', false);
+})();
 </script>

@@ -186,3 +186,22 @@ function pmbok_truncateText($text, $length = 100, $suffix = '...')
     }
     return mb_substr($text, 0, $length, 'UTF-8') . $suffix;
 }
+
+/**
+ * برچسب فارسی استراتژی پاسخ به ریسک (مقدار ناشناخته همان‌طور که هست نمایش داده می‌شود)
+ */
+function pmbok_getResponseStrategyLabel($value)
+{
+    $labels = [
+        'avoid'     => 'اجتناب',
+        'mitigate'  => 'کاهش',
+        'transfer'  => 'انتقال',
+        'accept'    => 'پذیرش',
+        'escalate'  => 'ارجاع به سطح بالاتر',
+        'exploit'   => 'بهره‌برداری',
+        'enhance'   => 'تقویت',
+        'share'     => 'اشتراک‌گذاری',
+    ];
+    $value = (string)$value;
+    return $labels[$value] ?? $value;
+}

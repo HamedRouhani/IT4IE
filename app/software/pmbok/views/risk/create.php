@@ -1,85 +1,85 @@
 <?php
-$pageTitle = 'ثبت ریسک جدید - PMBOK';
+/** ثبت ریسک جدید - PMBOK (بازطراحی‌شده) */
+$pageTitle  = 'ثبت ریسک جدید - PMBOK';
 $activePage = 'risk';
+
+$projects = $projects ?? [];
+$strategy = $strategy ?? ['enum' => false, 'options' => [], 'nullable' => true];
+$e = static fn($v) => htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8');
+$levels = ['very_low' => 'بسیار کم (1)', 'low' => 'کم (2)', 'medium' => 'متوسط (3)', 'high' => 'بالا (4)', 'very_high' => 'بسیار بالا (5)'];
 ?>
 
 <div class="page-header">
-    <nav class="breadcrumb">
-        <a href="?controller=risk">ریسک‌ها</a> /
-        <span>ثبت ریسک جدید</span>
-    </nav>
-    <h2><i class="fas fa-plus-circle"></i> ثبت ریسک جدید</h2>
+    <div>
+        <nav class="breadcrumb" aria-label="مسیر"><a href="?controller=risk">ریسک‌ها</a> / <span>ثبت ریسک جدید</span></nav>
+        <h2><i class="fas fa-plus-circle"></i> ثبت ریسک جدید</h2>
+    </div>
 </div>
 
-<div class="card">
+<section class="card">
     <form method="POST" action="?controller=risk&action=create" class="standard-form">
         <div class="form-group">
-            <label class="form-label">پروژه *</label>
-            <select name="project_id" class="form-select" required>
+            <label class="form-label" for="project_id">پروژه *</label>
+            <select id="project_id" name="project_id" class="form-select" required>
                 <option value="">انتخاب پروژه...</option>
                 <?php foreach ($projects as $p): ?>
-                    <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['name']) ?></option>
+                    <option value="<?= (int)$p['id'] ?>"><?= $e($p['name']) ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
-        
+
         <div class="form-group">
-            <label class="form-label">عنوان ریسک *</label>
-            <input type="text" name="title" class="form-control" required>
+            <label class="form-label" for="title">عنوان ریسک *</label>
+            <input type="text" id="title" name="title" class="form-control" required>
         </div>
-        
+
         <div class="form-group">
-            <label class="form-label">توضیحات</label>
-            <textarea name="description" class="form-control" rows="4"></textarea>
+            <label class="form-label" for="description">توضیحات</label>
+            <textarea id="description" name="description" class="form-control" rows="4"></textarea>
         </div>
-        
+
         <div class="form-row">
             <div class="form-group">
-                <label class="form-label">احتمال</label>
-                <select name="probability" class="form-select">
-                    <option value="very_low">بسیار کم (1)</option>
-                    <option value="low">کم (2)</option>
-                    <option value="medium" selected>متوسط (3)</option>
-                    <option value="high">بالا (4)</option>
-                    <option value="very_high">بسیار بالا (5)</option>
+                <label class="form-label" for="probability">احتمال</label>
+                <select id="probability" name="probability" class="form-select">
+                    <?php foreach ($levels as $k => $v): ?><option value="<?= $k ?>" <?= $k === 'medium' ? 'selected' : '' ?>><?= $v ?></option><?php endforeach; ?>
                 </select>
             </div>
-            
             <div class="form-group">
-                <label class="form-label">تاثیر</label>
-                <select name="impact" class="form-select">
-                    <option value="very_low">بسیار کم (1)</option>
-                    <option value="low">کم (2)</option>
-                    <option value="medium" selected>متوسط (3)</option>
-                    <option value="high">بالا (4)</option>
-                    <option value="very_high">بسیار بالا (5)</option>
+                <label class="form-label" for="impact">تاثیر</label>
+                <select id="impact" name="impact" class="form-select">
+                    <?php foreach ($levels as $k => $v): ?><option value="<?= $k ?>" <?= $k === 'medium' ? 'selected' : '' ?>><?= $v ?></option><?php endforeach; ?>
                 </select>
             </div>
         </div>
-        
+
         <div class="form-group">
-            <label class="form-label">استراتژی پاسخ</label>
-            <textarea name="response_strategy" class="form-control" rows="2" 
-                      placeholder="اجتناب / کاهش / انتقال / پذیرش"></textarea>
+            <label class="form-label" for="response_strategy">استراتژی پاسخ</label>
+            <?php if (!empty($strategy['enum'])): ?>
+                <select id="response_strategy" name="response_strategy" class="form-select">
+                    <?php if (!empty($strategy['nullable'])): ?><option value="">— انتخاب نشده —</option><?php endif; ?>
+                    <?php foreach ($strategy['options'] as $opt): ?>
+                        <option value="<?= $e($opt) ?>" <?= '' === $opt ? 'selected' : '' ?>><?= $e(pmbok_getResponseStrategyLabel($opt)) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            <?php else: ?>
+                <textarea id="response_strategy" name="response_strategy" class="form-control" rows="2" placeholder="اجتناب / کاهش / انتقال / پذیرش"><?= $e('') ?></textarea>
+            <?php endif; ?>
         </div>
-        
+
         <div class="form-group">
-            <label class="form-label">برنامه پاسخ</label>
-            <textarea name="response_plan" class="form-control" rows="3"></textarea>
+            <label class="form-label" for="response_plan">برنامه پاسخ</label>
+            <textarea id="response_plan" name="response_plan" class="form-control" rows="3"></textarea>
         </div>
-        
+
         <div class="form-group">
-            <label class="form-label">مسئول</label>
-            <input type="text" name="owner" class="form-control">
+            <label class="form-label" for="owner">مسئول</label>
+            <input type="text" id="owner" name="owner" class="form-control">
         </div>
-        
+
         <div class="form-actions">
-            <button type="submit" class="btn btn-danger">
-                <i class="fas fa-save"></i> ثبت ریسک
-            </button>
-            <a href="?controller=risk" class="btn btn-secondary">
-                <i class="fas fa-times"></i> انصراف
-            </a>
+            <button type="submit" class="btn btn-danger"><i class="fas fa-save"></i> ثبت ریسک</button>
+            <a href="?controller=risk" class="btn btn-secondary"><i class="fas fa-times"></i> انصراف</a>
         </div>
     </form>
-</div>
+</section>

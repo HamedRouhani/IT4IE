@@ -39,11 +39,25 @@ class ProjectController extends Controller
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         $projects = $stmt->fetchAll();
+
+        // آمار کل کاربر مستقل از فیلترهاست؛ تعداد نتایج از همان فهرست فیلترشده می‌آید.
+        $statsStmt = $this->db->prepare("SELECT COUNT(*) AS all_projects,
+                                                SUM(CASE WHEN phase IN ('execution', 'monitoring_controlling') THEN 1 ELSE 0 END) AS active,
+                                                SUM(CASE WHEN phase = 'closure' THEN 1 ELSE 0 END) AS completed
+                                         FROM {$this->prefix}projects
+                                         WHERE user_id = ?");
+        $statsStmt->execute([$this->currentUserId]);
+        $stats = $statsStmt->fetch() ?: [];
+        $stats['all_projects'] = (int)($stats['all_projects'] ?? 0);
+        $stats['active'] = (int)($stats['active'] ?? 0);
+        $stats['completed'] = (int)($stats['completed'] ?? 0);
+        $stats['total'] = count($projects);
         
         $this->view('project/index', [
             'pageTitle' => 'پروژه‌های من',
             'currentPage' => 'project',
             'projects' => $projects,
+            'stats' => $stats,
             'phase' => $phase,
             'methodology' => $methodology,
             'search' => $search,

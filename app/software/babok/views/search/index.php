@@ -24,7 +24,7 @@
                 autocomplete="off"
                 style="flex: 1; padding: 15px 20px; border: none; font-size: 1rem; outline: none;"
             >
-            <button type="submit" style="background: #6C3CE1; color: white; border: none; padding: 0 30px; font-size: 1rem; cursor: pointer; font-weight: 600;">
+            <button type="submit" style="background: var(--mt-dark); color: white; border: none; padding: 0 30px; font-size: 1rem; cursor: pointer; font-weight: 600;">
                 <i class="fas fa-search"></i> جستجو
             </button>
         </div>
