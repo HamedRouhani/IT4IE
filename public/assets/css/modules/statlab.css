@@ -407,6 +407,8 @@
 
 /* ═══ ردیف‌های لیست گزارش‌ها ═══ */
 .statlab-report-row {
+    min-width: 0;
+    overflow: hidden;
     transition: transform .15s, box-shadow .15s;
 }
 .statlab-report-row__body {
@@ -415,6 +417,7 @@
     align-items: center;
     gap: 1rem;
     width: 100%;
+    min-width: 0;
 }
 .statlab-report-row__info { min-width: 0; }
 .statlab-report-row__heading,
@@ -424,23 +427,39 @@
     align-items: center;
     gap: .5rem .75rem;
 }
+.statlab-report-row__heading { line-height: 1.6; }
+.statlab-report-row__meta { margin-top: .65rem; line-height: 1.7; }
 .statlab-report-row__title {
     min-width: 0;
     overflow-wrap: anywhere;
 }
 .statlab-report-row__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     justify-self: end;
     width: auto;
     max-width: 100%;
+    min-height: 40px;
+    padding-inline: 1rem;
     white-space: nowrap;
 }
 @media (max-width: 767.98px) {
     .statlab-report-row__body { grid-template-columns: minmax(0, 1fr); }
-    .statlab-report-row__action { justify-self: stretch; text-align: center; }
+    .statlab-report-row__action { justify-self: stretch; width: 100%; white-space: normal; text-align: center; }
 }
 .statlab-report-row:hover {
     transform: translateY(-2px);
     box-shadow: 0 .5rem 1rem rgba(0,0,0,.12) !important;
+}
+.statlab-report-interpretation {
+    max-width: 100%;
+    margin: 0;
+    color: #334155;
+    font-family: inherit;
+    line-height: 1.9;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 /* ═══ کارت‌های دسترسی سریع داشبورد ═══ */

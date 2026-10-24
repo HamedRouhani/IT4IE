@@ -21,7 +21,7 @@ $problemTypeCode = $project['problem_type_code'] ?? 'UNKNOWN';
 
     <!-- اطلاعات کلی پروژه -->
     <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center or-report-detail-header">
             <h5 class="mb-0 fw-bold"><i class="fas fa-file-alt text-primary me-2"></i> گزارش تفصیلی پروژه</h5>
             <div>
                 <button class="btn btn-sm btn-outline-info me-2" onclick="window.print()">
@@ -50,7 +50,7 @@ $problemTypeCode = $project['problem_type_code'] ?? 'UNKNOWN';
                 </div>
                 <div class="col-md-3">
                     <h6 class="text-muted small text-uppercase fw-bold">تاریخ حل</h6>
-                    <p class="fw-bold fs-5 mb-0"><?= htmlspecialchars($project['updated_at'] ?? 'ثبت نشده') ?></p>
+                    <p class="fw-bold fs-5 mb-0"><?= or_showDate($project['updated_at'] ?? '', 'Y/m/d H:i:s') ?></p>
                 </div>
             </div>
 

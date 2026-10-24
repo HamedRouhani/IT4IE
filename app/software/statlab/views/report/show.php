@@ -147,7 +147,7 @@ $sigCount = count(array_filter($results, fn($r) => $r['p_value'] !== null && (fl
                 <?php endif; ?>
 
                 <?php if (!empty($r['interpretation_fa'])): ?>
-                    <pre class="small mb-0" style="white-space: pre-wrap; color:#495057;"><?= stat_e($r['interpretation_fa']) ?></pre>
+                    <pre class="small mb-0 statlab-report-interpretation"><?= stat_e($r['interpretation_fa']) ?></pre>
                 <?php endif; ?>
             </div>
         </div>

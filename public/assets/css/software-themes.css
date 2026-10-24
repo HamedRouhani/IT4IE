@@ -77,7 +77,33 @@ body.software-mode[data-module="statlab"] .software-content .btn-success {
 body.software-mode[data-module="statlab"] .software-content .btn-success:hover { background: var(--mt-dark); border-color: var(--mt-dark); color: #fff; }
 body.software-mode[data-module="statlab"] .software-content .btn-outline-success { background: transparent; border: 1px solid var(--mt); color: var(--mt); }
 body.software-mode[data-module="statlab"] .software-content .btn-outline-success:hover { background: var(--mt); color: #fff; }
+/* OR uses orange for actions; semantic success badges remain green. */
+body.software-mode[data-module="or"] .software-content .btn-success {
+    --bs-btn-bg: var(--mt); --bs-btn-border-color: var(--mt); --bs-btn-color: #fff;
+    --bs-btn-hover-bg: var(--mt-dark); --bs-btn-hover-border-color: var(--mt-dark); --bs-btn-hover-color: #fff;
+    --bs-btn-active-bg: var(--mt-dark); --bs-btn-active-border-color: var(--mt-dark); --bs-btn-active-color: #fff;
+    --bs-btn-disabled-bg: var(--mt); --bs-btn-disabled-border-color: var(--mt);
+    --bs-btn-focus-shadow-rgb: var(--mt-rgb);
+    background: var(--mt); border-color: var(--mt); color: #fff;
+}
+body.software-mode[data-module="or"] .software-content .btn-success:hover,
+body.software-mode[data-module="or"] .software-content .btn-success:focus-visible { background: var(--mt-dark); border-color: var(--mt-dark); color: #fff; }
+body.software-mode[data-module="or"] .software-content .btn-outline-success {
+    --bs-btn-color: var(--mt); --bs-btn-border-color: var(--mt);
+    --bs-btn-hover-bg: var(--mt); --bs-btn-hover-border-color: var(--mt); --bs-btn-hover-color: #fff;
+    --bs-btn-active-bg: var(--mt-dark); --bs-btn-active-border-color: var(--mt-dark);
+    color: var(--mt); border-color: var(--mt);
+}
+body.software-mode[data-module="or"] .software-content .btn-outline-success:hover,
+body.software-mode[data-module="or"] .software-content .btn-outline-success:focus-visible { background: var(--mt); border-color: var(--mt); color: #fff; }
 body.software-mode[data-module] .software-content .form-control:focus { border-color: var(--mt); }
+/* Give icon-only table actions a consistent, keyboard-friendly hit area. */
+body.software-mode[data-module="or"] .software-content table .btn:has(> i:only-child),
+body.software-mode[data-module="or"] .software-content table .btn:has(> .fas:only-child),
+body.software-mode[data-module="or"] .software-content table .btn:has(> .fa:only-child) {
+    display: inline-grid; width: 40px; height: 40px; padding: 0; place-items: center;
+    border-radius: 10px; vertical-align: middle;
+}
 
 body.software-mode[data-module] .software-content .text-primary { color: var(--mt) !important; }
 body.software-mode[data-module] .software-content .bg-primary { background-color: var(--mt) !important; }
