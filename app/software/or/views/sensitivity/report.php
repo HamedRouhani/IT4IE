@@ -31,18 +31,18 @@
     <?php else: ?>
         
         <!-- هدر اطلاعات پروژه -->
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 or-sensitivity-summary">
             <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-4">
+                <div class="or-sensitivity-summary__grid">
+                    <div class="or-sensitivity-summary__item">
                         <h6 class="text-muted mb-1">نام پروژه</h6>
                         <h5 class="mb-0"><?= or_e($project['name']) ?></h5>
                     </div>
-                    <div class="col-md-4">
+                    <div class="or-sensitivity-summary__item">
                         <h6 class="text-muted mb-1">نوع مسئله</h6>
-                        <span class="badge bg-info fs-6"><?= $analysis['type'] ?? $problemType ?></span>
+                        <span class="badge bg-info fs-6 or-sensitivity-type-badge"><?= $analysis['type'] ?? $problemType ?></span>
                     </div>
-                    <div class="col-md-4">
+                    <div class="or-sensitivity-summary__item">
                         <h6 class="text-muted mb-1">مقدار بهینه</h6>
                         <h5 class="mb-0 text-success"><?= number_format($project['optimal_value'] ?? 0, 2) ?></h5>
                     </div>

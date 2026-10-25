@@ -108,6 +108,20 @@ body.software-mode[data-module="or"] .software-content table .btn:has(> .fa:only
 body.software-mode[data-module] .software-content .text-primary { color: var(--mt) !important; }
 body.software-mode[data-module] .software-content .bg-primary { background-color: var(--mt) !important; }
 body.software-mode[data-module] .software-content .border-primary { border-color: var(--mt) !important; }
+/* Keep colored utility text readable on white cards while preserving each module's hue. */
+body.software-mode[data-module="or"] .software-content .text-primary { color: #C2410C !important; }
+body.software-mode[data-module="or"] .software-content .text-info { color: #087990 !important; }
+body.software-mode[data-module="or"] .software-content .text-warning { color: #946200 !important; }
+body.software-mode[data-module="or"] { --bs-link-color: #C2410C; }
+body.software-mode[data-module="or"] .software-content .page-link { color: #C2410C; }
+body.software-mode[data-module="or"] .software-content .bg-info:not(.text-dark) {
+    background-color: #087990 !important;
+    color: #fff !important;
+}
+body.software-mode[data-module="or"] .software-content .bg-info.text-dark {
+    background-color: #cff4fc !important;
+    color: #055160 !important;
+}
 body.software-mode[data-module] .software-content .progress-bar { background-color: var(--mt); }
 body.software-mode[data-module] .software-content :is(.form-control, .form-select):focus {
     border-color: var(--mt); box-shadow: 0 0 0 .25rem rgba(var(--mt-rgb), .22);

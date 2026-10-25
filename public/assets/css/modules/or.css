@@ -110,7 +110,8 @@
 .or-dashboard-methods__icon { margin: 0 auto .75rem; }
 
 /* Smart modeler controls and score badges need contrast against the OR orange. */
-body.software-mode[data-module="or"] .software-content #analyzeBtn { border-radius: 12px; }
+body.software-mode[data-module="or"] .software-content #analyzeBtn { border-radius: 999px; }
+.or-smart-score-label { color: var(--mt-ink); }
 body.software-mode[data-module="or"] .software-content .or-smart-score {
     background-color: var(--mt-tint);
     border: 1px solid rgba(var(--mt-rgb), .24);
@@ -454,12 +455,21 @@ body.software-mode[data-module="or"] .btn-outline-success {
     background: var(--or-bg-gradient);
     border-radius: 12px;
 }
+.or-header-card .or-method-name-en {
+    display: inline-block;
+    padding: .2rem .45rem;
+    border-radius: 6px;
+    background: rgba(124, 45, 18, .38);
+    color: #fff !important;
+    opacity: 1;
+}
 
 /* ── کارت CTA ── */
 .or-cta-card {
     background: var(--or-bg-gradient);
     border-radius: 12px;
 }
+.or-cta-card p { color: rgba(255, 255, 255, .9) !important; }
 
 /* The report detail header has two controls beside its title on desktop. */
 .or-report-detail-header { gap: 1rem; }
@@ -467,6 +477,89 @@ body.software-mode[data-module="or"] .btn-outline-success {
 @media (max-width: 575.98px) {
     .or-report-detail-header { align-items: stretch !important; flex-direction: column; }
     .or-report-detail-header > div .btn { flex: 1 1 auto; min-height: 40px; }
+}
+
+/* Method detail layout responds to the actual content width left beside the
+   software sidebar, rather than the browser viewport breakpoint. */
+.or-method-page { container: or-method-page / inline-size; }
+.or-method-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, .42fr);
+    align-items: center;
+    gap: 1.25rem;
+}
+.or-method-hero__content,
+.or-method-hero__actions,
+.or-method-main,
+.or-method-aside { min-width: 0; }
+.or-method-hero__actions { text-align: right; }
+.or-method-hero__actions .btn-light { max-width: 100%; white-space: normal; }
+.or-method-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(250px, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+}
+.or-method-layout > :is(main, aside) { width: auto; max-width: 100%; }
+@container or-method-page (max-width: 900px) {
+    .or-method-hero { grid-template-columns: minmax(0, 1fr); }
+    .or-method-hero__actions { text-align: start; }
+    .or-method-hero__actions .btn-outline-light { display: inline-block !important; width: auto; margin-top: .5rem; }
+    .or-method-layout { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+    .or-method-aside .or-sticky-sidebar { position: static; }
+}
+
+/* Keep the sensitivity report action on one line; let the table scroll when
+   the viewport cannot accommodate all columns. */
+body.software-mode[data-module="or"] .software-content .or-sensitivity-table { min-width: 940px; }
+body.software-mode[data-module="or"] .software-content .or-sensitivity-actions-heading,
+body.software-mode[data-module="or"] .software-content .or-sensitivity-actions-cell {
+    width: 205px;
+    min-width: 205px;
+    white-space: nowrap;
+}
+body.software-mode[data-module="or"] .software-content .or-sensitivity-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    width: max-content;
+    min-width: 190px;
+    max-width: none;
+    white-space: nowrap !important;
+    line-height: 1.35;
+}
+.or-sensitivity-summary__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+    gap: 1rem;
+}
+.or-sensitivity-summary__item { min-width: 0; }
+.or-sensitivity-type-badge {
+    display: inline-block;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+    text-align: right;
+}
+@media (max-width: 767.98px) {
+    body.software-mode[data-module="or"] .software-content .or-sensitivity-table { min-width: 720px; }
+    body.software-mode[data-module="or"] .software-content .or-sensitivity-actions-heading,
+    body.software-mode[data-module="or"] .software-content .or-sensitivity-actions-cell {
+        width: 64px;
+        min-width: 64px;
+    }
+    body.software-mode[data-module="or"] .software-content .or-sensitivity-action {
+        display: inline-grid;
+        width: 40px;
+        min-width: 40px;
+        height: 40px;
+        padding: 0;
+        place-items: center;
+        border-radius: 10px;
+    }
+    .or-sensitivity-action__label { display: none; }
 }
 
 /* ── سایدبار چسبان ── */

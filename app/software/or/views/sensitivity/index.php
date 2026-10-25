@@ -40,7 +40,7 @@
         <div class="card border-0 shadow-sm">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="or-matrix">
+                    <table class="or-matrix or-sensitivity-table">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -48,7 +48,7 @@
                                 <th>نوع مسئله</th>
                                 <th>مقدار بهینه</th>
                                 <th>تاریخ حل</th>
-                                <th class="text-center">عملیات</th>
+                                <th class="text-center or-sensitivity-actions-heading">عملیات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -63,10 +63,10 @@
                                     <td><span class="badge bg-info"><?= or_e($project['problem_type_name'] ?? 'نامشخص') ?></span></td>
                                     <td class="text-success fw-bold"><?= number_format($optimalValue, 2) ?></td>
                                     <td class="text-muted small"><?= or_showDate($project['updated_at']) ?></td>
-                                    <td class="text-center">
+                                    <td class="text-center or-sensitivity-actions-cell">
                                         <a href="<?= or_url('controller=sensitivity&action=report&id=' . $project['id']) ?>" 
-                                           class="btn btn-or-primary btn-sm">
-                                            <i class="fas fa-chart-bar"></i> مشاهده گزارش حساسیت
+                                           class="btn btn-or-primary btn-sm or-sensitivity-action">
+                                            <i class="fas fa-chart-bar" aria-hidden="true"></i><span class="or-sensitivity-action__label">مشاهده گزارش حساسیت</span>
                                         </a>
                                     </td>
                                 </tr>

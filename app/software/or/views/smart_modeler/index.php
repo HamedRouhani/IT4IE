@@ -60,7 +60,7 @@
                             </button>
                             <!-- انواع پیشرفته -->
                             <button class="btn btn-sm btn-outline-primary" onclick="loadSampleText('queueing')">
-                                <i class="fas fa-line-up"></i> صف
+                                <i class="fas fa-hourglass-half"></i> صف
                             </button>
                             <button class="btn btn-sm btn-outline-primary" onclick="loadSampleText('markov')">
                                 <i class="fas fa-random"></i> مارکوف
@@ -241,7 +241,7 @@ function displayResults(data) {
             html += `
                 <div class="mb-2">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="fw-bold ${isActive ? 'text-primary' : 'text-muted'}">${isActive ? '🎯 ' : ''}${typeName}</span>
+                        <span class="fw-bold ${isActive ? 'or-smart-score-label' : 'text-muted'}">${isActive ? '🎯 ' : ''}${typeName}</span>
                         <span class="badge or-smart-score">${percent.toFixed(1)}%</span>
                     </div>
                     <div class="progress" style="height: 8px; background-color: #e9ecef;">

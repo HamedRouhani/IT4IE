@@ -81,7 +81,7 @@ if (!function_exists('orSimpleMarkdown')) {
 
 <link rel="stylesheet" href="/public/assets/css/modules/or.css">
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 or-method-page">
 
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
@@ -99,8 +99,8 @@ if (!function_exists('orSimpleMarkdown')) {
 
     <div class="card border-0 shadow-sm mb-4 or-header-card text-white">
         <div class="card-body p-4">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
+            <div class="or-method-hero">
+                <div class="or-method-hero__content">
                     <div class="d-flex flex-wrap gap-2 mb-2">
                         <span class="badge bg-<?= $cat['color'] ?> fs-6">
                             <i class="fas <?= $cat['icon'] ?> me-1"></i>
@@ -118,9 +118,9 @@ if (!function_exists('orSimpleMarkdown')) {
                         <?php endif; ?>
                     </div>
                     <h2 class="mb-1 fw-bold"><?= htmlspecialchars($name_fa, ENT_QUOTES, 'UTF-8') ?></h2>
-                    <p class="mb-0 opacity-75 font-monospace"><?= htmlspecialchars($name_en, ENT_QUOTES, 'UTF-8') ?></p>
+                    <p class="mb-0 font-monospace or-method-name-en"><?= htmlspecialchars($name_en, ENT_QUOTES, 'UTF-8') ?></p>
                 </div>
-                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <div class="or-method-hero__actions">
                     <!-- 🔧 دکمه اصلاح شده: هدایت مستقیم به کنترلر اختصاصی (مثلاً transport, assignment, ...) -->
                     <a href="<?= $createUrl ?>" class="btn btn-light btn-lg shadow-sm">
                         <i class="fas fa-plus-circle"></i> 
@@ -134,8 +134,8 @@ if (!function_exists('orSimpleMarkdown')) {
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8">
+    <div class="or-method-layout">
+        <main class="or-method-main">
             <?php if (!empty($desc)): ?>
             <div class="card border-0 shadow-sm mb-4 or-section" id="sec-description">
                 <div class="card-header bg-white border-bottom py-3">
@@ -273,9 +273,9 @@ if (!function_exists('orSimpleMarkdown')) {
                 </div>
             </div>
             <?php endif; ?>
-        </div>
+        </main>
 
-        <div class="col-lg-4">
+        <aside class="or-method-aside">
             <div class="or-sticky-sidebar">
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white border-bottom py-2">
@@ -419,6 +419,6 @@ if (!function_exists('orSimpleMarkdown')) {
                     </div>
                 </div>
             </div>
-        </div>
+        </aside>
     </div>
 </div>
