@@ -4,9 +4,9 @@ $currentPage = $currentPage ?? 'dashboard';
 
 // تابع فرمت ارز
 function formatCurrency($amount, $currency = 'IRR') {
-    if ($amount >= 1000000000) return number_format($amount / 1000000000, 1) . ' میلیارد';
-    if ($amount >= 1000000) return number_format($amount / 1000000, 0) . ' میلیون';
-    return number_format($amount, 0);
+    if ($amount >= 1000000000) return number_format($amount / 1000000000, 1) . ' میلیارد ' . htmlspecialchars($currency);
+    if ($amount >= 1000000) return number_format($amount / 1000000, 0) . ' میلیون ' . htmlspecialchars($currency);
+    return number_format($amount, 0) . ' ' . htmlspecialchars($currency);
 }
 
 // رنگ شاخص‌ها
@@ -57,7 +57,7 @@ function getPerformanceColor($value) {
                 </div>
                 <div>
                     <div style="font-size: 0.85rem; opacity: 0.85;">هزینه</div>
-                    <div style="font-size: 1.5rem; font-weight: 700;"><?= $health['cpi_score'] ?>%</div>
+                    <div style="font-size: 1.5rem; font-weight: 700;"><?= $health['cpi_score'] !== null ? $health['cpi_score'] . '%' : '—' ?></div>
                 </div>
                 <div>
                     <div style="font-size: 0.85rem; opacity: 0.85;">ریسک</div>
@@ -76,19 +76,22 @@ function getPerformanceColor($value) {
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
     <div class="card" style="text-align: center;">
         <div style="font-size: 0.85rem; color: var(--gray);">ارزش برنامه‌ریزی‌شده (PV)</div>
-        <div style="font-size: 1.5rem; font-weight: 700; color: #3B82F6;"><?= formatCurrency($evm['pv']) ?></div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: #3B82F6;"><?= formatCurrency($evm['pv'], $project['currency'] ?? 'IRR') ?></div>
     </div>
     <div class="card" style="text-align: center;">
         <div style="font-size: 0.85rem; color: var(--gray);">ارزش کسب‌شده (EV)</div>
-        <div style="font-size: 1.5rem; font-weight: 700; color: #10B981;"><?= formatCurrency($evm['ev']) ?></div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: #10B981;"><?= formatCurrency($evm['ev'], $project['currency'] ?? 'IRR') ?></div>
     </div>
     <div class="card" style="text-align: center;">
         <div style="font-size: 0.85rem; color: var(--gray);">هزینه واقعی (AC)</div>
-        <div style="font-size: 1.5rem; font-weight: 700; color: #F59E0B;"><?= $evm['ac'] !== null ? formatCurrency($evm['ac']) : '—' ?></div>
+        <div style="font-size: 1.5rem; font-weight: 700; color: #F59E0B;"><?= $evm['ac'] !== null ? formatCurrency($evm['ac'], $project['currency'] ?? 'IRR') : '—' ?></div>
+        <?php if (empty($evm['actual_cost_available'])): ?>
+            <small>هزینهٔ واقعی <?= (int)($evm['actual_cost_task_count'] ?? 0) ?> از <?= (int)($evm['actual_cost_total_tasks'] ?? 0) ?> فرآیند ثبت شده؛ برای محاسبهٔ شاخص‌های هزینه، همهٔ مقادیر را ثبت کنید.</small>
+        <?php endif; ?>
     </div>
     <div class="card" style="text-align: center;">
         <div style="font-size: 0.85rem; color: var(--gray);">بودجه کل (BAC)</div>
-        <div style="font-size: 1.5rem; font-weight: 700;"><?= formatCurrency($evm['bac']) ?></div>
+        <div style="font-size: 1.5rem; font-weight: 700;"><?= formatCurrency($evm['bac'], $project['currency'] ?? 'IRR') ?></div>
     </div>
 </div>
 
@@ -127,16 +130,16 @@ function getPerformanceColor($value) {
         <div style="display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; justify-content: space-between;">
                 <span>تخمین هزینه در تکمیل (EAC)</span>
-                <strong><?= $evm['eac'] !== null ? formatCurrency($evm['eac']) : '—' ?></strong>
+                <strong><?= $evm['eac'] !== null ? formatCurrency($evm['eac'], $project['currency'] ?? 'IRR') : '—' ?></strong>
             </div>
             <div style="display: flex; justify-content: space-between;">
                 <span>هزینه باقی‌مانده (ETC)</span>
-                <strong><?= $evm['etc'] !== null ? formatCurrency($evm['etc']) : '—' ?></strong>
+                <strong><?= $evm['etc'] !== null ? formatCurrency($evm['etc'], $project['currency'] ?? 'IRR') : '—' ?></strong>
             </div>
             <div style="display: flex; justify-content: space-between;">
                 <span>انحراف در تکمیل (VAC)</span>
                 <strong style="color: <?= $evm['vac'] !== null ? ($evm['vac'] >= 0 ? '#10B981' : '#EF4444') : '#64748B' ?>;">
-                    <?= $evm['vac'] !== null ? formatCurrency(abs($evm['vac'])) . ' ' . ($evm['vac'] >= 0 ? '(صرفه‌جویی)' : '(مازاد)') : '—' ?>
+                    <?= $evm['vac'] !== null ? formatCurrency(abs($evm['vac']), $project['currency'] ?? 'IRR') . ' ' . ($evm['vac'] >= 0 ? '(صرفه‌جویی)' : '(مازاد)') : '—' ?>
                 </strong>
             </div>
             <div style="display: flex; justify-content: space-between;">
@@ -201,7 +204,7 @@ new Chart(sCurveCtx, {
     data: {
         labels: ['PV (برنامه‌ریزی)', 'EV (کسب‌شده)', 'AC (واقعی)'],
         datasets: [{
-            label: 'ارزش (میلیون)',
+            label: 'ارزش (میلیون <?= htmlspecialchars($project['currency'] ?? 'IRR') ?>)',
             data: [
                 <?= round($evm['pv'] / 1000000, 1) ?>,
                 <?= round($evm['ev'] / 1000000, 1) ?>,

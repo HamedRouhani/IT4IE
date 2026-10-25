@@ -30,7 +30,6 @@ class AnalyticsService
 
         $budgetAtCompletion = (float)$project['budget'];
         $totalPlannedHours = array_sum(array_column($tasks, 'planned_hours'));
-        $totalActualHours = array_sum(array_column($tasks, 'actual_hours'));
         $taskCount = count($tasks);
 
         // محاسبه BAC (Budget at Completion) بر اساس ساعات
@@ -69,11 +68,17 @@ class AnalyticsService
             $ev += $this->calculateTaskBudget($task, $totalPlannedHours, $bac, $taskCount) * ($percentComplete / 100);
         }
 
-        // محاسبه AC (Actual Cost) - هزینه واقعی
-        // بر اساس ساعات واقعی × نرخ ساعتی
-        $hourlyRate = $totalPlannedHours > 0 ? $bac / $totalPlannedHours : 0;
-        $actualCostAvailable = $totalActualHours > 0 && $hourlyRate > 0;
-        $ac = $actualCostAvailable ? $totalActualHours * $hourlyRate : null;
+        // AC فقط از هزینهٔ واقعیِ ثبت‌شده می‌آید؛ ساعات واقعی جایگزین هزینه نیست.
+        $actualCostTaskCount = 0;
+        $actualCostTotal = 0.0;
+        foreach ($tasks as $task) {
+            if (array_key_exists('actual_cost', $task) && $task['actual_cost'] !== null && $task['actual_cost'] !== '') {
+                $actualCostTaskCount++;
+                $actualCostTotal += (float)$task['actual_cost'];
+            }
+        }
+        $actualCostAvailable = $actualCostTaskCount === $taskCount;
+        $ac = $actualCostAvailable ? $actualCostTotal : null;
 
         // محاسبات مشتق‌شده EVM
         $sv = $ev - $pv;                    // Schedule Variance
@@ -105,6 +110,8 @@ class AnalyticsService
             'ev' => $ev,
             'ac' => $ac,
             'actual_cost_available' => $actualCostAvailable,
+            'actual_cost_task_count' => $actualCostTaskCount,
+            'actual_cost_total_tasks' => $taskCount,
             'sv' => $sv,
             'cv' => $cv,
             'spi' => $spi !== null ? round($spi, 3) : null,
@@ -119,7 +126,7 @@ class AnalyticsService
             'completed_tasks' => count(array_filter($tasks, fn($t) => $t['status'] === 'completed')),
             'in_progress_tasks' => count(array_filter($tasks, fn($t) => $t['status'] === 'in_progress')),
             'total_planned_hours' => $totalPlannedHours,
-            'total_actual_hours' => $totalActualHours,
+            'total_actual_hours' => array_sum(array_column($tasks, 'actual_hours')),
         ];
     }
 

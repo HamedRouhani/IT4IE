@@ -439,18 +439,45 @@ class ReportController extends Controller
         // ─── آمار ───
         $active = array_filter($compensations, fn($c) => empty($c['end_date']) || $c['end_date'] >= date('Y-m-d'));
 
+        $salaryByCurrency = [];
+        foreach ($active as $compensation) {
+            $currency = trim((string)($compensation['currency'] ?? '')) ?: 'IRR';
+            $amount = (float)($compensation['total_fixed'] ?? 0);
+            if (!isset($salaryByCurrency[$currency])) {
+                $salaryByCurrency[$currency] = [
+                    'currency' => $currency,
+                    'count' => 0,
+                    'employees' => [],
+                    'total_payroll' => 0.0,
+                    'avg_salary' => 0.0,
+                    'min_salary' => $amount,
+                    'max_salary' => $amount,
+                ];
+            }
+            $salaryByCurrency[$currency]['count']++;
+            $salaryByCurrency[$currency]['employees'][(int)$compensation['employee_id']] = true;
+            $salaryByCurrency[$currency]['total_payroll'] += $amount;
+            $salaryByCurrency[$currency]['min_salary'] = min($salaryByCurrency[$currency]['min_salary'], $amount);
+            $salaryByCurrency[$currency]['max_salary'] = max($salaryByCurrency[$currency]['max_salary'], $amount);
+        }
+        foreach ($salaryByCurrency as &$salary) {
+            $salary['employee_count'] = count($salary['employees']);
+            $salary['avg_salary'] = $salary['count'] > 0 ? round($salary['total_payroll'] / $salary['count']) : 0;
+            unset($salary['employees']);
+        }
+        unset($salary);
+        ksort($salaryByCurrency);
+
         $stats = [
             'total'         => count($compensations),
             'active'        => count($active),
-            'total_payroll' => array_sum(array_column($active, 'total_fixed')),
-            'avg_salary'    => !empty($active) ? round(array_sum(array_column($active, 'total_fixed')) / count($active)) : 0,
-            'min_salary'    => !empty($active) ? min(array_column($active, 'total_fixed')) : 0,
-            'max_salary'    => !empty($active) ? max(array_column($active, 'total_fixed')) : 0,
+            'salary_by_currency' => array_values($salaryByCurrency),
         ];
 
         // ─── حقوق بر اساس دپارتمان ───
         $byDepartment = $this->rows(
             "SELECT d.name AS department_name,
+                    COALESCE(NULLIF(c.currency, ''), 'IRR') AS currency,
                     COUNT(c.id) AS count,
                     AVG(c.total_fixed) AS avg_salary,
                     SUM(c.total_fixed) AS total_salary
@@ -458,7 +485,7 @@ class ReportController extends Controller
              LEFT JOIN hr_employees e ON e.id = c.employee_id AND e.system_id = c.system_id
              LEFT JOIN hr_departments d ON d.id = e.department_id AND d.system_id = c.system_id
              WHERE c.system_id = ? AND (c.end_date IS NULL OR c.end_date >= CURDATE())
-             GROUP BY d.id, d.name
+             GROUP BY d.id, d.name, COALESCE(NULLIF(c.currency, ''), 'IRR')
              ORDER BY total_salary DESC",
             [$sid]
         );

@@ -11,7 +11,14 @@
                 مجموع احکام: <strong><?= hr_num($stats['total']) ?></strong>
                 — فعال: <strong style="color: var(--hr-success);"><?= hr_num($stats['active']) ?></strong>
                 — کارمندان: <strong><?= hr_num($stats['total_employees']) ?></strong>
-                — میانگین حقوق: <strong><?= hr_money($stats['avg_salary']) ?></strong>
+                — میانگین حقوق فعال به تفکیک ارز:
+                <?php if (empty($stats['salary_by_currency'])): ?>
+                    <strong>—</strong>
+                <?php else: ?>
+                    <?php foreach ($stats['salary_by_currency'] as $index => $salary): ?>
+                        <strong><?= hr_money($salary['avg_salary'], $currencyOptions[$salary['currency']] ?? $salary['currency']) ?></strong><?= $index < count($stats['salary_by_currency']) - 1 ? '، ' : '' ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </p>
         </div>
         <a href="<?= hr_url('compensation', 'create') ?>" class="btn-hr-primary">

@@ -65,6 +65,7 @@ foreach ($allTasks as $t) {
         <h2><i class="fas fa-project-diagram"></i> <?= $e($project['name']) ?></h2>
     </div>
     <div class="header-actions">
+        <a href="?controller=project&action=analytics&id=<?= $pid ?>" class="btn btn-primary"><i class="fas fa-chart-line"></i> تحلیل ارزش کسب‌شده</a>
         <a href="?controller=project&action=edit&id=<?= $pid ?>" class="btn btn-warning"><i class="fas fa-edit"></i> ویرایش پروژه</a>
         <a href="?controller=report&action=exportMsProject&id=<?= $pid ?>" class="btn btn-success"><i class="fas fa-file-code"></i> خروجی MSP</a>
         <a href="?controller=report&action=exportPrimavera&id=<?= $pid ?>" class="btn btn-info"><i class="fas fa-file-csv"></i> خروجی P6</a>
@@ -214,7 +215,7 @@ foreach ($allTasks as $t) {
             <?php else: ?>
                 <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead><tr><th>کد</th><th>نام فرآیند</th><th>حوزه دانشی</th><th>وضعیت</th><th>یادداشت</th><th class="col-actions">عملیات</th></tr></thead>
+                        <thead><tr><th>کد</th><th>نام فرآیند</th><th>حوزه دانشی</th><th>وضعیت</th><th>هزینهٔ واقعی تجمعی تا امروز (<?= $e($project['currency'] ?? 'IRR') ?>)</th><th>یادداشت</th><th class="col-actions">عملیات</th></tr></thead>
                         <tbody>
                         <?php foreach ($projectTasks as $pt): ?>
                             <tr>
@@ -222,6 +223,7 @@ foreach ($allTasks as $t) {
                                 <td><?= $e($pt['task_name']) ?></td>
                                 <td><?= $e($pt['ka_name']) ?></td>
                                 <td><span class="badge badge-<?= $taskStatus[$pt['status']] ?? 'secondary' ?>"><?= pmbok_getTaskStatusLabel($pt['status']) ?></span></td>
+                                <td><?= isset($pt['actual_cost']) && $pt['actual_cost'] !== null ? number_format((float)$pt['actual_cost'], 0) : '—' ?></td>
                                 <td><?= $e(pmbok_truncateText($pt['notes'] ?? '-', 40)) ?></td>
                                 <?= $rowActions('task', $pt, 'deleteTask', 'pt_id', 'آیا از حذف این فرآیند اطمینان دارید؟') ?>
                             </tr>
@@ -308,6 +310,7 @@ foreach ($allTasks as $t) {
                 { label: 'فرآیند', type: 'text', disabled: true, full: true,
                   value: function (d) { return (d.task_code || '') + ' - ' + (d.task_name || ''); } },
                 { key: 'status', label: 'وضعیت', type: 'select', full: true, opts: TASK_STATUS },
+                { key: 'actual_cost', label: 'هزینهٔ واقعی تجمعی تا امروز (' + <?= json_encode($project['currency'] ?? 'IRR', JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?> + ')', type: 'number', full: true, min: '0', step: '0.01', placeholder: 'خالی = ثبت‌نشده؛ برای هزینهٔ صفر، عدد ۰ وارد کنید' },
                 { key: 'notes', label: 'یادداشت', type: 'textarea', full: true, placeholder: 'یادداشت‌های مربوط به این فرآیند…' }
             ]
         }
@@ -348,7 +351,7 @@ foreach ($allTasks as $t) {
             ctrl.value = val;
         } else {
             ctrl = el('input', { id: id, type: f.type, name: f.disabled ? null : name, class: 'form-control',
-                                 required: !!f.req, disabled: !!f.disabled });
+                                 required: !!f.req, disabled: !!f.disabled, min: f.min, max: f.max, step: f.step });
             ctrl.value = val;
         }
         return el('div', { class: 'form-group' + (f.full ? ' form-group--full' : '') }, [

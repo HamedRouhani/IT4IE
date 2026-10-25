@@ -10,7 +10,14 @@
             <p class="hr-text-muted hr-mt-2" style="margin: 0;">
                 کل احکام: <strong><?= hr_num($stats['total']) ?></strong>
                 — فعال: <strong><?= hr_num($stats['active']) ?></strong>
-                — کل payroll: <strong><?= hr_money($stats['total_payroll']) ?></strong>
+                — کل payroll به تفکیک ارز:
+                <?php if (empty($stats['salary_by_currency'])): ?>
+                    <strong>—</strong>
+                <?php else: ?>
+                    <?php foreach ($stats['salary_by_currency'] as $index => $salary): ?>
+                        <strong><?= hr_money($salary['total_payroll'], $currencyOptions[$salary['currency']] ?? $salary['currency']) ?></strong><?= $index < count($stats['salary_by_currency']) - 1 ? '، ' : '' ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </p>
         </div>
         <div class="hr-report-actions">
@@ -23,24 +30,29 @@
         </div>
     </div>
 
-    <div class="hr-stats-grid hr-mb-4">
-        <div class="hr-stat-card">
-            <small><i class="fas fa-calculator"></i> میانگین حقوق</small>
-            <h3 style="font-size: 1.1rem;"><?= hr_money($stats['avg_salary']) ?></h3>
+    <?php if (!empty($stats['salary_by_currency'])): ?>
+        <div class="hr-stats-grid hr-mb-4">
+            <?php foreach ($stats['salary_by_currency'] as $salary): ?>
+                <?php $currencyLabel = $currencyOptions[$salary['currency']] ?? $salary['currency']; ?>
+                <div class="hr-stat-card">
+                    <small><i class="fas fa-calculator"></i> میانگین حقوق (<?= hr_e($currencyLabel) ?>)</small>
+                    <h3 style="font-size: 1.1rem;"><?= hr_money($salary['avg_salary'], $currencyLabel) ?></h3>
+                </div>
+                <div class="hr-stat-card success">
+                    <small><i class="fas fa-money-check"></i> کل payroll (<?= hr_e($currencyLabel) ?>)</small>
+                    <h3 style="font-size: 1.1rem;"><?= hr_money($salary['total_payroll'], $currencyLabel) ?></h3>
+                </div>
+                <div class="hr-stat-card critical">
+                    <small><i class="fas fa-arrow-down"></i> کمینه (<?= hr_e($currencyLabel) ?>)</small>
+                    <h3 style="font-size: 1.1rem;"><?= hr_money($salary['min_salary'], $currencyLabel) ?></h3>
+                </div>
+                <div class="hr-stat-card warning">
+                    <small><i class="fas fa-arrow-up"></i> بیشینه (<?= hr_e($currencyLabel) ?>)</small>
+                    <h3 style="font-size: 1.1rem;"><?= hr_money($salary['max_salary'], $currencyLabel) ?></h3>
+                </div>
+            <?php endforeach; ?>
         </div>
-        <div class="hr-stat-card success">
-            <small><i class="fas fa-arrow-up"></i> حداکثر</small>
-            <h3 style="font-size: 1.1rem;"><?= hr_money($stats['max_salary']) ?></h3>
-        </div>
-        <div class="hr-stat-card critical">
-            <small><i class="fas fa-arrow-down"></i> حداقل</small>
-            <h3 style="font-size: 1.1rem;"><?= hr_money($stats['min_salary']) ?></h3>
-        </div>
-        <div class="hr-stat-card warning">
-            <small><i class="fas fa-money-check"></i> کل payroll</small>
-            <h3 style="font-size: 1.1rem;"><?= hr_money($stats['total_payroll']) ?></h3>
-        </div>
-    </div>
+    <?php endif; ?>
 
     <!-- حقوق بر اساس دپارتمان -->
     <div class="card hr-mb-3">
@@ -54,6 +66,7 @@
                         <thead>
                             <tr>
                                 <th>دپارتمان</th>
+                                <th>واحد پول</th>
                                 <th>تعداد</th>
                                 <th>میانگین حقوق</th>
                                 <th>جمع حقوق</th>
@@ -63,9 +76,11 @@
                             <?php foreach ($byDepartment as $d): ?>
                                 <tr>
                                     <td><strong><?= hr_e($d['department_name'] ?? '—') ?></strong></td>
+                                    <?php $departmentCurrency = $currencyOptions[$d['currency'] ?? ''] ?? ($d['currency'] ?? 'IRR'); ?>
+                                    <td><?= hr_e($departmentCurrency) ?></td>
                                     <td><?= hr_num($d['count']) ?></td>
-                                    <td><?= hr_money($d['avg_salary']) ?></td>
-                                    <td><strong><?= hr_money($d['total_salary']) ?></strong></td>
+                                    <td><?= hr_money($d['avg_salary'], $departmentCurrency) ?></td>
+                                    <td><strong><?= hr_money($d['total_salary'], $departmentCurrency) ?></strong></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

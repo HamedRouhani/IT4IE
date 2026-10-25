@@ -116,6 +116,39 @@ class ProjectController extends Controller
             'allTasks' => $allTasks,
         ]);
     }
+
+    public function analytics($id = null)
+    {
+        $this->requireAuth();
+        if (!$id) {
+            $this->redirect('controller=project');
+            return;
+        }
+
+        $project = $this->getUserProject($id);
+        if (!$project) {
+            $this->flashError('پروژه یافت نشد یا شما به آن دسترسی ندارید.');
+            $this->redirect('controller=project');
+            return;
+        }
+
+        $analyticsService = new \App\Software\Pmbok\Services\AnalyticsService();
+        $evm = $analyticsService->calculateEVM($id);
+        if (!$evm) {
+            $this->flashError('برای تحلیل ارزش کسب‌شده، ابتدا فرآیندهای پروژه را ثبت کنید.');
+            $this->redirect('controller=project&action=show&id=' . (int)$id);
+            return;
+        }
+
+        $this->view('dashboard/project_analytics', [
+            'pageTitle' => 'تحلیل ارزش کسب‌شده - ' . $project['name'],
+            'currentPage' => 'project',
+            'project' => $project,
+            'evm' => $evm,
+            'health' => $analyticsService->calculateHealthIndex($id, $evm),
+            'kaDistribution' => $analyticsService->getTasksByKnowledgeArea($id),
+        ]);
+    }
     
     public function create()
     {
@@ -488,6 +521,14 @@ class ProjectController extends Controller
         $projectId = (int)($_POST['project_id'] ?? 0);
         $status = $_POST['status'] ?? 'not_started';
         $notes = trim($_POST['notes'] ?? '');
+        $hasActualCostInput = array_key_exists('actual_cost', $_POST);
+        $actualCostInput = trim((string)($_POST['actual_cost'] ?? ''));
+        if ($actualCostInput !== '' && (!is_numeric($actualCostInput) || !is_finite((float)$actualCostInput) || (float)$actualCostInput < 0)) {
+            $this->flashError('هزینهٔ واقعی باید عددی نامنفی باشد.');
+            $this->redirect("controller=project&action=show&id={$projectId}&tab=tasks");
+            return;
+        }
+        $actualCost = $actualCostInput === '' ? null : (float)$actualCostInput;
 
         // منطق مدیریت زمان‌ها بر اساس وضعیت جدید
         $now = date('Y-m-d H:i:s');
@@ -496,15 +537,15 @@ class ProjectController extends Controller
 
         // حذف updated_at به دلیل عدم وجود در جدول
         // استفاده از COALESCE برای started_at تا اگر تسک از قبل زمان شروعی دارد، آن را حفظ کند و بازنویسی نشود
-        $sql = "UPDATE {$this->prefix}project_tasks 
-                SET status = ?, 
-                    notes = ?, 
-                    started_at = COALESCE(started_at, ?), 
-                    completed_at = ? 
+        $costAssignment = $hasActualCostInput ? ', actual_cost = ?' : '';
+        $sql = "UPDATE {$this->prefix}project_tasks
+                SET status = ?, notes = ?{$costAssignment},
+                    started_at = COALESCE(started_at, ?), completed_at = ?
                 WHERE id = ? AND project_id = ? AND user_id = ?";
-                    
-        $this->db->prepare($sql)
-                ->execute([$status, $notes, $started_at, $completed_at, $id, $projectId, $this->currentUserId]);
+        $params = [$status, $notes];
+        if ($hasActualCostInput) $params[] = $actualCost;
+        array_push($params, $started_at, $completed_at, $id, $projectId, $this->currentUserId);
+        $this->db->prepare($sql)->execute($params);
 
         $this->flashSuccess('وضعیت تسک با موفقیت بروزرسانی شد. ✅');
         $this->redirect("controller=project&action=show&id={$projectId}&tab=tasks");

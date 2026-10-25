@@ -126,9 +126,7 @@ class Compensation extends BaseModel
         $sql = "SELECT
                     COUNT(*) AS total,
                     SUM(CASE WHEN end_date IS NULL OR end_date >= CURDATE() THEN 1 ELSE 0 END) AS active,
-                    COUNT(DISTINCT employee_id) AS total_employees,
-                    COALESCE(AVG(CASE WHEN end_date IS NULL OR end_date >= CURDATE() THEN total_fixed END), 0) AS avg_salary,
-                    COALESCE(SUM(CASE WHEN end_date IS NULL OR end_date >= CURDATE() THEN total_fixed END), 0) AS total_payroll
+                    COUNT(DISTINCT employee_id) AS total_employees
                 FROM {$this->tableName()}
                 WHERE system_id = :sid";
 
@@ -136,12 +134,34 @@ class Compensation extends BaseModel
         $stmt->execute(['sid' => $this->systemId]);
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
+        $salaryStmt = $this->db->prepare(
+            "SELECT COALESCE(NULLIF(currency, ''), 'IRR') AS currency,
+                    COUNT(*) AS active_records,
+                    COUNT(DISTINCT employee_id) AS employees,
+                    AVG(total_fixed) AS avg_salary,
+                    SUM(total_fixed) AS total_payroll,
+                    MIN(total_fixed) AS min_salary,
+                    MAX(total_fixed) AS max_salary
+             FROM {$this->tableName()}
+             WHERE system_id = :sid AND (end_date IS NULL OR end_date >= CURDATE())
+             GROUP BY COALESCE(NULLIF(currency, ''), 'IRR')
+             ORDER BY currency"
+        );
+        $salaryStmt->execute(['sid' => $this->systemId]);
+        $salaryByCurrency = $salaryStmt->fetchAll(\PDO::FETCH_ASSOC);
+        foreach ($salaryByCurrency as &$salary) {
+            foreach (['active_records', 'employees'] as $field) $salary[$field] = (int)$salary[$field];
+            foreach (['avg_salary', 'total_payroll', 'min_salary', 'max_salary'] as $field) {
+                $salary[$field] = round((float)$salary[$field], 0);
+            }
+        }
+        unset($salary);
+
         return [
             'total'           => (int) ($row['total'] ?? 0),
             'active'          => (int) ($row['active'] ?? 0),
             'total_employees' => (int) ($row['total_employees'] ?? 0),
-            'avg_salary'      => round((float) ($row['avg_salary'] ?? 0), 0),
-            'total_payroll'   => round((float) ($row['total_payroll'] ?? 0), 0),
+            'salary_by_currency' => $salaryByCurrency,
         ];
     }
 
