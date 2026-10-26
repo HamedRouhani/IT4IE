@@ -30,6 +30,7 @@
 .swl-card[data-theme="quality"] { --sw-color: #059669; --sw-color-dark: #047857; --sw-color-rgb: 5, 150, 105; }
 .swl-card[data-theme="itil"]    { --sw-color: #10B981; --sw-color-dark: #059669; --sw-color-rgb: 16, 185, 129; }
 .swl-card[data-theme="togaf"]   { --sw-color: #3B82F6; --sw-color-dark: #2563EB; --sw-color-rgb: 59, 130, 246; }
+.swl-card[data-theme="inventory"] { --sw-color: #BE123C; --sw-color-dark: #9F1239; --sw-color-rgb: 190, 18, 60; }
 .swl-card[data-theme="default"] { --sw-color: #6366F1; --sw-color-dark: #4F46E5; --sw-color-rgb: 99, 102, 241; }
 
 /* ─── Wrapper ─── */

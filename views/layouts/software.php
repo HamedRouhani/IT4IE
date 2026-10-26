@@ -88,6 +88,9 @@ $title = $title ?? ($softwareName . ' - IT4IE');
     <?php if ($moduleName): ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <?php endif; ?>
+    <?php if (($moduleName ?? '') === 'inventory'): ?>
+    <script src="<?php echo htmlspecialchars(it4ie_asset_url('js/software/inventory.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+    <?php endif; ?>
     <script src="/assets/js/script.js"></script>
 </body>
 </html>

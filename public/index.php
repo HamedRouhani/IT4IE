@@ -40,6 +40,7 @@ $moduleSlugs = [
     'or-analyzer'       => 'or',
     'statlab-analyzer'  => 'statlab',
     'pdm-analyzer'      => 'pdm',
+    'inventory-analyzer'=> 'inventory',
     'hr-analyzer'       => 'hr',
     'quality-analyzer'  => 'quality',
 ];

@@ -15,6 +15,7 @@ body.software-mode[data-module="statlab"] { --module-accent: #86efac; --module-a
 body.software-mode[data-module="pdm"] { --module-accent: #5eead4; --module-accent-soft: rgba(94, 234, 212, .16); --module-surface: #f2f8f7; }
 body.software-mode[data-module="quality"] { --module-accent: #6ee7b7; --module-accent-soft: rgba(110, 231, 183, .17); --module-surface: #f3f8f6; }
 body.software-mode[data-module="hr"] { --module-accent: #93c5fd; --module-accent-soft: rgba(147, 197, 253, .18); }
+body.software-mode[data-module="inventory"] { --module-accent: #FDA4AF; --module-accent-soft: rgba(253, 164, 175, .18); --module-surface: #FFF7F8; }
 
 body.software-mode .software-wrapper,
 body.software-mode .software-main { min-width: 0; background: var(--module-surface); }

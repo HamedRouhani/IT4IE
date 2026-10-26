@@ -123,6 +123,19 @@ $moduleMenus = [
         ]
     ],
 
+    // -------- Inventory Analyzer --------
+    'inventory' => [
+        'name'  => 'Inventory Analyzer',
+        'icon'  => 'fas fa-boxes-stacked',
+        'param' => 'controller',
+        'menus' => [
+            ['route' => 'dashboard',  'icon' => 'fas fa-gauge-high',       'label' => 'داشبورد'],
+            ['route' => 'item',       'icon' => 'fas fa-box',              'label' => 'اقلام موجودی'],
+            ['route' => 'movement',   'icon' => 'fas fa-arrow-right-arrow-left', 'label' => 'گردش موجودی'],
+            ['route' => 'analysis',   'icon' => 'fas fa-calculator',       'label' => 'تحلیل و سفارش'],
+        ]
+    ],
+
     // -------- HR Analyzer --------
     'hr' => [
         'name'  => 'HR Analyzer',
