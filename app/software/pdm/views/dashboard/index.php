@@ -5,7 +5,6 @@
  */
 ?>
 
-<link rel="stylesheet" href="/public/assets/css/modules/pdm.css">
 
 <div class="software-content pdm-fade-in">
 

@@ -48,7 +48,6 @@ if (!function_exists('pdm_render_category_tree')) {
 }
 ?>
 
-<link rel="stylesheet" href="/public/assets/css/modules/pdm.css?v=<?= time() ?>">
 
 <div class="software-content pdm-fade-in">
 

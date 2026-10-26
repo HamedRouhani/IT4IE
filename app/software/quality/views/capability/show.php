@@ -18,7 +18,6 @@ $colorMap = [
 ];
 $badgeClass = $colorMap[$verdictColor] ?? 'qc-status-inactive';
 ?>
-<link rel="stylesheet" href="/public/assets/css/modules/quality.css?v=<?= time() ?>">
 
 <div class="software-content qc-fade-in">
 

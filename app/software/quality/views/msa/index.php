@@ -5,7 +5,6 @@ $studies = $studies ?? [];
 $system  = $system  ?? [];
 $avgGrr  = $avgGrr  ?? null;
 ?>
-<link rel="stylesheet" href="/public/assets/css/modules/quality.css?v=<?= time() ?>">
 
 <div class="software-content qc-fade-in">
 

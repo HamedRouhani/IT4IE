@@ -4,7 +4,6 @@ use App\Software\Quality\Models\MsaStudy;
 $projects = $projects ?? [];
 $methods  = $methods  ?? MsaStudy::METHODS;
 ?>
-<link rel="stylesheet" href="/public/assets/css/modules/quality.css?v=<?= time() ?>">
 
 <div class="software-content qc-fade-in">
 

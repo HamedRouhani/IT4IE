@@ -36,7 +36,6 @@ $sigma = (float)($chart['sigma_hat'] ?? 0);
 $chartTypeLabels = Dataset::CHART_TYPES;
 $nelsonViolations = $violations['nelson'] ?? [];
 ?>
-<link rel="stylesheet" href="/public/assets/css/modules/quality.css?v=<?= time() ?>">
 
 <div class="software-content qc-fade-in">
 

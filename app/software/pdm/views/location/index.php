@@ -56,7 +56,6 @@ if (!function_exists('pdm_render_location_tree')) {
 }
 ?>
 
-<link rel="stylesheet" href="/public/assets/css/modules/pdm.css?v=<?= time() ?>">
 
 <div class="software-content pdm-fade-in">
 

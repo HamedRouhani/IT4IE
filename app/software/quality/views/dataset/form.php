@@ -14,7 +14,6 @@ $formAction = $isEdit
 
 $currentChart = $dataset['chart_type'] ?? 'xbar_r';
 ?>
-<link rel="stylesheet" href="/public/assets/css/modules/quality.css?v=<?= time() ?>">
 
 <div class="software-content qc-fade-in">
 

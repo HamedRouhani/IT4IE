@@ -29,7 +29,6 @@ $stats = array_merge([
 // 🎯 انواع نمودار صفتی
 $attributeTypes = ['p', 'np', 'c', 'u'];
 ?>
-<link rel="stylesheet" href="/public/assets/css/modules/quality.css?v=<?= time() ?>">
 
 <div class="software-content qc-fade-in">
 

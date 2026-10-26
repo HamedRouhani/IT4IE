@@ -8,7 +8,6 @@ $statusLabels = [
 $statusMeta = $statusLabels[$analysis['status']] ?? ['label' => $analysis['status'], 'class' => 'info'];
 ?>
 
-<link rel="stylesheet" href="/public/assets/css/modules/quality.css?v=<?= time() ?>">
 
 <div class="software-content qc-fade-in">
 

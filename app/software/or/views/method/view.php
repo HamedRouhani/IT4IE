@@ -79,7 +79,6 @@ if (!function_exists('orSimpleMarkdown')) {
 }
 ?>
 
-<link rel="stylesheet" href="/public/assets/css/modules/or.css">
 
 <div class="container-fluid py-4 or-method-page">
 

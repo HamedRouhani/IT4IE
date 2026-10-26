@@ -11,7 +11,6 @@ $isAttribute  = $isAttribute  ?? false;
 $chartLabel = Dataset::CHART_TYPES[$dataset['chart_type']] ?? $dataset['chart_type'];
 $saveUrl = CURRENT_MODULE_URL . '?controller=dataset&action=saveData&id=' . (int)$dataset['id'];
 ?>
-<link rel="stylesheet" href="/public/assets/css/modules/quality.css?v=<?= time() ?>">
 
 <div class="software-content qc-fade-in">
 

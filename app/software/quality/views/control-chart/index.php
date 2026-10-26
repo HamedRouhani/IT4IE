@@ -10,7 +10,6 @@ $emptyText   = $isAttribute
     ? 'هنوز نمودار صفتی محاسبه نشده — از دیتاست‌های p, np, c, u استفاده کنید'
     : 'هنوز نمودار متغیر محاسبه نشده — از دیتاست‌های X̄-R, X̄-S, I-MR استفاده کنید';
 ?>
-<link rel="stylesheet" href="/public/assets/css/modules/quality.css?v=<?= time() ?>">
 
 <div class="software-content qc-fade-in">
 

@@ -6,7 +6,6 @@ $formAction = $isEdit
     ? CURRENT_MODULE_URL . '?controller=project&action=update&id=' . (int)$project['id']
     : CURRENT_MODULE_URL . '?controller=project&action=store';
 ?>
-<link rel="stylesheet" href="/public/assets/css/modules/quality.css?v=<?= time() ?>">
 
 <div class="software-content qc-fade-in">
 

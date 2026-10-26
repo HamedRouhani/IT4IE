@@ -5,7 +5,6 @@
  */
 ?>
 
-<link rel="stylesheet" href="/public/assets/css/modules/hr.css?v=<?= time() ?>">
 
 <div class="software-content hr-fade-in">
 
