@@ -9,10 +9,12 @@ final class ItemController extends InventoryController
     public function index(): void
     {
         $workspace = $this->workspace();
-        $items = (new InventoryItem())->all((int) $workspace['id']);
+        $showArchived = ($_GET['archived'] ?? '') === '1';
+        $items = (new InventoryItem())->all((int) $workspace['id'], $showArchived, $showArchived);
         $this->renderPage('item/index', [
             'pageTitle' => 'اقلام موجودی',
             'items' => InventoryPolicyService::classifyAbc($items),
+            'showArchived' => $showArchived,
         ]);
     }
 
@@ -85,5 +87,14 @@ final class ItemController extends InventoryController
         $archived = (new InventoryItem())->archive((int) $workspace['id'], $id);
         inv_flash_set($archived ? 'success' : 'danger', $archived ? 'قلم از فهرست فعال خارج شد؛ سابقهٔ گردش آن حفظ شده است.' : 'قلم پیدا نشد.');
         $this->redirect(inv_url('item'));
+    }
+
+    public function restore(int $id): void
+    {
+        $workspace = $this->workspace();
+        $this->requirePost();
+        $restored = (new InventoryItem())->restore((int) $workspace['id'], $id);
+        inv_flash_set($restored ? 'success' : 'danger', $restored ? 'قلم دوباره به فهرست فعال برگشت.' : 'قلم بایگانی‌شده پیدا نشد.');
+        $this->redirect(inv_url('item', 'index', ['archived' => 1]));
     }
 }

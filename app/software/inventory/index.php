@@ -28,6 +28,7 @@ $controllerMap = [
     'item'      => 'ItemController',
     'movement'  => 'MovementController',
     'analysis'  => 'AnalysisController',
+    'export'    => 'ExportController',
 ];
 $controllerKey = strtolower((string) ($_GET['controller'] ?? 'dashboard'));
 $action = (string) ($_GET['action'] ?? 'index');

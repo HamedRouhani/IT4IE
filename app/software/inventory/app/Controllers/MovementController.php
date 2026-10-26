@@ -23,14 +23,14 @@ final class MovementController extends InventoryController
         try {
             $itemId = filter_var($_POST['item_id'] ?? null, FILTER_VALIDATE_INT);
             $type = (string) ($_POST['movement_type'] ?? '');
-            $raw = trim((string) ($_POST['quantity'] ?? ''));
-            $raw = str_replace([',', '٬', '٫'], ['', '', '.'], $raw);
-            if (!$itemId || $raw === '' || !is_numeric($raw)) throw new \InvalidArgumentException('قلم و مقدار گردش را به‌درستی وارد کنید.');
-            $quantity = (float) $raw;
+            if (!$itemId) throw new \InvalidArgumentException('قلم گردش را به‌درستی انتخاب کنید.');
+            $quantity = $this->decimalValue((string) ($_POST['quantity'] ?? ''), 'مقدار گردش');
+            $receivedAgainstOrder = $this->decimalValue((string) ($_POST['received_against_order'] ?? '0'), 'مقدار تسویه سفارش');
             (new InventoryMovement())->record(
                 (int) $workspace['id'], (int) $itemId, (int) $_SESSION['user_id'], $type, $quantity,
                 trim((string) ($_POST['note'] ?? '')) ?: null,
-                (string) ($_POST['adjustment_direction'] ?? 'increase')
+                (string) ($_POST['adjustment_direction'] ?? 'increase'),
+                $receivedAgainstOrder
             );
             inv_flash_set('success', 'گردش موجودی ثبت شد و مانده به‌روزرسانی شد.');
             $this->redirect(inv_url('movement'));

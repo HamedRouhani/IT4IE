@@ -33,14 +33,28 @@ abstract class InventoryController extends Controller
         }
     }
 
-    /** Parse finite, non-negative decimal values; commas are accepted as grouping marks. */
+    /** Parse bounded decimals using the precision supported by the inventory schema. */
     protected function number(string $field, string $label, float $default = 0.0): float
     {
         $raw = trim((string) ($_POST[$field] ?? $default));
-        $raw = str_replace([',', '٬', '٫'], ['', '', '.'], $raw);
-        if ($raw === '' || !is_numeric($raw)) throw new \InvalidArgumentException("مقدار «{$label}» باید عددی باشد.");
+        $scale = $field === 'lead_time_days' ? 2 : ($field === 'holding_rate' ? 6 : 4);
+        $precision = $field === 'lead_time_days' ? 10 : ($field === 'holding_rate' ? 8 : 18);
+        return $this->decimalValue($raw, $label, $scale, $precision);
+    }
+
+    protected function decimalValue(string $raw, string $label, int $scale = 4, int $precision = 18): float
+    {
+        $raw = str_replace([',', '٬', '٫'], ['', '', '.'], trim($raw));
+        if (!preg_match('/^\d+(?:\.\d+)?$/D', $raw)) {
+            throw new \InvalidArgumentException("مقدار «{$label}» باید عددی نامنفی باشد.");
+        }
+        $parts = explode('.', $raw, 2);
+        $maxIntegerDigits = $precision - $scale;
+        if (strlen($parts[0]) > $maxIntegerDigits || (isset($parts[1]) && strlen($parts[1]) > $scale)) {
+            throw new \InvalidArgumentException("مقدار «{$label}» از دقت مجاز بیشتر است؛ حداکثر {$scale} رقم اعشار وارد کنید.");
+        }
         $value = (float) $raw;
-        if (!is_finite($value) || $value < 0) throw new \InvalidArgumentException("مقدار «{$label}» نمی‌تواند منفی یا نامعتبر باشد.");
+        if (!is_finite($value)) throw new \InvalidArgumentException("مقدار «{$label}» معتبر نیست.");
         return $value;
     }
 

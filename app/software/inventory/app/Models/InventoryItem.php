@@ -12,10 +12,11 @@ final class InventoryItem
         $this->db = Database::getInstance();
     }
 
-    public function all(int $workspaceId, bool $includeInactive = false): array
+    public function all(int $workspaceId, bool $includeInactive = false, bool $onlyInactive = false): array
     {
         $sql = 'SELECT * FROM inv_items WHERE workspace_id = ?';
-        if (!$includeInactive) $sql .= ' AND is_active = 1';
+        if ($onlyInactive) $sql .= ' AND is_active = 0';
+        elseif (!$includeInactive) $sql .= ' AND is_active = 1';
         $sql .= ' ORDER BY name ASC, id DESC';
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$workspaceId]);
@@ -93,6 +94,12 @@ final class InventoryItem
     public function archive(int $workspaceId, int $id): bool
     {
         $stmt = $this->db->prepare('UPDATE inv_items SET is_active=0 WHERE workspace_id=? AND id=? AND is_active=1');
+        return $stmt->execute([$workspaceId, $id]);
+    }
+
+    public function restore(int $workspaceId, int $id): bool
+    {
+        $stmt = $this->db->prepare('UPDATE inv_items SET is_active=1 WHERE workspace_id=? AND id=? AND is_active=0');
         return $stmt->execute([$workspaceId, $id]);
     }
 
