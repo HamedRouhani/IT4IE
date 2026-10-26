@@ -2,7 +2,7 @@
 require_once VIEWS_PATH . '/partials/asset-helper.php';
 
 /**
- * صفحه لیست نرم‌افزارها — نسخه 4.0 (رنگ‌محور)
+ * صفحه فهرست نرم‌افزارها — کارت‌های خلاصه و رنگ‌محور
  * مسیر: views/software/index.php
  */
 $softwareList  = $softwareList  ?? [];
@@ -37,30 +37,18 @@ $statusMap = [
 <div class="swl-page">
     <div class="swl-container">
 
-        <!-- Header -->
+        <!-- Compact intro -->
         <div class="swl-header">
+            <span class="swl-kicker"><i class="fas fa-layer-group"></i> ابزارهای تخصصی IT4IE</span>
             <h1>
-                <i class="fas fa-cubes"></i>
                 نرم‌افزارهای تخصصی
                 <span>IT4IE</span>
             </h1>
-            <p>ابزارها و تحلیلگرهای پیشرفته برای مدیریت کسب‌وکار و پروژه</p>
+            <p>ابزارهای یکپارچه برای تحلیل، تصمیم‌گیری و مدیریت عملیات</p>
+            <?php if ($totalSoftware > 0): ?>
+                <div class="swl-count"><strong><?= (int) $totalSoftware ?></strong><span>نرم‌افزار</span></div>
+            <?php endif; ?>
         </div>
-
-        <!-- Stat -->
-        <?php if ($totalSoftware > 0): ?>
-            <div class="swl-stat-wrap">
-                <div class="swl-stat">
-                    <div class="swl-stat-icon">
-                        <i class="fas fa-cubes"></i>
-                    </div>
-                    <div class="swl-stat-info">
-                        <h3><?= (int) $totalSoftware ?></h3>
-                        <p>نرم‌افزار فعال</p>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
 
         <!-- Grid -->
         <?php if (empty($softwareList)): ?>
@@ -132,7 +120,7 @@ $statusMap = [
                         <!-- Tech Stack -->
                         <?php if (!empty($techStack)): ?>
                             <div class="swl-tech">
-                                <?php foreach (array_slice($techStack, 0, 4) as $tech): ?>
+                                <?php foreach (array_slice($techStack, 0, 2) as $tech): ?>
                                     <span><?= htmlspecialchars($tech) ?></span>
                                 <?php endforeach; ?>
                             </div>
@@ -141,15 +129,16 @@ $statusMap = [
                         <!-- Features -->
                         <?php if (!empty($features)): ?>
                             <ul class="swl-features">
-                                <?php foreach (array_slice($features, 0, 3) as $feature): ?>
+                                <?php foreach (array_slice($features, 0, 2) as $feature): ?>
                                     <li>
                                         <i class="fas fa-check-circle"></i>
                                         <span><?= htmlspecialchars($feature) ?></span>
                                     </li>
                                 <?php endforeach; ?>
-                                <?php if (count($features) > 3): ?>
+                                <?php if (count($features) > 2): ?>
                                     <li class="more">
-                                        ... و <?= count($features) - 3 ?> مورد دیگر
+                                        <i class="fas fa-plus"></i>
+                                        <?= count($features) - 2 ?> قابلیت دیگر
                                     </li>
                                 <?php endif; ?>
                             </ul>
