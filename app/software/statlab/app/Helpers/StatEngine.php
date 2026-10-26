@@ -8,14 +8,15 @@ class StatEngine
 {
     public static function mean(array $data): float
     {
+        $data = self::validatedData($data, 1);
         $n = count($data);
-        return $n ? array_sum($data) / $n : 0.0;
+        return array_sum($data) / $n;
     }
 
     public static function median(array $data): float
     {
+        $data = self::validatedData($data, 1);
         $n = count($data);
-        if (!$n) return 0.0;
         $sorted = $data;
         sort($sorted);
         $mid = intdiv($n, 2);
@@ -24,7 +25,7 @@ class StatEngine
 
     public static function mode(array $data)
     {
-        if (empty($data)) return null;
+        $data = self::validatedData($data, 1);
         $counts = array_count_values(array_map('strval', $data));
         arsort($counts);
         return array_key_first($counts);
@@ -32,8 +33,8 @@ class StatEngine
 
     public static function variance(array $data, bool $sample = true): float
     {
+        $data = self::validatedData($data, $sample ? 2 : 1);
         $n = count($data);
-        if ($n < 2) return 0.0;
         $mean = self::mean($data);
         $ss = 0.0;
         foreach ($data as $x) $ss += ($x - $mean) ** 2;
@@ -45,12 +46,13 @@ class StatEngine
         return sqrt(self::variance($data, $sample));
     }
 
-    public static function min(array $data): float { return $data ? (float)min($data) : 0.0; }
-    public static function max(array $data): float { return $data ? (float)max($data) : 0.0; }
+    public static function min(array $data): float { return (float) min(self::validatedData($data, 1)); }
+    public static function max(array $data): float { return (float) max(self::validatedData($data, 1)); }
     public static function range(array $data): float { return self::max($data) - self::min($data); }
 
     public static function quartiles(array $data): array
     {
+        $data = self::validatedData($data, 1);
         $sorted = $data;
         sort($sorted);
         $n = count($sorted);
@@ -67,6 +69,7 @@ class StatEngine
 
     public static function skewness(array $data): float
     {
+        $data = self::validatedData($data, 1);
         $n = count($data);
         if ($n < 3) return 0.0;
         $m = self::mean($data);
@@ -80,6 +83,7 @@ class StatEngine
 
     public static function kurtosis(array $data): float
     {
+        $data = self::validatedData($data, 1);
         $n = count($data);
         if ($n < 4) return 0.0;
         $m = self::mean($data);
@@ -104,6 +108,7 @@ class StatEngine
      */
     public static function describe(array $data): array
     {
+        $data = self::validatedData($data, 2);
         return [
             'count'      => count($data),
             'mean'       => round(self::mean($data), 6),
@@ -119,5 +124,16 @@ class StatEngine
             'kurtosis'   => round(self::kurtosis($data), 6),
             'outliers'   => self::outliers($data),
         ];
+    }
+
+    private static function validatedData(array $data, int $minimum): array
+    {
+        if (count($data) < $minimum) {
+            throw new \InvalidArgumentException("حداقل {$minimum} مشاهده معتبر لازم است.");
+        }
+        foreach ($data as $value) {
+            InputValidator::finiteNumber($value, 'مشاهده');
+        }
+        return array_values(array_map('floatval', $data));
     }
 }

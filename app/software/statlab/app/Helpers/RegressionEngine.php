@@ -11,6 +11,7 @@ class RegressionEngine
     // ═══ همبستگی پیرسون + اجزای کمکی ═══
     public static function pearsonParts(array $x, array $y): array
     {
+        [$x, $y] = self::validatedPair($x, $y, 2);
         $n = count($x);
         $mx = StatEngine::mean($x);
         $my = StatEngine::mean($y);
@@ -44,6 +45,8 @@ class RegressionEngine
     // ═══ آزمون همبستگی (پیرسون + اسپیرمن) ═══
     public static function correlation(array $x, array $y, float $alpha): array
     {
+        $alpha = InputValidator::alpha($alpha);
+        [$x, $y] = self::validatedPair($x, $y, 3);
         $p = self::pearsonParts($x, $y);
         $n = $p['n']; $r = $p['r']; $df = $n - 2;
 
@@ -82,6 +85,11 @@ class RegressionEngine
     // ═══ رگرسیون خطی ساده ═══
     public static function simple(array $x, array $y, float $alpha): array
     {
+        $alpha = InputValidator::alpha($alpha);
+        [$x, $y] = self::validatedPair($x, $y, 3);
+        if (count(array_unique($x, SORT_REGULAR)) < 2) {
+            throw new \InvalidArgumentException('متغیر مستقل باید دست‌کم دو مقدار متفاوت داشته باشد.');
+        }
         $p = self::pearsonParts($x, $y);
         $n = $p['n']; $df = $n - 2;
         $b1 = $p['sxx'] > 0 ? $p['sxy'] / $p['sxx'] : 0;
@@ -130,8 +138,22 @@ class RegressionEngine
     // ═══ رگرسیون چندگانه ═══
     public static function multiple(array $Y, array $Xs, float $alpha): array
     {
+        $alpha = InputValidator::alpha($alpha);
+        if (count($Xs) < 1 || count($Xs) > 5) {
+            throw new \InvalidArgumentException('تعداد متغیرهای پیش‌بین باید بین ۱ و ۵ باشد.');
+        }
+        $Y = self::validatedSeries($Y, 3, 'Y');
         $n = count($Y);
         $k = count($Xs);
+        if ($n <= $k + 1) {
+            throw new \InvalidArgumentException('تعداد مشاهدات باید از تعداد ضرایب مدل بیشتر باشد.');
+        }
+        foreach ($Xs as $j => $x) {
+            $Xs[$j] = self::validatedSeries($x, $n, 'X' . ($j + 1));
+            if (count($Xs[$j]) !== $n) {
+                throw new \InvalidArgumentException('همه متغیرهای X باید با Y هم‌اندازه باشند.');
+            }
+        }
         $p = $k + 1;
 
         $X = [];
@@ -208,6 +230,15 @@ class RegressionEngine
     public static function invertMatrix(array $A): ?array
     {
         $n = count($A);
+        if ($n === 0) {
+            throw new \InvalidArgumentException('ماتریس برای معکوس‌گیری خالی است.');
+        }
+        foreach ($A as $row) {
+            if (!is_array($row) || count($row) !== $n) {
+                throw new \InvalidArgumentException('ماتریس معکوس‌گیری باید مربعی باشد.');
+            }
+            self::validatedSeries($row, $n, 'درایه ماتریس');
+        }
         $M = [];
         for ($i = 0; $i < $n; $i++) {
             $M[$i] = array_merge(array_values($A[$i]), array_fill(0, $n, 0));
@@ -229,5 +260,27 @@ class RegressionEngine
         $inv = [];
         for ($i = 0; $i < $n; $i++) $inv[$i] = array_slice($M[$i], $n);
         return $inv;
+    }
+
+    private static function validatedPair(array $x, array $y, int $minimum): array
+    {
+        $x = self::validatedSeries($x, $minimum, 'X');
+        $y = self::validatedSeries($y, $minimum, 'Y');
+        if (count($x) !== count($y)) {
+            throw new \InvalidArgumentException('طول دو متغیر باید برابر باشد.');
+        }
+        return [$x, $y];
+    }
+
+    private static function validatedSeries(array $data, int $minimum, string $label): array
+    {
+        if (count($data) < $minimum) {
+            throw new \InvalidArgumentException("{$label} باید دست‌کم {$minimum} مقدار داشته باشد.");
+        }
+        $values = [];
+        foreach ($data as $value) {
+            $values[] = InputValidator::finiteNumber($value, $label);
+        }
+        return $values;
     }
 }

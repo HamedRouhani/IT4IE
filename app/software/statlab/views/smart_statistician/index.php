@@ -101,7 +101,7 @@ async function smartAnalyze() {
 function renderSmart(d) {
     const box = document.getElementById('smartResult');
     const badge = document.getElementById('confBadge');
-    badge.textContent = 'اطمینان: ' + d.confidence + '%';
+    badge.textContent = 'سهم امتیاز اکتشافی: ' + d.match_share + '%';
     badge.classList.remove('d-none');
 
     const catLabels = {descriptive:'توصیفی', distribution:'توزیع', hypothesis:'آزمون فرض', regression:'رگرسیون'};
@@ -134,7 +134,8 @@ function renderSmart(d) {
     const entries = Object.entries(d.all_scores).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
     const total = entries.reduce((s, [, v]) => s + v, 0) || 1;
 
-    html += `<h6 class="fw-bold small mb-2"><i class="fas fa-chart-bar me-1 text-secondary"></i> امتیاز گزینه‌ها (درصد اطمینان)</h6><div class="mb-3">`;
+    html += `<h6 class="fw-bold small mb-2"><i class="fas fa-chart-bar me-1 text-secondary"></i> سهم امتیاز گزینه‌ها (اکتشافی)</h6>
+        <p class="text-muted small mb-2">درصدها سهم هر گزینه از مجموع امتیازهای کلیدواژه‌ای هستند؛ احتمال درستی تشخیص یا اطمینان آماری محسوب نمی‌شوند.</p><div class="mb-3">`;
     entries.slice(0, 5).forEach(([k, v]) => {
         const pct = (v / total) * 100;
         const isTop = k === d.detected_test;

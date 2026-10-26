@@ -45,21 +45,31 @@ class RegressionController extends Controller
         try {
             $payload = json_decode(file_get_contents('php://input'), true) ?: $_POST;
             $mode    = $payload['mode'] ?? 'simple';
-            $alpha   = (float)($payload['alpha'] ?? 0.05);
+            if (!in_array($mode, ['correlation', 'simple', 'multiple'], true)) {
+                throw new \InvalidArgumentException('Invalid regression mode.');
+            }
+            $alpha = \App\Software\Statlab\Helpers\InputValidator::alpha($payload['alpha'] ?? 0.05);
 
             $Y = $this->parseNumbers((string)($payload['y'] ?? ''));
             $n = count($Y);
-            if ($n < 3) throw new \Exception('حداقل ۳ مشاهده برای Y لازم است.');
+            if ($n < 3) throw new \InvalidArgumentException('حداقل ۳ مشاهده برای Y لازم است.');
 
-            $k  = ($mode === 'multiple') ? max(1, min(5, (int)($payload['k'] ?? 1))) : 1;
+            $k = 1;
+            if ($mode === 'multiple') {
+                $rawK = \App\Software\Statlab\Helpers\InputValidator::finiteNumber($payload['k'] ?? 1, 'تعداد پیش‌بین‌ها');
+                if (floor($rawK) !== $rawK || $rawK < 1 || $rawK > 5) {
+                    throw new \InvalidArgumentException('تعداد پیش‌بین‌ها باید عدد صحیحی بین ۱ و ۵ باشد.');
+                }
+                $k = (int)$rawK;
+            }
             $Xs = [];
             for ($j = 1; $j <= $k; $j++) {
                 $xj = $this->parseNumbers((string)($payload['x' . $j] ?? ''));
-                if (count($xj) !== $n) throw new \Exception("تعداد داده‌های X$j باید برابر Y باشد ($n).");
+                if (count($xj) !== $n) throw new \InvalidArgumentException("تعداد داده‌های X$j باید برابر Y باشد ($n).");
                 $Xs[] = $xj;
             }
             if ($mode === 'multiple' && $n <= $k + 1) {
-                throw new \Exception('تعداد مشاهدات باید بیشتر از (تعداد پیشبین‌ها + ۱) باشد.');
+                throw new \InvalidArgumentException('تعداد مشاهدات باید بیشتر از (تعداد پیش‌بین‌ها + ۱) باشد.');
             }
 
             // ─── اجرای محاسبات ───
@@ -124,22 +134,12 @@ class RegressionController extends Controller
 
         } catch (\Throwable $e) {
             error_log('StatLab Regression Error: ' . $e->getMessage());
-            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => $e->getMessage()], $e instanceof \InvalidArgumentException ? 422 : 500);
         }
     }
 
     private function parseNumbers(string $text): array
     {
-        $out = [];
-        $text = str_replace(
-            ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹','٠','١','٢','٣','٤','٥','٦','٧','٨','٩'],
-            ['0','1','2','3','4','5','6','7','8','9','0','1','2','3','4','5','6','7','8','9'],
-            $text
-        );
-        foreach (preg_split('/[\s,;\n\r\t|]+/', $text) as $part) {
-            $part = trim($part);
-            if ($part !== '' && is_numeric($part)) $out[] = (float)$part;
-        }
-        return $out;
+        return \App\Software\Statlab\Helpers\InputValidator::parseNumbers($text);
     }
 }

@@ -26,24 +26,75 @@ class HypothesisTester
     // ═══ اجرای آزمون ═══
     public static function run(string $test, array $in, float $alpha): array
     {
-        if (!is_finite($alpha) || $alpha <= 0 || $alpha >= 1) {
-            throw new \InvalidArgumentException('سطح معناداری باید بین صفر و یک باشد.');
-        }
+        $alpha = InputValidator::alpha($alpha);
         $alt = $in['alternative'] ?? 'two';
         if (!in_array($alt, ['two', 'less', 'greater'], true)) {
             throw new \InvalidArgumentException('جهت آزمون معتبر نیست.');
         }
         switch ($test) {
-            case 'one_sample_t': return self::oneSampleT($in['data1'], (float)$in['mu0'], $alt, $alpha);
-            case 'two_sample_t': return self::twoSampleT($in['data1'], $in['data2'], $alt, $alpha);
-            case 'paired_t':     return self::pairedT($in['data1'], $in['data2'], $alt, $alpha);
-            case 'one_prop_z':   return self::onePropZ((int)$in['x'], (int)$in['n'], (float)$in['p0'], $alt, $alpha);
-            case 'f_var':        return self::fTest($in['data1'], $in['data2'], $alpha);
-            case 'chi2_gof':     return self::chi2Gof($in['observed'], $in['expected'] ?? [], $alpha);
-            case 'chi2_indep':   return self::chi2Indep($in['matrix'], $alpha);
-            case 'mann_whitney': return self::mannWhitney($in['data1'], $in['data2'], $alt, $alpha);
+            case 'one_sample_t':
+                return self::oneSampleT(self::validatedSample($in['data1'] ?? [], 3), InputValidator::finiteNumber($in['mu0'] ?? null, 'میانگین فرضی'), $alt, $alpha);
+            case 'two_sample_t':
+                return self::twoSampleT(self::validatedSample($in['data1'] ?? [], 3), self::validatedSample($in['data2'] ?? [], 3), $alt, $alpha);
+            case 'paired_t':
+                return self::pairedT(self::validatedSample($in['data1'] ?? [], 3), self::validatedSample($in['data2'] ?? [], 3), $alt, $alpha);
+            case 'one_prop_z':
+                $x = self::integerValue($in['x'] ?? null, 'تعداد موفقیت');
+                $n = self::integerValue($in['n'] ?? null, 'حجم نمونه');
+                return self::onePropZ($x, $n, InputValidator::finiteNumber($in['p0'] ?? null, 'نسبت فرضی'), $alt, $alpha);
+            case 'f_var':
+                return self::fTest(self::validatedSample($in['data1'] ?? [], 3), self::validatedSample($in['data2'] ?? [], 3), $alpha);
+            case 'chi2_gof':
+                $observed = self::validatedSample($in['observed'] ?? [], 2, true, true);
+                $expected = isset($in['expected']) ? self::validatedSample($in['expected'], 0, true) : [];
+                return self::chi2Gof($observed, $expected, $alpha);
+            case 'chi2_indep':
+                return self::chi2Indep(self::validatedMatrix($in['matrix'] ?? []), $alpha);
+            case 'mann_whitney':
+                return self::mannWhitney(self::validatedSample($in['data1'] ?? [], 3), self::validatedSample($in['data2'] ?? [], 3), $alt, $alpha);
         }
         throw new \Exception('آزمون نامعتبر است.');
+    }
+
+    private static function validatedSample(array $data, int $minimum, bool $nonNegative = false, bool $integers = false): array
+    {
+        if (count($data) < $minimum) {
+            throw new \InvalidArgumentException("حداقل {$minimum} مشاهده لازم است.");
+        }
+        $values = [];
+        foreach ($data as $value) {
+            $value = InputValidator::finiteNumber($value, 'مشاهده');
+            if (($nonNegative && $value < 0) || ($integers && floor($value) !== $value)) {
+                throw new \InvalidArgumentException('فراوانی‌ها باید اعداد صحیح نامنفی باشند.');
+            }
+            $values[] = $value;
+        }
+        return $values;
+    }
+
+    private static function validatedMatrix(array $matrix): array
+    {
+        if (count($matrix) < 2 || !is_array($matrix[0] ?? null) || count($matrix[0]) < 2) {
+            throw new \InvalidArgumentException('جدول توافقی باید حداقل ۲×۲ باشد.');
+        }
+        $columns = count($matrix[0]);
+        foreach ($matrix as &$row) {
+            if (!is_array($row) || count($row) !== $columns) {
+                throw new \InvalidArgumentException('سطرهای جدول توافقی باید هم‌اندازه باشند.');
+            }
+            $row = self::validatedSample($row, $columns, true, true);
+        }
+        unset($row);
+        return $matrix;
+    }
+
+    private static function integerValue($value, string $label): int
+    {
+        $number = InputValidator::finiteNumber($value, $label);
+        if (floor($number) !== $number || $number > PHP_INT_MAX || $number < PHP_INT_MIN) {
+            throw new \InvalidArgumentException($label . ' باید عدد صحیح باشد.');
+        }
+        return (int) $number;
     }
 
     // ─────────── t یک نمونه ───────────

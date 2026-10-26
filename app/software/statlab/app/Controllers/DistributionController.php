@@ -34,24 +34,36 @@ class DistributionController extends Controller
             $dist  = $payload['dist'] ?? 'normal';
             $meta  = DL::list();
 
-            if (!isset($meta[$dist])) {
-                $this->json(['success' => false, 'error' => 'توزیع نامعتبر است.']);
-                return;
+            if (!is_string($dist) || !isset($meta[$dist])) {
+                throw new \InvalidArgumentException('توزیع نامعتبر است.');
+            }
+
+            $rawParams = $payload['params'] ?? [];
+            if (!is_array($rawParams)) {
+                throw new \InvalidArgumentException('پارامترهای توزیع باید به‌صورت مجموعهٔ مقادیر ارسال شوند.');
             }
 
             // اعتبارسنجی و ساخت پارامترها
             $params = [];
             foreach ($meta[$dist]['params'] as $pm) {
-                $v = (float)($payload['params'][$pm['key']] ?? $pm['default']);
-                if (isset($pm['min']) && $v < $pm['min']) $v = $pm['min'];
-                if (isset($pm['max']) && $v > $pm['max']) $v = $pm['max'];
+                $raw = $rawParams[$pm['key']] ?? $pm['default'];
+                $v = \App\Software\Statlab\Helpers\InputValidator::finiteNumber($raw, $pm['label']);
+                if (isset($pm['min']) && $v < $pm['min']) {
+                    throw new \InvalidArgumentException($pm['label'] . ' خارج از بازه مجاز است.');
+                }
+                if (isset($pm['max']) && $v > $pm['max']) {
+                    throw new \InvalidArgumentException($pm['label'] . ' خارج از بازه مجاز است.');
+                }
                 $params[$pm['key']] = $v;
             }
 
             $mode = $payload['mode'] ?? 'left';
-            $x  = (float)($payload['x'] ?? 0);
-            $x2 = (float)($payload['x2'] ?? 0);
-            $prob = (float)($payload['p'] ?? 0.95);
+            if (!is_string($mode) || !in_array($mode, ['left', 'right', 'between', 'quantile'], true)) {
+                throw new \InvalidArgumentException('نوع محاسبه نامعتبر است.');
+            }
+            $x = \App\Software\Statlab\Helpers\InputValidator::finiteNumber($payload['x'] ?? 0, 'x');
+            $x2 = \App\Software\Statlab\Helpers\InputValidator::finiteNumber($payload['x2'] ?? 0, 'x2');
+            $prob = \App\Software\Statlab\Helpers\InputValidator::finiteNumber($payload['p'] ?? 0.95, 'احتمال');
 
             $family = $meta[$dist]['family'];
             $result = [];
@@ -72,7 +84,7 @@ class DistributionController extends Controller
                     $probOut = 1 - DL::cdf($dist, $params, $x);
                     $region = [$x, null];
                     $text = "P(X ≥ " . $x . ") = " . round($probOut, 6);
-                } else { // between
+                } else {
                     if ($x2 < $x) [$x, $x2] = [$x2, $x];
                     $probOut = DL::cdf($dist, $params, $x2) - DL::cdf($dist, $params, $x);
                     $region = [$x, $x2];
@@ -107,7 +119,7 @@ class DistributionController extends Controller
 
         } catch (\Throwable $e) {
             error_log("StatLab Distribution Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => $e->getMessage()], $e instanceof \InvalidArgumentException ? 422 : 500);
         }
     }
 }

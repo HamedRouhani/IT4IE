@@ -62,7 +62,7 @@ class DescriptiveController extends Controller
 
             $data = $this->parseNumbers($dataText);
             if (count($data) < 2) {
-                $this->json(['success' => false, 'error' => 'حداقل ۲ داده معتبر نیاز است.']);
+                $this->json(['success' => false, 'error' => 'حداقل ۲ داده معتبر نیاز است.'], 422);
                 return;
             }
 
@@ -128,23 +128,13 @@ class DescriptiveController extends Controller
 
         } catch (\Throwable $e) {
             error_log('StatLab Descriptive Error: ' . $e->getMessage());
-            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => $e->getMessage()], $e instanceof \InvalidArgumentException ? 422 : 500);
         }
     }
 
     private function parseNumbers(string $text): array
     {
-        $out = [];
-        $text = str_replace(
-            ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹','٠','١','٢','٣','٤','٥','٦','٧','٨','٩'],
-            ['0','1','2','3','4','5','6','7','8','9','0','1','2','3','4','5','6','7','8','9'],
-            $text
-        );
-        foreach (preg_split('/[\s,;\n\r\t|]+/', $text) as $part) {
-            $part = trim($part);
-            if ($part !== '' && is_numeric($part)) $out[] = (float)$part;
-        }
-        return $out;
+        return \App\Software\Statlab\Helpers\InputValidator::parseNumbers($text);
     }
 
     private function generateInterpretation(array $s): string

@@ -13,6 +13,9 @@ class DistributionLibrary
 
     public static function logGamma(float $x): float
     {
+        if (!is_finite($x) || $x <= 0) {
+            throw new \InvalidArgumentException('ورودی تابع گاما باید مثبت و متناهی باشد.');
+        }
         $c = [76.18009172947146, -86.50532032941677, 24.01409824083091,
               -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
         $y = $x;
@@ -26,7 +29,10 @@ class DistributionLibrary
     /** P(a,x) گامای پایین منظم‌شده */
     public static function gammaP(float $a, float $x): float
     {
-        if ($x <= 0 || $a <= 0) return 0.0;
+        if (!is_finite($a) || !is_finite($x) || $a <= 0 || $x < 0) {
+            throw new \InvalidArgumentException('پارامترهای گامای ناکامل معتبر نیستند.');
+        }
+        if ($x == 0) return 0.0;
         if ($x < $a + 1) {
             $sum = 1.0 / $a; $del = $sum;
             for ($n = 1; $n < 300; $n++) {
@@ -42,6 +48,10 @@ class DistributionLibrary
     /** Q(a,x) گامای بالای منظم‌شده */
     public static function gammaQ(float $a, float $x): float
     {
+        if (!is_finite($a) || !is_finite($x) || $a <= 0 || $x < 0) {
+            throw new \InvalidArgumentException('پارامترهای گامای ناکامل معتبر نیستند.');
+        }
+        if ($x == 0) return 1.0;
         if ($x < $a + 1) return 1.0 - self::gammaP($a, $x);
         $tiny = 1e-300;
         $b = $x + 1 - $a; $c = 1 / $tiny; $d = 1 / $b; $h = $d;
@@ -58,6 +68,9 @@ class DistributionLibrary
     /** I_x(a,b) بتای ناقص منظم‌شده */
     public static function ibeta(float $a, float $b, float $x): float
     {
+        if (!is_finite($a) || !is_finite($b) || !is_finite($x) || $a <= 0 || $b <= 0 || $x < 0 || $x > 1) {
+            throw new \InvalidArgumentException('پارامترهای بتای ناکامل معتبر نیستند.');
+        }
         if ($x <= 0) return 0.0;
         if ($x >= 1) return 1.0;
         $bt = exp(self::logGamma($a + $b) - self::logGamma($a) - self::logGamma($b)
@@ -90,6 +103,9 @@ class DistributionLibrary
 
     public static function erf(float $x): float
     {
+        if (!is_finite($x)) {
+            throw new \InvalidArgumentException('ورودی تابع خطا باید متناهی باشد.');
+        }
         $sign = $x < 0 ? -1 : 1;
         $ax = abs($x);
         $t = 1 / (1 + 0.3275911 * $ax);
@@ -143,6 +159,7 @@ class DistributionLibrary
 
     public static function support(string $d, array $p): array
     {
+        $p = self::validatedParameters($d, $p);
         switch ($d) {
             case 'normal':    return [$p['mu'] - 4 * $p['sigma'], $p['mu'] + 4 * $p['sigma']];
             case 't':         return [-6, 6];
@@ -155,13 +172,17 @@ class DistributionLibrary
             case 'binomial':  return [0, $p['n']];
             case 'poisson':   return [0, max(10, (int)ceil($p['lambda'] * 3))];
         }
-        return [0, 1];
+        throw new \InvalidArgumentException('توزیع ناشناخته است.');
     }
 
     // ═══════════════ PDF / PMF ═══════════════
 
     public static function pdf(string $d, array $p, float $x): float
     {
+        $p = self::validatedParameters($d, $p);
+        if (!is_finite($x)) {
+            throw new \InvalidArgumentException('نقطه ارزیابی باید متناهی باشد.');
+        }
         switch ($d) {
             case 'normal':
                 $z = ($x - $p['mu']) / $p['sigma'];
@@ -210,6 +231,10 @@ class DistributionLibrary
 
     public static function cdf(string $d, array $p, float $x): float
     {
+        $p = self::validatedParameters($d, $p);
+        if (!is_finite($x)) {
+            throw new \InvalidArgumentException('نقطه ارزیابی باید متناهی باشد.');
+        }
         switch ($d) {
             case 'normal':    return 0.5 * (1 + self::erf(($x - $p['mu']) / ($p['sigma'] * sqrt(2))));
             case 't':
@@ -238,17 +263,39 @@ class DistributionLibrary
             case 'poisson':
                 return $x < 0 ? 0 : 1 - self::gammaP((int)floor($x + 1e-9) + 1, $p['lambda']);
         }
-        return 0;
+        throw new \InvalidArgumentException('توزیع ناشناخته است.');
     }
 
     // ═══════════════ Quantile (معکوس CDF) ═══════════════
 
     public static function quantile(string $d, array $p, float $prob): float
     {
-        $prob = max(1e-9, min(1 - 1e-9, $prob));
+        $p = self::validatedParameters($d, $p);
+        if (!is_finite($prob) || $prob <= 0 || $prob >= 1) {
+            throw new \InvalidArgumentException('احتمال چندک باید بزرگ‌تر از صفر و کوچک‌تر از یک باشد.');
+        }
         [$lo, $hi] = self::support($d, $p);
-        if (self::cdf($d, $p, $lo) >= $prob) return $lo;
-        if (self::cdf($d, $p, $hi) < $prob) $hi *= 10; // دنبه‌های سنگین
+        $span = max(1.0, abs($hi - $lo));
+        $lowerExpansions = 0;
+        while (self::cdf($d, $p, $lo) >= $prob && $lowerExpansions++ < 128) {
+            $lo -= $span;
+            $span *= 2;
+            if (!is_finite($lo) || !is_finite($span)) {
+                throw new \RuntimeException('بازهٔ جست‌وجوی چندک از محدودهٔ عددی خارج شد.');
+            }
+        }
+        $span = max(1.0, abs($hi - $lo));
+        $upperExpansions = 0;
+        while (self::cdf($d, $p, $hi) < $prob && $upperExpansions++ < 128) {
+            $hi += $span;
+            $span *= 2;
+            if (!is_finite($hi) || !is_finite($span)) {
+                throw new \RuntimeException('بازهٔ جست‌وجوی چندک از محدودهٔ عددی خارج شد.');
+            }
+        }
+        if (self::cdf($d, $p, $lo) >= $prob || self::cdf($d, $p, $hi) < $prob) {
+            throw new \RuntimeException('احتمال هدف در بازهٔ قابل جست‌وجوی چندک محصور نشد.');
+        }
         for ($i = 0; $i < 120; $i++) {
             $mid = ($lo + $hi) / 2;
             if (self::cdf($d, $p, $mid) < $prob) $lo = $mid; else $hi = $mid;
@@ -258,6 +305,7 @@ class DistributionLibrary
 
     public static function mean(string $d, array $p): ?float
     {
+        $p = self::validatedParameters($d, $p);
         switch ($d) {
             case 'normal': case 'lognormal': return $d === 'normal' ? $p['mu'] : exp($p['mu'] + $p['sigma'] ** 2 / 2);
             case 't': return $p['df'] > 1 ? 0 : null;
@@ -274,6 +322,7 @@ class DistributionLibrary
 
     public static function variance(string $d, array $p): ?float
     {
+        $p = self::validatedParameters($d, $p);
         switch ($d) {
             case 'normal': return $p['sigma'] ** 2;
             case 't': return $p['df'] > 2 ? $p['df'] / ($p['df'] - 2) : null;
@@ -290,5 +339,49 @@ class DistributionLibrary
                 return $p['lambda'] ** 2 * ($g2 - $g1 ** 2);
         }
         return null;
+    }
+
+    private static function validatedParameters(string $distribution, array $params): array
+    {
+        $required = [
+            'normal' => ['mu', 'sigma'], 't' => ['df'], 'chi2' => ['df'],
+            'f' => ['d1', 'd2'], 'exponential' => ['lambda'], 'uniform' => ['a', 'b'],
+            'lognormal' => ['mu', 'sigma'], 'weibull' => ['k', 'lambda'],
+            'binomial' => ['n', 'p'], 'poisson' => ['lambda'],
+        ];
+        if (!isset($required[$distribution])) {
+            throw new \InvalidArgumentException('توزیع ناشناخته است.');
+        }
+        $values = [];
+        foreach ($required[$distribution] as $key) {
+            if (!array_key_exists($key, $params)) {
+                throw new \InvalidArgumentException("پارامتر {$key} برای این توزیع لازم است.");
+            }
+            $values[$key] = InputValidator::finiteNumber($params[$key], $key);
+        }
+        if (in_array($distribution, ['normal', 'lognormal'], true) && $values['sigma'] <= 0) {
+            throw new \InvalidArgumentException('انحراف معیار باید مثبت باشد.');
+        }
+        if (in_array($distribution, ['t', 'chi2'], true) && $values['df'] <= 0) {
+            throw new \InvalidArgumentException('درجه آزادی باید مثبت باشد.');
+        }
+        if ($distribution === 'f' && ($values['d1'] <= 0 || $values['d2'] <= 0)) {
+            throw new \InvalidArgumentException('درجه‌های آزادی توزیع F باید مثبت باشند.');
+        }
+        if (in_array($distribution, ['exponential', 'poisson'], true) && $values['lambda'] <= 0) {
+            throw new \InvalidArgumentException('نرخ باید مثبت باشد.');
+        }
+        if ($distribution === 'uniform' && $values['a'] >= $values['b']) {
+            throw new \InvalidArgumentException('کران پایین توزیع یکنواخت باید از کران بالا کمتر باشد.');
+        }
+        if ($distribution === 'weibull' && ($values['k'] <= 0 || $values['lambda'] <= 0)) {
+            throw new \InvalidArgumentException('پارامترهای شکل و مقیاس ویبول باید مثبت باشند.');
+        }
+        if ($distribution === 'binomial') {
+            if ($values['n'] < 1 || floor($values['n']) !== $values['n'] || $values['p'] < 0 || $values['p'] > 1) {
+                throw new \InvalidArgumentException('در توزیع دوجمله‌ای n باید عدد صحیح مثبت و p بین صفر و یک باشد.');
+            }
+        }
+        return $values;
     }
 }

@@ -58,7 +58,7 @@ class SmartStatistician
 
         $top = array_key_first($scores);
         $total = array_sum($scores);
-        $confidence = $total > 0 ? round(($scores[$top] / $total) * 100, 1) : 0;
+        $matchShare = $total > 0 ? round(($scores[$top] / $total) * 100, 1) : 0;
 
         $params = $this->extractParams($clean, $top);
 
@@ -67,7 +67,11 @@ class SmartStatistician
             'detected_test'   => $top,
             'detected_name'   => self::testNameFa($top),
             'category'        => $this->categoryOf($top),
-            'confidence'      => $confidence,
+            // Kept as a legacy alias for the database schema and older clients.
+            // This is a normalized heuristic score share, not a probability.
+            'confidence'      => $matchShare,
+            'match_share'     => $matchShare,
+            'score_semantics' => 'exploratory_keyword_match_share',
             'all_scores'      => $scores,
             'extracted_params'=> $params,
             'suggested'       => $this->suggest($top),
