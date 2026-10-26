@@ -67,6 +67,10 @@ $ok = ($result['status'] ?? '') === 'ok';
                                 <td><?= number_format((int)$result['iterations']) ?></td>
                             </tr>
                             <tr>
+                                <td class="fw-bold">نمونه معتبر / نامعتبر</td>
+                                <td><?= number_format((int)($result['valid_samples'] ?? $result['iterations'])) ?> / <?= number_format((int)($result['invalid_samples'] ?? 0)) ?></td>
+                            </tr>
+                            <tr>
                                 <td class="fw-bold">زمان اجرا</td>
                                 <td><?= number_format((float)$result['elapsed_ms'], 2) ?> میلی‌ثانیه</td>
                             </tr>

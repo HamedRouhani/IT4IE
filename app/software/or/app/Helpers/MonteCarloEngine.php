@@ -43,41 +43,62 @@ class MonteCarloEngine
             }
         }
 
+        foreach ($variables as $v) {
+            if ($v['dist'] !== 'lognormal') continue;
+            $mean = filter_var($v['params']['mean'] ?? null, FILTER_VALIDATE_FLOAT);
+            $std = filter_var($v['params']['std'] ?? null, FILTER_VALIDATE_FLOAT);
+            if ($mean === false || $std === false || !is_finite((float)$mean) || !is_finite((float)$std) || $mean <= 0 || $std < 0) {
+                throw new \InvalidArgumentException("Invalid lognormal parameters for {$v['name']}: mean must be positive and standard deviation non-negative.");
+            }
+            $cv = $std / $mean;
+            if (!is_finite($cv) || !is_finite($cv * $cv)) {
+                throw new \InvalidArgumentException("Lognormal parameters are out of numeric range for {$v['name']}.");
+            }
+        }
+
         $results = [];
         $varStats = [];
         foreach ($variables as $v) $varStats[$v['name']] = ['sum' => 0, 'sum2' => 0];
 
         $t0 = microtime(true);
 
+        $invalidSamples = 0;
         for ($i = 0; $i < $iterations; $i++) {
-            $values = [];
-            foreach ($variables as $v) {
-                $values[$v['name']] = self::sample($v['dist'], $v['params']);
-                $varStats[$v['name']]['sum'] += $values[$v['name']];
-                $varStats[$v['name']]['sum2'] += $values[$v['name']] ** 2;
-            }
             try {
+                $values = [];
+                foreach ($variables as $v) {
+                    $values[$v['name']] = self::sample($v['dist'], $v['params']);
+                    if (!is_finite($values[$v['name']])) throw new \UnexpectedValueException('Non-finite random sample');
+                }
                 $y = self::evaluate($funcExpr, $values);
+                if (!is_finite($y)) throw new \UnexpectedValueException('Non-finite simulation output');
+                foreach ($variables as $v) {
+                    $value = $values[$v['name']];
+                    $varStats[$v['name']]['sum'] += $value;
+                    $varStats[$v['name']]['sum2'] += $value ** 2;
+                }
                 $results[] = $y;
             } catch (\Throwable $e) {
+                $invalidSamples++;
                 // اگر ارزیابی ناموفق بود، رد می‌کنیم
             }
         }
 
         $elapsed = microtime(true) - $t0;
 
-        if (empty($results)) {
-            throw new \Exception('هیچ نتیجه معتبری تولید نشد. عبارت تابع را بررسی کنید.');
+        $validSamples = count($results);
+        if ($validSamples < 4) {
+            throw new \Exception("تعداد نمونه‌های معتبر برای گزارش آماری کافی نیست: {$validSamples} از {$iterations}. تابع هدف و توزیع‌ها را بررسی کنید.");
         }
 
         // آمار نتایج
         $stats = self::computeStats($results);
         $varFinalStats = [];
         foreach ($varStats as $name => $s) {
-            $mean = $s['sum'] / $iterations;
+            $mean = $s['sum'] / $validSamples;
             $varFinalStats[$name] = [
                 'mean' => $mean,
-                'std'  => sqrt(max(0, $s['sum2'] / $iterations - $mean ** 2)),
+                'std'  => sqrt(max(0, $s['sum2'] / $validSamples - $mean ** 2)),
             ];
         }
 
@@ -90,6 +111,8 @@ class MonteCarloEngine
         return [
             'status'       => 'ok',
             'iterations'   => $iterations,
+            'valid_samples' => $validSamples,
+            'invalid_samples' => $invalidSamples,
             'elapsed_ms'   => round($elapsed * 1000, 2),
             'function'     => $funcExpr,
             'variables'    => $variables,
@@ -150,10 +173,13 @@ class MonteCarloEngine
             case 'lognormal':
                 $mean = (float)$params['mean'];
                 $std  = (float)$params['std'];
-                $u1 = mt_rand() / mt_getrandmax();
+                $cv = $std / $mean;
+                $sigmaSquared = log1p($cv * $cv);
+                $mu = log($mean) - ($sigmaSquared / 2);
+                $u1 = (mt_rand() + 1) / (mt_getrandmax() + 2);
                 $u2 = mt_rand() / mt_getrandmax();
                 $z = sqrt(-2 * log($u1)) * cos(2 * M_PI * $u2);
-                return exp($mean + $std * $z);
+                return exp($mu + sqrt($sigmaSquared) * $z);
 
             default:
                 throw new \Exception("توزیع پشتیبانی‌نشده: $dist");
@@ -174,7 +200,7 @@ class MonteCarloEngine
 
         // ارزیابی امن
         $result = @eval("return ($safeExpr);");
-        if ($result === false || !is_numeric($result)) {
+        if ($result === false || !is_numeric($result) || !is_finite((float)$result)) {
             throw new \Exception("عبارت نامعتبر: $expr");
         }
         return (float)$result;
@@ -219,6 +245,7 @@ class MonteCarloEngine
     private static function skewness(array $data, float $mean, float $std): float
     {
         $n = count($data);
+        if ($n < 3 || $std <= 0) return 0.0;
         $sum = 0;
         foreach ($data as $v) $sum += (($v - $mean) / $std) ** 3;
         return ($n / (($n - 1) * ($n - 2))) * $sum;
@@ -227,6 +254,7 @@ class MonteCarloEngine
     private static function kurtosis(array $data, float $mean, float $std): float
     {
         $n = count($data);
+        if ($n < 4 || $std <= 0) return 0.0;
         $sum = 0;
         foreach ($data as $v) $sum += (($v - $mean) / $std) ** 4;
         return (($n * ($n + 1)) / (($n - 1) * ($n - 2) * ($n - 3))) * $sum - (3 * ($n - 1) ** 2) / (($n - 2) * ($n - 3));

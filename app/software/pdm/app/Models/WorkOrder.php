@@ -241,20 +241,25 @@ class WorkOrder extends BaseModel
     {
         $sql = "SELECT 
                     wo.asset_id,
-                    wo.completed_at,
-                    LAG(wo.completed_at) OVER (PARTITION BY wo.asset_id ORDER BY wo.completed_at) AS prev_completed
+                    wo.started_at,
+                    LAG(wo.completed_at) OVER (PARTITION BY wo.asset_id ORDER BY wo.started_at, wo.id) AS prev_completed
                 FROM {$this->tableName()} wo
+                INNER JOIN {$this->prefix}maintenance_types mt
+                    ON mt.id = wo.maintenance_type_id AND mt.code = 'CM'
                 WHERE wo.system_id = ?
                   AND wo.status = 'completed'
+                  AND wo.started_at IS NOT NULL
                   AND wo.completed_at IS NOT NULL
-                ORDER BY wo.asset_id, wo.completed_at";
+                ORDER BY wo.asset_id, wo.started_at, wo.id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$this->systemId]);
 
         $intervals = [];
         foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-            if (!empty($row['prev_completed'])) {
-                $diff = strtotime($row['completed_at']) - strtotime($row['prev_completed']);
+            if (!empty($row['prev_completed']) && !empty($row['started_at'])) {
+                // Estimate operating time from the previous corrective repair completion
+                // until the next corrective failure work order starts.
+                $diff = strtotime($row['started_at']) - strtotime($row['prev_completed']);
                 if ($diff > 0) {
                     $intervals[] = $diff / 3600;
                 }

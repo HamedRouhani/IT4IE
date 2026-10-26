@@ -268,7 +268,9 @@ function renderResult(r) {
     const box = document.getElementById('resultBox');
     let html = `<div class="alert alert-warning py-2 small mb-3">
         <strong>تابع:</strong> <span class="font-monospace">${escapeHtml(r.function)}</span> | 
-        <strong>تکرار:</strong> ${r.iterations.toLocaleString()} | 
+        <strong>تکرار درخواستی:</strong> ${r.iterations.toLocaleString()} |
+        <strong>نمونه معتبر:</strong> ${r.valid_samples.toLocaleString()} |
+        <strong>نامعتبر:</strong> ${r.invalid_samples.toLocaleString()} |
         <strong>زمان:</strong> ${r.elapsed_ms} ms
     </div>`;
 

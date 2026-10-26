@@ -26,16 +26,59 @@ class DashboardController extends Controller
         $stats = $systemModel->getStats($systemId);
 
         $chartModel = new ControlChart();
-        $recentCharts = $chartModel->getLatestBySystem($systemId, 5);
+        $allCharts = $chartModel->findBySystem($systemId);
+        $recentCharts = array_slice($allCharts, 0, 5);
         $outOfControl = $chartModel->countOutOfControl($systemId);
 
         $capModel = new CapabilityStudy();
-        $recentCapabilities = array_slice($capModel->findBySystem($systemId), 0, 5);
+        $allCapabilities = $capModel->findBySystem($systemId);
+        $recentCapabilities = array_slice($allCapabilities, 0, 5);
         $avgCpk = $capModel->averageCpk($systemId);
 
         $msaModel = new MsaStudy();
-        $recentMsa = array_slice($msaModel->findBySystem($systemId), 0, 5);
+        $allMsa = $msaModel->findBySystem($systemId);
+        $recentMsa = array_slice($allMsa, 0, 5);
         $avgGrr = $msaModel->averagePctGrr($systemId);
+
+        $alerts = [];
+        foreach ($allCharts as $chart) {
+            if ((int) ($chart['in_control'] ?? 1) !== 1) {
+                $alerts[] = [
+                    'level' => 'danger',
+                    'icon' => 'fa-chart-line',
+                    'message' => 'نمودار «' . ($chart['dataset_name'] ?? 'بدون نام') . '» خارج از کنترل است.',
+                    'url' => CURRENT_MODULE_URL . '?controller=' . (in_array(($chart['chart_type'] ?? ''), ['p', 'np', 'c', 'u'], true) ? 'attribute_chart' : 'control_chart') . '&action=show&id=' . (int) $chart['id'],
+                ];
+            }
+        }
+        foreach ($allCapabilities as $study) {
+            if ($study['cpk'] === null) {
+                continue;
+            }
+            $cpk = (float) $study['cpk'];
+            if ($cpk < 1.33) {
+                $alerts[] = [
+                    'level' => $cpk < 1.00 ? 'danger' : 'warning',
+                    'icon' => 'fa-bullseye',
+                    'message' => 'Cpk مطالعه «' . ($study['dataset_name'] ?? 'بدون نام') . '» کمتر از حد پیش‌فرض 1.33 است (' . number_format($cpk, 2) . ').',
+                    'url' => CURRENT_MODULE_URL . '?controller=capability&action=show&id=' . (int) $study['id'],
+                ];
+            }
+        }
+        foreach ($allMsa as $study) {
+            if ($study['pct_grr'] === null) {
+                continue;
+            }
+            $grr = (float) $study['pct_grr'];
+            if ($grr >= 10.0) {
+                $alerts[] = [
+                    'level' => $grr > 30.0 ? 'danger' : 'warning',
+                    'icon' => 'fa-ruler-combined',
+                    'message' => '%GRR مطالعه «' . ($study['name'] ?? 'بدون نام') . '» به حد هشدار پیش‌فرض 10٪ رسیده یا از آن عبور کرده است (' . number_format($grr, 2) . '%).',
+                    'url' => CURRENT_MODULE_URL . '?controller=msa&action=show&id=' . (int) $study['id'],
+                ];
+            }
+        }
 
         $projectModel = new Project();
         $recentProjects = array_slice($projectModel->findBySystemWithStats($systemId), 0, 5);
@@ -46,6 +89,7 @@ class DashboardController extends Controller
             'stats'              => $stats,
             'recentCharts'       => $recentCharts,
             'outOfControl'       => $outOfControl,
+            'alerts'             => $alerts,
             'recentCapabilities' => $recentCapabilities,
             'avgCpk'             => $avgCpk,
             'recentMsa'          => $recentMsa,

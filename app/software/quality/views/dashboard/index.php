@@ -14,6 +14,7 @@ $recentCapabilities = $recentCapabilities ?? [];
 $recentMsa          = $recentMsa          ?? [];
 $recentProjects     = $recentProjects     ?? [];
 $outOfControl = (int) ($outOfControl ?? 0);
+$alerts = $alerts ?? [];
 $avgCpk = $avgCpk ?? null;
 $avgGrr = $avgGrr ?? null;
 
@@ -81,6 +82,30 @@ $attributeTypes = ['p', 'np', 'c', 'u'];
         <div class="qc-stat-card info">
             <small><i class="fas fa-ruler-combined"></i> میانگین %GRR</small>
             <h3><?= $avgGrr !== null ? number_format((float) $avgGrr, 2) . '%' : '—' ?></h3>
+        </div>
+    </div>
+
+    <div class="qc-card qc-mb-4">
+        <div class="qc-card-header">
+            <h3 class="qc-card-title"><i class="fas fa-bell"></i> هشدارهای پیش‌فرض کیفیت</h3>
+            <small class="qc-text-muted">Cpk &lt; 1.33 · %GRR ≥ 10٪ · نمودار خارج از کنترل</small>
+        </div>
+        <div class="qc-card-body">
+            <?php if (empty($alerts)): ?>
+                <div class="qc-alert qc-alert-success" role="status">
+                    <i class="fas fa-check-circle"></i> با معیارهای پیش‌فرض، هشداری برای نتایج ثبت‌شده وجود ندارد.
+                </div>
+            <?php else: ?>
+                <?php foreach (array_slice($alerts, 0, 10) as $alert): ?>
+                    <div class="qc-alert qc-alert-<?= htmlspecialchars($alert['level']) ?> qc-mb-2" role="alert">
+                        <i class="fas <?= htmlspecialchars($alert['icon']) ?>"></i>
+                        <a href="<?= htmlspecialchars($alert['url']) ?>"><?= htmlspecialchars($alert['message']) ?></a>
+                    </div>
+                <?php endforeach; ?>
+                <?php if (count($alerts) > 10): ?>
+                    <small class="qc-text-muted">و <?= count($alerts) - 10 ?> هشدار دیگر</small>
+                <?php endif; ?>
+            <?php endif; ?>
         </div>
     </div>
 
