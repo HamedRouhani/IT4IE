@@ -12,7 +12,7 @@
         </div></div>
         <div class="inv-form-section"><h2>موجودی و تقاضا</h2><div class="inv-form-grid">
             <label>موجودی فعلی *<input name="on_hand" type="number" min="0" step="0.0001" required value="<?= $value('on_hand', '0') ?>" <?= $editing ? 'readonly aria-readonly="true"' : '' ?>><small><?= $editing ? 'برای تغییر مانده از دفتر گردش استفاده کنید.' : 'این مقدار به‌عنوان موجودی اولیه در دفتر گردش ثبت می‌شود.' ?></small></label>
-            <label>سفارش در راه<input name="on_order" type="number" min="0" step="0.0001" value="<?= $value('on_order', '0') ?>"><small>جمع مقداری که سفارش شده و هنوز دریافت نشده است.</small></label>
+            <label>سفارش در راه<input name="on_order" type="number" min="0" step="0.0001" value="<?= $value('on_order', '0') ?>" <?= $editing ? 'readonly aria-readonly="true"' : '' ?>><small><?= $editing ? 'مانده با ارسال، دریافت یا لغو سفارش خرید به‌روزرسانی می‌شود.' : 'مقدار اولیه را می‌توان ثبت کرد؛ پس از آن از سفارش خرید استفاده کنید.' ?></small></label>
             <label>تقاضای سالانه *<input name="annual_demand" type="number" min="0" step="0.0001" required value="<?= $value('annual_demand', '0') ?>"></label>
             <label>انحراف معیار تقاضای روزانه *<input name="daily_demand_std" type="number" min="0" step="0.0001" required value="<?= $value('daily_demand_std', '0') ?>"></label>
             <label>زمان تأمین (روز) *<input name="lead_time_days" type="number" min="0" step="0.01" required value="<?= $value('lead_time_days', '0') ?>"></label>

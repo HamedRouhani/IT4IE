@@ -3,6 +3,7 @@ namespace App\Software\Inventory\Controllers;
 
 use App\Software\Inventory\Models\InventoryItem;
 use App\Software\Inventory\Models\InventoryMovement;
+use App\Software\Inventory\Models\InventoryPurchaseOrder;
 use App\Software\Inventory\Services\InventoryPolicyService;
 
 final class DashboardController extends InventoryController
@@ -19,12 +20,15 @@ final class DashboardController extends InventoryController
         $stats['abc_b'] = count(array_filter($analysis, static fn($item) => $item['_analysis']['abc_class'] === 'B'));
         $stats['abc_c'] = count(array_filter($analysis, static fn($item) => $item['_analysis']['abc_class'] === 'C'));
         $stats['reorder_count'] = count(array_filter($analysis, static fn($item) => $item['_analysis']['should_order']));
+        $purchaseOrders = new InventoryPurchaseOrder();
+        $stats['open_po_count'] = $purchaseOrders->countOpen((int) $workspace['id']);
         $this->renderPage('dashboard/index', [
             'pageTitle' => 'مدیریت و بهینه‌سازی موجودی',
             'workspace' => $workspace,
             'stats' => $stats,
             'items' => $analysis,
             'movements' => (new InventoryMovement())->latest((int) $workspace['id'], 8),
+            'orders' => $purchaseOrders->recent((int) $workspace['id'], 5),
         ]);
     }
 }

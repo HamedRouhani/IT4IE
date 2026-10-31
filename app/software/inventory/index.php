@@ -28,6 +28,7 @@ $controllerMap = [
     'item'      => 'ItemController',
     'movement'  => 'MovementController',
     'analysis'  => 'AnalysisController',
+    'purchase_order' => 'PurchaseOrderController',
     'export'    => 'ExportController',
 ];
 $controllerKey = strtolower((string) ($_GET['controller'] ?? 'dashboard'));

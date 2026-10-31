@@ -4,6 +4,17 @@
     const movementType = document.querySelector('[data-inv-movement-type]');
     const adjustment = document.querySelector('[data-inv-adjustment]');
     const orderReceipt = document.querySelector('[data-inv-order-receipt]');
+    const jalaliDate = document.querySelector('input[name="expected_date"]');
+
+    if (jalaliDate) {
+        jalaliDate.addEventListener('input', function () {
+            jalaliDate.value = jalaliDate.value.replace(/[۰-۹]/g, function (digit) {
+                return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit));
+            }).replace(/[٠-٩]/g, function (digit) {
+                return String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
+            }).replace(/[٫／]/g, '/');
+        });
+    }
 
     function syncAdjustmentField() {
         if (!movementType) return;

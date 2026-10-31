@@ -80,12 +80,12 @@ final class InventoryItem
     public function update(int $workspaceId, int $id, array $data): bool
     {
         $stmt = $this->db->prepare(
-            'UPDATE inv_items SET sku=?, name=?, category=?, unit=?, unit_cost=?, on_order=?, annual_demand=?,
+            'UPDATE inv_items SET sku=?, name=?, category=?, unit=?, unit_cost=?, annual_demand=?,
              daily_demand_std=?, lead_time_days=?, order_cost=?, holding_rate=?, service_level=?
              WHERE workspace_id=? AND id=? AND is_active=1'
         );
         return $stmt->execute([
-            $data['sku'], $data['name'], $data['category'], $data['unit'], $data['unit_cost'], $data['on_order'],
+            $data['sku'], $data['name'], $data['category'], $data['unit'], $data['unit_cost'],
             $data['annual_demand'], $data['daily_demand_std'], $data['lead_time_days'], $data['order_cost'],
             $data['holding_rate'], $data['service_level'], $workspaceId, $id,
         ]);

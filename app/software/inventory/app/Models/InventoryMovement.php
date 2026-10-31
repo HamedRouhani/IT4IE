@@ -25,6 +25,18 @@ final class InventoryMovement
         }
         $this->db->beginTransaction();
         try {
+            if ($receivedAgainstOrder > 0) {
+                $openOrder = $this->db->prepare(
+                    "SELECT 1 FROM inv_purchase_order_lines pol
+                     JOIN inv_purchase_orders po ON po.id=pol.purchase_order_id AND po.workspace_id=pol.workspace_id
+                     WHERE pol.workspace_id=? AND pol.item_id=? AND po.status IN ('ordered','partial')
+                       AND pol.received_quantity < pol.ordered_quantity LIMIT 1 FOR UPDATE"
+                );
+                $openOrder->execute([$workspaceId, $itemId]);
+                if ($openOrder->fetchColumn()) {
+                    throw new \InvalidArgumentException('برای سفارش‌های ثبت‌شده، دریافت را از صفحهٔ همان سفارش انجام دهید تا ردیف سفارش و موجودی با هم تطبیق بمانند.');
+                }
+            }
             $stmt = $this->db->prepare('SELECT on_hand, on_order FROM inv_items WHERE id=? AND workspace_id=? AND is_active=1 FOR UPDATE');
             $stmt->execute([$itemId, $workspaceId]);
             $row = $stmt->fetch(\PDO::FETCH_ASSOC);

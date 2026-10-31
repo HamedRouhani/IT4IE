@@ -78,6 +78,42 @@ PREPARE inv_migration FROM @inv_add_receipt_audit_column;
 EXECUTE inv_migration;
 DEALLOCATE PREPARE inv_migration;
 
+CREATE TABLE IF NOT EXISTS inv_purchase_orders (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    workspace_id BIGINT UNSIGNED NOT NULL,
+    order_no VARCHAR(40) NULL,
+    supplier_name VARCHAR(180) NOT NULL,
+    status ENUM('draft','ordered','partial','received','cancelled') NOT NULL DEFAULT 'draft',
+    expected_date DATE NULL,
+    notes VARCHAR(1000) NULL,
+    created_by INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_inv_po_workspace_number (workspace_id, order_no),
+    UNIQUE KEY uq_inv_po_workspace_id (workspace_id, id),
+    KEY idx_inv_po_workspace_status (workspace_id, status, created_at),
+    KEY idx_inv_po_workspace_recent (workspace_id, created_at, id),
+    CONSTRAINT fk_inv_po_creator FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS inv_purchase_order_lines (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    workspace_id BIGINT UNSIGNED NOT NULL,
+    purchase_order_id BIGINT UNSIGNED NOT NULL,
+    item_id BIGINT UNSIGNED NOT NULL,
+    ordered_quantity DECIMAL(18,4) NOT NULL,
+    received_quantity DECIMAL(18,4) NOT NULL DEFAULT 0,
+    unit_cost DECIMAL(18,4) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_inv_po_line_item (purchase_order_id, item_id),
+    KEY idx_inv_po_line_workspace_order (workspace_id, purchase_order_id),
+    CONSTRAINT fk_inv_po_line_order FOREIGN KEY (purchase_order_id)
+        REFERENCES inv_purchase_orders (id) ON DELETE CASCADE,
+    CONSTRAINT chk_inv_po_line_quantity CHECK (ordered_quantity > 0 AND received_quantity >= 0 AND received_quantity <= ordered_quantity),
+    CONSTRAINT chk_inv_po_line_cost CHECK (unit_cost >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT INTO software
     (name, slug, description, version, demo_url, features, tech_stack, db_config,
      module_path, route_prefix, icon_class, requires_license, status, download_count,
@@ -85,10 +121,10 @@ INSERT INTO software
 VALUES
     ('Inventory Analyzer', 'inventory-analyzer',
      'ابزار مدیریت اقلام، ثبت گردش انبار و تحلیل نقطه سفارش و مقدار سفارش اقتصادی برای برنامه‌ریزی موجودی.',
-     '0.2.0', '/software/inventory-analyzer/',
-     '["مدیریت اقلام و موجودی اولیه","ثبت گردش دریافت، خروج و تعدیل","محاسبه موجودی اطمینان و نقطه سفارش","محاسبه EOQ و پیشنهاد مقدار سفارش","طبقه‌بندی ABC و گزارش‌های موجودی"]',
+     '0.3.0', '/software/inventory-analyzer/',
+     '["مدیریت اقلام و موجودی اولیه","ثبت گردش دریافت، خروج و تعدیل","سفارش خرید چندقلمی با دریافت مرحله‌ای","محاسبه موجودی اطمینان و نقطه سفارش","محاسبه EOQ و پیشنهاد مقدار سفارش","طبقه‌بندی ABC و گزارش‌های موجودی"]',
      '["PHP 8.2","MySQL 8","Bootstrap 5","Vanilla JavaScript"]',
-     '{"prefix":"inv_","tables":["workspaces","items","movements"]}',
+     '{"prefix":"inv_","tables":["workspaces","items","movements","purchase_orders","purchase_order_lines"]}',
      'app/software/inventory', 'inventory-analyzer', 'fas fa-boxes-stacked', 0,
      'beta', 0, 1, 'app/software/inventory/index.php',
      '{"module_path":"app/software/inventory","db_prefix":"inv_","sidebar_enabled":true,"theme":"inventory","color":"#BE123C"}')

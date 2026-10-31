@@ -3,6 +3,7 @@ namespace App\Software\Inventory\Controllers;
 
 use App\Software\Inventory\Models\InventoryItem;
 use App\Software\Inventory\Models\InventoryMovement;
+use App\Software\Inventory\Models\InventoryPurchaseOrder;
 use App\Software\Inventory\Services\InventoryPolicyService;
 
 final class ExportController extends InventoryController
@@ -45,6 +46,22 @@ final class ExportController extends InventoryController
                 $labels[$row['movement_type']] ?? $row['movement_type'], $row['quantity'], $row['on_order_received'] ?? 0, $row['balance_after'], $row['note'] ?? '',
             ];
         }, $rows));
+    }
+
+    public function purchaseOrders(): void
+    {
+        $workspace = $this->workspace();
+        $labels = ['draft' => 'پیش‌نویس', 'ordered' => 'ارسال‌شده', 'partial' => 'دریافت مرحله‌ای', 'received' => 'دریافت کامل', 'cancelled' => 'لغوشده'];
+        $orderLines = (new InventoryPurchaseOrder())->exportLines((int) $workspace['id']);
+        $rows = array_map(static fn($line) => [
+            $line['order_no'], $line['supplier_name'], $labels[$line['status']] ?? $line['status'],
+            $line['expected_date'] ?? '', $line['sku'], $line['item_name'], $line['ordered_quantity'],
+            $line['received_quantity'], max(0, (float) $line['ordered_quantity'] - (float) $line['received_quantity']),
+            $line['unit_cost'], (float) $line['ordered_quantity'] * (float) $line['unit_cost'], $line['notes'] ?? '',
+        ], $orderLines);
+        foreach ($rows as &$row) if ($row[3] !== '') $row[3] = inv_date($row[3] . ' 00:00:00');
+        unset($row);
+        $this->csv('inventory-purchase-orders', ['شماره سفارش', 'تأمین‌کننده', 'وضعیت', 'موعد شمسی', 'کد قلم', 'نام قلم', 'مقدار سفارش', 'دریافت‌شده', 'مانده', 'بهای واحد', 'ارزش ردیف', 'یادداشت'], $rows);
     }
 
     private function csv(string $name, array $header, array $rows): void

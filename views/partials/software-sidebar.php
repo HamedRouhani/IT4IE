@@ -131,6 +131,7 @@ $moduleMenus = [
         'menus' => [
             ['route' => 'dashboard',  'icon' => 'fas fa-gauge-high',       'label' => 'داشبورد'],
             ['route' => 'item',       'icon' => 'fas fa-box',              'label' => 'اقلام موجودی'],
+            ['route' => 'purchase_order', 'icon' => 'fas fa-file-invoice',  'label' => 'سفارش‌های خرید'],
             ['route' => 'movement',   'icon' => 'fas fa-arrow-right-arrow-left', 'label' => 'گردش موجودی'],
             ['route' => 'analysis',   'icon' => 'fas fa-calculator',       'label' => 'تحلیل و سفارش'],
         ]

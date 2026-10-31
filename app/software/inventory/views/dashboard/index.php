@@ -7,6 +7,7 @@
         </div>
         <div class="inv-head-actions">
             <a class="inv-btn inv-btn-primary" href="<?= inv_e(inv_url('item', 'create')) ?>"><i class="fa-solid fa-plus"></i> افزودن قلم</a>
+            <a class="inv-btn inv-btn-secondary" href="<?= inv_e(inv_url('purchase_order', 'create', ['suggested' => 1])) ?>"><i class="fa-solid fa-file-circle-plus"></i> پیش‌نویس سفارش پیشنهادی</a>
             <a class="inv-btn inv-btn-secondary" href="<?= inv_e(inv_url('movement')) ?>"><i class="fa-solid fa-arrow-right-arrow-left"></i> ثبت گردش</a>
         </div>
     </header>
@@ -18,6 +19,7 @@
         <article class="inv-stat is-warning"><span class="inv-stat-icon"><i class="fa-solid fa-cart-shopping"></i></span><div><small>نیازمند سفارش</small><strong><?= inv_num($stats['reorder_count'], 0) ?></strong></div></article>
         <article class="inv-stat is-blue"><span class="inv-stat-icon"><i class="fa-solid fa-coins"></i></span><div><small>ارزش موجودی فعلی</small><strong><?= inv_num($stats['inventory_value']) ?></strong></div></article>
         <article class="inv-stat is-teal"><span class="inv-stat-icon"><i class="fa-solid fa-right-left"></i></span><div><small>گردش‌های ثبت‌شده</small><strong><?= inv_num($stats['movement_count'], 0) ?></strong></div></article>
+        <article class="inv-stat is-warning"><span class="inv-stat-icon"><i class="fa-solid fa-truck-fast"></i></span><div><small>سفارش‌های باز خرید</small><strong><?= inv_num($stats['open_po_count'], 0) ?></strong></div></article>
     </div>
 
     <section class="inv-card">
@@ -31,6 +33,9 @@
     </section>
 
     <div class="inv-dashboard-grid">
+        <section class="inv-card"><div class="inv-card-head"><div><h2>آخرین سفارش‌های خرید</h2><p>پیش‌نویس‌ها و وضعیت دریافت</p></div><a href="<?= inv_e(inv_url('purchase_order')) ?>" class="inv-text-link">همه سفارش‌ها</a></div>
+            <?php if (!empty($orders)): ?><div class="inv-movement-list"><?php $poLabels = ['draft' => 'پیش‌نویس', 'ordered' => 'ارسال‌شده', 'partial' => 'دریافت مرحله‌ای', 'received' => 'دریافت کامل', 'cancelled' => 'لغوشده']; foreach ($orders as $order): ?><a class="inv-movement-row inv-order-row" href="<?= inv_e(inv_url('purchase_order', 'show', ['id' => $order['id']])) ?>"><span class="inv-movement-symbol"><i class="fa-solid fa-file-invoice"></i></span><span class="inv-movement-name"><strong><?= inv_e($order['order_no']) ?> · <?= inv_e($order['supplier_name']) ?></strong><small><?= inv_e($poLabels[$order['status']] ?? $order['status']) ?> · <?= inv_num($order['line_count'], 0) ?> ردیف</small></span><b><?= inv_num($order['order_value']) ?></b></a><?php endforeach; ?></div><?php else: ?><div class="inv-empty compact"><span>سفارشی ثبت نشده است.</span><a href="<?= inv_e(inv_url('purchase_order', 'create')) ?>" class="inv-text-link">ایجاد سفارش</a></div><?php endif; ?>
+        </section>
         <section class="inv-card"><div class="inv-card-head"><div><h2>آخرین گردش‌ها</h2><p>دفتر ثبت دریافت، خروج و تعدیل</p></div><a href="<?= inv_e(inv_url('movement')) ?>" class="inv-text-link">دفتر گردش</a></div>
             <?php if (!empty($movements)): ?><div class="inv-movement-list">
                 <?php foreach ($movements as $movement): $label = ['opening' => 'موجودی اولیه', 'receipt' => 'دریافت', 'issue' => 'خروج', 'adjustment' => 'تعدیل'][$movement['movement_type']] ?? $movement['movement_type']; ?>
