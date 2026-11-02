@@ -288,8 +288,9 @@
 | ۵ | OR Analyzer | `or_` | ۱۲ | 1.0 | Beta |
 | ۶ | PdM Analyzer | `pm_` | ۲۱ | 9.0 | Stable |
 | ۷ | Inventory Analyzer | `inv_` | ۵ | 0.3.0 | Beta |
-| ۸ | HR Analyzer | `hr_` | ۲۵ | 10.0 | Beta |
-| ۹ | Quality Analyzer | `qc_` | ۹ | 1.0 | Beta |
+| ۸ | Time Study Analyzer | `ts_` | ۶ | 1.0.0 | Stable |
+| ۹ | HR Analyzer | `hr_` | ۲۵ | 10.0 | Beta |
+| ۱۰ | Quality Analyzer | `qc_` | ۹ | 1.0 | Beta |
 
 ---
 
