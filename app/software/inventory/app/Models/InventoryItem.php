@@ -118,4 +118,58 @@ final class InventoryItem
             'reorder_count' => 0,
         ];
     }
+
+    /** Estimate demand from recorded issue movements, treating unrecorded issue days as zero. */
+    public function demandEstimates(int $workspaceId, int $windowDays = 90): array
+    {
+        $windowDays = max(30, min(365, $windowDays));
+        $daysBeforeToday = $windowDays - 1;
+        $stmt = $this->db->prepare(
+            'SELECT i.id,
+                    GREATEST(1, DATEDIFF(CURRENT_DATE, GREATEST(DATE_SUB(CURRENT_DATE, INTERVAL ' . $daysBeforeToday . ' DAY), DATE(i.created_at))) + 1) AS observed_days,
+                    COALESCE(SUM(d.daily_quantity), 0) AS total_quantity,
+                    COALESCE(SUM(d.daily_quantity * d.daily_quantity), 0) AS sum_squares,
+                    COUNT(d.demand_date) AS active_days
+             FROM inv_items i
+             LEFT JOIN (
+                 SELECT item_id, DATE(created_at) AS demand_date, SUM(ABS(quantity)) AS daily_quantity
+                 FROM inv_movements
+                 WHERE workspace_id = ? AND movement_type = \'issue\'
+                   AND quantity < 0 AND created_at >= DATE_SUB(CURRENT_DATE, INTERVAL ' . $daysBeforeToday . ' DAY)
+                 GROUP BY item_id, DATE(created_at)
+             ) d ON d.item_id = i.id
+                AND d.demand_date >= GREATEST(DATE_SUB(CURRENT_DATE, INTERVAL ' . $daysBeforeToday . ' DAY), DATE(i.created_at))
+             WHERE i.workspace_id = ? AND i.is_active = 1
+             GROUP BY i.id, i.created_at'
+        );
+        $stmt->execute([$workspaceId, $workspaceId]);
+        $estimates = [];
+        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+            $days = (int) $row['observed_days'];
+            $total = (float) $row['total_quantity'];
+            if ($days < 30 || $total <= 0) continue;
+            $mean = $total / $days;
+            $sumSquares = (float) $row['sum_squares'];
+            $sampleVariance = $days > 1 ? max(0.0, ($sumSquares - ($total * $total / $days)) / ($days - 1)) : 0.0;
+            $estimates[(int) $row['id']] = [
+                'annual_demand' => $mean * 365.0,
+                'daily_demand_std' => sqrt($sampleVariance),
+                'observed_days' => $days,
+                'active_days' => (int) $row['active_days'],
+                'total_quantity' => $total,
+            ];
+        }
+        return $estimates;
+    }
+
+    public function updateDemandParameters(int $workspaceId, int $id, float $annualDemand, float $dailyStd): bool
+    {
+        if (!is_finite($annualDemand) || !is_finite($dailyStd) || $annualDemand < 0 || $dailyStd < 0) {
+            throw new \InvalidArgumentException('برآورد تقاضا معتبر نیست.');
+        }
+        $stmt = $this->db->prepare(
+            'UPDATE inv_items SET annual_demand=?, daily_demand_std=? WHERE workspace_id=? AND id=? AND is_active=1'
+        );
+        return $stmt->execute([$annualDemand, $dailyStd, $workspaceId, $id]);
+    }
 }

@@ -71,7 +71,7 @@ body.software-mode[data-module="inventory"] .inv-dashboard-grid { display: grid;
 
 body.software-mode[data-module="inventory"] .inv-table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--inv-border); border-radius: 12px; }
 body.software-mode[data-module="inventory"] .inv-table { width: 100%; min-width: 790px; border-collapse: collapse; background: #fff; }
-body.software-mode[data-module="inventory"] .inv-analysis-table { min-width: 1060px; }
+body.software-mode[data-module="inventory"] .inv-analysis-table { min-width: 1340px; }
 body.software-mode[data-module="inventory"] .inv-table th, body.software-mode[data-module="inventory"] .inv-table td { padding: 12px 13px; border-bottom: 1px solid #e8edf2; text-align: right; vertical-align: middle; }
 body.software-mode[data-module="inventory"] .inv-table th { color: #46576e; background: #f5f8fa; font-size: .83rem; font-weight: 800; white-space: nowrap; }
 body.software-mode[data-module="inventory"] .inv-table td { color: #34445b; font-size: .9rem; }
