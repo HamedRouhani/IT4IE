@@ -160,6 +160,7 @@ final class StudyController extends StudyControllerBase
             $zone = new DateTimeZone('Asia/Tehran');
             $startAt = new DateTimeImmutable($date . ' ' . $start . ':00', $zone);
             $endAt = new DateTimeImmutable($date . ' ' . $end . ':00', $zone);
+            if ($endAt <= $startAt) $endAt = $endAt->modify('+1 day');
             $span = $endAt->getTimestamp() - $startAt->getTimestamp();
             if ($span < 60) throw new \InvalidArgumentException('پایان شیفت باید پس از شروع باشد و بازه دست‌کم یک دقیقه طول بکشد.');
             $rawCount = filter_var(self::latinDigits((string) ($_POST['sample_count'] ?? '')), FILTER_VALIDATE_INT);
@@ -170,8 +171,10 @@ final class StudyController extends StudyControllerBase
             sort($offsets, SORT_NUMERIC);
             $dateTimes = [];
             foreach ($offsets as $offset) $dateTimes[] = $startAt->modify('+' . $offset . ' seconds')->format('Y-m-d H:i:s');
-            (new StudyRepository())->generateSamplingSlots($userId, $id, $dateTimes);
-            ts_flash_set('success', count($dateTimes) . ' زمان تصادفی برای مشاهده ساخته شد. برنامه را پیش از اجرای شیفت در اختیار مشاهده‌گر بگذارید.');
+            $inserted = (new StudyRepository())->generateSamplingSlots($userId, $id, $dateTimes);
+            if ($inserted === 0) throw new \InvalidArgumentException('هیچ زمان تازه‌ای اضافه نشد؛ زمان‌های تولیدشده با برنامه‌های قبلی تکراری بودند. بازه یا تاریخ دیگری انتخاب کنید.');
+            $skipped = count($dateTimes) - $inserted;
+            ts_flash_set('success', $inserted . ' زمان تصادفی به برنامه افزوده شد.' . ($skipped ? ' ' . $skipped . ' زمان تکراری با برنامه‌های قبلی حذف شد.' : '') . ' برنامه را پیش از اجرای شیفت در اختیار مشاهده‌گر بگذارید.');
         } catch (\InvalidArgumentException $e) {
             ts_flash_set('danger', $e->getMessage());
         } catch (\Throwable $e) {

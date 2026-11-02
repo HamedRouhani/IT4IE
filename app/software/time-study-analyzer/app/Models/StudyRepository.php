@@ -212,16 +212,21 @@ final class StudyRepository
         }
     }
 
-    public function generateSamplingSlots(int $userId, int $studyId, array $dateTimes): void
+    public function generateSamplingSlots(int $userId, int $studyId, array $dateTimes): int
     {
         $this->db->beginTransaction();
         try {
             $study = $this->lockStudy($userId, $studyId);
             if ($study['method'] !== 'work_sampling' || $study['status'] !== 'active') throw new \InvalidArgumentException('برنامه فقط برای مطالعهٔ نمونه‌برداری فعال ساخته می‌شود.');
             if (count($dateTimes) < 1 || count($dateTimes) > 500) throw new \InvalidArgumentException('تعداد زمان‌های نمونه باید بین ۱ تا ۵۰۰ باشد.');
-            $insert = $this->db->prepare('INSERT INTO ts_sampling_slots (study_id, scheduled_at) VALUES (?, ?)');
-            foreach ($dateTimes as $dateTime) $insert->execute([$studyId, $dateTime]);
+            $insert = $this->db->prepare('INSERT IGNORE INTO ts_sampling_slots (study_id, scheduled_at) VALUES (?, ?)');
+            $inserted = 0;
+            foreach ($dateTimes as $dateTime) {
+                $insert->execute([$studyId, $dateTime]);
+                $inserted += $insert->rowCount();
+            }
             $this->db->commit();
+            return $inserted;
         } catch (\Throwable $e) {
             if ($this->db->inTransaction()) $this->db->rollBack();
             throw $e;

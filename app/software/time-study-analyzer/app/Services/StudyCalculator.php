@@ -149,9 +149,12 @@ final class StudyCalculator
         }
         $productive = 0;
         foreach ($rows as $row) if ($row['category']['category_type'] === 'productive') $productive += $row['count'];
+        $void = count(array_filter($slots, static fn($slot) => $slot['slot_status'] === 'void'));
+        $resolved = $observed + $missed + $void;
         return [
             'categories' => $rows, 'observed_count' => $observed, 'planned_count' => $planned,
-            'missed_count' => $missed, 'productive_share' => $observed > 0 ? $productive / $observed : null,
+            'missed_count' => $missed, 'void_count' => $void, 'resolved_count' => $resolved,
+            'productive_share' => $observed > 0 ? $productive / $observed : null,
             'required_sample_size' => $required, 'confidence_level' => $confidence,
             'precision_pct' => (float) $study['precision_pct'], 'sample_is_sufficient' => $observed >= $required,
             'completion_pct' => $planned > 0 ? 100.0 * ($observed + $missed) / $planned : null,
