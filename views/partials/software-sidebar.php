@@ -137,6 +137,17 @@ $moduleMenus = [
         ]
     ],
 
+    // -------- Time Study Analyzer --------
+    'time-study-analyzer' => [
+        'name' => 'Time Study Analyzer',
+        'icon' => 'fas fa-stopwatch',
+        'param' => 'controller',
+        'menus' => [
+            ['route' => 'dashboard', 'icon' => 'fas fa-gauge-high', 'label' => 'داشبورد'],
+            ['route' => 'study', 'icon' => 'fas fa-stopwatch', 'label' => 'مطالعات زمان‌سنجی'],
+        ],
+    ],
+
     // -------- HR Analyzer --------
     'hr' => [
         'name'  => 'HR Analyzer',

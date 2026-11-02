@@ -17,6 +17,7 @@ $slugMap = [
     'statlab-analyzer' => ['icon' => 'fas fa-chart-line',       'class' => 'statlab'],
     'pdm-analyzer'     => ['icon' => 'fas fa-industry',         'class' => 'pdm'],
     'inventory-analyzer' => ['icon' => 'fas fa-boxes-stacked',    'class' => 'inventory'],
+    'time-study-analyzer' => ['icon' => 'fas fa-stopwatch',       'class' => 'time-study-analyzer'],
     'hr-analyzer'      => ['icon' => 'fas fa-users',            'class' => 'hr'],
     'quality-analyzer' => ['icon' => 'fas fa-clipboard-check',  'class' => 'quality'],
     'itil-analyzer'    => ['icon' => 'fas fa-server',           'class' => 'itil'],

@@ -7,3 +7,4 @@
 
 # Inventory Analyzer deployment schema is maintained with its module.
 !app/software/inventory/database/beta-install.sql
+!app/software/time-study-analyzer/database/install.sql

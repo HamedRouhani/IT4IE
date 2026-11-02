@@ -91,6 +91,10 @@ $title = $title ?? ($softwareName . ' - IT4IE');
     <?php if (($moduleName ?? '') === 'inventory'): ?>
     <script src="<?php echo htmlspecialchars(it4ie_asset_url('js/software/inventory.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <?php endif; ?>
+    <?php if (($moduleName ?? '') === 'time-study-analyzer'): ?>
+    <script src="<?php echo htmlspecialchars(it4ie_asset_url('js/software/hr-datepicker.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+    <script src="<?php echo htmlspecialchars(it4ie_asset_url('js/software/time-study-analyzer.js'), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+    <?php endif; ?>
     <script src="/assets/js/script.js"></script>
 </body>
 </html>

@@ -22,6 +22,7 @@ body.software-mode[data-module="pdm"]     { --mt:#0F766E; --mt-dark:#115E59; --m
 body.software-mode[data-module="hr"]      { --mt:#1E40AF; --mt-dark:#1E3A8A; --mt-rgb:30,64,175;    --mt-accent:#93c5fd; --mt-soft:#f3f6fc; --mt-tint:#dbeafe; --mt-ink:#172554; }
 body.software-mode[data-module="quality"] { --mt:#059669; --mt-dark:#047857; --mt-rgb:5,150,105;    --mt-accent:#6ee7b7; --mt-soft:#f3f8f6; --mt-tint:#d1fae5; --mt-ink:#064e3b; }
 body.software-mode[data-module="inventory"] { --mt:#BE123C; --mt-dark:#9F1239; --mt-rgb:190,18,60; --mt-accent:#FDA4AF; --mt-soft:#FFF7F8; --mt-tint:#FFE4E6; --mt-ink:#881337; }
+body.software-mode[data-module="time-study-analyzer"] { --mt:#4F46E5; --mt-dark:#3730A3; --mt-rgb:79,70,229; --mt-accent:#A5B4FC; --mt-soft:#F5F6FF; --mt-tint:#E0E7FF; --mt-ink:#312E81; }
 
 /* ---- Shared shell: sidebar, nav, focus, surface use the module tokens ---- */
 body.software-mode[data-module] {
