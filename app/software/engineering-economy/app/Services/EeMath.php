@@ -502,6 +502,77 @@ final class EeMath
         return $rows;
     }
 
+    /**
+     * جریان خالص پس از مالیات با سپر مالیاتی استهلاک.
+     *
+     * سال ۰ (سرمایه‌گذاری) بدون اثر مالیاتی می‌ماند. برای سال‌های بعد:
+     *   taxable = net − depreciation
+     *   tax     = max(0, taxable) × rate
+     *   ATCF    = net − tax
+     *
+     * @param array<int,float> $flows              جریان خالص پیش از مالیات
+     * @param array<int,float> $depreciationByYear نگاشت سال => استهلاک
+     * @return array<int,float>
+     */
+    public static function afterTaxNetFlows(array $flows, array $depreciationByYear, float $taxRate): array
+    {
+        $taxRate = max(0.0, min(1.0, $taxRate));
+        $result = [];
+
+        foreach (self::compactFlows($flows) as $year => $flow) {
+            $year = (int) $year;
+            if ($year === 0) {
+                $result[0] = $flow;
+                continue;
+            }
+
+            $depreciation = (float) ($depreciationByYear[$year] ?? 0.0);
+            $taxable = $flow - $depreciation;
+            $result[$year] = $flow - (max(0.0, $taxable) * $taxRate);
+        }
+
+        return $result;
+    }
+
+    /**
+     * تبدیل جدول استهلاک به نگاشت سال => مبلغ.
+     *
+     * @param array<int,array{year:int|string,depreciation:float|string}> $schedule
+     * @return array<int,float>
+     */
+    public static function depreciationByYear(array $schedule): array
+    {
+        $map = [];
+        foreach ($schedule as $row) {
+            $map[(int) $row['year']] = (float) $row['depreciation'];
+        }
+
+        return $map;
+    }
+
+    /**
+     * جدول استهلاک بر پایهٔ روش انتخاب‌شدهٔ پروژه.
+     *
+     * @param array<int,float> $unitsByYear فقط برای روش واحد تولید
+     * @return array<int,array{year:int,depreciation:float,bookValue:float}>
+     */
+    public static function depreciationSchedule(
+        string $method,
+        float $cost,
+        float $salvage,
+        int $life,
+        float $decliningRate = 0.20,
+        array $unitsByYear = []
+    ): array {
+        return match ($method) {
+            'straight' => self::depreciationStraightLine($cost, $salvage, $life),
+            'declining' => self::depreciationDeclining($cost, $salvage, $life, $decliningRate),
+            'soyd' => self::depreciationSumOfYears($cost, $salvage, $life),
+            'uop' => self::depreciationUnitsOfProduction($cost, $salvage, $unitsByYear),
+            default => [],
+        };
+    }
+
     /* ==================================================================
      * تورم و نرخ‌ها
      * ================================================================== */

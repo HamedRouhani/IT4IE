@@ -76,6 +76,47 @@
         <?php endif; ?>
     </section>
 
+    <?php $afterTaxRows = array_filter($analysis['rows'], static fn(array $row): bool => $row['afterTax'] !== null); ?>
+    <?php if ($afterTaxRows): ?>
+        <section class="ee-card">
+            <div class="ee-card-head">
+                <div>
+                    <span class="ee-eyebrow">مالیات و استهلاک</span>
+                    <h2>نتیجه پس از مالیات</h2>
+                    <p>استهلاک روی سرمایهٔ اولیهٔ هر گزینه با روش «<?= ee_e(ee_method_label((string) $analysis['project']['depreciation_method'])) ?>» و ارزش اسقاط صفر محاسبه شده است.</p>
+                </div>
+                <span class="ee-tag">نرخ مالیات <?= ee_num($analysis['project']['tax_rate_pct'], 1) ?>٪</span>
+            </div>
+            <div class="ee-table-wrap">
+                <table class="ee-table">
+                    <thead><tr><th>گزینه</th><th>NPV پیش از مالیات</th><th>NPV پس از مالیات</th><th>IRR پس از مالیات</th><th>بازگشت پس از مالیات</th><th>اثر مالیات بر NPV</th></tr></thead>
+                    <tbody>
+                        <?php foreach ($afterTaxRows as $row): ?>
+                            <tr>
+                                <td><?= ee_e($row['alternative']['name']) ?></td>
+                                <td class="ee-num"><?= ee_money($row['npv'], $analysis['project']['currency']) ?></td>
+                                <td class="ee-num"><?= ee_money($row['afterTax']['npv'], $analysis['project']['currency']) ?></td>
+                                <td class="ee-num"><?= ee_pct($row['afterTax']['irr']) ?></td>
+                                <td class="ee-num"><?= $row['afterTax']['payback'] === null ? '—' : ee_num($row['afterTax']['payback'], 2) ?></td>
+                                <td class="ee-num"><?= ee_money((float) $row['afterTax']['npv'] - (float) $row['npv'], $analysis['project']['currency']) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="ee-note" style="margin-top:14px;">
+                <i class="fa-solid fa-circle-info"></i>
+                <div>
+                    <strong>فرض محاسبه</strong>
+                    <ul>
+                        <li>مبنای استهلاک، خروجی سال ۰ همان گزینه است و ارزش اسقاط صفر گرفته شده.</li>
+                        <li>اگر جریان نقدی واردشده از پیش پس از مالیات است، نرخ مالیات پروژه را صفر کنید تا مالیات دوبار اعمال نشود.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+
     <?php if (count($analysis['ranking']) > 1): ?>
         <section class="ee-card">
             <div class="ee-card-head"><div><span class="ee-eyebrow">رتبه‌بندی</span><h2>ترتیب بر پایهٔ NPV</h2></div></div>

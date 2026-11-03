@@ -59,6 +59,36 @@
         <?php endif; ?>
     </section>
 
+    <?php $reportAfterTax = array_filter($analysis['rows'], static fn(array $row): bool => $row['afterTax'] !== null); ?>
+    <?php if ($reportAfterTax): ?>
+        <section class="ee-card">
+            <div class="ee-card-head"><div><span class="ee-eyebrow">مالیات و استهلاک</span><h2>تحلیل پس از مالیات</h2><p>مبنای استهلاک: سرمایهٔ اولیهٔ هر گزینه · ارزش اسقاط صفر · نرخ مالیات <?= ee_num($analysis['project']['tax_rate_pct'], 1) ?>٪</p></div></div>
+            <div class="ee-table-wrap">
+                <table class="ee-table">
+                    <thead><tr><th>گزینه</th><th>NPV پیش از مالیات</th><th>NPV پس از مالیات</th><th>IRR پس از مالیات</th><th>میانگین استهلاک سالانه</th></tr></thead>
+                    <tbody>
+                        <?php foreach ($reportAfterTax as $row): ?>
+                            <?php
+                            $scheduleTotal = 0.0;
+                            foreach ($row['afterTax']['schedule'] as $depRow) {
+                                $scheduleTotal += (float) $depRow['depreciation'];
+                            }
+                            $scheduleYears = count($row['afterTax']['schedule']);
+                            ?>
+                            <tr>
+                                <td><?= ee_e($row['alternative']['name']) ?></td>
+                                <td class="ee-num"><?= ee_money($row['npv'], $analysis['project']['currency']) ?></td>
+                                <td class="ee-num"><?= ee_money($row['afterTax']['npv'], $analysis['project']['currency']) ?></td>
+                                <td class="ee-num"><?= ee_pct($row['afterTax']['irr']) ?></td>
+                                <td class="ee-num"><?= $scheduleYears > 0 ? ee_money($scheduleTotal / $scheduleYears, $analysis['project']['currency']) : '—' ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    <?php endif; ?>
+
     <?php if ($analysis['incremental']): ?>
         <section class="ee-card">
             <div class="ee-card-head"><div><span class="ee-eyebrow">مقایسه</span><h2>تحلیل افزایشی</h2></div></div>

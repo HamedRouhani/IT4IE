@@ -116,7 +116,18 @@ check('جریان پس از مالیات سال ۱', $afterTax[1]['netCash'], 26
 check('قاعدهٔ شش‌دهم (ظرفیت دو برابر)', (float) EeMath::capacityCost(1000.0, 100.0, 200.0), 1515.72, 1.0e-2);
 
 /* ------------------------------------------------------------------
- * ۸) بررسی اعتبار ورودی
+ * ۸) تحلیل پس از مالیات با سپر استهلاک (مسیر واقعی ماژول)
+ * ------------------------------------------------------------------ */
+$depreciationMap = EeMath::depreciationByYear(EeMath::depreciationSchedule('straight', 10000.0, 0.0, 5));
+$afterTaxFlows = EeMath::afterTaxNetFlows($flows, $depreciationMap, 0.25);
+check('ATCF سال ۰ بدون اثر مالیاتی', $afterTaxFlows[0], -10000.0);
+check('ATCF سال ۱ (مالیات ۲۵٪، استهلاک ۲۰۰۰)', $afterTaxFlows[1], 2750.0);
+check('NPV پس از مالیات', EeMath::npv(0.10, $afterTaxFlows), 424.66, 1.0e-2);
+check('استهلاک مجموع سنوات سال ۲', EeMath::depreciationByYear(EeMath::depreciationSchedule('soyd', 10000.0, 0.0, 5))[2], 2666.6667, 1.0e-4);
+check('استهلاک واحد تولید (کل ۱۰۰۰ واحد)', EeMath::depreciationByYear(EeMath::depreciationSchedule('uop', 10000.0, 0.0, 4, 0.2, [1 => 400.0, 2 => 300.0, 3 => 200.0, 4 => 100.0]))[2], 3000.0);
+
+/* ------------------------------------------------------------------
+ * ۹) بررسی اعتبار ورودی
  * ------------------------------------------------------------------ */
 $issues = EeMath::validate([-1000.0, 500.0, -500.0, 900.0]);
 printf("ok    هشدارهای جریان غیرمتعارف = %d مورد\n", count($issues));

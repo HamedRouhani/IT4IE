@@ -121,7 +121,7 @@ final class AnalysisController extends Controller
                 }
             }
         } else {
-            fputcsv($out, ['alternative', 'npv', 'irr', 'err', 'mirr', 'payback_years', 'discounted_payback_years', 'pi', 'annual_worth', 'bc_ratio']);
+            fputcsv($out, ['alternative', 'npv', 'irr', 'err', 'mirr', 'payback_years', 'discounted_payback_years', 'pi', 'annual_worth', 'bc_ratio', 'after_tax_npv', 'after_tax_irr']);
             foreach ($analysis['rows'] as $row) {
                 fputcsv($out, [
                     $this->csvCell($row['alternative']['name']),
@@ -134,6 +134,8 @@ final class AnalysisController extends Controller
                     $row['pi'],
                     $row['aw'],
                     $row['bc']['ratio'] ?? null,
+                    $row['afterTax']['npv'] ?? null,
+                    $row['afterTax']['irr'] ?? null,
                 ]);
             }
             fputcsv($out, []);
@@ -185,8 +187,32 @@ final class AnalysisController extends Controller
                 $costs[$year] = (float) $raw['outflow'];
             }
 
+            // ---- تحلیل پس از مالیات (فقط وقتی نرخ مالیات و روش استهلاک تعیین شده باشد) ----
+            $afterTax = null;
+            if ($tax > 0.0 && $project['depreciation_method'] !== 'none' && $flows !== []) {
+                $initialInvestment = -(float) ($flows[0] ?? 0.0);
+                $depreciationLife = min($studyPeriod, max(1, (int) $alternative['life_years']));
+                $schedule = EeMath::depreciationSchedule(
+                    (string) $project['depreciation_method'],
+                    max(0.0, $initialInvestment),
+                    0.0,
+                    $depreciationLife
+                );
+                $afterTaxFlows = EeMath::afterTaxNetFlows($flows, EeMath::depreciationByYear($schedule), $tax);
+
+                $afterTax = [
+                    'flows' => $afterTaxFlows,
+                    'schedule' => $schedule,
+                    'life' => $depreciationLife,
+                    'npv' => EeMath::npv($rate, $afterTaxFlows),
+                    'irr' => EeMath::irr($afterTaxFlows),
+                    'payback' => EeMath::paybackSimple($afterTaxFlows),
+                ];
+            }
+
             $rows[] = [
                 'alternative' => $alternative,
+                'afterTax' => $afterTax,
                 'rawRows' => $rawRows,
                 'flows' => $flows,
                 'issues' => $flows === [] ? ['جریان نقدی ثبت نشده است.'] : EeMath::validate($flows),
