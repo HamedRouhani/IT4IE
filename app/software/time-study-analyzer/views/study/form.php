@@ -98,6 +98,7 @@ $methodLabel = $method === 'stopwatch' ? 'زمان‌سنجی مستقیم' : '�
                 <label>خستگی (%)<input name="fatigue_allowance_pct" type="number" min="0" max="79.99" step="0.01" value="<?= $value('fatigue_allowance_pct', '0') ?>"></label>
                 <label>تأخیر اجتناب‌ناپذیر (%)<input name="delay_allowance_pct" type="number" min="0" max="79.99" step="0.01" value="<?= $value('delay_allowance_pct', '0') ?>"></label>
                 <label>سایر allowance (%)<input name="other_allowance_pct" type="number" min="0" max="79.99" step="0.01" value="<?= $value('other_allowance_pct', '0') ?>"></label>
+                <label class="ts-span-2">الگوی راهنمای allowance (اختیاری)<select data-ts-allowance-preset><option value="">انتخاب الگو…</option><option value="light">کار سبک / اداری</option><option value="medium">کار کارگاهی متوسط</option><option value="heavy">کار سنگین</option></select><small>فقط نقطهٔ شروع بر پایهٔ رویهٔ رایج PFD است؛ با سیاست سازمان و شرایط واقعی بازبینی شود و در «منبع / توجیه» مستند گردد.</small></label>
                 <label class="ts-span-2">منبع / توجیه allowance<textarea name="allowance_rationale" rows="2" maxlength="1000" placeholder="منبع سازمانی، توافق کارفرما و کارکنان یا مبنای ارگونومی"><?= $value('allowance_rationale') ?></textarea></label>
                 <?php else: ?><input type="hidden" name="allowance_basis" value="standard"><?php endif; ?>
             </div>

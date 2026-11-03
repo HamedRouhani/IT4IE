@@ -350,6 +350,34 @@
     /* ==================================================================
      * ۱۱) جلوگیری از ارسال دوبارهٔ فرم با دوبار کلیک
      * ================================================================== */
+    /* ==================================================================
+     * ۱۲) الگوی راهنمای allowance (PFD) برای پرکردن سریع چهار فیلد
+     * ================================================================== */
+    safe('allowance-presets', () => {
+        const preset = document.querySelector('[data-ts-allowance-preset]');
+        if (!preset) return;
+
+        const fields = {
+            personal: document.querySelector('input[name="personal_allowance_pct"]'),
+            fatigue: document.querySelector('input[name="fatigue_allowance_pct"]'),
+            delay: document.querySelector('input[name="delay_allowance_pct"]'),
+        };
+
+        const presets = {
+            light: [5, 4, 3],
+            medium: [5, 6, 4],
+            heavy: [7, 10, 6],
+        };
+
+        preset.addEventListener('change', () => {
+            const values = presets[preset.value];
+            if (!values) return;
+            if (fields.personal) fields.personal.value = String(values[0]);
+            if (fields.fatigue) fields.fatigue.value = String(values[1]);
+            if (fields.delay) fields.delay.value = String(values[2]);
+        });
+    });
+
     safe('double-submit', () => {
         document.querySelectorAll('[data-ts-form], [data-ts-sample-form]').forEach((form) => {
             form.addEventListener('submit', (event) => {
