@@ -6,18 +6,21 @@
 $softwareList  = $softwareList  ?? [];
 $totalSoftware = $totalSoftware ?? count($softwareList);
 
-// نقشه‌ی تشخیص ماژول بر اساس slug
+// نقشه‌ی تشخیص ماژول بر اساس slug: آیکون + کلید تم (رنگ از software.css خوانده می‌شود)
 $slugMap = [
-    'babok-analyzer'   => ['icon' => 'fas fa-robot',            'class' => 'babok'],
-    'pmbok-analyzer'   => ['icon' => 'fas fa-project-diagram',  'class' => 'pmbok'],
-    'mcdm-analyzer'    => ['icon' => 'fas fa-scale-balanced',   'class' => 'mcdm'],
-    'or-analyzer'      => ['icon' => 'fas fa-gears',            'class' => 'or'],
-    'statlab-analyzer' => ['icon' => 'fas fa-chart-line',       'class' => 'statlab'],
-    'pdm-analyzer'     => ['icon' => 'fas fa-industry',         'class' => 'pdm'],
-    'hr-analyzer'      => ['icon' => 'fas fa-users',            'class' => 'hr'],
-    'quality-analyzer' => ['icon' => 'fas fa-clipboard-check',  'class' => 'quality'],
-    'itil-analyzer'    => ['icon' => 'fas fa-server',           'class' => 'itil'],
-    'togaf-analyzer'   => ['icon' => 'fas fa-network-wired',    'class' => 'togaf'],
+    'babok-analyzer'      => ['icon' => 'fas fa-robot',           'class' => 'babok'],
+    'pmbok-analyzer'      => ['icon' => 'fas fa-project-diagram', 'class' => 'pmbok'],
+    'mcdm-analyzer'       => ['icon' => 'fas fa-scale-balanced',  'class' => 'mcdm'],
+    'or-analyzer'         => ['icon' => 'fas fa-gears',           'class' => 'or'],
+    'statlab-analyzer'    => ['icon' => 'fas fa-chart-line',      'class' => 'statlab'],
+    'pdm-analyzer'        => ['icon' => 'fas fa-industry',        'class' => 'pdm'],
+    'inventory-analyzer'  => ['icon' => 'fas fa-boxes-stacked',   'class' => 'inventory'],
+    'time-study-analyzer' => ['icon' => 'fas fa-stopwatch',       'class' => 'time-study-analyzer'],
+    'engineering-economy' => ['icon' => 'fas fa-coins',           'class' => 'engineering-economy'],
+    'hr-analyzer'         => ['icon' => 'fas fa-users',           'class' => 'hr'],
+    'quality-analyzer'    => ['icon' => 'fas fa-clipboard-check', 'class' => 'quality'],
+    'itil-analyzer'       => ['icon' => 'fas fa-server',          'class' => 'itil'],
+    'togaf-analyzer'      => ['icon' => 'fas fa-network-wired',   'class' => 'togaf'],
 ];
 
 // برچسب و کلاس وضعیت
@@ -27,9 +30,33 @@ $statusMap = [
     'development' => ['label' => 'Dev',        'class' => 'development'],
     'deprecated'  => ['label' => 'Deprecated', 'class' => 'deprecated'],
 ];
+
+/**
+ * ساخت متغیرهای رنگ کارت از یک رنگ هگز.
+ * فقط برای ماژول‌هایی استفاده می‌شود که هنوز کلاس تم در software.css ندارند،
+ * تا رنگ کارت از config_json همین ماژول گرفته شود.
+ */
+$themeVars = static function ($color): string {
+    if (!is_string($color) || trim($color) === '') return '';
+
+    $hex = ltrim(trim($color), '#');
+    if (strlen($hex) === 3) $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+    if (!preg_match('/^[0-9a-fA-F]{6}$/', $hex)) return '';
+
+    $red = (int) hexdec(substr($hex, 0, 2));
+    $green = (int) hexdec(substr($hex, 2, 2));
+    $blue = (int) hexdec(substr($hex, 4, 2));
+    $dark = sprintf('#%02x%02x%02x', (int) round($red * 0.78), (int) round($green * 0.78), (int) round($blue * 0.78));
+
+    return sprintf('--sw-color:#%s;--sw-color-dark:%s;--sw-color-rgb:%d,%d,%d', strtolower($hex), $dark, $red, $green, $blue);
+};
+
+// نسخهٔ فایل CSS بر پایهٔ زمان تغییر، تا بعد از هر آپلود کش مرورگر عوض شود.
+$publicPath = defined('PUBLIC_PATH') ? PUBLIC_PATH : dirname(__DIR__, 2) . '/public';
+$softwareCssVersion = (int) (@filemtime($publicPath . '/assets/css/software.css') ?: 1);
 ?>
 
-<link rel="stylesheet" href="/assets/css/software.css?v=20261010">
+<link rel="stylesheet" href="/assets/css/software.css?v=<?= $softwareCssVersion ?>">
 
 <div class="swl-page">
     <div class="swl-container">
@@ -74,16 +101,20 @@ $statusMap = [
                     // تشخیص آیکون و کلاس بر اساس slug
                     $iconInfo = $slugMap[$slug] ?? ['icon' => 'fas fa-cube', 'class' => 'default'];
 
-                    // fallback: تشخیص بر اساس نام
+                    // fallback: تشخیص بر اساس نام (طولانی‌ترین کلید منطبق، با مرز واژه)
                     if ($iconInfo['class'] === 'default') {
                         $nameLower = strtolower($software['name'] ?? '');
+                        $bestMatch = null;
+                        $bestLength = 0;
                         foreach ($slugMap as $key => $info) {
                             $keyword = explode('-', $key)[0];
-                            if (stripos($nameLower, $keyword) !== false) {
-                                $iconInfo = $info;
-                                break;
+                            if (strlen($keyword) <= $bestLength) continue;
+                            if (preg_match('/\b' . preg_quote($keyword, '/') . '\b/i', $nameLower)) {
+                                $bestMatch = $info;
+                                $bestLength = strlen($keyword);
                             }
                         }
+                        if ($bestMatch !== null) $iconInfo = $bestMatch;
                     }
 
                     // وضعیت
@@ -97,8 +128,16 @@ $statusMap = [
                     // تکنولوژی‌ها
                     $techStack = json_decode($software['tech_stack'] ?? '[]', true);
                     if (!is_array($techStack)) $techStack = [];
+
+                    // برای ماژول‌هایی که کلاس تم مشخصی ندارند، رنگ از config_json همان ماژول خوانده می‌شود.
+                    $themeStyle = '';
+                    if ($iconInfo['class'] === 'default') {
+                        $config = json_decode($software['config_json'] ?? '[]', true);
+                        $themeColor = is_array($config) ? ($config['color'] ?? null) : null;
+                        $themeStyle = $themeVars($themeColor);
+                    }
                     ?>
-                    <div class="swl-card" data-theme="<?= htmlspecialchars($iconInfo['class']) ?>">
+                    <div class="swl-card" data-theme="<?= htmlspecialchars($iconInfo['class']) ?>"<?= $themeStyle !== '' ? ' style="' . htmlspecialchars($themeStyle, ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
 
                         <!-- Badge وضعیت -->
                         <span class="swl-badge <?= htmlspecialchars($statusInfo['class']) ?>">
