@@ -60,6 +60,7 @@
         <!-- فرم ارسال مجدد -->
         <form method="POST" action="/auth/resend-verification" style="margin-bottom: 16px;">
             <input type="hidden" name="email" value="<?= htmlspecialchars($email ?? '') ?>">
+            <?php echo $this->csrfField(); ?>
             <button type="submit" class="btn-auth">
                 <i class="fas fa-redo"></i>
                 ارسال مجدد ایمیل تأیید

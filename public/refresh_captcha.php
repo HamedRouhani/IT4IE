@@ -2,9 +2,7 @@
 // Start session
 session_start();
 
-// Error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Error details are never printed here; failures are reported through the log.
 
 // Define base paths
 define('ROOT_PATH', dirname(__DIR__));

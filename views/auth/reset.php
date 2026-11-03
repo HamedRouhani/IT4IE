@@ -16,6 +16,7 @@
         <?php endif; ?>
         
         <form method="POST" action="/reset-password/<?php echo $token; ?>" class="auth-form">
+            <?php echo $this->csrfField(); ?>
             <div class="form-group">
                 <label for="password">رمز عبور جدید</label>
                 <div class="input-group">

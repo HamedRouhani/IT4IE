@@ -24,15 +24,11 @@ define('VIEWS_PATH', ROOT_PATH . '/views');
 define('PUBLIC_PATH', __DIR__);
 define('CONFIG_PATH', ROOT_PATH . '/app/config');
 
-// حالت توسعه (برای نمایش خطاهای دقیق)
-define('APP_DEBUG', true);
-if (APP_DEBUG) {
-    error_reporting(E_ALL);
-    ini_set('display_errors', 1);
-} else {
-    error_reporting(0);
-    ini_set('display_errors', 0);
-}
+// حالت توسعه (برای نمایش خطاهای دقیق) - پیش‌فرض خاموش است
+define('APP_DEBUG', filter_var(getenv('APP_DEBUG') ?: 'false', FILTER_VALIDATE_BOOLEAN));
+error_reporting(APP_DEBUG ? E_ALL : 0);
+ini_set('display_errors', APP_DEBUG ? '1' : '0');
+ini_set('log_errors', '1');
 
 // ==========================================================
 // ۳. بارگذاری فایل‌های Core (ضروری)

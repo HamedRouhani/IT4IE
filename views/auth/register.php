@@ -13,6 +13,7 @@
         <?php endif; ?>
         
         <form method="POST" action="/register" class="auth-form">
+            <?php echo $this->csrfField(); ?>
             <div class="form-group">
                 <label for="name">نام و نام خانوادگی</label>
                 <div class="input-group">

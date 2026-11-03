@@ -3,9 +3,7 @@ date_default_timezone_set('Asia/Tehran');
 // Start session
 session_start();
 
-// Error reporting (disable in production)
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Error reporting is configured below, after loading .env (APP_DEBUG).
 
 // Define base paths
 define('ROOT_PATH', dirname(__DIR__));
@@ -28,6 +26,18 @@ if (file_exists($envFile)) {
         }
     }
 }
+
+// ============================================
+// ERROR HANDLING
+// فقط وقتی APP_DEBUG در .env روشن باشد جزئیات خطا نمایش داده می‌شود.
+// ============================================
+$appDebug = filter_var(getenv('APP_DEBUG') ?: 'false', FILTER_VALIDATE_BOOLEAN);
+if (!defined('APP_DEBUG')) {
+    define('APP_DEBUG', $appDebug);
+}
+error_reporting($appDebug ? E_ALL : 0);
+ini_set('display_errors', $appDebug ? '1' : '0');
+ini_set('log_errors', '1');
 
 // ============================================
 // 🎯 SLUG → FOLDER MAPPING
@@ -146,6 +156,13 @@ if (file_exists(APP_PATH . '/helpers/Captcha.php')) {
 require_once APP_PATH . '/core/Controller.php';
 require_once APP_PATH . '/core/Model.php';
 require_once APP_PATH . '/core/Database.php';
+
+// ============================================
+// 🛡️ گارد CSRF سراسری
+// هر درخواست تغییردهندهٔ داده باید از همین دامنه آمده باشد؛ در غیر این صورت
+// پیش از ورود به روتر رد می‌شود. این گارد همهٔ ماژول‌ها را پوشش می‌دهد.
+// ============================================
+\App\Core\Controller::guardStateChangingRequest();
 
 // ============================================
 // DIRECT INCLUDE MODELS (با بررسی وجود فایل)

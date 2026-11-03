@@ -29,7 +29,9 @@ class Database
             );
             $this->connection->exec("SET time_zone = '+03:30'");
         } catch (PDOException $e) {
-            die("Database connection failed: " . $e->getMessage());
+            // پیام کامل فقط در لاگ سرور ثبت می‌شود؛ کاربر جزئیات اعتبارنامه را نمی‌بیند.
+            error_log('Database connection failed: ' . $e->getMessage());
+            self::renderUnavailable();
         }
     }
     
@@ -57,7 +59,28 @@ class Database
             $connection->exec("SET time_zone = '+03:30'");
             return $connection;
         } catch (PDOException $e) {
-            throw new \Exception("Database connection failed: " . $e->getMessage());
+            error_log('Database connection failed: ' . $e->getMessage());
+            throw new \Exception('Database connection failed.');
         }
+    }
+
+    /**
+     * نمایش خطای عمومی ۵۰۳ بدون افشای هاست، کاربر یا اعتبارنامهٔ پایگاه داده.
+     */
+    private static function renderUnavailable()
+    {
+        if (!headers_sent()) {
+            http_response_code(503);
+            header('Content-Type: text/html; charset=utf-8');
+        }
+
+        echo '<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8">'
+            . '<title>سرویس در دسترس نیست</title></head>'
+            . '<body style="font-family:Tahoma;direction:rtl;text-align:center;padding:60px;">'
+            . '<h1>۵۰۳ - سرویس موقتاً در دسترس نیست</h1>'
+            . '<p>ارتباط با پایگاه داده برقرار نشد. لطفاً چند لحظه بعد دوباره تلاش کنید.</p>'
+            . '</body></html>';
+
+        exit;
     }
 }

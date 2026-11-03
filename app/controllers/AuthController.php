@@ -131,6 +131,12 @@ class AuthController extends Controller
         $settings = $settingModel->getAll();
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!$this->verifyCsrf()) {
+                $_SESSION['error'] = 'درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.';
+                $this->redirect('/register');
+                return;
+            }
+
             $name = trim($_POST['name'] ?? '');
             $email = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
@@ -276,6 +282,12 @@ class AuthController extends Controller
         $settings = $settingModel->getAll();
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!$this->verifyCsrf()) {
+                $_SESSION['error'] = 'درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.';
+                $this->redirect('/forgot-password');
+                return;
+            }
+
             $email = trim($_POST['email'] ?? '');
             $captchaCode = $_POST['captcha'] ?? '';
             
@@ -349,6 +361,12 @@ class AuthController extends Controller
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!$this->verifyCsrf()) {
+                $_SESSION['error'] = 'درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.';
+                $this->redirect('/reset-password/' . rawurlencode($token));
+                return;
+            }
+
             $password = $_POST['password'] ?? '';
             $passwordConfirm = $_POST['password_confirm'] ?? '';
             
@@ -444,6 +462,12 @@ class AuthController extends Controller
     public function resendVerification()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('/verify-email-needed');
+            return;
+        }
+
+        if (!$this->verifyCsrf()) {
+            $_SESSION['resend_error'] = 'درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.';
             $this->redirect('/verify-email-needed');
             return;
         }

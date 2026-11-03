@@ -143,6 +143,12 @@ class BillingController extends Controller
             return;
         }
 
+        if (!$this->verifyCsrf()) {
+            $_SESSION['error'] = 'درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.';
+            $this->redirect('/billing/my');
+            return;
+        }
+
         $paymentId = (int)($_POST['payment_id'] ?? 0);
         $ref = trim((string)($_POST['ref_code'] ?? ''));
 
@@ -225,6 +231,12 @@ class BillingController extends Controller
     {
         if (!isset($_SESSION['user_id']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('/pricing');
+            return;
+        }
+
+        if (!$this->verifyCsrf()) {
+            $_SESSION['error'] = 'درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.';
+            $this->redirect('/billing/my');
             return;
         }
 

@@ -118,6 +118,7 @@ foreach ($plans as $p) {
                 <h4>کد اشتراک دارید؟</h4>
                 <p>کد دریافتی از طریق تلگرام یا فروش سازمانی را اینجا فعال کنید.</p>
                 <form method="POST" action="/billing/redeem">
+                    <?php echo $this->csrfField(); ?>
                     <input type="text" name="code" placeholder="IT4IE-1M-XXXXXX" required dir="ltr">
                     <button type="submit" class="btn-plan">فعال‌سازی کد</button>
                 </form>

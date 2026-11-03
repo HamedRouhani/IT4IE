@@ -96,6 +96,7 @@ $isInvoice = ($payment['method'] ?? '') === 'invoice';
                     </div>
 
                     <form method="POST" action="/billing/submit-payment" class="pay-form">
+                        <?php echo $this->csrfField(); ?>
                         <input type="hidden" name="payment_id" value="<?= $payment['id'] ?>">
 
                         <div class="form-group">

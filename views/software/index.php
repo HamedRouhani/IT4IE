@@ -1,8 +1,6 @@
 <?php
-require_once VIEWS_PATH . '/partials/asset-helper.php';
-
 /**
- * صفحه فهرست نرم‌افزارها — کارت‌های خلاصه و رنگ‌محور
+ * صفحه لیست نرم‌افزارها — نسخه 4.0 (رنگ‌محور)
  * مسیر: views/software/index.php
  */
 $softwareList  = $softwareList  ?? [];
@@ -16,8 +14,6 @@ $slugMap = [
     'or-analyzer'      => ['icon' => 'fas fa-gears',            'class' => 'or'],
     'statlab-analyzer' => ['icon' => 'fas fa-chart-line',       'class' => 'statlab'],
     'pdm-analyzer'     => ['icon' => 'fas fa-industry',         'class' => 'pdm'],
-    'inventory-analyzer' => ['icon' => 'fas fa-boxes-stacked',    'class' => 'inventory'],
-    'time-study-analyzer' => ['icon' => 'fas fa-stopwatch',       'class' => 'time-study-analyzer'],
     'hr-analyzer'      => ['icon' => 'fas fa-users',            'class' => 'hr'],
     'quality-analyzer' => ['icon' => 'fas fa-clipboard-check',  'class' => 'quality'],
     'itil-analyzer'    => ['icon' => 'fas fa-server',           'class' => 'itil'],
@@ -33,23 +29,35 @@ $statusMap = [
 ];
 ?>
 
-<?= it4ie_css_link('css/software.css') ?>
+<link rel="stylesheet" href="/assets/css/software.css?v=20261010">
 
 <div class="swl-page">
     <div class="swl-container">
 
-        <!-- Compact intro -->
+        <!-- Header -->
         <div class="swl-header">
-            <span class="swl-kicker"><i class="fas fa-layer-group"></i> ابزارهای تخصصی IT4IE</span>
             <h1>
+                <i class="fas fa-cubes"></i>
                 نرم‌افزارهای تخصصی
                 <span>IT4IE</span>
             </h1>
-            <p>ابزارهای یکپارچه برای تحلیل، تصمیم‌گیری و مدیریت عملیات</p>
-            <?php if ($totalSoftware > 0): ?>
-                <div class="swl-count"><strong><?= (int) $totalSoftware ?></strong><span>نرم‌افزار</span></div>
-            <?php endif; ?>
+            <p>ابزارها و تحلیلگرهای پیشرفته برای مدیریت کسب‌وکار و پروژه</p>
         </div>
+
+        <!-- Stat -->
+        <?php if ($totalSoftware > 0): ?>
+            <div class="swl-stat-wrap">
+                <div class="swl-stat">
+                    <div class="swl-stat-icon">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <div class="swl-stat-info">
+                        <h3><?= (int) $totalSoftware ?></h3>
+                        <p>نرم‌افزار فعال</p>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <!-- Grid -->
         <?php if (empty($softwareList)): ?>
@@ -121,7 +129,7 @@ $statusMap = [
                         <!-- Tech Stack -->
                         <?php if (!empty($techStack)): ?>
                             <div class="swl-tech">
-                                <?php foreach (array_slice($techStack, 0, 2) as $tech): ?>
+                                <?php foreach (array_slice($techStack, 0, 4) as $tech): ?>
                                     <span><?= htmlspecialchars($tech) ?></span>
                                 <?php endforeach; ?>
                             </div>
@@ -130,16 +138,15 @@ $statusMap = [
                         <!-- Features -->
                         <?php if (!empty($features)): ?>
                             <ul class="swl-features">
-                                <?php foreach (array_slice($features, 0, 2) as $feature): ?>
+                                <?php foreach (array_slice($features, 0, 3) as $feature): ?>
                                     <li>
                                         <i class="fas fa-check-circle"></i>
                                         <span><?= htmlspecialchars($feature) ?></span>
                                     </li>
                                 <?php endforeach; ?>
-                                <?php if (count($features) > 2): ?>
+                                <?php if (count($features) > 3): ?>
                                     <li class="more">
-                                        <i class="fas fa-plus"></i>
-                                        <?= count($features) - 2 ?> قابلیت دیگر
+                                        ... و <?= count($features) - 3 ?> مورد دیگر
                                     </li>
                                 <?php endif; ?>
                             </ul>
@@ -154,17 +161,6 @@ $statusMap = [
                                     <span>ورود و اجرا</span>
                                 </button>
                             </form>
-
-                            <?php if (!empty($software['demo_url'])): ?>
-                                <a href="<?= htmlspecialchars($software['demo_url']) ?>"
-                                   target="_blank"
-                                   rel="noopener"
-                                   class="swl-btn-sec"
-                                   title="مشاهده دمو">
-                                    <i class="fas fa-eye"></i>
-                                    <span>دمو</span>
-                                </a>
-                            <?php endif; ?>
 
                             <?php if (!empty($software['github_url'])): ?>
                                 <a href="<?= htmlspecialchars($software['github_url']) ?>"

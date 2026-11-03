@@ -32,12 +32,17 @@ abstract class Controller
     }
 
     /**
-     * بررسی توکن CSRF
+     * بررسی «خام» توکن CSRF؛ فقط true/false برمی‌گرداند و درخواست را متوقف نمی‌کند.
      */
-    protected function verifyCsrf()
+    protected function csrfTokenIsValid()
     {
         $sessionToken = $_SESSION['_csrf_token'] ?? '';
         $requestToken = $_POST['_csrf_token'] ?? '';
+
+        // درخواست‌های AJAX می‌توانند توکن را در هدر بفرستند
+        if ((!is_string($requestToken) || $requestToken === '') && !empty($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+            $requestToken = trim((string) $_SERVER['HTTP_X_CSRF_TOKEN']);
+        }
 
         if (
             !is_string($sessionToken) ||
@@ -50,6 +55,168 @@ abstract class Controller
         }
 
         return true;
+    }
+
+    /**
+     * بررسی توکن CSRF با توقف درخواست در صورت نامعتبر بودن.
+     *
+     * این متد شکل «اجباری» بررسی است: اگر توکن معتبر نباشد، پاسخ ۴۱۹ (برای AJAX)
+     * یا بازگشت به صفحهٔ قبلی انجام می‌شود و اجرای کد ادامه پیدا نمی‌کند. به همین
+     * دلیل فراخوانی صرفِ آن در ابتدای عملیات نوشتن برای محافظت کافی است.
+     * برای بررسی بدون توقف از csrfTokenIsValid() استفاده کنید.
+     */
+    protected function verifyCsrf()
+    {
+        if ($this->csrfTokenIsValid()) {
+            return true;
+        }
+
+        // درخواست AJAX هم‌مبدأ: مرورگر نمی‌تواند چنین درخواستی را از سایت دیگر بسازد
+        if (static::isAjaxRequest() && static::requestIsSameOrigin()) {
+            error_log('CSRF: same-origin AJAX request without token - ' . ($_SERVER['REQUEST_URI'] ?? ''));
+            return true;
+        }
+
+        $this->rejectInvalidRequest(
+            'درخواست منقضی یا نامعتبر است؛ صفحه را تازه کنید و دوباره تلاش کنید.',
+            419
+        );
+
+        return false;
+    }
+
+    /**
+     * رد درخواست نامعتبر با پاسخ JSON (برای AJAX) یا بازگشت به صفحهٔ قبلی.
+     */
+    protected function rejectInvalidRequest($message, $status = 400)
+    {
+        http_response_code($status);
+
+        if (static::isAjaxRequest()) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => false,
+                'ok' => false,
+                'error' => $message
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION['error'] = $message;
+        }
+
+        header('Location: ' . $this->safeReturnUrl(), true, 303);
+        exit;
+    }
+
+    /**
+     * آدرس بازگشت امن؛ فقط مسیرهایی از همین دامنه پذیرفته می‌شوند.
+     */
+    protected function safeReturnUrl()
+    {
+        $referer = (string) ($_SERVER['HTTP_REFERER'] ?? '');
+        if ($referer !== '') {
+            $parts = parse_url($referer);
+            $path = is_array($parts) ? (string) ($parts['path'] ?? '') : '';
+            $host = is_array($parts) ? strtolower((string) ($parts['host'] ?? '')) : '';
+            $expected = strtolower(trim((string) ($_SERVER['HTTP_HOST'] ?? '')));
+
+            $path = str_replace(["\r", "\n"], '', $path);
+
+            if ($path !== '' && $path[0] === '/' && ($path === '/' || strpos($path, '//') !== 0) && $host !== '' && hash_equals($expected, $host)) {
+                return $path;
+            }
+        }
+
+        if (defined('CURRENT_MODULE_URL')) {
+            return CURRENT_MODULE_URL;
+        }
+
+        return '/';
+    }
+
+    /**
+     * آیا درخواست جاری از نوع AJAX است؟
+     */
+    protected static function isAjaxRequest()
+    {
+        $requestedWith = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
+
+        return is_string($requestedWith) && strtolower($requestedWith) === 'xmlhttprequest';
+    }
+
+    /**
+     * آیا مبدأ درخواست (Origin یا Referer) با همین دامنه یکسان است؟
+     *
+     * اگر هیچ‌کدام از این دو هدر ارسال نشده باشد، درخواست «هم‌مبدأ» در نظر گرفته می‌شود
+     * تا کلاینت‌های داخلی و ابزارهای بدون هدر مبدأ مسدود نشوند؛ مرورگرها برای
+     * درخواست‌های تغییردهندهٔ داده همیشه هدر مبدأ را می‌فرستند.
+     */
+    protected static function requestIsSameOrigin()
+    {
+        $expected = strtolower(trim((string) ($_SERVER['HTTP_HOST'] ?? '')));
+        if ($expected === '') {
+            return true;
+        }
+
+        $source = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
+        if ($source === '') {
+            $source = (string) ($_SERVER['HTTP_REFERER'] ?? '');
+        }
+        if ($source === '') {
+            return true;
+        }
+
+        $parts = parse_url($source);
+        if (!is_array($parts) || empty($parts['host'])) {
+            return false;
+        }
+
+        $origin = strtolower((string) $parts['host']);
+        if (!empty($parts['port'])) {
+            $origin .= ':' . (int) $parts['port'];
+        }
+
+        return hash_equals($expected, $origin);
+    }
+
+    /**
+     * گارد سراسری: هر درخواست تغییردهندهٔ داده (POST/PUT/PATCH/DELETE)
+     * باید از همین دامنه آمده باشد. پیش از ورود به روتر صدا زده می‌شود.
+     */
+    public static function guardStateChangingRequest()
+    {
+        $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+        if (!in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+            return true;
+        }
+
+        if (static::requestIsSameOrigin()) {
+            return true;
+        }
+
+        $origin = (string) ($_SERVER['HTTP_ORIGIN'] ?? ($_SERVER['HTTP_REFERER'] ?? ''));
+        error_log('Blocked cross-origin ' . $method . ' request to ' . ($_SERVER['REQUEST_URI'] ?? '') . ' from ' . $origin);
+
+        http_response_code(403);
+
+        if (static::isAjaxRequest()) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => false,
+                'error' => 'درخواست از مبدأ نامعتبر رد شد.'
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        echo '<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8">'
+            . '<title>دسترسی غیرمجاز</title></head>'
+            . '<body style="font-family:Tahoma;direction:rtl;text-align:center;padding:60px;">'
+            . '<h1>۴۰۳ - دسترسی غیرمجاز</h1>'
+            . '<p>درخواست شما از مبدأ نامعتبر ارسال شده است.</p>'
+            . '<p><a href="/">بازگشت به صفحه اصلی</a></p></body></html>';
+        exit;
     }
 
     /**
