@@ -40,10 +40,12 @@ final class StudyController extends StudyControllerBase
             $this->redirect(ts_url('study', 'show', ['id' => $id]));
         } catch (\InvalidArgumentException $e) {
             ts_flash_set('danger', $e->getMessage());
+            $_SESSION['ts_old_study'] = ['data' => $_POST, 'at' => time(), 'form' => 'create'];
             $this->redirect(ts_url('study', 'create', ['method' => (string) ($_POST['method'] ?? 'stopwatch')]));
         } catch (\Throwable $e) {
             error_log('Time Study create failed: ' . $e->getMessage());
             ts_flash_set('danger', 'ثبت مطالعه انجام نشد؛ ورودی‌ها را بازبینی کنید.');
+            $_SESSION['ts_old_study'] = ['data' => $_POST, 'at' => time(), 'form' => 'create'];
             $this->redirect(ts_url('study', 'create'));
         }
     }
@@ -74,6 +76,9 @@ final class StudyController extends StudyControllerBase
             ts_flash_set('success', 'پیش‌نویس به‌روزرسانی شد.');
         } catch (\InvalidArgumentException $e) {
             ts_flash_set('danger', $e->getMessage());
+            $_SESSION['ts_old_study'] = ['data' => $_POST, 'at' => time(), 'form' => 'edit:' . $id];
+            $this->redirect(ts_url('study', 'edit', ['id' => $id]));
+            return;
         } catch (\Throwable $e) {
             error_log('Time Study draft update failed: ' . $e->getMessage());
             ts_flash_set('danger', 'به‌روزرسانی پیش‌نویس انجام نشد.');
@@ -145,7 +150,7 @@ final class StudyController extends StudyControllerBase
             error_log('Time Study cycle registration failed: ' . $e->getMessage());
             ts_flash_set('danger', 'ثبت چرخه انجام نشد.');
         }
-        $this->redirect(ts_url('study', 'show', ['id' => $id]));
+        $this->redirect(ts_url('study', 'show', ['id' => $id]) . '#cycle-form');
     }
 
     public function generateSchedule(int $id): void
@@ -181,7 +186,7 @@ final class StudyController extends StudyControllerBase
             error_log('Time Study sampling schedule failed: ' . $e->getMessage());
             ts_flash_set('danger', 'ساخت برنامهٔ نمونه‌برداری انجام نشد.');
         }
-        $this->redirect(ts_url('study', 'show', ['id' => $id]));
+        $this->redirect(ts_url('study', 'show', ['id' => $id]) . '#sampling-queue');
     }
 
     public function recordSample(int $id, int $slotId): void
@@ -201,7 +206,7 @@ final class StudyController extends StudyControllerBase
             error_log('Time Study sample record failed: ' . $e->getMessage());
             ts_flash_set('danger', 'ثبت نتیجهٔ مشاهده انجام نشد.');
         }
-        $this->redirect(ts_url('study', 'show', ['id' => $id]));
+        $this->redirect(ts_url('study', 'show', ['id' => $id]) . '#sampling-queue');
     }
 
     public function complete(int $id): void
@@ -228,5 +233,25 @@ final class StudyController extends StudyControllerBase
             ts_flash_set('danger', $e instanceof \InvalidArgumentException ? $e->getMessage() : 'بایگانی مطالعه انجام نشد.');
         }
         $this->redirect(ts_url('study', 'index', ['archived' => 1]));
+    }
+
+    /**
+     * حذف کامل مطالعه و همهٔ داده‌های وابسته (فقط مالک، فقط با تأیید).
+     */
+    public function delete(int $id): void
+    {
+        $userId = $this->userId();
+        $this->postOnly();
+        $backToArchived = (string) ($_POST['back'] ?? '') === 'archived';
+        try {
+            (new StudyRepository())->delete($userId, $id);
+            ts_flash_set('success', 'مطالعه و همهٔ داده‌های وابسته به آن حذف شد.');
+        } catch (\InvalidArgumentException $e) {
+            ts_flash_set('danger', $e->getMessage());
+        } catch (\Throwable $e) {
+            error_log('Time Study delete failed: ' . $e->getMessage());
+            ts_flash_set('danger', 'حذف مطالعه انجام نشد.');
+        }
+        $this->redirect(ts_url('study', 'index', $backToArchived ? ['archived' => 1] : []));
     }
 }

@@ -296,6 +296,33 @@ final class StudyRepository
         $this->db->prepare("UPDATE ts_studies SET status='archived' WHERE id=? AND user_id=? AND status='completed'")->execute([$studyId, $userId]);
     }
 
+    /**
+     * حذف کامل یک مطالعه و همهٔ داده‌های وابسته (فقط مالک مطالعه).
+     *
+     * حذف صریح و به ترتیب انجام می‌شود تا وابستگی RESTRICT میان زمان‌های
+     * نمونه‌برداری و دسته‌ها روی هیچ نسخه‌ای از اسکیما خطا ندهد و دادهٔ یتیم
+     * باقی نماند.
+     */
+    public function delete(int $userId, int $studyId): void
+    {
+        $this->db->beginTransaction();
+        try {
+            $this->lockStudy($userId, $studyId);
+
+            $this->db->prepare('DELETE FROM ts_time_observations WHERE study_id=?')->execute([$studyId]);
+            $this->db->prepare('DELETE FROM ts_sampling_slots WHERE study_id=?')->execute([$studyId]);
+            $this->db->prepare('DELETE FROM ts_sampling_categories WHERE study_id=?')->execute([$studyId]);
+            $this->db->prepare('DELETE FROM ts_cycles WHERE study_id=?')->execute([$studyId]);
+            $this->db->prepare('DELETE FROM ts_elements WHERE study_id=?')->execute([$studyId]);
+            $this->db->prepare('DELETE FROM ts_studies WHERE id=? AND user_id=?')->execute([$studyId, $userId]);
+
+            $this->db->commit();
+        } catch (\Throwable $e) {
+            if ($this->db->inTransaction()) $this->db->rollBack();
+            throw $e;
+        }
+    }
+
     private function replaceChildren(int $studyId, string $method, array $children): void
     {
         if ($method === 'stopwatch') {

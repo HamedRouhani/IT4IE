@@ -1,11 +1,44 @@
 <?php
+// ورودی‌های تایپ‌شده پس از خطای اعتبارسنجی بازیابی می‌شوند تا کاربر داده‌اش را از دست ندهد.
+// فقط ورودی‌های کمتر از ۱۰ دقیقه پیش و فقط برای همان فرم (ایجاد یا همان شناسهٔ ویرایش).
 $editing = !empty($study);
+$oldPayload = $_SESSION['ts_old_study'] ?? null;
+unset($_SESSION['ts_old_study']);
+$old = [];
+$expectedFormKey = $editing ? 'edit:' . (int) ($study['id'] ?? 0) : 'create';
+if (is_array($oldPayload) && isset($oldPayload['data'], $oldPayload['at'])
+    && is_array($oldPayload['data']) && (time() - (int) $oldPayload['at']) < 600
+    && (string) ($oldPayload['form'] ?? '') === $expectedFormKey) {
+    $old = $oldPayload['data'];
+}
+
 $method = $method ?? ($study['method'] ?? 'stopwatch');
-$value = static fn(string $key, $default = '') => ts_e($study[$key] ?? $default);
+$value = static fn(string $key, $default = '') => ts_e($old[$key] ?? $study[$key] ?? $default);
 $tehranToday = (new DateTimeImmutable('now', new DateTimeZone('Asia/Tehran')))->format('Y-m-d');
-$dateValue = $study ? ts_date($study['study_date']) : ts_date($tehranToday);
+$dateValue = $old['study_date'] ?? ($study ? ts_date($study['study_date']) : ts_date($tehranToday));
 $elements = $study['elements'] ?? [['name'=>'','code'=>'','element_type'=>'manual','frequency_per_cycle'=>'1','notes'=>'']];
+if (!empty($old['element_name']) && is_array($old['element_name'])) {
+    $elements = [];
+    foreach (array_values($old['element_name']) as $index => $name) {
+        $elements[] = [
+            'name' => (string) $name,
+            'element_code' => (string) ($old['element_code'][$index] ?? ''),
+            'element_type' => (string) ($old['element_type'][$index] ?? 'manual'),
+            'frequency_per_cycle' => (string) ($old['element_frequency'][$index] ?? '1'),
+            'notes' => (string) ($old['element_note'][$index] ?? ''),
+        ];
+    }
+}
 $categories = $study['categories'] ?? [['name'=>'','category_type'=>'productive'], ['name'=>'','category_type'=>'delay']];
+if (!empty($old['category_name']) && is_array($old['category_name'])) {
+    $categories = [];
+    foreach (array_values($old['category_name']) as $index => $name) {
+        $categories[] = [
+            'name' => (string) $name,
+            'category_type' => (string) ($old['category_type'][$index] ?? 'productive'),
+        ];
+    }
+}
 $methodLabel = $method === 'stopwatch' ? 'زمان‌سنجی مستقیم' : 'نمونه‌برداری کار';
 ?>
 <section class="ts-page" dir="rtl">
@@ -41,6 +74,7 @@ $methodLabel = $method === 'stopwatch' ? 'زمان‌سنجی مستقیم' : '�
                 <button type="button" class="ts-icon-button" data-ts-remove aria-label="حذف عنصر"><i class="fa-solid fa-trash"></i></button>
             </div><?php endforeach; ?>
             </div><button type="button" class="ts-button ts-button-outline" data-ts-add="elements"><i class="fa-solid fa-plus"></i> افزودن عنصر کار</button>
+            <div class="ts-form-grid ts-span-2"><label class="ts-span-2">افزودن دسته‌ای عناصر (هر خط یک عنصر)<textarea data-ts-elements-bulk rows="3" placeholder="گرفتن قطعه&#10;بستن درپوش&#10;بازرسی چشمی"></textarea></label><div class="ts-form-actions ts-span-2"><button type="button" class="ts-button ts-button-outline" data-ts-elements-bulk-apply><i class="fa-solid fa-list-check"></i> ساخت عناصر از متن</button></div></div>
         </div>
         <div class="ts-form-section"><div class="ts-form-section-head"><span>۳</span><div><h2>مبنای نرمال‌سازی</h2><p>ارزیابی عملکرد برای عناصر دستی ثبت می‌شود؛ عنصر ماشین با rating برابر ۱۰۰٪ محاسبه می‌شود.</p></div></div>
         <?php else: ?>

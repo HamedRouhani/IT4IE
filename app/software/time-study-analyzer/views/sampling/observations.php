@@ -7,7 +7,7 @@ usort($samplingSlots, static function ($a, $b) {
 });
 $pendingSamplingSlots = array_values(array_filter($samplingSlots, static fn($slot) => $slot['slot_status'] === 'planned'));
 ?>
-<section class="ts-card ts-no-print">
+<section class="ts-card ts-no-print" id="sampling-queue" data-ts-sampling-queue>
     <div class="ts-card-head"><div><span class="ts-eyebrow">اجرای نمونه‌برداری</span><h2>صف زمان‌های مشاهده</h2><p>در هر زمانِ برنامه‌ریزی‌شده، وضعیت واقعی کار را همان لحظه ثبت کنید. برای زمان ازدست‌رفته یا باطل، علت روشن بنویسید.</p></div><span class="ts-status <?= $pendingSamplingSlots ? 'active' : 'completed' ?>"><?= count($pendingSamplingSlots) ?> زمان باز</span></div>
     <?php if ($samplingSlots): ?>
     <div class="ts-sampling-queue">
