@@ -1,0 +1,122 @@
+/* ============================================================
+   Engineering Economy Analyzer — تم «پترول و طلا»
+   پیشوند کلاس‌ها: ee- | وابسته به هیچ فریم‌ورک خارجی نیست
+   ============================================================ */
+
+body.software-mode[data-module="engineering-economy"] {
+    --ee-primary: #0f3d3e;
+    --ee-primary-dark: #0a2a2b;
+    --ee-primary-soft: #e8f1ef;
+    --ee-accent: #c9a227;
+    --ee-accent-dark: #a5821b;
+    --ee-accent-soft: #f7efd2;
+    --ee-ink: #132420;
+    --ee-muted: #66756f;
+    --ee-border: #dce5e1;
+    --ee-surface: #ffffff;
+    --ee-page: #f7f5ee;
+    --ee-danger: #b42318;
+    --ee-danger-soft: #fef3f2;
+    --ee-good: #067647;
+
+    background: var(--ee-page);
+    color: var(--ee-ink);
+}
+
+body.software-mode[data-module="engineering-economy"] .software-sidebar { border-top: 4px solid var(--ee-accent); }
+
+.ee-page { display: grid; gap: 20px; direction: rtl; color: var(--ee-ink); }
+
+/* ---------- سرصفحه ---------- */
+.ee-page-head { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; justify-content: space-between; }
+.ee-page-head h1 { display: flex; align-items: center; gap: 10px; margin: 4px 0; font-size: clamp(1.4rem, 2.6vw, 1.95rem); font-weight: 800; }
+.ee-page-head h1 i { color: var(--ee-accent); }
+.ee-page-head p { margin: 0; color: var(--ee-muted); line-height: 1.9; }
+.ee-eyebrow { color: var(--ee-primary); font-size: .85rem; font-weight: 750; letter-spacing: .2px; }
+.ee-head-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- کارت و شبکه ---------- */
+.ee-card { min-width: 0; padding: clamp(16px, 2.2vw, 24px); border: 1px solid var(--ee-border); border-radius: 16px; background: var(--ee-surface); box-shadow: 0 6px 20px rgba(19, 36, 32, .06); }
+.ee-card-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.ee-card-head h2 { margin: 3px 0; font-size: 1.15rem; font-weight: 800; }
+.ee-card-head p { margin: 4px 0 0; color: var(--ee-muted); line-height: 1.8; }
+
+.ee-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.ee-kpi { display: grid; gap: 6px; align-content: center; min-height: 96px; padding: 18px; border: 1px solid var(--ee-border); border-radius: 15px; background: linear-gradient(180deg, #fff, #fcfbf7); }
+.ee-kpi span { color: var(--ee-muted); font-size: .86rem; }
+.ee-kpi strong { color: var(--ee-primary-dark); font-size: 1.55rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.ee-kpi small { color: var(--ee-muted); font-size: .78rem; }
+.ee-kpi.is-accent { border-color: #e7d79b; background: linear-gradient(180deg, #fffdf5, var(--ee-accent-soft)); }
+.ee-kpi.is-accent strong { color: var(--ee-accent-dark); }
+
+/* ---------- دکمه‌ها ---------- */
+.ee-button { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border: 1px solid var(--ee-border); border-radius: 11px; background: #fff; color: var(--ee-ink); font: inherit; font-size: .92rem; font-weight: 700; text-decoration: none; cursor: pointer; transition: border-color .15s ease, background .15s ease, color .15s ease; }
+.ee-button:hover { border-color: var(--ee-primary); color: var(--ee-primary-dark); }
+.ee-button-primary { border-color: var(--ee-primary); background: var(--ee-primary); color: #fff; }
+.ee-button-primary:hover { background: var(--ee-primary-dark); color: #fff; }
+.ee-button-accent { border-color: var(--ee-accent); background: var(--ee-accent); color: #231c05; }
+.ee-button-accent:hover { background: var(--ee-accent-dark); color: #fff; }
+.ee-button-ghost { background: transparent; }
+.ee-button.is-danger { border-color: #f0c2bd; color: var(--ee-danger); }
+
+/* ---------- جدول ---------- */
+.ee-table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--ee-border); border-radius: 13px; }
+.ee-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.ee-table thead th { padding: 11px 12px; background: #f2f6f4; color: var(--ee-primary-dark); font-size: .82rem; font-weight: 750; text-align: right; white-space: nowrap; }
+.ee-table td { padding: 11px 12px; border-top: 1px solid var(--ee-border); font-size: .9rem; vertical-align: middle; }
+.ee-table tbody tr:hover { background: #fafcfa; }
+.ee-table .ee-num { font-variant-numeric: tabular-nums; direction: ltr; text-align: right; }
+.ee-table small { display: block; margin-top: 3px; color: var(--ee-muted); font-size: .78rem; }
+
+/* ---------- نشان‌ها ---------- */
+.ee-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: .78rem; font-weight: 750; white-space: nowrap; }
+.ee-status.draft { background: #eef1f0; color: #445450; }
+.ee-status.active { background: var(--ee-accent-soft); color: var(--ee-accent-dark); }
+.ee-status.completed { background: #e7f6ec; color: var(--ee-good); }
+.ee-status.archived { background: #eceff1; color: #455a64; }
+.ee-tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 8px; background: var(--ee-primary-soft); color: var(--ee-primary-dark); font-size: .76rem; font-weight: 700; }
+
+/* ---------- فرم ---------- */
+.ee-form { display: grid; gap: 18px; }
+.ee-form-section { padding: 18px; border: 1px solid var(--ee-border); border-radius: 14px; background: #fdfcf9; }
+.ee-form-section > h3 { margin: 0 0 12px; font-size: .98rem; font-weight: 800; color: var(--ee-primary-dark); }
+.ee-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.ee-form-grid label { display: grid; gap: 6px; font-size: .88rem; font-weight: 700; }
+.ee-form-grid label small { color: var(--ee-muted); font-weight: 400; line-height: 1.7; }
+.ee-form-grid .ee-span-2 { grid-column: span 2; }
+.ee-form input, .ee-form select, .ee-form textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--ee-border); border-radius: 10px; background: #fff; color: var(--ee-ink); font: inherit; font-size: .92rem; }
+.ee-form input[type="number"] { font-variant-numeric: tabular-nums; }
+.ee-form input:focus, .ee-form select:focus, .ee-form textarea:focus { outline: 3px solid rgba(201, 162, 39, .2); border-color: var(--ee-accent); }
+.ee-form-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+/* ---------- پیام و حالت خالی ---------- */
+.ee-alert { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--ee-border); background: #fff; font-weight: 600; }
+.ee-alert.success { border-color: #bfe3ca; background: #eef8f1; color: #0b5132; }
+.ee-alert.danger { border-color: #f2c8c4; background: var(--ee-danger-soft); color: var(--ee-danger); }
+.ee-alert.warning { border-color: #ead9a6; background: var(--ee-accent-soft); color: #6b5407; }
+
+.ee-empty { display: grid; justify-items: center; gap: 8px; padding: 32px 16px; text-align: center; color: var(--ee-muted); }
+.ee-empty i { font-size: 1.7rem; color: var(--ee-accent); }
+.ee-empty strong { color: var(--ee-ink); }
+
+.ee-note { display: flex; gap: 12px; padding: 14px; border: 1px dashed #e2d9b4; border-radius: 13px; background: #fffdf4; }
+.ee-note i { margin-top: 3px; color: var(--ee-accent-dark); }
+.ee-note ul { margin: 6px 0 0; padding-inline-start: 18px; }
+.ee-note li { margin-bottom: 4px; line-height: 1.8; }
+
+.ee-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+
+@media (max-width: 900px) {
+    .ee-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ee-grid-2, .ee-form-grid { grid-template-columns: 1fr; }
+    .ee-form-grid .ee-span-2 { grid-column: auto; }
+}
+
+@media print {
+    body.software-mode[data-module="engineering-economy"] .software-sidebar,
+    body.software-mode[data-module="engineering-economy"] .software-nav,
+    .ee-no-print { display: none !important; }
+    .ee-card { box-shadow: none; break-inside: avoid; }
+    .ee-table-wrap { overflow: visible; }
+    .ee-table { min-width: 0; font-size: 9pt; }
+}

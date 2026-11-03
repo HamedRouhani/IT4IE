@@ -148,6 +148,16 @@ $moduleMenus = [
         ],
     ],
 
+    // -------- Engineering Economy Analyzer --------
+    'engineering-economy' => [
+        'name' => 'Engineering Economy Analyzer',
+        'icon' => 'fas fa-coins',
+        'param' => 'controller',
+        'menus' => [
+            ['route' => 'project', 'icon' => 'fas fa-folder-open', 'label' => 'پروژه‌های اقتصادی'],
+        ],
+    ],
+
     // -------- HR Analyzer --------
     'hr' => [
         'name'  => 'HR Analyzer',
