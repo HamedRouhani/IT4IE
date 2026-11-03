@@ -796,3 +796,176 @@ body.software-mode .content-wrapper > .sidebar { display: none !important; }
     .software-nav { flex: none; }
     .software-sidebar-footer { margin-top: 10px; }
 }
+
+/* ================================================================
+   نسخه ۵.۰ — چیدمان فشردهٔ فهرست نرم‌افزارها (دسکتاپ + موبایل)
+   کارت‌های کوتاه با جست‌وجو و فیلتر؛ برای غلبه بر استایل‌های
+   body.ui2 در 24-modern-ui.css از پیشوند .swl-page استفاده شده است.
+   ================================================================ */
+
+/* ─── سرصفحهٔ فشرده ─── */
+.swl-page .swl-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+}
+
+body.ui2 .swl-page .swl-header { padding: 18px 20px; }
+
+.swl-page .swl-header-main { min-width: 0; }
+.swl-page .swl-header h1 { margin: 0; font-size: clamp(1.15rem, 2.4vw, 1.55rem); line-height: 1.5; }
+.swl-page .swl-header h1 span { font-size: .82em; }
+.swl-page .swl-header p { margin: 4px 0 0; font-size: .84rem; line-height: 1.7; }
+
+.swl-count-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 13px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .16);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+body:not(.ui2) .swl-count-chip { background: #eef2ff; color: #3730a3; }
+
+/* ─── نوار جست‌وجو و فیلتر ─── */
+.swl-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.swl-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 260px;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 1px solid var(--swl-border);
+    border-radius: 12px;
+    background: #fff;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.swl-search:focus-within { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, .14); }
+.swl-search i { color: #94a3b8; font-size: .85rem; }
+.swl-search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font: inherit;
+    font-size: .9rem;
+    color: var(--swl-dark);
+}
+
+.swl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.swl-chip {
+    padding: 7px 13px;
+    border: 1px solid var(--swl-border);
+    border-radius: 999px;
+    background: #fff;
+    color: #475569;
+    font: inherit;
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.swl-chip:hover { border-color: #c7d2fe; color: #3730a3; }
+.swl-chip.is-active { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+
+.swl-nomatch {
+    margin: 0 0 12px;
+    padding: 12px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
+    background: #fff;
+    color: #64748b;
+    font-size: .88rem;
+    text-align: center;
+}
+
+/* ─── شبکهٔ فشرده ─── */
+.swl-page .swl-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 228px), 1fr)); gap: 12px; }
+body.ui2 .swl-page .swl-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 232px), 1fr)); gap: 12px; }
+
+/* ─── کارت فشرده ─── */
+.swl-page .swl-card { padding: 13px 14px 12px; border-radius: 15px; gap: 8px; }
+body.ui2 .swl-page .swl-card { padding: 13px 14px 12px; border-radius: 15px; }
+.swl-page .swl-card::before { height: 3px; }
+.swl-page .swl-card:hover { transform: translateY(-3px); }
+body.ui2 .swl-page .swl-card:hover { transform: translateY(-3px); }
+.swl-page .swl-card[hidden] { display: none !important; }
+
+.swl-page .swl-head { gap: 10px; align-items: center; margin-bottom: 0; padding-top: 0; }
+.swl-page .swl-icon { width: 40px; height: 40px; border-radius: 11px; font-size: 1rem; }
+body.ui2 .swl-page .swl-icon { width: 40px; height: 40px; border-radius: 11px; }
+.swl-page .swl-title { padding-top: 0; }
+.swl-page .swl-title h3 { margin: 0 0 4px; font-size: .97rem; line-height: 1.5; }
+.swl-page .swl-title small { font-size: .72rem; }
+
+/* نشان وضعیت و نسخه در یک ردیف زیر عنوان */
+.swl-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 3px; }
+.swl-page .swl-badge { position: static; top: auto; left: auto; padding: 2px 8px; font-size: .64rem; }
+.swl-meta small {
+    padding: 2px 8px;
+    border-radius: 8px;
+    background: rgba(var(--sw-color-rgb), .12);
+    color: #334155;
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+/* توضیح دو خطی */
+.swl-page .swl-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+    font-size: .8rem;
+    line-height: 1.75;
+    min-height: 0;
+}
+
+/* دکمه‌های فشرده */
+.swl-page .swl-foot { gap: 6px; margin-top: auto; padding-top: 2px; }
+.swl-page .swl-foot form { min-width: 0; }
+.swl-page .swl-btn-run { height: 36px; padding: 0 12px; border-radius: 10px; font-size: .8rem; }
+.swl-page .swl-btn-sec { height: 36px; padding: 0 12px; border-radius: 10px; font-size: .78rem; }
+.swl-page .swl-btn-ico { width: 36px; height: 36px; flex: 0 0 36px; padding: 0; }
+
+/* ─── موبایل: یک ستون، فشرده‌تر ─── */
+@media (max-width: 640px) {
+    .swl-page .swl-header { padding: 14px 15px; }
+    .swl-page .swl-header h1 { font-size: 1.1rem; }
+    .swl-page .swl-header p { font-size: .8rem; }
+    .swl-toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+    .swl-page .swl-grid { grid-template-columns: 1fr; gap: 10px; }
+    .swl-page .swl-card { padding: 12px 13px 11px; }
+    .swl-page .swl-icon { width: 38px; height: 38px; font-size: .95rem; }
+    .swl-page .swl-btn-run,
+    .swl-page .swl-btn-sec { height: 40px; }
+    .swl-page .swl-foot form { flex: 1 1 auto; }
+}
+
+/* دو ستون کوتاه در صفحه‌های میانی */
+@media (min-width: 641px) and (max-width: 900px) {
+    .swl-page .swl-grid { grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); }
+}
+

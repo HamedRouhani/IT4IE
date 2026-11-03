@@ -1,6 +1,6 @@
 <?php
 /**
- * صفحه لیست نرم‌افزارها — نسخه 4.0 (رنگ‌محور)
+ * صفحه لیست نرم‌افزارها — نسخه 5.0 (فشرده، جستوجوپذیر)
  * مسیر: views/software/index.php
  */
 $softwareList  = $softwareList  ?? [];
@@ -61,44 +61,43 @@ $softwareCssVersion = (int) (@filemtime($publicPath . '/assets/css/software.css'
 <div class="swl-page">
     <div class="swl-container">
 
-        <!-- Header -->
-        <div class="swl-header">
-            <h1>
-                <i class="fas fa-cubes"></i>
-                نرم‌افزارهای تخصصی
-                <span>IT4IE</span>
-            </h1>
-            <p>ابزارها و تحلیلگرهای پیشرفته برای مدیریت کسب‌وکار و پروژه</p>
-        </div>
-
-        <!-- Stat -->
-        <?php if ($totalSoftware > 0): ?>
-            <div class="swl-stat-wrap">
-                <div class="swl-stat">
-                    <div class="swl-stat-icon">
-                        <i class="fas fa-cubes"></i>
-                    </div>
-                    <div class="swl-stat-info">
-                        <h3><?= (int) $totalSoftware ?></h3>
-                        <p>نرم‌افزار فعال</p>
-                    </div>
-                </div>
+        <header class="swl-header">
+            <div class="swl-header-main">
+                <h1><i class="fas fa-cubes"></i> نرم‌افزارهای تخصصی <span>IT4IE</span></h1>
+                <p>فهرست فشردهٔ ابزارها؛ برای شروع، دکمهٔ «اجرا» را بزنید. برای دیدن ویژگی‌ها نشانگر را روی کارت نگه دارید.</p>
             </div>
-        <?php endif; ?>
+            <span class="swl-count-chip" data-swl-count><?= (int) $totalSoftware ?> نرم‌افزار</span>
+        </header>
 
-        <!-- Grid -->
         <?php if (empty($softwareList)): ?>
             <div class="swl-empty">
                 <i class="fas fa-folder-open"></i>
                 <p>در حال حاضر هیچ نرم‌افزاری برای نمایش وجود ندارد.</p>
             </div>
         <?php else: ?>
-            <div class="swl-grid">
+
+            <div class="swl-toolbar">
+                <label class="swl-search" for="swl-search">
+                    <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                    <input id="swl-search" type="search" placeholder="جست‌وجو در نام، توضیح یا ویژگی‌ها…"
+                           autocomplete="off" data-swl-search aria-label="جست‌وجوی نرم‌افزار">
+                </label>
+                <div class="swl-chips" role="group" aria-label="فیلتر وضعیت">
+                    <button type="button" class="swl-chip is-active" data-swl-filter="all">همه</button>
+                    <button type="button" class="swl-chip" data-swl-filter="stable">Stable</button>
+                    <button type="button" class="swl-chip" data-swl-filter="beta">Beta</button>
+                    <button type="button" class="swl-chip" data-swl-filter="development">Dev</button>
+                </div>
+            </div>
+
+            <p class="swl-nomatch" data-swl-empty hidden>نرم‌افزاری با این مشخصات پیدا نشد؛ عبارت دیگری را امتحان کنید.</p>
+
+            <div class="swl-grid" data-swl-grid>
                 <?php foreach ($softwareList as $software): ?>
                     <?php
-                    $slug = $software['slug'] ?? '';
+                    $slug = (string) ($software['slug'] ?? '');
 
-                    // تشخیص آیکون و کلاس بر اساس slug
+                    // تشخیص آیکون و کلاس تم
                     $iconInfo = $slugMap[$slug] ?? ['icon' => 'fas fa-cube', 'class' => 'default'];
 
                     // fallback: تشخیص بر اساس نام (طولانی‌ترین کلید منطبق، با مرز واژه)
@@ -117,106 +116,124 @@ $softwareCssVersion = (int) (@filemtime($publicPath . '/assets/css/software.css'
                         if ($bestMatch !== null) $iconInfo = $bestMatch;
                     }
 
-                    // وضعیت
-                    $status = $software['status'] ?? 'development';
-                    $statusInfo = $statusMap[$status] ?? $statusMap['development'];
-
-                    // ویژگی‌ها
-                    $features = json_decode($software['features'] ?? '[]', true);
-                    if (!is_array($features)) $features = [];
-
-                    // تکنولوژی‌ها
-                    $techStack = json_decode($software['tech_stack'] ?? '[]', true);
-                    if (!is_array($techStack)) $techStack = [];
-
-                    // برای ماژول‌هایی که کلاس تم مشخصی ندارند، رنگ از config_json همان ماژول خوانده می‌شود.
+                    // برای ماژول‌های بدون کلاس تم، رنگ از config_json
                     $themeStyle = '';
                     if ($iconInfo['class'] === 'default') {
                         $config = json_decode($software['config_json'] ?? '[]', true);
                         $themeColor = is_array($config) ? ($config['color'] ?? null) : null;
                         $themeStyle = $themeVars($themeColor);
                     }
+
+                    // وضعیت
+                    $status = (string) ($software['status'] ?? 'development');
+                    $statusInfo = $statusMap[$status] ?? $statusMap['development'];
+
+                    // کلیدواژه‌های جست‌وجو (نام + توضیح + ویژگی‌ها)
+                    $features = json_decode($software['features'] ?? '[]', true);
+                    if (!is_array($features)) $features = [];
+
+                    $searchText = mb_strtolower(implode(' ', array_filter([
+                        $software['name'] ?? '',
+                        $software['description'] ?? '',
+                        implode(' ', array_slice($features, 0, 6)),
+                    ])), 'UTF-8');
                     ?>
-                    <div class="swl-card" data-theme="<?= htmlspecialchars($iconInfo['class']) ?>"<?= $themeStyle !== '' ? ' style="' . htmlspecialchars($themeStyle, ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
+                    <article class="swl-card"
+                             data-theme="<?= htmlspecialchars($iconInfo['class']) ?>"
+                             data-status="<?= htmlspecialchars($status) ?>"
+                             data-name="<?= htmlspecialchars($searchText) ?>"<?= $features !== [] ? ' title="' . htmlspecialchars(implode(' • ', array_slice($features, 0, 3)), ENT_QUOTES, 'UTF-8') . '"' : '' ?><?= $themeStyle !== '' ? ' style="' . htmlspecialchars($themeStyle, ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
 
-                        <!-- Badge وضعیت -->
-                        <span class="swl-badge <?= htmlspecialchars($statusInfo['class']) ?>">
-                            <?= htmlspecialchars($statusInfo['label']) ?>
-                        </span>
-
-                        <!-- Head -->
                         <div class="swl-head">
-                            <div class="swl-icon">
-                                <i class="<?= htmlspecialchars($iconInfo['icon']) ?>"></i>
-                            </div>
+                            <span class="swl-icon" aria-hidden="true"><i class="<?= htmlspecialchars($iconInfo['icon']) ?>"></i></span>
                             <div class="swl-title">
                                 <h3><?= htmlspecialchars($software['name'] ?? '—') ?></h3>
-                                <small>
-                                    <i class="fas fa-tag"></i>
-                                    نسخه <?= htmlspecialchars($software['version'] ?? '1.0') ?>
-                                </small>
+                                <div class="swl-meta">
+                                    <span class="swl-badge <?= htmlspecialchars($statusInfo['class']) ?>"><?= htmlspecialchars($statusInfo['label']) ?></span>
+                                    <small>v<?= htmlspecialchars($software['version'] ?? '1.0') ?></small>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Description -->
                         <?php if (!empty($software['description'])): ?>
-                            <p class="swl-desc">
-                                <?= htmlspecialchars($software['description']) ?>
-                            </p>
+                            <p class="swl-desc"><?= htmlspecialchars($software['description']) ?></p>
                         <?php endif; ?>
 
-                        <!-- Tech Stack -->
-                        <?php if (!empty($techStack)): ?>
-                            <div class="swl-tech">
-                                <?php foreach (array_slice($techStack, 0, 4) as $tech): ?>
-                                    <span><?= htmlspecialchars($tech) ?></span>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-
-                        <!-- Features -->
-                        <?php if (!empty($features)): ?>
-                            <ul class="swl-features">
-                                <?php foreach (array_slice($features, 0, 3) as $feature): ?>
-                                    <li>
-                                        <i class="fas fa-check-circle"></i>
-                                        <span><?= htmlspecialchars($feature) ?></span>
-                                    </li>
-                                <?php endforeach; ?>
-                                <?php if (count($features) > 3): ?>
-                                    <li class="more">
-                                        ... و <?= count($features) - 3 ?> مورد دیگر
-                                    </li>
-                                <?php endif; ?>
-                            </ul>
-                        <?php endif; ?>
-
-                        <!-- Footer -->
                         <div class="swl-foot">
-
                             <form method="POST" action="/software/run/<?= urlencode($slug) ?>">
                                 <button type="submit" class="swl-btn-run">
-                                    <i class="fas fa-play-circle"></i>
-                                    <span>ورود و اجرا</span>
+                                    <i class="fas fa-play-circle" aria-hidden="true"></i>
+                                    <span>اجرا</span>
                                 </button>
                             </form>
 
                             <?php if (!empty($software['github_url'])): ?>
-                                <a href="<?= htmlspecialchars($software['github_url']) ?>"
-                                   target="_blank"
-                                   rel="noopener"
-                                   class="swl-btn-sec swl-btn-ico"
-                                   title="مشاهده در گیت‌هاب">
-                                    <i class="fab fa-github"></i>
+                                <a href="<?= htmlspecialchars($software['github_url']) ?>" target="_blank" rel="noopener"
+                                   class="swl-btn-sec swl-btn-ico" title="مشاهده در گیت‌هاب" aria-label="گیت‌هاب <?= htmlspecialchars($software['name'] ?? '') ?>">
+                                    <i class="fab fa-github" aria-hidden="true"></i>
                                 </a>
                             <?php endif; ?>
-
                         </div>
-
-                    </div>
+                    </article>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
 
     </div>
 </div>
+
+<script>
+(function () {
+    'use strict';
+
+    var search = document.querySelector('[data-swl-search]');
+    var chips = Array.prototype.slice.call(document.querySelectorAll('[data-swl-filter]'));
+    var grid = document.querySelector('[data-swl-grid]');
+    var empty = document.querySelector('[data-swl-empty]');
+    var counter = document.querySelector('[data-swl-count]');
+
+    if (!grid) return;
+
+    var cards = Array.prototype.slice.call(grid.querySelectorAll('.swl-card'));
+    var activeStatus = 'all';
+
+    var applyFilters = function () {
+        var term = search && search.value ? search.value.trim().toLowerCase() : '';
+        var visible = 0;
+
+        cards.forEach(function (card) {
+            var text = (card.getAttribute('data-name') || '').toLowerCase();
+            var status = card.getAttribute('data-status') || '';
+            var statusOk = activeStatus === 'all' || status === activeStatus;
+            var termOk = term === '' || text.indexOf(term) !== -1;
+            var show = statusOk && termOk;
+
+            card.hidden = !show;
+            if (show) visible++;
+        });
+
+        if (empty) empty.hidden = visible !== 0;
+        if (counter) counter.textContent = visible + ' نرم‌افزار';
+    };
+
+    chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            chips.forEach(function (item) { item.classList.remove('is-active'); });
+            chip.classList.add('is-active');
+            activeStatus = chip.getAttribute('data-swl-filter') || 'all';
+            applyFilters();
+        });
+    });
+
+    if (search) {
+        search.addEventListener('input', applyFilters);
+        search.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                search.value = '';
+                applyFilters();
+            }
+        });
+    }
+
+    applyFilters();
+})();
+</script>
