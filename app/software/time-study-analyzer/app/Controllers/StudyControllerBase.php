@@ -22,10 +22,7 @@ abstract class StudyControllerBase extends Controller
             http_response_code(405);
             $this->redirect(ts_url());
         }
-        if (!$this->verifyCsrf()) {
-            ts_flash_set('danger', 'درخواست معتبر نیست یا نشست منقضی شده است؛ صفحه را تازه کنید.');
-            $this->redirect(ts_url());
-        }
+        $this->verifyCsrf('درخواست معتبر نیست یا نشست منقضی شده است؛ صفحه را تازه کنید.');
     }
 
     protected function renderPage(string $view, array $data = []): void

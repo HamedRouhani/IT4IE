@@ -79,6 +79,7 @@ class Controller
             throw new \Exception("StatLab View not found: {$view}");
         }
         $content = ob_get_clean();
+        $content = it4ie_inject_csrf_fields($content);
         
         // Layout مشترک IT4IE
         $lf = VIEWS_PATH . '/layouts/software.php';

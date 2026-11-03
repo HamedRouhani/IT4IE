@@ -9,6 +9,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// 🛡️ گارد CSRF: عملیات نوشتن باید توکن معتبر همین نشست را داشته باشد
+it4ie_require_csrf();
+
 if (!defined('MODULAR_APP_PATH')) {
     define('MODULAR_APP_PATH', __DIR__);
 }

@@ -61,6 +61,7 @@ class Controller
         if (file_exists($vp)) include $vp;
         else throw new \Exception("OR View not found: {$view}");
         $content = ob_get_clean();
+        $content = it4ie_inject_csrf_fields($content);
         $lf = VIEWS_PATH . '/layouts/software.php';
         if (file_exists($lf)) include $lf; else echo $content;
     }

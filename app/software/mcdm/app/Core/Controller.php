@@ -85,6 +85,7 @@ class Controller
             throw new \Exception("MCDM View not found: {$view}");
         }
         $content = ob_get_clean();
+        $content = it4ie_inject_csrf_fields($content);
 
         $layoutFile = VIEWS_PATH . '/layouts/software.php';
         if (file_exists($layoutFile)) {

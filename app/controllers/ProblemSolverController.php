@@ -16,7 +16,8 @@ class ProblemSolverController extends Controller
             ]);
         }
 
-        if (!$this->verifyCsrf()) {
+        if (!$this->csrfTokenIsValid()) {
+            http_response_code(419);
             $this->json([
                 'success' => false,
                 'message' => 'درخواست نامعتبر است. صفحه را مجدداً بارگذاری کنید.'

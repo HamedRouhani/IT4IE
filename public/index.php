@@ -150,6 +150,8 @@ spl_autoload_register(function ($class) {
 if (file_exists(APP_PATH . '/helpers/functions.php')) {
     require_once APP_PATH . '/helpers/functions.php';
 }
+// گاردهای CSRF ماژول‌ها به این فایل وابسته‌اند؛ بارگذاری آن اجباری است.
+require_once APP_PATH . '/helpers/csrf.php';
 if (file_exists(APP_PATH . '/helpers/Captcha.php')) {
     require_once APP_PATH . '/helpers/Captcha.php';
 }
@@ -556,7 +558,6 @@ if (strpos($url, 'admin') === 0) {
         '#^messages/delete/(\d+)$#'  => 'deleteMessage',
         '#^users/edit/(\d+)$#'       => 'editUser',
         '#^users/delete/(\d+)$#'     => 'deleteUser',
-        '#^users/update$#'           => 'updateUser',
         '#^categories/edit/(\d+)$#'  => 'editCategory',
         '#^categories/delete/(\d+)$#'=> 'deleteCategory',
         '#^tags/delete/(\d+)$#'      => 'deleteTag',
@@ -568,7 +569,6 @@ if (strpos($url, 'admin') === 0) {
         '#^checklist/question/add/(\d+)$#'    => 'addChecklistQuestion',
         '#^checklist/question/delete/(\d+)$#' => 'deleteChecklistQuestion',
         '#^checklist/view/(\d+)$#'            => 'viewChecklist',
-        '#^checklist/update-status$#'         => 'updateChecklistStatus',
         '#^checklist/message/(\d+)$#'         => 'messageChecklist',
         '#^checklist/question/edit/(\d+)$#'   => 'editChecklistQuestion',
         '#^checklist/question/move/(\d+)$#'   => 'moveChecklistQuestion',
@@ -579,7 +579,7 @@ if (strpos($url, 'admin') === 0) {
     foreach ($paramRoutes as $pattern => $method) {
         if (preg_match($pattern, $adminUrl, $m)) {
             if (method_exists($controller, $method)) {
-                $controller->$method($m[1]);
+                $controller->$method($m[1] ?? null);
             } else {
                 http_response_code(404);
                 echo "404 - متد {$method} یافت نشد";
@@ -597,6 +597,7 @@ if (strpos($url, 'admin') === 0) {
         'posts/create'        => 'createPost',
         'messages'            => 'messages',
         'users'               => 'users',
+        'users/update'        => 'updateUser',
         'categories'          => 'categories',
         'categories/create'   => 'createCategory',
         'tags'                => 'tags',
@@ -611,6 +612,7 @@ if (strpos($url, 'admin') === 0) {
         'checklist'           => 'checklist',
         'checklists'          => 'checklists',
         'checklist/create'    => 'createChecklist',
+        'checklist/update-status' => 'updateChecklistStatus',
     ];
 
     if (array_key_exists($adminUrl, $simpleRoutes)) {
@@ -714,25 +716,6 @@ if (preg_match('#^billing/subscribe/(\d+)$#', $url, $m)) {
 if (preg_match('#^billing/pay/(\d+)$#', $url, $m)) {
     require_once APP_PATH . '/controllers/BillingController.php';
     (new App\Controllers\BillingController())->pay($m[1]);
-    exit;
-}
-
-// ============================================
-// ADMIN CHECKLIST ROUTES
-// ============================================
-if ($url === 'admin/checklist') {
-    require_once APP_PATH . '/controllers/ChecklistController.php';
-    (new App\Controllers\ChecklistController())->adminIndex();
-    exit;
-}
-if (preg_match('#^admin/checklist/view/(\d+)$#', $url, $m)) {
-    require_once APP_PATH . '/controllers/ChecklistController.php';
-    (new App\Controllers\ChecklistController())->adminView($m[1]);
-    exit;
-}
-if ($url === 'admin/checklist/update-status') {
-    require_once APP_PATH . '/controllers/ChecklistController.php';
-    (new App\Controllers\ChecklistController())->adminUpdateStatus();
     exit;
 }
 

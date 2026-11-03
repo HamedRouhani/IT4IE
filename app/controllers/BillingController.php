@@ -143,11 +143,7 @@ class BillingController extends Controller
             return;
         }
 
-        if (!$this->verifyCsrf()) {
-            $_SESSION['error'] = 'درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.';
-            $this->redirect('/billing/my');
-            return;
-        }
+        $this->verifyCsrf('درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.');
 
         $paymentId = (int)($_POST['payment_id'] ?? 0);
         $ref = trim((string)($_POST['ref_code'] ?? ''));
@@ -234,11 +230,7 @@ class BillingController extends Controller
             return;
         }
 
-        if (!$this->verifyCsrf()) {
-            $_SESSION['error'] = 'درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.';
-            $this->redirect('/billing/my');
-            return;
-        }
+        $this->verifyCsrf('درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.');
 
         $res = $this->payModel->redeemVoucher(trim($_POST['code'] ?? ''), (int)$_SESSION['user_id'], $this->subModel);
         if ($res['ok']) $_SESSION['message'] = $res['msg'];
@@ -265,13 +257,7 @@ class BillingController extends Controller
             return;
         }
 
-        if (!$this->verifyCsrf()) {
-            $_SESSION['error'] =
-                'درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.';
-
-            $this->redirect('/pricing');
-            return;
-        }
+        $this->verifyCsrf('درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.');
 
         $userId = (int)$_SESSION['user_id'];
         $planId = (int)($_POST['plan_id'] ?? 0);

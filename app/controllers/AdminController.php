@@ -962,11 +962,7 @@ class AdminController extends Controller
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (!$this->verifyCsrf()) {
-                $_SESSION['error'] = 'درخواست معتبر نیست؛ صفحه را تازه کنید و دوباره تلاش کنید.';
-                $this->redirect('/admin/checklist/message/' . (int) $id);
-                return;
-            }
+            $this->verifyCsrf('درخواست معتبر نیست؛ صفحه را تازه کنید و دوباره تلاش کنید.');
 
             $subject = trim($_POST['subject'] ?? '');
             $content = trim($_POST['message'] ?? '');
@@ -1053,11 +1049,7 @@ class AdminController extends Controller
             $this->redirect('/admin/leads');
             return;
         }
-        if (!$this->verifyCsrf()) {
-            $_SESSION['error'] = 'درخواست معتبر نیست؛ صفحه را تازه کنید و دوباره تلاش کنید.';
-            $this->redirect('/admin/leads');
-            return;
-        }
+        $this->verifyCsrf('درخواست معتبر نیست؛ صفحه را تازه کنید و دوباره تلاش کنید.');
 
         require_once APP_PATH . '/models/Subscription.php';
         $updated = (new \App\Models\Subscription())->updateLeadStatus((int) $id, (string) ($_POST['lead_status'] ?? ''));

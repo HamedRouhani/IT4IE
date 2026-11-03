@@ -104,6 +104,7 @@ class Controller
         }
 
         $content = ob_get_clean();
+        $content = it4ie_inject_csrf_fields($content);
 
         $layoutFile = VIEWS_PATH . '/layouts/software.php';
         

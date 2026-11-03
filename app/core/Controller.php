@@ -64,10 +64,17 @@ abstract class Controller
      * یا بازگشت به صفحهٔ قبلی انجام می‌شود و اجرای کد ادامه پیدا نمی‌کند. به همین
      * دلیل فراخوانی صرفِ آن در ابتدای عملیات نوشتن برای محافظت کافی است.
      * برای بررسی بدون توقف از csrfTokenIsValid() استفاده کنید.
+     *
+     * @param string|null $message پیام خطای سفارشی برای نمایش به کاربر
      */
-    protected function verifyCsrf()
+    protected function verifyCsrf($message = null)
     {
         if ($this->csrfTokenIsValid()) {
+            return true;
+        }
+
+        // مرورگر خودش اعلام می‌کند درخواست از همین مبدأ است و این هدر جعل‌شدنی نیست
+        if (strtolower((string) ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? '')) === 'same-origin') {
             return true;
         }
 
@@ -78,7 +85,9 @@ abstract class Controller
         }
 
         $this->rejectInvalidRequest(
-            'درخواست منقضی یا نامعتبر است؛ صفحه را تازه کنید و دوباره تلاش کنید.',
+            $message !== null && $message !== ''
+                ? (string) $message
+                : 'درخواست منقضی یا نامعتبر است؛ صفحه را تازه کنید و دوباره تلاش کنید.',
             419
         );
 

@@ -42,6 +42,7 @@ class Controller
         }
 
         $content = ob_get_clean();
+        $content = it4ie_inject_csrf_fields($content);
 
         // استفاده از layout ترکیبی IT4IE
         $layoutFile = VIEWS_PATH . '/layouts/software.php';

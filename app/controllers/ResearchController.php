@@ -87,11 +87,7 @@ class ResearchController extends Controller
             http_response_code(405);
             return;
         }
-        if (!$this->verifyCsrf()) {
-            http_response_code(403);
-            $_SESSION['error'] = 'درخواست معتبر نیست. صفحه را تازه‌سازی کنید و دوباره تلاش کنید.';
-            $this->redirect('/research/' . rawurlencode($slug));
-        }
+        $this->verifyCsrf('درخواست معتبر نیست. صفحه را تازه‌سازی کنید و دوباره تلاش کنید.');
 
         $template = (new WorkflowTemplate())->findPublishedBySlug($slug);
         if (!$template || !in_array($template['tool_slug'], self::ALLOWED_TOOLS, true)) {

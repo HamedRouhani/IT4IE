@@ -27,10 +27,7 @@ abstract class InventoryController extends Controller
             http_response_code(405);
             $this->redirect(inv_url());
         }
-        if (!$this->verifyCsrf()) {
-            inv_flash_set('danger', 'درخواست منقضی یا نامعتبر است؛ صفحه را تازه کنید و دوباره تلاش کنید.');
-            $this->redirect(inv_url());
-        }
+        $this->verifyCsrf('درخواست منقضی یا نامعتبر است؛ صفحه را تازه کنید و دوباره تلاش کنید.');
     }
 
     /** Parse bounded decimals using the precision supported by the inventory schema. */
