@@ -22,6 +22,7 @@ $controllers = [
     'dashboard' => 'DashboardController',
     'study' => 'StudyController',
     'export' => 'ExportController',
+    'learn' => 'LearnController',
 ];
 $controllerKey = strtolower((string) ($_GET['controller'] ?? 'dashboard'));
 $action = (string) ($_GET['action'] ?? 'index');

@@ -145,6 +145,7 @@ $moduleMenus = [
         'menus' => [
             ['route' => 'dashboard', 'icon' => 'fas fa-gauge-high', 'label' => 'داشبورد'],
             ['route' => 'study', 'icon' => 'fas fa-stopwatch', 'label' => 'مطالعات زمان‌سنجی'],
+            ['route' => 'learn', 'icon' => 'fas fa-graduation-cap', 'label' => 'مرکز آموزش'],
         ],
     ],
 

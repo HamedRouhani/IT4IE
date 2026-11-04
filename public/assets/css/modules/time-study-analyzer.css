@@ -115,3 +115,91 @@ body.software-mode[data-module="time-study-analyzer"] .hr-dp-btn:hover { backgro
 @media(max-width:600px) { body.software-mode[data-module="time-study-analyzer"] .software-content { padding:12px; }.ts-method-grid,.ts-form-grid,.ts-stats,.ts-result-stats,.ts-meta-grid { grid-template-columns:1fr; }.ts-span-2 { grid-column:auto; }.ts-card { padding:15px; }.ts-form-section { padding:16px; }.ts-head-actions { width:100%; }.ts-repeat-row,.ts-repeat-row--category { grid-template-columns:1fr; }.ts-repeat-row .ts-icon-button { grid-column:auto; justify-self:end; }.ts-page-head { align-items:flex-start; }.ts-page-head>*,.ts-hero>* { max-width:100%; } }
 @media(max-width:480px) { body.software-mode[data-module="time-study-analyzer"] .hr-dp-panel { right:auto; left:0; } }
 @media print { body.software-mode[data-module="time-study-analyzer"] .software-sidebar,body.software-mode[data-module="time-study-analyzer"] .software-nav,.ts-no-print,.ts-final-actions { display:none!important; }.ts-page { gap:10px; }.ts-card,.ts-stats article { box-shadow:none; break-inside:avoid; }.ts-table-wrap { overflow:visible; }.ts-table { min-width:0; font-size:9pt; } }
+
+/* ============================================================
+   مرکز آموزش Time Study — درس، واژه‌نامه و ماشین‌حساب
+   ============================================================ */
+
+.ts-lessons { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 270px), 1fr)); gap:12px; }
+.ts-lesson-card { display:flex; flex-direction:column; gap:8px; padding:16px; border:1px solid var(--ts-border); border-radius:14px; background:#fff; color:inherit; text-decoration:none; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
+.ts-lesson-card:hover { transform:translateY(-3px); border-color:var(--ts-primary); box-shadow:0 10px 24px rgba(79,70,229,.12); }
+.ts-lesson-icon { display:grid; place-items:center; width:38px; height:38px; border-radius:11px; background:var(--ts-primary-soft); color:var(--ts-primary); font-size:1rem; }
+.ts-lesson-card h3 { margin:0; font-size:1rem; line-height:1.6; color:var(--ts-ink); }
+.ts-lesson-card p { margin:0; color:var(--ts-muted); font-size:.84rem; line-height:1.85; flex:1; }
+.ts-lesson-meta { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:2px; }
+.ts-lesson-meta small { display:inline-flex; align-items:center; gap:4px; color:var(--ts-muted); font-size:.76rem; }
+.ts-learn-links { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px; }
+.ts-link-card { text-decoration:none; color:inherit; transition:border-color .15s ease, transform .15s ease; }
+.ts-link-card:hover { border-color:var(--ts-primary); transform:translateY(-2px); }
+.ts-link-card h2 { margin:4px 0 8px; font-size:1.05rem; }
+.ts-link-card p { margin:0; color:var(--ts-muted); line-height:1.9; font-size:.88rem; }
+
+.ts-lesson-layout { display:grid; grid-template-columns:240px minmax(0,1fr); gap:18px; align-items:start; }
+.ts-toc { position:sticky; top:16px; padding:16px; border:1px solid var(--ts-border); border-radius:14px; background:#fff; }
+.ts-toc strong { display:block; margin-bottom:8px; color:var(--ts-primary-dark); font-size:.86rem; }
+.ts-toc ol { margin:0; padding-inline-start:18px; color:var(--ts-muted); font-size:.84rem; line-height:2; }
+.ts-toc a { color:var(--ts-ink); text-decoration:none; }
+.ts-toc a:hover { color:var(--ts-primary); text-decoration:underline; }
+.ts-lesson-body { display:grid; gap:14px; min-width:0; }
+.ts-lesson-body .ts-card { scroll-margin-top:16px; }
+.ts-lesson-h2 { margin:0 0 6px; font-size:1.05rem; font-weight:800; color:var(--ts-primary-dark); }
+.ts-lesson-p { margin:0 0 10px; color:var(--ts-ink); line-height:2; font-size:.92rem; }
+.ts-lesson-list { margin:0; padding-inline-start:20px; color:var(--ts-ink); line-height:2; font-size:.9rem; }
+.ts-lesson-list--warn { color:#8a3a2a; }
+.ts-lesson-list li { margin-bottom:4px; }
+
+.ts-formulas { display:grid; gap:10px; }
+.ts-formula { display:grid; gap:5px; padding:12px 14px; border:1px solid var(--ts-border); border-radius:12px; background:#fafbff; }
+.ts-formula strong { font-size:.88rem; color:var(--ts-primary-dark); }
+.ts-formula code { font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.88rem; color:#1e1b4b; background:var(--ts-primary-soft); padding:6px 10px; border-radius:8px; overflow-x:auto; }
+.ts-formula small { color:var(--ts-muted); font-size:.78rem; }
+
+.ts-example-given { padding:12px 14px; margin-bottom:12px; border-radius:12px; background:var(--ts-primary-soft); }
+.ts-example-given strong { display:block; margin-bottom:4px; color:var(--ts-primary-dark); font-size:.86rem; }
+.ts-example-given ul { margin:0; padding-inline-start:18px; line-height:1.9; font-size:.88rem; }
+.ts-example-answer { display:flex; gap:10px; align-items:flex-start; margin-top:12px; padding:12px 14px; border-radius:12px; background:#eef2ff; color:#312e81; font-size:.9rem; line-height:1.9; }
+.ts-example-answer i { margin-top:4px; color:var(--ts-primary); }
+
+.ts-quiz { border:1px solid var(--ts-border); border-radius:12px; padding:10px 14px; background:#fff; }
+.ts-quiz summary { cursor:pointer; font-weight:700; color:var(--ts-primary); font-size:.88rem; }
+.ts-quiz p { margin:8px 0 0; line-height:1.9; font-size:.9rem; color:var(--ts-ink); }
+
+.ts-lesson-nav { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+
+.ts-search { display:flex; align-items:center; gap:8px; padding:9px 12px; margin-bottom:14px; border:1px solid var(--ts-border); border-radius:11px; background:#fff; }
+.ts-search:focus-within { border-color:var(--ts-primary); box-shadow:0 0 0 3px rgba(79,70,229,.14); }
+.ts-search i { color:var(--ts-muted); font-size:.85rem; }
+.ts-search input { flex:1; min-width:0; border:0; outline:0; background:transparent; font:inherit; font-size:.9rem; color:var(--ts-ink); }
+.ts-nomatch { margin:10px 0 0; padding:12px; border:1px dashed var(--ts-border); border-radius:12px; color:var(--ts-muted); text-align:center; font-size:.88rem; }
+
+.ts-glossary { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap:10px; }
+.ts-glossary-item { padding:12px 14px; border:1px solid var(--ts-border); border-radius:12px; background:#fff; }
+.ts-glossary-item[hidden] { display:none !important; }
+.ts-glossary-head { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; margin-bottom:4px; }
+.ts-glossary-head strong { color:var(--ts-primary-dark); font-size:.9rem; }
+.ts-glossary-head span { color:var(--ts-muted); font-size:.78rem; }
+.ts-glossary-item p { margin:0; font-size:.84rem; line-height:1.9; color:var(--ts-ink); }
+
+.ts-tool { border:1px solid var(--ts-border); border-radius:14px; background:#fff; overflow:hidden; }
+.ts-tool > summary { display:flex; align-items:center; gap:9px; padding:14px 16px; cursor:pointer; font-weight:800; color:var(--ts-primary-dark); font-size:.95rem; list-style:none; }
+.ts-tool > summary::-webkit-details-marker { display:none; }
+.ts-tool > summary::after { content:'▾'; margin-inline-start:auto; color:var(--ts-muted); font-size:.8rem; transition:transform .2s ease; }
+.ts-tool[open] > summary::after { transform:rotate(180deg); }
+.ts-tool[open] > summary { border-bottom:1px solid var(--ts-border); background:#f8f9ff; }
+.ts-tool .ts-form { padding:16px; }
+
+.ts-result-metrics { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap:10px; }
+.ts-result-metric { display:grid; gap:4px; padding:12px 14px; border:1px solid var(--ts-border); border-radius:12px; background:#fafbff; }
+.ts-result-metric span { color:var(--ts-muted); font-size:.8rem; }
+.ts-result-metric strong { color:var(--ts-primary-dark); font-size:1.05rem; }
+
+@media (max-width:900px) {
+    .ts-lesson-layout { grid-template-columns:1fr; }
+    .ts-toc { position:static; }
+    .ts-learn-links { grid-template-columns:1fr; }
+}
+
+@media print {
+    .ts-toc, .ts-lesson-nav, .ts-search { display:none !important; }
+    .ts-lesson-layout { grid-template-columns:1fr; }
+}

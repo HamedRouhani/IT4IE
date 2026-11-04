@@ -1,5 +1,5 @@
 <section class="ts-page" dir="rtl">
-    <header class="ts-page-head"><div><span class="ts-eyebrow">ثبت و پیگیری</span><h1><i class="fa-solid fa-clipboard-list"></i> مطالعات کار</h1><p>مطالعهٔ جدید بسازید یا داده‌های مطالعهٔ فعال را تکمیل کنید.</p></div><a class="ts-button ts-button-outline" href="/software/time-study-analyzer/"><i class="fa-solid fa-arrow-right"></i> داشبورد</a></header>
+    <header class="ts-page-head"><div><span class="ts-eyebrow">ثبت و پیگیری</span><h1><i class="fa-solid fa-clipboard-list"></i> مطالعات کار</h1><p>مطالعهٔ جدید بسازید یا داده‌های مطالعهٔ فعال را تکمیل کنید.</p></div><div class="ts-head-actions"><a class="ts-button ts-button-outline" href="<?= ts_e(ts_url('learn', 'index')) ?>"><i class="fa-solid fa-graduation-cap"></i> مرکز آموزش</a><a class="ts-button ts-button-outline" href="/software/time-study-analyzer/"><i class="fa-solid fa-arrow-right"></i> داشبورد</a></div></header>
     <?php if (!empty($flash)): ?><div class="ts-alert <?= ts_e($flash['type']) ?>" role="status"><?= ts_e($flash['message']) ?></div><?php endif; ?>
     <section class="ts-card">
         <div class="ts-card-head"><div><span class="ts-eyebrow">روش‌ها</span><h2>مطالعهٔ تازه</h2></div></div>
