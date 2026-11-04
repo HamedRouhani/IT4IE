@@ -7,6 +7,7 @@
         </div>
         <div class="ee-head-actions">
             <a class="ee-button ee-button-primary" href="<?= ee_e(ee_url('project', 'create')) ?>"><i class="fa-solid fa-plus"></i> پروژهٔ جدید</a>
+            <a class="ee-button" href="<?= ee_e(ee_url('learn', 'index')) ?>"><i class="fa-solid fa-graduation-cap"></i> مرکز آموزش</a>
             <?php if ($showArchived): ?>
                 <a class="ee-button" href="<?= ee_e(ee_url('project', 'index')) ?>">پروژه‌های جاری</a>
             <?php else: ?>

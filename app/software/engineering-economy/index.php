@@ -27,6 +27,7 @@ $controllers = [
     'project' => 'ProjectController',
     'cashflow' => 'CashFlowController',
     'analysis' => 'AnalysisController',
+    'learn' => 'LearnController',
 ];
 
 $controllerKey = strtolower((string) ($_GET['controller'] ?? 'project'));

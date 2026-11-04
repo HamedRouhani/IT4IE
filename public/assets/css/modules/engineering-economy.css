@@ -112,6 +112,84 @@ body.software-mode[data-module="engineering-economy"] .software-sidebar { border
     .ee-form-grid .ee-span-2 { grid-column: auto; }
 }
 
+/* ---------- مرکز آموزش ---------- */
+.ee-search { display: flex; align-items: center; gap: 8px; padding: 9px 12px; margin-bottom: 14px; border: 1px solid var(--ee-border); border-radius: 11px; background: #fff; }
+.ee-search:focus-within { border-color: var(--ee-accent); box-shadow: 0 0 0 3px rgba(201, 162, 39, .18); }
+.ee-search i { color: var(--ee-muted); font-size: .85rem; }
+.ee-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: .9rem; color: var(--ee-ink); }
+
+.ee-nomatch { margin: 10px 0 0; padding: 12px; border: 1px dashed var(--ee-border); border-radius: 12px; color: var(--ee-muted); text-align: center; font-size: .88rem; }
+
+.ee-lessons { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 268px), 1fr)); gap: 12px; }
+.ee-lesson-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--ee-border); border-radius: 14px; background: #fff; color: inherit; text-decoration: none; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
+.ee-lesson-card:hover { transform: translateY(-3px); border-color: var(--ee-accent); box-shadow: 0 10px 24px rgba(15, 61, 62, .10); }
+.ee-lesson-icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 11px; background: var(--ee-primary-soft); color: var(--ee-primary); font-size: 1rem; }
+.ee-lesson-card h3 { margin: 0; font-size: 1rem; line-height: 1.6; color: var(--ee-ink); }
+.ee-lesson-card p { margin: 0; color: var(--ee-muted); font-size: .84rem; line-height: 1.85; flex: 1; }
+.ee-lesson-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 2px; }
+.ee-lesson-meta small { display: inline-flex; align-items: center; gap: 4px; color: var(--ee-muted); font-size: .76rem; }
+
+.ee-link-card { text-decoration: none; color: inherit; transition: border-color .15s ease, transform .15s ease; }
+.ee-link-card:hover { border-color: var(--ee-accent); transform: translateY(-2px); }
+
+.ee-lesson-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 18px; align-items: start; }
+.ee-toc { position: sticky; top: 16px; padding: 16px; border: 1px solid var(--ee-border); border-radius: 14px; background: #fff; }
+.ee-toc strong { display: block; margin-bottom: 8px; color: var(--ee-primary-dark); font-size: .86rem; }
+.ee-toc ol { margin: 0; padding-inline-start: 18px; color: var(--ee-muted); font-size: .84rem; line-height: 2; }
+.ee-toc a { color: var(--ee-ink); text-decoration: none; }
+.ee-toc a:hover { color: var(--ee-primary); text-decoration: underline; }
+.ee-lesson-body { display: grid; gap: 14px; min-width: 0; }
+.ee-lesson-body .ee-card { scroll-margin-top: 16px; }
+.ee-lesson-h2 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 800; color: var(--ee-primary-dark); }
+.ee-lesson-p { margin: 0 0 10px; color: var(--ee-ink); line-height: 2; font-size: .92rem; }
+.ee-lesson-list { margin: 0; padding-inline-start: 20px; color: var(--ee-ink); line-height: 2; font-size: .9rem; }
+.ee-lesson-list--warn { color: #7a3020; }
+.ee-lesson-list li { margin-bottom: 4px; }
+
+.ee-formulas { display: grid; gap: 10px; }
+.ee-formula { display: grid; gap: 5px; padding: 12px 14px; border: 1px solid var(--ee-border); border-radius: 12px; background: #fdfcf7; }
+.ee-formula strong { font-size: .88rem; color: var(--ee-primary-dark); }
+.ee-formula code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88rem; color: #0b2a2b; background: var(--ee-accent-soft); padding: 6px 10px; border-radius: 8px; overflow-x: auto; }
+.ee-formula small { color: var(--ee-muted); font-size: .78rem; }
+
+.ee-example-given { padding: 12px 14px; margin-bottom: 12px; border-radius: 12px; background: var(--ee-primary-soft); }
+.ee-example-given strong { display: block; margin-bottom: 4px; color: var(--ee-primary-dark); font-size: .86rem; }
+.ee-example-given ul { margin: 0; padding-inline-start: 18px; line-height: 1.9; font-size: .88rem; }
+.ee-example-answer { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: var(--ee-accent-soft); color: #4a3a08; font-size: .9rem; line-height: 1.9; }
+.ee-example-answer i { margin-top: 4px; color: var(--ee-accent-dark); }
+
+.ee-quiz { border: 1px solid var(--ee-border); border-radius: 12px; padding: 10px 14px; background: #fff; }
+.ee-quiz summary { cursor: pointer; font-weight: 700; color: var(--ee-primary); font-size: .88rem; }
+.ee-quiz p { margin: 8px 0 0; line-height: 1.9; font-size: .9rem; color: var(--ee-ink); }
+
+.ee-lesson-nav { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+
+.ee-glossary { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+.ee-glossary-item { padding: 12px 14px; border: 1px solid var(--ee-border); border-radius: 12px; background: #fff; }
+.ee-glossary-item[hidden] { display: none !important; }
+.ee-glossary-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.ee-glossary-head strong { color: var(--ee-primary-dark); font-size: .9rem; }
+.ee-glossary-head span { color: var(--ee-muted); font-size: .78rem; }
+.ee-glossary-item p { margin: 0; font-size: .84rem; line-height: 1.9; color: var(--ee-ink); }
+
+.ee-tool { border: 1px solid var(--ee-border); border-radius: 14px; background: #fff; overflow: hidden; }
+.ee-tool > summary { display: flex; align-items: center; gap: 9px; padding: 14px 16px; cursor: pointer; font-weight: 800; color: var(--ee-primary-dark); font-size: .95rem; list-style: none; }
+.ee-tool > summary::-webkit-details-marker { display: none; }
+.ee-tool > summary::after { content: '▾'; margin-inline-start: auto; color: var(--ee-muted); font-size: .8rem; transition: transform .2s ease; }
+.ee-tool[open] > summary::after { transform: rotate(180deg); }
+.ee-tool[open] > summary { border-bottom: 1px solid var(--ee-border); background: #fbfaf5; }
+.ee-tool .ee-form { padding: 16px; }
+
+.ee-result-metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: 10px; }
+.ee-result-metric { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--ee-border); border-radius: 12px; background: #fdfcf7; }
+.ee-result-metric span { color: var(--ee-muted); font-size: .8rem; }
+.ee-result-metric strong { color: var(--ee-primary-dark); font-size: 1.05rem; }
+
+@media (max-width: 900px) {
+    .ee-lesson-layout { grid-template-columns: 1fr; }
+    .ee-toc { position: static; }
+}
+
 @media print {
     body.software-mode[data-module="engineering-economy"] .software-sidebar,
     body.software-mode[data-module="engineering-economy"] .software-nav,

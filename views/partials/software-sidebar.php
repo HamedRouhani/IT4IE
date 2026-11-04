@@ -155,6 +155,7 @@ $moduleMenus = [
         'param' => 'controller',
         'menus' => [
             ['route' => 'project', 'icon' => 'fas fa-folder-open', 'label' => 'پروژه‌های اقتصادی'],
+            ['route' => 'learn', 'icon' => 'fas fa-graduation-cap', 'label' => 'مرکز آموزش'],
         ],
     ],
 
