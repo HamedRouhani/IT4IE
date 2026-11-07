@@ -202,6 +202,7 @@ $moduleMenus = [
             ['route' => 'sampling',        'icon' => 'fas fa-vials',                 'label' => 'نمونه‌گیری'],
             ['route' => 'pareto', 'label' => 'تحلیل Pareto',   'icon' => 'fas fa-chart-bar'],
             ['route' => 'capa',   'label' => 'اقدامات اصلاحی', 'icon' => 'fas fa-tasks'],
+            ['route' => 'learn',          'icon' => 'fas fa-graduation-cap',       'label' => 'مرکز آموزش'],
             ['route' => 'report',          'icon' => 'fas fa-file-alt',              'label' => 'گزارش‌ها'],
         ]
     ],

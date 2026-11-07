@@ -126,6 +126,7 @@ $controllerMap = [
     'pareto'          => 'ParetoController',
     'capa'            => 'CapaController',
     'report'          => 'ReportController', 
+    'learn'           => 'LearnController',
 ];
 
 try {

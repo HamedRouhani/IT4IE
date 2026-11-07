@@ -41,6 +41,7 @@ $attributeTypes = ['p', 'np', 'c', 'u'];
             </small>
         </h2>
         <div class="qc-flex qc-gap-1">
+            <a href="<?= CURRENT_MODULE_URL ?>?controller=learn" class="btn-qc-outline"><i class="fas fa-graduation-cap"></i> مرکز آموزش</a>
             <a href="<?= CURRENT_MODULE_URL ?>?controller=dataset&action=create" class="btn-qc-primary">
                 <i class="fas fa-plus"></i> دیتاست جدید
             </a>
