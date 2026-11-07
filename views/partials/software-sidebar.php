@@ -120,6 +120,7 @@ $moduleMenus = [
             ['route' => 'spare_part',       'icon' => 'fas fa-puzzle-piece',            'label' => 'قطعات یدکی'],
             ['route' => 'kpi',              'icon' => 'fas fa-chart-line',              'label' => 'شاخص‌ها (KPI)'],
             ['route' => 'report',           'icon'  => 'fas fa-chart-line',             'label' => 'گزارش‌ها'],
+            ['route' => 'learn',            'icon' => 'fas fa-graduation-cap',          'label' => 'مرکز آموزش'],
         ]
     ],
 

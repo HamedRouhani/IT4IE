@@ -26,6 +26,7 @@
             </p>
         </div>
         <div class="pdm-flex pdm-gap-2">
+            <a href="<?= pdm_url('learn') ?>" class="btn-pdm-outline"><i class="fas fa-graduation-cap"></i> مرکز آموزش</a>
             <a href="<?= pdm_url('asset', 'create') ?>" class="btn-pdm-primary">
                 <i class="fas fa-plus"></i> افزودن دارایی
             </a>

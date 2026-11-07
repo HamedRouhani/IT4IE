@@ -116,6 +116,7 @@ $controllerMap = [
     'sensor'         => 'SensorController',
     'kpi'            => 'KPIController',
     'report'         => 'ReportController',
+    'learn'          => 'LearnController',
 ];
 
 try {
