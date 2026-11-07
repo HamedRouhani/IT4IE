@@ -39,6 +39,39 @@ if (!function_exists('inv_num')) {
     }
 }
 
+if (!function_exists('inv_money')) {
+    /**
+     * نمایش مبلغ با جداکنندهٔ هزارگان؛ اعشار فقط وقتی مقدار گرد نیست.
+     */
+    function inv_money($value): string
+    {
+        if ($value === null || !is_numeric($value) || !is_finite((float) $value)) return '—';
+        $value = (float) $value;
+        $decimals = abs($value - round($value)) < 0.005 ? 0 : 2;
+
+        return number_format($value, $decimals, '.', ',');
+    }
+}
+
+if (!function_exists('inv_pct')) {
+    /**
+     * تبدیل کسر (0.96) به درصد نمایشی (96.00٪).
+     */
+    function inv_pct($fraction, int $precision = 2): string
+    {
+        if ($fraction === null || !is_numeric($fraction) || !is_finite((float) $fraction)) return '—';
+
+        return number_format((float) $fraction * 100.0, $precision, '.', ',') . '٪';
+    }
+}
+
+if (!function_exists('inv_ratio')) {
+    function inv_ratio($value, int $precision = 2): string
+    {
+        return inv_num($value, $precision);
+    }
+}
+
 if (!function_exists('inv_date')) {
     function inv_date(?string $value): string
     {

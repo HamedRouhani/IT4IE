@@ -28,6 +28,7 @@ $controllerMap = [
     'item'      => 'ItemController',
     'movement'  => 'MovementController',
     'analysis'  => 'AnalysisController',
+    'learn'     => 'LearnController',
     'purchase_order' => 'PurchaseOrderController',
     'export'    => 'ExportController',
 ];

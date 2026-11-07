@@ -18,6 +18,12 @@ final class InventoryPolicyService
         return ['90' => '90٪', '95' => '95٪', '97.5' => '97.5٪', '99' => '99٪', '99.5' => '99.5٪', '99.9' => '99.9٪'];
     }
 
+    /** ضریب z متناظر با سطح خدمت چرخه‌ای. */
+    public static function zValue(string $serviceLevel): float
+    {
+        return self::SERVICE_Z[$serviceLevel] ?? self::SERVICE_Z['95'];
+    }
+
     public static function analyze(array $item): array
     {
         $demand = max(0.0, (float) $item['annual_demand']);
@@ -25,7 +31,7 @@ final class InventoryPolicyService
         $dailyStd = max(0.0, (float) $item['daily_demand_std']);
         $leadDays = max(0.0, (float) $item['lead_time_days']);
         $service = (string) $item['service_level'];
-        $z = self::SERVICE_Z[$service] ?? self::SERVICE_Z['95'];
+        $z = self::zValue($service);
         $safety = $z * $dailyStd * sqrt($leadDays);
         $reorderPoint = ($dailyAverage * $leadDays) + $safety;
         $position = (float) $item['on_hand'] + (float) $item['on_order'];

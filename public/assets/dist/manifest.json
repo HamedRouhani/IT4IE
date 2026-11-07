@@ -1,5 +1,5 @@
 {
-    "built": 1793600894,
+    "built": 1794032784,
     "config": "f97d9990d941cdf19000f6cc50fedb7d387aa17176c38ab6bb472fcaa2bc5276",
     "files": {
         "css/1-reset.css": "b33c4d448d043dc249fe3cc9cca6a108b9109977ef470e56e7432db588a187ab",
@@ -28,17 +28,19 @@
         "css/9-admin.css": "aeef53d33ee0ca1901a5484e309a98f111e2b1302c89d338c0051cd0e4f0de94",
         "css/ds/it4ie-ds.css": "dc77654045fe02a52df6e36580fc61f79f60369fc74d0a61d651f742ddc6f8d8",
         "css/modules/babok.css": "275b07e9df612213f479b580900ecbb7d15f04b97b357894f17c378bf835aef0",
+        "css/modules/engineering-economy.css": "640d24225819d50896aa990ad14e4f1b58489aad7b5c065545545bad85128b7f",
         "css/modules/hr.css": "8f69d560b5a80bfaf5d4e623a47ae6294869b04415e314db6d1460e2de2d47da",
-        "css/modules/inventory.css": "f6292b248a0c98800fab939dcd8b8f97ee058c8cc3b465ae7491fd2e4c199e1e",
+        "css/modules/inventory.css": "0c31b4e6c1179a5d7781f5cac8cfd77b3d2b265743c9c34f103b48b2857785ca",
         "css/modules/mcdm.css": "8b4b426e286d0f9a0b6af642caff56a68b03edec82802cc8f9712014b6992e91",
         "css/modules/or.css": "4cf1e394578fe45b6a40448f8613715fd29c5aa6dfb46d18406580e682ffe5dc",
         "css/modules/pdm.css": "bdc34290ed7c72399bcfe0f43373e85eea89d42166604bc106defec6eeecb30e",
         "css/modules/pmbok.css": "7d1092c5f753e9a0cf0957b7f69b969949a2a6c8c8e2174b7427cc8a7bc9e690",
         "css/modules/quality.css": "d583bfdedad6f703994898f8bbd8d63b65f9ce852c7e24eabc8e245c67da5140",
         "css/modules/statlab.css": "0d3339af35ffecd54a17914776b55f23146d1e125cc36db3dda2db2d8804050b",
+        "css/modules/time-study-analyzer.css": "0242c9457054e697e61ebde0153f0c94bfbe98a431333aa7770f81dc9ba725d7",
         "css/software-refinement.css": "968c42fad08a67f14451e9d63548442e70396a35dfaa1883bbad71a620d5bcc4",
-        "css/software-themes.css": "eb3a158a0a7c0adb2411c8cde15a8db2c3ced836df7acc2dc81f96ddcaaebbd7",
-        "css/software.css": "65aec0978516874675f34a6160efbfb05ef0253cb11c0b5a03984f3281b5b803",
+        "css/software-themes.css": "55aef9079ca05b34e2dc3989addfa34afc26ea0140145ecf9155e4e8fa148710",
+        "css/software.css": "0f1afbbd7d3c4bcd5ddf677769567a316b7f793a181d3480cfcf674869025bfa",
         "css/style.css": "6b59ec9e469961c795c6dc3a961ffb4b19c8f4c9ff5bba24c2a5d545fa797830"
     }
 }

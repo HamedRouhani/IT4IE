@@ -134,6 +134,7 @@ $moduleMenus = [
             ['route' => 'purchase_order', 'icon' => 'fas fa-file-invoice',  'label' => 'سفارش‌های خرید'],
             ['route' => 'movement',   'icon' => 'fas fa-arrow-right-arrow-left', 'label' => 'گردش موجودی'],
             ['route' => 'analysis',   'icon' => 'fas fa-calculator',       'label' => 'تحلیل و سفارش'],
+            ['route' => 'learn',      'icon' => 'fas fa-graduation-cap',   'label' => 'مرکز آموزش'],
         ]
     ],
 
