@@ -99,6 +99,7 @@ $moduleMenus = [
             ['route' => 'regression',         'icon' => 'fas fa-chart-line',         'label' => 'رگرسیون و همبستگی'],
             ['route' => 'smart_statistician', 'icon' => 'fas fa-wand-magic-sparkles','label' => 'دستیار هوشمند'],
             ['route' => 'report',             'icon' => 'fas fa-chart-bar',          'label' => 'گزارش‌ها'],
+            ['route' => 'learn',              'icon' => 'fas fa-graduation-cap',     'label' => 'مرکز آموزش'],
         ]
     ],
 

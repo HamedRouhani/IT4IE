@@ -40,6 +40,7 @@ $title = $title ?? ($softwareName . ' - IT4IE');
     <?php echo it4ie_css_software($moduleName); ?>
     <?php if ($moduleName === 'quality' && ($_GET['controller'] ?? '') === 'learn') echo it4ie_css_link('css/modules/quality-learning.css'); ?>
     <?php if ($moduleName === 'pdm' && ($_GET['controller'] ?? '') === 'learn') echo it4ie_css_link('css/modules/pdm-learning.css'); ?>
+    <?php if ($moduleName === 'statlab' && ($_GET['controller'] ?? '') === 'learn') echo it4ie_css_link('css/modules/statlab-learning.css'); ?>
 </head>
 <body class="software-mode ui2-shell" data-module="<?php echo htmlspecialchars($moduleName, ENT_QUOTES, 'UTF-8'); ?>"<?php echo it4ie_is_ds($moduleName) ? ' data-ds="1"' : ''; ?>>
 

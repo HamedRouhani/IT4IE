@@ -10,6 +10,7 @@ $quickLinks = [
     ['url' => 'controller=smart_statistician', 'icon' => 'fa-wand-magic-sparkles', 'color' => '#db2777', 'label' => 'دستیار هوشمند', 'desc' => 'پیشنهاد روش تحلیل بر اساس مسئله'],
     ['url' => 'controller=project', 'icon' => 'fa-folder-open', 'color' => '#475569', 'label' => 'پروژه‌های آماری', 'desc' => 'مدیریت پروژه‌ها، متغیرها و مجموعه‌داده‌ها'],
     ['url' => 'controller=report', 'icon' => 'fa-file-lines', 'color' => '#0891b2', 'label' => 'گزارش‌ها', 'desc' => 'مرور و چاپ نتایج تحلیل‌ها'],
+    ['url' => 'controller=learn', 'icon' => 'fa-graduation-cap', 'color' => '#0f766e', 'label' => 'مرکز آموزش', 'desc' => 'درس‌های آماری، مثال‌های حل‌شده و محاسبه‌گرهای آموزشی'],
 ];
 $catLabels = ['descriptive' => 'توصیفی', 'distribution' => 'توزیع', 'hypothesis' => 'آزمون فرض', 'regression' => 'رگرسیون'];
 ?>

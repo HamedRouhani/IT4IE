@@ -94,6 +94,7 @@ $controllerMap = [
     'regression'         => 'RegressionController',
     'smart_statistician' => 'SmartStatisticianController',
     'report'             => 'ReportController',
+    'learn'               => 'LearnController',
 ];
 
 try {
