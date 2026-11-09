@@ -589,6 +589,26 @@
     box-shadow: 0 6px 18px rgba(108, 60, 225, 0.28);
 }
 
+#problem-solver-modal .problem-result-tool-extra-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+#problem-solver-modal .problem-result-tool-button-secondary {
+    background: #fff;
+    color: var(--primary-dark);
+    border: 1px solid rgba(108, 60, 225, 0.24);
+    box-shadow: none;
+}
+
+#problem-solver-modal .problem-result-tool-button-secondary:hover {
+    color: var(--primary-dark);
+    background: rgba(108, 60, 225, 0.06);
+    box-shadow: none;
+}
+
 
 /* =========================================================
    NOTE

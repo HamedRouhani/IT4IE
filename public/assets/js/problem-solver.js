@@ -379,57 +379,68 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
 
-        const moduleItem = modules[0];
+        const recommendations = modules
+            .map(function (item) {
+                if (typeof item === 'string') {
+                    return { url: item, title: '' };
+                }
+                return {
+                    url: item?.url || item?.link || '',
+                    title: item?.title || item?.name || ''
+                };
+            })
+            .filter(function (item) {
+                return item.url.startsWith('/software/');
+            });
 
-
-        const moduleUrl =
-            typeof moduleItem === 'string'
-                ? moduleItem
-                : (moduleItem?.url || moduleItem?.link || '');
-
-
-        const moduleTitleFromData =
-            typeof moduleItem === 'object'
-                ? (moduleItem?.title || '')
-                : '';
-
+        if (recommendations.length === 0) {
+            moduleSection.style.display = 'none';
+            return;
+        }
 
         const moduleNames = {
-
-            '/software/mcdm-analyzer/':
-                'تحلیل‌گر تصمیم‌گیری چندمعیاره',
-
-            '/software/or-analyzer/':
-                'تحلیل‌گر تحقیق در عملیات',
-
-            '/software/statlab-analyzer/':
-                'تحلیل‌گر آماری و داده',
-
-            '/software/pmbok-analyzer/':
-                'تحلیل‌گر مدیریت پروژه',
-
-            '/software/babok-analyzer/':
-                'تحلیل‌گر تحلیل کسب‌وکار'
+            '/software/mcdm-analyzer/': 'تحلیل‌گر تصمیم‌گیری چندمعیاره',
+            '/software/or-analyzer/': 'تحلیل‌گر تحقیق در عملیات',
+            '/software/statlab-analyzer/': 'تحلیل‌گر آماری و داده',
+            '/software/pmbok-analyzer/': 'تحلیل‌گر مدیریت پروژه',
+            '/software/babok-analyzer/': 'تحلیل‌گر تحلیل کسب‌وکار',
+            '/software/inventory-analyzer/': 'تحلیل‌گر کنترل موجودی',
+            '/software/time-study-analyzer/': 'تحلیل‌گر زمان‌سنجی و مطالعه کار',
+            '/software/engineering-economy/': 'تحلیل‌گر اقتصاد مهندسی',
+            '/software/pdm-analyzer/': 'تحلیل‌گر نگهداری و تعمیرات',
+            '/software/quality-analyzer/': 'تحلیل‌گر کیفیت'
         };
 
-
-        const title =
-            moduleTitleFromData ||
-            moduleNames[moduleUrl] ||
-            'ابزار تخصصی IT4IE';
-
-
+        const first = recommendations[0];
         if (moduleTitle) {
-
-            moduleTitle.textContent = title;
+            moduleTitle.textContent = first.title || moduleNames[first.url] || 'ابزار تخصصی IT4IE';
+        }
+        if (moduleLink) {
+            moduleLink.href = first.url;
+            moduleLink.textContent = 'شروع تحلیل با این ابزار';
+            const arrow = document.createElement('span');
+            arrow.textContent = '←';
+            moduleLink.appendChild(arrow);
         }
 
-
-        if (moduleLink && moduleUrl) {
-
-            moduleLink.href = moduleUrl;
+        const content = moduleSection.querySelector('.problem-result-tool-content');
+        if (content) {
+            content.querySelectorAll('.problem-result-tool-extra-links').forEach(function (node) {
+                node.remove();
+            });
+            if (recommendations.length > 1) {
+                const extraLinks = document.createElement('div');
+                extraLinks.className = 'problem-result-tool-extra-links';
+                recommendations.slice(1).forEach(function (item) {
+                    const link = document.createElement('a');
+                    link.className = 'problem-result-tool-button problem-result-tool-button-secondary';
+                    link.href = item.url;
+                    link.textContent = item.title || moduleNames[item.url] || 'ابزار تخصصی IT4IE';
+                    extraLinks.appendChild(link);
+                });
+                content.appendChild(extraLinks);
+            }
         }
-
 
         moduleSection.style.display = '';
     }

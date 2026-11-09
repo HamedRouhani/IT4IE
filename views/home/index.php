@@ -99,7 +99,7 @@
         <div class="problem-solver-form-footer">
 
             <span class="problem-solver-hint">
-                توضیح مسئله را با زبان خودتان بنویسید.
+                از انتخاب تأمین‌کننده و کنترل موجودی تا زمان‌سنجی، کیفیت، نگهداری‌وتعمیرات و ارزیابی اقتصادی؛ مسئله را با زبان خودتان بنویسید.
             </span>
 
             <button
@@ -223,7 +223,7 @@
                     <div class="problem-result-tool-content">
 
                         <div class="problem-result-tool-label">
-                            ابزار پیشنهادی
+                            ابزارهای پیشنهادی
                         </div>
 
                         <div id="problem-result-module-title"
@@ -480,4 +480,8 @@ function handleTelegramClick(event, username) {
     // در دسکتاپ همان لینک عادی کار می‌کند
 }
 </script>
-<script src="/assets/js/problem-solver.js"></script>
+<?php
+$problemSolverJsPath = (defined('PUBLIC_PATH') ? PUBLIC_PATH : dirname(__DIR__, 2) . '/public') . '/assets/js/problem-solver.js';
+$problemSolverJsVersion = (int) (@filemtime($problemSolverJsPath) ?: 1);
+?>
+<script src="/assets/js/problem-solver.js?v=<?= $problemSolverJsVersion ?>"></script>
