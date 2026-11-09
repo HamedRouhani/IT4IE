@@ -105,6 +105,7 @@ $controllerMap = [
     'game_theory'    => 'GameTheoryController',
     'dual'           => 'DualController',
     'ilp'            => 'ILPController',
+    'learn'          => 'LearnController',
 ];
 
 try {

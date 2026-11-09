@@ -38,7 +38,8 @@ $iconMap = [
                 </ol>
             </nav>
         </div>
-        <div> 
+        <div class="d-flex flex-wrap gap-2">
+            <a href="<?= or_url('controller=learn') ?>" class="btn btn-or-primary"><i class="fas fa-graduation-cap"></i> مرکز آموزش</a>
             <!-- ✅ حذف دکمه پروژه جدید (چون کنترلر project حذف شده) -->
             <a href="<?= or_url('controller=problem_type') ?>" class="btn btn-or-primary">
                 <i class="fas fa-cubes"></i> انتخاب نوع مسئله

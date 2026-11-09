@@ -82,6 +82,7 @@ $moduleMenus = [
             ['route' => 'problem_type',  'icon' => 'fas fa-cubes',               'label' => 'انواع حل مسئله'],
             ['route' => 'method',        'icon' => 'fas fa-calculator',          'label' => 'روش‌های حل'],
             ['route' => 'report',        'icon' => 'fas fa-chart-bar',           'label' => 'گزارش‌ها'],
+            ['route' => 'learn',         'icon' => 'fas fa-graduation-cap',      'label' => 'مرکز آموزش'],
         ]
     ],
 
