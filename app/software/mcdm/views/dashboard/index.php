@@ -1,6 +1,7 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
     <h1 class="h3 mb-0">داشبورد تصمیم‌گیری چندمعیاره</h1>
     <?php if ($isAuthenticated): ?>
+        <a href="<?= mcdm_url('controller=learn') ?>" class="btn btn-outline-primary"><i class="fas fa-graduation-cap"></i> مرکز آموزش</a>
         <a href="<?= mcdm_url('controller=project&action=create') ?>" class="btn btn-primary">
             <i class="fas fa-plus"></i> پروژه جدید
         </a>

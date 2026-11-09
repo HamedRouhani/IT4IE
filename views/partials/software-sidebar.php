@@ -67,6 +67,7 @@ $moduleMenus = [
             ['route' => 'industry',      'icon' => 'fas fa-industry',          'label' => 'صنایع'],
             ['route' => 'assistant',     'icon' => 'fas fa-robot',             'label' => 'دستیار هوشمند'],
             ['route' => 'report',        'icon' => 'fas fa-chart-bar',         'label' => 'گزارش‌ها'],
+            ['route' => 'learn',         'icon' => 'fas fa-graduation-cap',   'label' => 'مرکز آموزش'],
         ]
     ],
 

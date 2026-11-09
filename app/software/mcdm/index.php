@@ -90,6 +90,7 @@ $controllerMap = [
     'report'        => 'ReportController',
     'assistant'     => 'AssistantController',
     'industry'      => 'IndustryController',
+    'learn'         => 'LearnController',
 ];
 
 try {
