@@ -138,8 +138,8 @@
 
             <div class="problem-solver-modal-header">
 
-                <div class="problem-solver-success-icon">
-                    ✓
+                <div class="problem-solver-success-icon problem-solver-analysis-icon" aria-hidden="true">
+                    ✳
                 </div>
 
                 <div>
@@ -147,8 +147,8 @@
                         تحلیل اولیه مسئله
                     </h2>
 
-                    <p>
-                        مسیر اولیه حل مسئله شما شناسایی شد.
+                    <p id="problem-result-subtitle">
+                        پیشنهاد اولیه بر اساس نشانه‌های توضیح شما آماده است.
                     </p>
                 </div>
 
@@ -169,12 +169,11 @@
 
                 </section>
 
-
                 <!-- حوزه مسئله -->
                 <section class="problem-result-section">
 
                     <div class="problem-result-section-title">
-                        حوزه شناسایی‌شده
+                        حوزه‌های محتمل
                     </div>
 
                     <div id="problem-result-domains"
@@ -183,6 +182,23 @@
 
                 </section>
 
+                <!-- پیشنهاد اصلی -->
+                <section id="problem-result-module-section" class="problem-result-tool" aria-live="polite">
+                    <div class="problem-result-tool-icon" aria-hidden="true">◎</div>
+                    <div class="problem-result-tool-content">
+                        <div class="problem-result-tool-heading">
+                            <div class="problem-result-tool-label">پیشنهاد اصلی</div>
+                            <span id="problem-result-match-badge" class="problem-result-match-badge"></span>
+                        </div>
+                        <div id="problem-result-module-title" class="problem-result-tool-title"></div>
+                        <div id="problem-result-module-reason" class="problem-result-tool-description"></div>
+                        <div id="problem-result-evidence" class="problem-result-evidence" hidden></div>
+                        <a id="problem-result-module-link" href="#" class="problem-result-tool-button">
+                            شروع تحلیل با این ابزار <span aria-hidden="true">←</span>
+                        </a>
+                        <div id="problem-result-module-alternatives" class="problem-result-tool-extra-links"></div>
+                    </div>
+                </section>
 
                 <!-- مسیر پیشنهادی -->
                 <section class="problem-result-section">
@@ -197,12 +213,20 @@
 
                 </section>
 
+                <section class="problem-result-section problem-result-questions-section" hidden>
+                    <details id="problem-result-questions-details" class="problem-result-questions-details">
+                        <summary>برای دقیق‌ترشدن پیشنهاد، چند سؤال را پاسخ دهید</summary>
+                        <ul id="problem-result-questions" class="problem-result-questions"></ul>
+                        <button type="button" id="problem-result-refine" class="problem-result-refine" hidden>تحلیل دوباره با پاسخ‌ها</button>
+                    </details>
+                </section>
+
 
                 <!-- روش‌ها -->
                 <section class="problem-result-section">
 
                     <div class="problem-result-section-title">
-                        روش‌های مناسب
+                        روش‌های مرتبط با پیشنهاد اصلی
                     </div>
 
                     <div id="problem-result-methods"
@@ -212,48 +236,12 @@
                 </section>
 
 
-                <!-- ابزار پیشنهادی -->
-                <section id="problem-result-module-section"
-                        class="problem-result-tool">
-
-                    <div class="problem-result-tool-icon">
-                        ⚙
-                    </div>
-
-                    <div class="problem-result-tool-content">
-
-                        <div class="problem-result-tool-label">
-                            ابزارهای پیشنهادی
-                        </div>
-
-                        <div id="problem-result-module-title"
-                            class="problem-result-tool-title">
-                        </div>
-
-                        <div class="problem-result-tool-description">
-                            برای ادامه تحلیل تخصصی مسئله می‌توانید از این ابزار استفاده کنید.
-                        </div>
-
-                        <a id="problem-result-module-link"
-                        href="#"
-                        class="problem-result-tool-button">
-                            شروع تحلیل با این ابزار
-                            <span>←</span>
-                        </a>
-
-                    </div>
-
-                </section>
-
-
                 <!-- پیام توضیحی -->
-                <div class="problem-result-note">
-                    <span>ⓘ</span>
-
-                    <p id="problem-result-message">
-                        این تحلیل اولیه است و برای انتخاب مسیر مناسب حل مسئله انجام شده است.
-                    </p>
-                </div>
+                <details id="problem-result-notes-details" class="problem-result-note">
+                    <summary><span aria-hidden="true">ⓘ</span> ملاحظات تشخیص و فرض‌های روش</summary>
+                    <p id="problem-result-message">این پیشنهاد بر اساس نشانه‌های متن است؛ روش نهایی را با داده‌ها و فرض‌های مسئله بررسی کنید.</p>
+                    <ul id="problem-result-guidance-notes" class="problem-result-guidance-notes"></ul>
+                </details>
 
             </div>
 

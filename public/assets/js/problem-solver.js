@@ -32,6 +32,18 @@ document.addEventListener('DOMContentLoaded', function () {
         'problem-result-methods'
     );
 
+    const resultQuestions = document.getElementById(
+        'problem-result-questions'
+    );
+    const refineButton = document.getElementById('problem-result-refine');
+    const questionsDetails = document.getElementById('problem-result-questions-details');
+    const resultSubtitle = document.getElementById('problem-result-subtitle');
+    const resultMatchBadge = document.getElementById('problem-result-match-badge');
+    const resultEvidence = document.getElementById('problem-result-evidence');
+    const moduleAlternatives = document.getElementById('problem-result-module-alternatives');
+    const resultNotesDetails = document.getElementById('problem-result-notes-details');
+    const resultGuidanceNotes = document.getElementById('problem-result-guidance-notes');
+
     const resultMessage = document.getElementById(
         'problem-result-message'
     );
@@ -276,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             resultMethods.innerHTML = `
                 <span class="problem-result-tag">
-                    نیاز به تحلیل بیشتر
+                    با اطلاعات فعلی روش مشخصی قابل پیشنهاد نیست
                 </span>
             `;
 
@@ -302,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // مسیر پیشنهادی حل مسئله
     // =====================================================
 
-    function renderPath(domains, methods) {
+    function renderPath(guide, domains, methods) {
 
         if (!resultPath) {
             return;
@@ -315,7 +327,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 : 'انتخاب روش مناسب';
 
 
-        const path = [
+        const path = Array.isArray(guide?.steps) && guide.steps.length
+            ? guide.steps
+            : [
             'تعریف و شفاف‌سازی مسئله',
             'تعیین شاخص‌ها و داده‌های موردنیاز',
             firstMethod,
@@ -356,12 +370,51 @@ document.addEventListener('DOMContentLoaded', function () {
         ).join('');
     }
 
+    function renderQuestions(questions, expanded) {
+        if (!resultQuestions) return;
+        resultQuestions.replaceChildren();
+        const items = Array.isArray(questions) ? questions : [];
+        items.forEach(function (question) {
+            const item = document.createElement('li');
+            const label = document.createElement('label');
+            label.textContent = question;
+            const answer = document.createElement('textarea');
+            answer.rows = 2;
+            answer.className = 'problem-result-answer';
+            answer.placeholder = 'پاسخ شما (اختیاری)';
+            answer.setAttribute('aria-label', question);
+            item.append(label, answer);
+            resultQuestions.appendChild(item);
+        });
+        const section = resultQuestions.closest('.problem-result-questions-section');
+        if (section) section.hidden = items.length === 0;
+        if (questionsDetails) questionsDetails.open = Boolean(expanded);
+        if (refineButton) refineButton.hidden = items.length === 0;
+    }
+
+    if (refineButton) {
+        refineButton.addEventListener('click', function () {
+            const answers = Array.from(resultQuestions.querySelectorAll('.problem-result-answer'))
+                .map(function (field) {
+                    const question = field.getAttribute('aria-label') || 'اطلاعات تکمیلی';
+                    return field.value.trim() ? 'پرسش: ' + question + '\nپاسخ: ' + field.value.trim() : '';
+                })
+                .filter(Boolean);
+            if (answers.length === 0 || !input) return;
+            const combined = input.value.trim() + '\n\nاطلاعات تکمیلی:\n' + answers.join('\n');
+            input.value = combined.slice(0, 5000);
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            if (typeof closeModal === 'function') closeModal();
+            form.requestSubmit();
+        });
+    }
+
 
     // =====================================================
     // ابزار پیشنهادی
     // =====================================================
 
-    function renderModule(modules) {
+    function renderModule(modules, reason) {
 
         if (!moduleSection) {
             return;
@@ -382,11 +435,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const recommendations = modules
             .map(function (item) {
                 if (typeof item === 'string') {
-                    return { url: item, title: '' };
+                    return { url: item, title: '', match_level: 'exploratory', evidence: [] };
                 }
                 return {
                     url: item?.url || item?.link || '',
-                    title: item?.title || item?.name || ''
+                    title: item?.title || item?.name || '',
+                    match_level: item?.match_level || 'exploratory',
+                    evidence: Array.isArray(item?.evidence) ? item.evidence : []
                 };
             })
             .filter(function (item) {
@@ -423,23 +478,54 @@ document.addEventListener('DOMContentLoaded', function () {
             moduleLink.appendChild(arrow);
         }
 
-        const content = moduleSection.querySelector('.problem-result-tool-content');
-        if (content) {
-            content.querySelectorAll('.problem-result-tool-extra-links').forEach(function (node) {
-                node.remove();
-            });
-            if (recommendations.length > 1) {
-                const extraLinks = document.createElement('div');
-                extraLinks.className = 'problem-result-tool-extra-links';
-                recommendations.slice(1).forEach(function (item) {
-                    const link = document.createElement('a');
-                    link.className = 'problem-result-tool-button problem-result-tool-button-secondary';
-                    link.href = item.url;
-                    link.textContent = item.title || moduleNames[item.url] || 'ابزار تخصصی IT4IE';
-                    extraLinks.appendChild(link);
+        const matchLabels = {
+            strong: 'چند گروه نشانهٔ هم‌راستا',
+            supported: 'یک نشانهٔ مرتبط',
+            exploratory: 'تطبیق اولیه'
+        };
+        if (resultMatchBadge) {
+            resultMatchBadge.textContent = matchLabels[first.match_level] || matchLabels.exploratory;
+            resultMatchBadge.dataset.level = first.match_level;
+        }
+
+        if (resultEvidence) {
+            resultEvidence.replaceChildren();
+            if (first.evidence.length) {
+                const label = document.createElement('span');
+                label.className = 'problem-result-evidence-label';
+                label.textContent = 'نشانه‌های دیده‌شده در متن';
+                resultEvidence.appendChild(label);
+                first.evidence.forEach(function (signal) {
+                    const chip = document.createElement('span');
+                    chip.className = 'problem-result-evidence-chip';
+                    chip.textContent = signal;
+                    resultEvidence.appendChild(chip);
                 });
-                content.appendChild(extraLinks);
+                resultEvidence.hidden = false;
+            } else {
+                resultEvidence.hidden = true;
             }
+        }
+
+        const reasonElement = document.getElementById('problem-result-module-reason');
+        if (reasonElement) {
+            reasonElement.textContent = reason || 'این ابزار بر اساس نشانه‌های مسئله پیشنهاد شده است؛ پیش از ورود داده‌ها، روش و فرض‌های مسئله را بررسی کنید.';
+        }
+
+        if (moduleAlternatives) {
+            moduleAlternatives.replaceChildren();
+            recommendations.slice(1).forEach(function (item) {
+                const link = document.createElement('a');
+                link.className = 'problem-result-tool-button problem-result-tool-button-secondary';
+                link.href = item.url;
+                link.textContent = item.title || moduleNames[item.url] || 'ابزار تخصصی IT4IE';
+                if (item.evidence.length) {
+                    const detail = document.createElement('small');
+                    detail.textContent = 'نشانه: ' + item.evidence.slice(0, 2).join('، ');
+                    link.appendChild(detail);
+                }
+                moduleAlternatives.appendChild(link);
+            });
         }
 
         moduleSection.style.display = '';
@@ -493,18 +579,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 ? data.methods
                 : [];
 
-
-        renderMethods(methods);
+        const guide = data.guide && typeof data.guide === 'object' ? data.guide : {};
+        const relevantMethods = Array.isArray(guide.suggested_methods)
+            ? guide.suggested_methods
+            : methods;
+        renderMethods(relevantMethods);
 
 
         // -----------------------------------------------
         // مسیر
         // -----------------------------------------------
 
-        renderPath(
-            domains,
-            methods
-        );
+        renderPath(guide, domains, methods);
 
 
         // -----------------------------------------------
@@ -517,7 +603,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 : [];
 
 
-        renderModule(modules);
+        renderModule(modules, guide.reason);
+
+        const matchLevel = modules[0]?.match_level || 'exploratory';
+        if (resultSubtitle) {
+            resultSubtitle.textContent = matchLevel === 'strong'
+                ? 'چند گروه نشانهٔ هم‌راستا پیدا شد؛ مسیر زیر پیشنهاد اولیهٔ حل مسئله است.'
+                : matchLevel === 'supported'
+                    ? 'یک نشانهٔ مرتبط پیدا شد؛ پاسخ به پرسش‌ها روش و ابزار را دقیق‌تر می‌کند.'
+                    : 'تطبیق فعلی محدود است؛ پرسش‌های تکمیلی را پاسخ دهید تا مسیر دقیق‌تر شود.';
+        }
+        renderQuestions(guide.questions, matchLevel !== 'strong' || modules.length > 1);
+        if (resultNotesDetails) {
+            resultNotesDetails.open = matchLevel !== 'strong' || modules.length > 1;
+        }
 
 
         // -----------------------------------------------
@@ -525,10 +624,19 @@ document.addEventListener('DOMContentLoaded', function () {
         // -----------------------------------------------
 
         if (resultMessage) {
-
-            resultMessage.textContent =
-                data.message ||
-                'این تحلیل اولیه است و برای انتخاب مسیر مناسب حل مسئله انجام شده است.';
+            const notes = [data.message, data.confidence_note].filter(Boolean);
+            resultMessage.textContent = notes.join(' ')
+                || 'این پیشنهاد بر اساس نشانه‌های متن است؛ روش نهایی را با داده‌ها و فرض‌های مسئله بررسی کنید.';
+        }
+        if (resultGuidanceNotes) {
+            resultGuidanceNotes.replaceChildren();
+            const notes = Array.isArray(data.guidance_notes) ? data.guidance_notes : [];
+            notes.forEach(function (note) {
+                const item = document.createElement('li');
+                item.textContent = note;
+                resultGuidanceNotes.appendChild(item);
+            });
+            resultGuidanceNotes.hidden = notes.length === 0;
         }
 
 
