@@ -199,6 +199,64 @@
         </div>
     </div>
 
+    <div class="card pdm-mt-4">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-boxes"></i> قطعات مصرفی و اتصال به انبار</h3>
+            <p class="pdm-text-muted" style="margin: .35rem 0 0;">موجودی از Inventory خوانده می‌شود؛ برای اتصال، کد قطعه یدکی در PdM باید دقیقاً با SKU قلم انبار برابر باشد.</p>
+        </div>
+        <?php if (!$inventoryAvailable): ?>
+            <div class="card-body"><div class="pdm-alert warning">برای این کاربر فضای انبار Inventory پیدا نشد؛ ابتدا وارد Inventory شوید و یک فضای انبار بسازید.</div></div>
+        <?php else: ?>
+            <?php if (in_array($wo['status'], ['open', 'in_progress'], true)): ?>
+                <div class="card-body">
+                    <?php if (empty($availableParts)): ?>
+                        <div class="pdm-empty-state" style="padding: 1rem;">قطعه‌ای با کد منطبق بر SKU انبار پیدا نشد. کدها را در بخش قطعات یدکی PdM و اقلام Inventory یکسان کنید.</div>
+                    <?php else: ?>
+                        <form method="POST" action="<?= pdm_url('workorder', 'issueMaterial', ['id' => $wo['id']]) ?>" class="pdm-form-row" style="align-items:end;">
+                            <?= $this->csrfField() ?>
+                            <div class="pdm-form-group">
+                                <label class="pdm-form-label" for="pdm-spare-part">قطعهٔ یدکی متصل</label>
+                                <select id="pdm-spare-part" name="spare_part_id" class="pdm-form-control" required>
+                                    <?php foreach ($availableParts as $part): ?>
+                                        <option value="<?= (int) $part['id'] ?>" <?= (float) $part['on_hand'] <= 0 ? 'disabled' : '' ?>>
+                                            <?= pdm_e($part['code'] . ' — ' . $part['name']) ?> | موجودی: <?= pdm_num($part['on_hand']) ?> <?= pdm_e($part['unit']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="pdm-form-group">
+                                <label class="pdm-form-label" for="pdm-issue-quantity">مقدار مصرف</label>
+                                <input id="pdm-issue-quantity" type="number" name="quantity" class="pdm-form-control" min="0.0001" step="0.0001" required>
+                            </div>
+                            <div class="pdm-form-group">
+                                <label class="pdm-form-label" for="pdm-issue-note">یادداشت</label>
+                                <input id="pdm-issue-note" type="text" name="note" class="pdm-form-control" maxlength="450" placeholder="اختیاری">
+                            </div>
+                            <div class="pdm-form-group"><button type="submit" class="btn-pdm-primary"><i class="fas fa-arrow-down"></i> ثبت مصرف و خروج از انبار</button></div>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+            <div class="table-responsive">
+                <table class="pdm-table">
+                    <thead><tr><th>قطعه</th><th>SKU انبار</th><th>مقدار مصرف‌شده</th><th>تاریخ ثبت</th></tr></thead>
+                    <tbody>
+                    <?php if (empty($issuedMaterials)): ?>
+                        <tr><td colspan="4" class="text-center">هنوز مصرف قطعه‌ای برای این دستورکار ثبت نشده است.</td></tr>
+                    <?php else: foreach ($issuedMaterials as $material): ?>
+                        <tr>
+                            <td><?= pdm_e($material['code'] . ' — ' . $material['spare_part_name']) ?></td>
+                            <td><code><?= pdm_e($material['sku']) ?></code></td>
+                            <td><?= pdm_num($material['quantity']) ?> <?= pdm_e($material['unit']) ?></td>
+                            <td><?= pdm_date($material['created_at'], 'Y/m/d H:i') ?></td>
+                        </tr>
+                    <?php endforeach; endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+
 </div>
 
 <script src="/public/assets/js/software/pdm.js"></script>

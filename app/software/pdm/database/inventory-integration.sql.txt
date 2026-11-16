@@ -1,0 +1,20 @@
+-- PdM to Inventory integration: tracks stock issues against maintenance work orders.
+-- Run this script once in the IT4IE application database before using the integration.
+-- Inventory remains the stock source of truth. Spare-part code must match inv_items.sku.
+CREATE TABLE IF NOT EXISTS pm_work_order_inventory_issues (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    system_id INT UNSIGNED NOT NULL,
+    work_order_id INT UNSIGNED NOT NULL,
+    spare_part_id INT UNSIGNED NOT NULL,
+    workspace_id INT UNSIGNED NOT NULL,
+    inventory_item_id INT UNSIGNED NOT NULL,
+    inventory_movement_id BIGINT UNSIGNED NOT NULL,
+    quantity DECIMAL(18,4) NOT NULL,
+    issued_by INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_pm_wo_inventory_movement (inventory_movement_id),
+    KEY idx_pm_wo_inventory_work_order (system_id, work_order_id, created_at),
+    KEY idx_pm_wo_inventory_spare_part (system_id, spare_part_id),
+    CONSTRAINT chk_pm_wo_inventory_quantity CHECK (quantity > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
