@@ -183,36 +183,41 @@ class CapaAction extends Model
     public function calculateEffectiveness($id)
     {
         $action = $this->find($id);
-        if (!$action || $action['before_value'] === null || $action['after_value'] === null) {
+        if (!$action) {
             return null;
         }
-
-        $before = (float)$action['before_value'];
-        $after  = (float)$action['after_value'];
-
-        if ($before <= 0) {
+        $assessment = $this->assessEffectiveness($action);
+        if ($assessment === null) {
+            $this->update($id, ['effectiveness' => 'pending']);
             return null;
         }
+        $this->update($id, ['effectiveness' => $assessment['effectiveness']]);
+        return $assessment;
+    }
 
-        // درصد بهبود
-        $improvement = (($before - $after) / $before) * 100;
-
-        // تعیین وضعیت اثربخشی
-        if ($improvement >= 50) {
-            $effectiveness = 'effective';
-        } elseif ($improvement >= 20) {
-            $effectiveness = 'partially_effective';
-        } else {
-            $effectiveness = 'not_effective';
+    /** Assess the measured result against the explicitly selected target and direction. */
+    public function assessEffectiveness(array $action): ?array
+    {
+        if (trim((string)($action['effectiveness_metric_name'] ?? '')) === '' || $action['before_value'] === null || $action['after_value'] === null || ($action['effectiveness_target_value'] ?? null) === null) {
+            return null;
         }
+        $before = (float) $action['before_value'];
+        $after = (float) $action['after_value'];
+        $target = (float) $action['effectiveness_target_value'];
+        $direction = ($action['effectiveness_direction'] ?? 'decrease') === 'increase' ? 'increase' : 'decrease';
+        if (!is_finite($before) || !is_finite($after) || !is_finite($target)) return null;
 
-        $this->update($id, [
-            'effectiveness' => $effectiveness,
-        ]);
-
+        $improvement = $direction === 'increase' ? $after - $before : $before - $after;
+        $targetReached = $direction === 'increase' ? $after >= $target : $after <= $target;
+        $meetsTarget = $targetReached && $improvement > 0.0000001;
+        $relativeImprovement = abs($before) > 0.0000001 ? ($improvement / abs($before)) * 100 : null;
         return [
-            'improvement'   => round($improvement, 2),
-            'effectiveness' => $effectiveness,
+            'improvement' => $relativeImprovement === null ? null : round($relativeImprovement, 2),
+            'effectiveness' => $meetsTarget ? 'effective' : 'not_effective',
+            'meets_target' => $meetsTarget,
+            'target_reached' => $targetReached,
+            'target' => $target,
+            'direction' => $direction,
         ];
     }
 

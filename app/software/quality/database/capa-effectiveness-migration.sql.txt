@@ -1,0 +1,10 @@
+-- Quality Analyzer CAPA evidence and measurable acceptance target.
+-- Run once in the IT4IE application database before using CAPA verification.
+ALTER TABLE qc_capa_actions
+    ADD COLUMN effectiveness_metric_name VARCHAR(120) NULL AFTER after_value,
+    ADD COLUMN effectiveness_metric_unit VARCHAR(40) NULL AFTER effectiveness_metric_name,
+    ADD COLUMN effectiveness_direction VARCHAR(16) NOT NULL DEFAULT 'decrease' AFTER effectiveness_metric_unit,
+    ADD COLUMN effectiveness_target_value DECIMAL(18,6) NULL AFTER effectiveness_direction,
+    ADD COLUMN verification_sample_size INT UNSIGNED NULL AFTER effectiveness_target_value,
+    ADD COLUMN verification_period_days SMALLINT UNSIGNED NULL AFTER verification_sample_size,
+    ADD COLUMN effectiveness_evidence TEXT NULL AFTER verification_period_days;

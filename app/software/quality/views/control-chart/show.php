@@ -58,6 +58,11 @@ $nelsonViolations = $violations['nelson'] ?? [];
                class="btn-qc-outline">
                 <i class="fas fa-sync-alt"></i> محاسبه مجدد
             </a>
+            <?php if (!$inControl): ?>
+                <a href="<?= CURRENT_MODULE_URL ?>?controller=capa&action=create&source_type=control_chart&source_id=<?= (int)$chart['dataset_id'] ?>" class="btn-qc-primary">
+                    <i class="fas fa-clipboard-check"></i> ایجاد اقدام اصلاحی (CAPA)
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 

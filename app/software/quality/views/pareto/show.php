@@ -6,6 +6,29 @@ $statusLabels = [
     'closed'       => ['label' => 'بسته‌شده', 'class' => 'inactive'],
 ];
 $statusMeta = $statusLabels[$analysis['status']] ?? ['label' => $analysis['status'], 'class' => 'info'];
+
+$paretoLabels = array_values($chart['labels'] ?? []);
+$paretoValues = array_map(static function ($value) {
+    return max(0, (float)$value);
+}, array_values($chart['values'] ?? []));
+$paretoCumulative = array_map(static function ($value) {
+    return min(100, max(0, (float)$value));
+}, array_values($chart['cumulative'] ?? []));
+$paretoColors = array_values($chart['colors'] ?? []);
+$paretoCount = min(count($paretoLabels), count($paretoValues), count($paretoCumulative));
+$paretoMax = $paretoCount > 0 ? max(array_slice($paretoValues, 0, $paretoCount)) : 0;
+$paretoScale = $paretoMax > 0 ? $paretoMax : 1;
+$paretoSvgWidth = 1000;
+$paretoSvgHeight = 430;
+$paretoPlotLeft = 82;
+$paretoPlotRight = 82;
+$paretoPlotTop = 48;
+$paretoPlotBottom = 270;
+$paretoPlotWidth = $paretoSvgWidth - $paretoPlotLeft - $paretoPlotRight;
+$paretoPlotHeight = $paretoPlotBottom - $paretoPlotTop;
+$paretoSlotWidth = $paretoCount > 0 ? $paretoPlotWidth / $paretoCount : 0;
+$paretoBarWidth = $paretoCount > 0 ? min(96, $paretoSlotWidth * 0.62) : 0;
+$paretoLinePoints = [];
 ?>
 
 
@@ -117,9 +140,70 @@ $statusMeta = $statusLabels[$analysis['status']] ?? ['label' => $analysis['statu
             </h3>
         </div>
         <div class="qc-card-body">
-            <div style="position:relative; height:400px;">
-                <canvas id="paretoChart"></canvas>
-            </div>
+            <?php if ($paretoCount > 0): ?>
+                <div style="width:100%; height:430px; direction:ltr; overflow:hidden;">
+                    <svg role="img" aria-label="نمودار پارتو برای <?= htmlspecialchars($analysis['title'], ENT_QUOTES, 'UTF-8') ?>"
+                         viewBox="0 0 <?= $paretoSvgWidth ?> <?= $paretoSvgHeight ?>" width="100%" height="100%"
+                         preserveAspectRatio="xMidYMid meet" style="font-family:inherit;">
+                        <?php foreach ([0, 25, 50, 75, 100] as $tick): ?>
+                            <?php
+                            $tickY = $paretoPlotBottom - ($tick / 100) * $paretoPlotHeight;
+                            $tickValue = $paretoScale * $tick / 100;
+                            ?>
+                            <line x1="<?= $paretoPlotLeft ?>" y1="<?= $tickY ?>" x2="<?= $paretoSvgWidth - $paretoPlotRight ?>" y2="<?= $tickY ?>" stroke="#e2e8f0" />
+                            <text x="<?= $paretoPlotLeft - 12 ?>" y="<?= $tickY + 4 ?>" text-anchor="end" fill="#64748b" font-size="12"><?= number_format($tickValue, 2) ?></text>
+                            <text x="<?= $paretoSvgWidth - $paretoPlotRight + 12 ?>" y="<?= $tickY + 4 ?>" text-anchor="start" fill="#64748b" font-size="12"><?= $tick ?>٪</text>
+                        <?php endforeach; ?>
+                        <line x1="<?= $paretoPlotLeft ?>" y1="<?= $paretoPlotTop ?>" x2="<?= $paretoPlotLeft ?>" y2="<?= $paretoPlotBottom ?>" stroke="#94a3b8" />
+                        <line x1="<?= $paretoSvgWidth - $paretoPlotRight ?>" y1="<?= $paretoPlotTop ?>" x2="<?= $paretoSvgWidth - $paretoPlotRight ?>" y2="<?= $paretoPlotBottom ?>" stroke="#94a3b8" />
+                        <line x1="<?= $paretoPlotLeft ?>" y1="<?= $paretoPlotBottom ?>" x2="<?= $paretoSvgWidth - $paretoPlotRight ?>" y2="<?= $paretoPlotBottom ?>" stroke="#94a3b8" />
+
+                        <?php for ($i = 0; $i < $paretoCount; $i++): ?>
+                            <?php
+                            $barHeight = ($paretoValues[$i] / $paretoScale) * $paretoPlotHeight;
+                            $barX = $paretoPlotLeft + ($paretoSlotWidth * $i) + (($paretoSlotWidth - $paretoBarWidth) / 2);
+                            $barY = $paretoPlotBottom - $barHeight;
+                            $barColor = $paretoColors[$i] ?? '#059669';
+                            if (!preg_match('/^#[0-9a-f]{3,8}$/i', (string)$barColor)) {
+                                $barColor = '#059669';
+                            }
+                            $pointX = $paretoPlotLeft + ($paretoSlotWidth * ($i + 0.5));
+                            $pointY = $paretoPlotBottom - (($paretoCumulative[$i] / 100) * $paretoPlotHeight);
+                            $paretoLinePoints[] = $pointX . ',' . $pointY;
+                            ?>
+                            <g>
+                                <title><?= htmlspecialchars((string)$paretoLabels[$i], ENT_QUOTES, 'UTF-8') ?>: <?= number_format($paretoValues[$i], 2) ?> <?= htmlspecialchars((string)($analysis['unit'] ?? ''), ENT_QUOTES, 'UTF-8') ?></title>
+                                <rect x="<?= $barX ?>" y="<?= $barY ?>" width="<?= $paretoBarWidth ?>" height="<?= $barHeight ?>" rx="4" fill="<?= $barColor ?>" opacity="0.86" />
+                            </g>
+                            <?php if ($i % max(1, (int)ceil($paretoCount / 12)) === 0 || $i === $paretoCount - 1): ?>
+                                <text x="<?= $pointX ?>" y="<?= $paretoPlotBottom + 18 ?>" transform="rotate(-42 <?= $pointX ?> <?= $paretoPlotBottom + 18 ?>)" text-anchor="end" direction="rtl" fill="#475569" font-size="12">
+                                    <?= htmlspecialchars((string)$paretoLabels[$i], ENT_QUOTES, 'UTF-8') ?>
+                                </text>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+
+                        <?php if ($paretoLinePoints): ?>
+                            <polyline points="<?= implode(' ', $paretoLinePoints) ?>" fill="none" stroke="#0f766e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+                        <?php endif; ?>
+                        <?php for ($i = 0; $i < $paretoCount; $i++): ?>
+                            <?php
+                            $pointX = $paretoPlotLeft + ($paretoSlotWidth * ($i + 0.5));
+                            $pointY = $paretoPlotBottom - (($paretoCumulative[$i] / 100) * $paretoPlotHeight);
+                            ?>
+                            <circle cx="<?= $pointX ?>" cy="<?= $pointY ?>" r="4" fill="#0f766e" stroke="#fff" stroke-width="2">
+                                <title><?= number_format($paretoCumulative[$i], 2) ?>٪</title>
+                            </circle>
+                        <?php endfor; ?>
+
+                        <rect x="390" y="17" width="12" height="12" fill="#059669" />
+                        <text x="408" y="28" fill="#334155" font-size="13">مقدار<?= !empty($analysis['unit']) ? ' (' . htmlspecialchars($analysis['unit'], ENT_QUOTES, 'UTF-8') . ')' : '' ?></text>
+                        <line x1="555" y1="23" x2="578" y2="23" stroke="#0f766e" stroke-width="3" />
+                        <text x="586" y="28" fill="#334155" font-size="13">درصد تجمعی</text>
+                    </svg>
+                </div>
+            <?php else: ?>
+                <div class="qc-empty-state" style="padding:2rem;">دادهٔ معتبری برای رسم نمودار پارتو وجود ندارد.</div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -246,13 +330,3 @@ $statusMeta = $statusLabels[$analysis['status']] ?? ['label' => $analysis['statu
         </div>
     </div>
 </div>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="/assets/js/software/quality.js"></script>
-
-<script>
-window.PARETO_CHART_DATA = <?= json_encode($chart, JSON_UNESCAPED_UNICODE) ?>;
-window.PARETO_UNIT = <?= json_encode($analysis['unit'] ?? '', JSON_UNESCAPED_UNICODE) ?>;
-</script>
-<script src="/assets/js/software/pareto.js?v=<?= time() ?>"></script>

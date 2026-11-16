@@ -144,9 +144,10 @@ if ($currentIdx === false) $currentIdx = -1;
                 <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:6px;">
                     <i class="fas fa-link"></i> منبع این اقدام
                 </div>
-                <a href="<?= CURRENT_MODULE_URL ?>?controller=pareto&action=show&id=<?= $sourceInfo['id'] ?>"
+                <a href="<?= CURRENT_MODULE_URL ?>?controller=<?= htmlspecialchars($sourceInfo['controller'] ?? 'pareto') ?>&action=show&id=<?= (int)$sourceInfo['id'] ?>"
                    style="color:#059669; font-weight:600; text-decoration:none; font-size:1rem;">
-                    <i class="fas fa-chart-bar"></i> تحلیل Pareto: <?= htmlspecialchars($sourceInfo['title']) ?>
+                    <i class="fas <?= ($sourceInfo['source_type'] ?? 'pareto') === 'control_chart' ? 'fa-chart-line' : 'fa-chart-bar' ?>"></i>
+                    <?= ($sourceInfo['source_type'] ?? 'pareto') === 'control_chart' ? 'نمودار کنترل' : 'تحلیل Pareto' ?>: <?= htmlspecialchars($sourceInfo['title']) ?>
                 </a>
             </div>
         </div>
@@ -213,7 +214,8 @@ if ($currentIdx === false) $currentIdx = -1;
                         $after  = (float)($capa['after_value'] ?? 0);
                         $improvement = null;
                         if ($before > 0 && $capa['after_value'] !== null) {
-                            $improvement = (($before - $after) / $before) * 100;
+                            $improvement = (($capa['effectiveness_direction'] ?? 'decrease') === 'increase'
+                                ? ($after - $before) : ($before - $after)) / abs($before) * 100;
                         }
                         ?>
                         <div class="qc-stats-grid">
@@ -222,7 +224,7 @@ if ($currentIdx === false) $currentIdx = -1;
                                     <i class="fas fa-arrow-down"></i>
                                 </div>
                                 <div>
-                                    <div class="qc-stat-value"><?= number_format($before, 2) ?></div>
+                                    <div class="qc-stat-value"><?= number_format($before, 4) ?> <?= htmlspecialchars($capa['effectiveness_metric_unit'] ?? '') ?></div>
                                     <div class="qc-stat-label">قبل از اقدام</div>
                                 </div>
                             </div>
@@ -231,7 +233,7 @@ if ($currentIdx === false) $currentIdx = -1;
                                     <i class="fas fa-arrow-up"></i>
                                 </div>
                                 <div>
-                                    <div class="qc-stat-value"><?= number_format($after, 2) ?></div>
+                                    <div class="qc-stat-value"><?= number_format($after, 4) ?> <?= htmlspecialchars($capa['effectiveness_metric_unit'] ?? '') ?></div>
                                     <div class="qc-stat-label">بعد از اقدام</div>
                                 </div>
                             </div>
@@ -247,6 +249,21 @@ if ($currentIdx === false) $currentIdx = -1;
                                 </div>
                             <?php endif; ?>
                         </div>
+
+                        <div style="margin-top:1rem; padding:12px; background:#f8fafc; border-radius:8px;">
+                            <strong>شاخص <?= htmlspecialchars($capa['effectiveness_metric_name'] ?? 'اثربخشی') ?>:</strong>
+                            <?= ($capa['effectiveness_direction'] ?? 'decrease') === 'increase' ? 'افزایش تا حداقل' : 'کاهش تا حداکثر' ?>
+                            <?= number_format((float)($capa['effectiveness_target_value'] ?? 0), 4) ?> <?= htmlspecialchars($capa['effectiveness_metric_unit'] ?? '') ?>
+                            <span> | نمونه‌های پایش: <?= (int)($capa['verification_sample_size'] ?? 0) ?></span>
+                            <span> | طول پایش: <?= (int)($capa['verification_period_days'] ?? 0) ?> روز</span>
+                        </div>
+
+                        <?php if (!empty($capa['effectiveness_evidence'])): ?>
+                            <div style="margin-top:.75rem; padding:12px; border-right:3px solid #2563eb; background:#eff6ff; border-radius:6px;">
+                                <strong>مدرک و نتیجهٔ پایش:</strong>
+                                <p style="margin:.4rem 0 0; color:#334155; white-space:pre-line;"><?= htmlspecialchars($capa['effectiveness_evidence']) ?></p>
+                            </div>
+                        <?php endif; ?>
 
                         <?php if ($capa['effectiveness_notes']): ?>
                             <div style="margin-top:1rem; padding:12px; background:#f0fdf4; border-radius:6px; border-right:3px solid #059669;">

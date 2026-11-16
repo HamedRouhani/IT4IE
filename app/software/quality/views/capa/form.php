@@ -14,6 +14,17 @@ $sourceLabels = [
     'customer_complaint' => 'شکایت مشتری',
     'other'              => 'سایر',
 ];
+$capaStatusOptions = [
+    'open' => 'باز', 'in_progress' => 'در حال اجرا', 'implemented' => 'اجرا شد',
+    'verified' => 'تأییدشده', 'closed' => 'بسته‌شده', 'cancelled' => 'لغو‌شده',
+];
+$allowedStatusOptions = [
+    'open' => ['open', 'in_progress', 'cancelled'],
+    'in_progress' => ['in_progress', 'implemented', 'cancelled'],
+    'implemented' => ['implemented', 'in_progress', 'verified'],
+    'verified' => ['verified', 'closed'], 'closed' => ['closed'], 'cancelled' => ['cancelled'],
+];
+$currentCapaStatus = $capa['status'] ?? 'open';
 ?>
 
 
@@ -52,7 +63,7 @@ $sourceLabels = [
                 <div>
                     <label class="qc-form-label">عنوان اقدام <span style="color:#dc2626;">*</span></label>
                     <input type="text" name="title" class="qc-form-control" required
-                           value="<?= htmlspecialchars($capa['title'] ?? '') ?>"
+                           value="<?= htmlspecialchars($capa['title'] ?? ($suggestedTitle ?? '')) ?>"
                            placeholder="مثلاً: کالیبراسیون دستگاه اندازه‌گیری">
                 </div>
 
@@ -103,7 +114,7 @@ $sourceLabels = [
                 <div>
                     <label class="qc-form-label">شرح مشکل</label>
                     <textarea name="problem_description" class="qc-form-textarea" rows="3"
-                              placeholder="مشکل چی هست؟ کجا و چطور ظاهر شد؟"><?= htmlspecialchars($capa['problem_description'] ?? '') ?></textarea>
+                              placeholder="مشکل چی هست؟ کجا و چطور ظاهر شد؟"><?= htmlspecialchars($capa['problem_description'] ?? ($suggestedProblem ?? '')) ?></textarea>
                 </div>
 
                 <div class="qc-form-grid-2" style="margin-top:1rem;">
@@ -174,12 +185,9 @@ $sourceLabels = [
                     <div>
                         <label class="qc-form-label">وضعیت</label>
                         <select name="status" class="qc-form-select">
-                            <option value="open"        <?= ($capa['status'] ?? 'open') === 'open' ? 'selected' : '' ?>>باز</option>
-                            <option value="in_progress" <?= ($capa['status'] ?? '') === 'in_progress' ? 'selected' : '' ?>>در حال اجرا</option>
-                            <option value="implemented" <?= ($capa['status'] ?? '') === 'implemented' ? 'selected' : '' ?>>اجرا شد</option>
-                            <option value="verified"    <?= ($capa['status'] ?? '') === 'verified' ? 'selected' : '' ?>>تأییدشده</option>
-                            <option value="closed"      <?= ($capa['status'] ?? '') === 'closed' ? 'selected' : '' ?>>بسته‌شده</option>
-                            <option value="cancelled"   <?= ($capa['status'] ?? '') === 'cancelled' ? 'selected' : '' ?>>لغو‌شده</option>
+                            <?php foreach ($allowedStatusOptions[$currentCapaStatus] ?? [$currentCapaStatus] as $statusOption): ?>
+                                <option value="<?= htmlspecialchars($statusOption) ?>" <?= $currentCapaStatus === $statusOption ? 'selected' : '' ?>><?= htmlspecialchars($capaStatusOptions[$statusOption] ?? $statusOption) ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
@@ -191,6 +199,18 @@ $sourceLabels = [
                 <h3 class="qc-card-title"><i class="fas fa-chart-line"></i> اثربخشی و هزینه (اختیاری)</h3>
             </div>
             <div class="qc-card-body">
+                <div class="qc-form-grid-2" style="margin-bottom:1rem;">
+                    <div>
+                        <label class="qc-form-label">نام شاخص اثربخشی</label>
+                        <input type="text" name="effectiveness_metric_name" class="qc-form-control" maxlength="120"
+                               value="<?= htmlspecialchars($capa['effectiveness_metric_name'] ?? '') ?>" placeholder="مثلاً نرخ نقص یا Cpk">
+                    </div>
+                    <div>
+                        <label class="qc-form-label">واحد شاخص</label>
+                        <input type="text" name="effectiveness_metric_unit" class="qc-form-control" maxlength="40"
+                               value="<?= htmlspecialchars($capa['effectiveness_metric_unit'] ?? '') ?>" placeholder="مثلاً درصد، قطعه یا بدون واحد">
+                    </div>
+                </div>
                 <div class="qc-form-grid-2">
                     <div>
                         <label class="qc-form-label">مقدار قبل از اقدام</label>
@@ -203,6 +223,39 @@ $sourceLabels = [
                         <input type="number" step="0.0001" name="after_value" class="qc-form-control"
                                value="<?= htmlspecialchars($capa['after_value'] ?? '') ?>"
                                placeholder="مثلاً: درصد نقص بعد">
+                    </div>
+                </div>
+
+                <div class="qc-form-grid-3" style="margin-top:1rem;">
+                    <div>
+                        <label class="qc-form-label">جهت مطلوب شاخص</label>
+                        <select name="effectiveness_direction" class="qc-form-select">
+                            <option value="decrease" <?= ($capa['effectiveness_direction'] ?? 'decrease') === 'decrease' ? 'selected' : '' ?>>کاهش بهتر است</option>
+                            <option value="increase" <?= ($capa['effectiveness_direction'] ?? '') === 'increase' ? 'selected' : '' ?>>افزایش بهتر است</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="qc-form-label">هدف قابل‌قبول شاخص</label>
+                        <input type="number" step="0.0001" name="effectiveness_target_value" class="qc-form-control"
+                               value="<?= htmlspecialchars($capa['effectiveness_target_value'] ?? '') ?>">
+                    </div>
+                    <div>
+                        <label class="qc-form-label">تعداد نمونهٔ دورهٔ پایش</label>
+                        <input type="number" min="1" step="1" name="verification_sample_size" class="qc-form-control"
+                               value="<?= htmlspecialchars($capa['verification_sample_size'] ?? '') ?>">
+                    </div>
+                </div>
+
+                <div class="qc-form-grid-2" style="margin-top:1rem;">
+                    <div>
+                        <label class="qc-form-label">طول دورهٔ پایش (روز)</label>
+                        <input type="number" min="1" step="1" name="verification_period_days" class="qc-form-control"
+                               value="<?= htmlspecialchars($capa['verification_period_days'] ?? '') ?>">
+                    </div>
+                    <div>
+                        <label class="qc-form-label">مدرک پایش اثربخشی</label>
+                        <textarea name="effectiveness_evidence" class="qc-form-textarea" rows="2"
+                                  placeholder="دوره و منبع داده، نمودار/گزارش، مسئول پایش و نتیجه را ثبت کنید."><?= htmlspecialchars($capa['effectiveness_evidence'] ?? '') ?></textarea>
                     </div>
                 </div>
 

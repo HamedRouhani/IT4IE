@@ -6,6 +6,7 @@ use App\Software\Quality\Models\System;
 use App\Software\Quality\Models\Project;
 use App\Software\Quality\Models\CapaAction;
 use App\Software\Quality\Models\ParetoAnalysis;
+use App\Software\Quality\Models\ControlChart;
 
 class CapaController extends Controller
 {
@@ -46,6 +47,54 @@ class CapaController extends Controller
             return null;
         }
         return $capa;
+    }
+
+    protected function transitionError(array $current, string $next, array $data = []): ?string
+    {
+        $from = $current['status'] ?? 'open';
+        $allowed = [
+            'open' => ['in_progress', 'cancelled'],
+            'in_progress' => ['implemented', 'cancelled'],
+            'implemented' => ['in_progress', 'verified'],
+            'verified' => ['closed'],
+            'closed' => [],
+            'cancelled' => [],
+        ];
+        if ($next === 'verified') {
+            if ($from !== 'implemented') return 'اقدام باید پیش از تأیید، اجرا شده باشد.';
+        } elseif ($next === 'implemented') {
+            if ($from === 'implemented') return null;
+            if ($from !== 'in_progress') return 'ابتدا CAPA را به مرحلهٔ در حال اجرا ببرید.';
+            $implementation = array_merge($current, $data);
+            if (trim((string)($implementation['root_cause'] ?? '')) === '' || trim((string)($implementation['action_plan'] ?? '')) === '') {
+                return 'پیش از ثبت اجرا، علت ریشه‌ای و برنامهٔ اقدام را تکمیل کنید.';
+            }
+        } elseif ($next === 'closed') {
+            if ($from !== 'verified') return 'بستن CAPA فقط پس از تأیید اثربخشی مجاز است.';
+        } elseif ($from === $next) {
+            return null;
+        } elseif (!in_array($next, $allowed[$from] ?? [], true)) {
+            return 'این جابه‌جایی وضعیت در گردش کار CAPA مجاز نیست.';
+        }
+        if (!in_array($next, ['verified', 'closed'], true)) return null;
+
+        $evidence = array_merge($current, $data);
+        if (trim((string)($evidence['effectiveness_metric_name'] ?? '')) === '' || empty($evidence['effectiveness_evidence']) || (int)($evidence['verification_sample_size'] ?? 0) < 1 || (int)($evidence['verification_period_days'] ?? 0) < 1) {
+            return 'برای تأیید، نام شاخص، مدرک، تعداد نمونه و طول دورهٔ پایش را ثبت کنید.';
+        }
+        $assessment = $this->capaModel->assessEffectiveness($evidence);
+        if (!$assessment || !$assessment['meets_target']) {
+            return 'نتیجهٔ پایش به هدف اثربخشی نرسیده است؛ اقدام را بازنگری کنید و پس از اجرای مجدد، دوباره پایش کنید.';
+        }
+        return null;
+    }
+
+    protected function validateChartSource(string $sourceType, ?int $sourceId, int $systemId): bool
+    {
+        if ($sourceType !== 'control_chart' || !$sourceId) return true;
+        $dataset = (new \App\Software\Quality\Models\Dataset())->find($sourceId);
+        $chart = (new ControlChart())->findByDataset($sourceId);
+        return $dataset && (int)$dataset['system_id'] === $systemId && $chart && (int)$chart['system_id'] === $systemId;
     }
 
     // ═══════════════════════════════════════════════════════
@@ -124,12 +173,30 @@ class CapaController extends Controller
         $sourceType = $_GET['source_type'] ?? null;
         $sourceId   = isset($_GET['source_id']) ? (int)$_GET['source_id'] : null;
 
+        $suggestedTitle = '';
+        $suggestedProblem = '';
+        if ($sourceType === 'control_chart' && $sourceId) {
+            $chart = (new ControlChart())->findByDataset($sourceId);
+            $dataset = (new \App\Software\Quality\Models\Dataset())->find($sourceId);
+            if (!$chart || !$dataset || (int)$chart['system_id'] !== (int)$system['id'] || (int)$dataset['system_id'] !== (int)$system['id']) {
+                $this->setError('نمودار کنترل منبع پیدا نشد.');
+                $this->redirect(CURRENT_MODULE_URL . '?controller=capa');
+                return;
+            }
+            $suggestedTitle = 'بررسی سیگنال خارج از کنترل: ' . ($dataset['name'] ?? 'نمودار کنترل');
+            $violations = (new ControlChart())->decodeViolations($chart);
+            $ruleCount = count($violations['nelson'] ?? []) + count($violations['we'] ?? []);
+            $suggestedProblem = 'نمودار کنترل در محاسبهٔ ' . ($chart['computed_at'] ?? '') . ' خارج از کنترل تشخیص داده شد. تعداد قواعد نقض‌شده: ' . $ruleCount . '. علت ویژه را بررسی و مستند کنید.';
+        }
+
         return $this->renderSoftware('capa/form', [
             'system'     => $system,
             'projects'   => $projects,
             'capa'       => null,
             'sourceType' => $sourceType,
             'sourceId'   => $sourceId,
+            'suggestedTitle' => $suggestedTitle,
+            'suggestedProblem' => $suggestedProblem,
         ], 'quality');
     }
 
@@ -150,11 +217,19 @@ class CapaController extends Controller
             $this->redirect(CURRENT_MODULE_URL . '?controller=capa&action=create');
         }
 
+        $sourceType = $_POST['source_type'] ?? 'other';
+        $sourceId = !empty($_POST['source_id']) ? (int)$_POST['source_id'] : null;
+        if (!$this->validateChartSource($sourceType, $sourceId, (int)$system['id'])) {
+            $this->setError('نمودار کنترل انتخاب‌شده متعلق به این سیستم نیست.');
+            $this->redirect(CURRENT_MODULE_URL . '?controller=capa&action=create');
+            return;
+        }
+
         $id = $this->capaModel->create([
             'system_id'            => $system['id'],
             'project_id'           => !empty($_POST['project_id']) ? (int)$_POST['project_id'] : null,
-            'source_type'          => $_POST['source_type'] ?? 'other',
-            'source_id'            => !empty($_POST['source_id']) ? (int)$_POST['source_id'] : null,
+            'source_type'          => $sourceType,
+            'source_id'            => $sourceId,
             'action_type'          => $_POST['action_type'] ?? 'corrective',
             'title'                => $title,
             'problem_description'  => trim($_POST['problem_description'] ?? '') ?: null,
@@ -165,8 +240,16 @@ class CapaController extends Controller
             'department'           => trim($_POST['department'] ?? '') ?: null,
             'priority'             => $_POST['priority'] ?? 'medium',
             'due_date'             => $_POST['due_date'] ?: null,
-            'status'               => $_POST['status'] ?? 'open',
+            'status'               => 'open',
             'before_value'         => $_POST['before_value'] !== '' ? (float)$_POST['before_value'] : null,
+            'after_value'          => $_POST['after_value'] !== '' ? (float)$_POST['after_value'] : null,
+            'effectiveness_metric_name' => trim($_POST['effectiveness_metric_name'] ?? '') ?: null,
+            'effectiveness_metric_unit' => trim($_POST['effectiveness_metric_unit'] ?? '') ?: null,
+            'effectiveness_direction' => in_array($_POST['effectiveness_direction'] ?? 'decrease', ['decrease', 'increase'], true) ? $_POST['effectiveness_direction'] : 'decrease',
+            'effectiveness_target_value' => ($_POST['effectiveness_target_value'] ?? '') !== '' ? (float)$_POST['effectiveness_target_value'] : null,
+            'verification_sample_size' => ($_POST['verification_sample_size'] ?? '') !== '' ? (int)$_POST['verification_sample_size'] : null,
+            'verification_period_days' => ($_POST['verification_period_days'] ?? '') !== '' ? (int)$_POST['verification_period_days'] : null,
+            'effectiveness_evidence' => trim($_POST['effectiveness_evidence'] ?? '') ?: null,
             'estimated_cost'       => $_POST['estimated_cost'] !== '' ? (float)$_POST['estimated_cost'] : null,
             'created_by'           => $this->currentUser()['id'],
         ]);
@@ -198,6 +281,17 @@ class CapaController extends Controller
         $sourceInfo = null;
         if ($capa['source_type'] === 'pareto' && $capa['source_id']) {
             $sourceInfo = $this->paretoModel->find($capa['source_id']);
+        } elseif ($capa['source_type'] === 'control_chart' && $capa['source_id']) {
+            $sourceDataset = (new \App\Software\Quality\Models\Dataset())->find((int)$capa['source_id']);
+            $sourceChart = (new ControlChart())->findByDataset((int)$capa['source_id']);
+            if ($sourceDataset && (int)$sourceDataset['system_id'] === (int)$system['id'] && $sourceChart && (int)$sourceChart['system_id'] === (int)$system['id']) {
+                $sourceInfo = [
+                    'id' => $sourceChart['id'],
+                    'title' => $sourceDataset['name'],
+                    'source_type' => 'control_chart',
+                    'controller' => in_array($sourceChart['chart_type'], ['p', 'np', 'c', 'u'], true) ? 'attribute_chart' : 'control_chart',
+                ];
+            }
         }
 
         return $this->renderSoftware('capa/show', [
@@ -273,15 +367,36 @@ class CapaController extends Controller
             'status'               => $_POST['status'] ?? $capa['status'],
             'before_value'         => $_POST['before_value'] !== '' ? (float)$_POST['before_value'] : null,
             'after_value'          => $_POST['after_value'] !== '' ? (float)$_POST['after_value'] : null,
+            'effectiveness_metric_name' => trim($_POST['effectiveness_metric_name'] ?? '') ?: null,
+            'effectiveness_metric_unit' => trim($_POST['effectiveness_metric_unit'] ?? '') ?: null,
             'estimated_cost'       => $_POST['estimated_cost'] !== '' ? (float)$_POST['estimated_cost'] : null,
             'actual_cost'          => $_POST['actual_cost'] !== '' ? (float)$_POST['actual_cost'] : null,
             'effectiveness_notes'  => trim($_POST['effectiveness_notes'] ?? '') ?: null,
+            'effectiveness_direction' => in_array($_POST['effectiveness_direction'] ?? 'decrease', ['decrease', 'increase'], true) ? $_POST['effectiveness_direction'] : 'decrease',
+            'effectiveness_target_value' => ($_POST['effectiveness_target_value'] ?? '') !== '' ? (float)$_POST['effectiveness_target_value'] : null,
+            'verification_sample_size' => ($_POST['verification_sample_size'] ?? '') !== '' ? (int)$_POST['verification_sample_size'] : null,
+            'verification_period_days' => ($_POST['verification_period_days'] ?? '') !== '' ? (int)$_POST['verification_period_days'] : null,
+            'effectiveness_evidence' => trim($_POST['effectiveness_evidence'] ?? '') ?: null,
         ];
+
+        if (!$this->validateChartSource((string)$data['source_type'], $data['source_id'] ? (int)$data['source_id'] : null, (int)$system['id'])) {
+            $this->setError('نمودار کنترل انتخاب‌شده متعلق به این سیستم نیست.');
+            $this->redirect(CURRENT_MODULE_URL . '?controller=capa&action=edit&id=' . $id);
+            return;
+        }
+        $transitionError = $this->transitionError($capa, (string)$data['status'], $data);
+        if ($transitionError !== null) {
+            $this->setError($transitionError);
+            $this->redirect(CURRENT_MODULE_URL . '?controller=capa&action=edit&id=' . $id);
+            return;
+        }
+        if ($data['status'] === 'implemented' && empty($capa['implemented_date'])) $data['implemented_date'] = date('Y-m-d');
+        if ($data['status'] === 'verified' && empty($capa['verification_date'])) $data['verification_date'] = date('Y-m-d');
 
         $ok = $this->capaModel->update($id, $data);
 
         // اگه after_value داده شده، اثربخشی رو محاسبه کن
-        if ($ok && !empty($data['after_value'])) {
+        if ($ok) {
             $this->capaModel->calculateEffectiveness($id);
         }
 
@@ -314,9 +429,12 @@ class CapaController extends Controller
         }
 
         $valid = ['open', 'in_progress', 'implemented', 'verified', 'closed', 'cancelled'];
-        if (!in_array($status, $valid)) {
+        if (!in_array($status, $valid, true)) {
             return $this->json(['success' => false, 'error' => 'وضعیت نامعتبر']);
         }
+
+        $transitionError = $this->transitionError($capa, $status);
+        if ($transitionError !== null) return $this->json(['success' => false, 'error' => $transitionError]);
 
         // ✅ منطق گردش کار: تاریخ‌ها رو خودکار پر کن
         $updateData = ['status' => $status];
@@ -327,6 +445,8 @@ class CapaController extends Controller
         if ($status === 'verified' && empty($capa['verification_date'])) {
             $updateData['verification_date'] = date('Y-m-d');
         }
+
+        if ($status === 'verified') $this->capaModel->calculateEffectiveness($id);
         
         $this->capaModel->update($id, $updateData);
         
@@ -375,6 +495,7 @@ class CapaController extends Controller
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             return $this->json(['success' => false, 'error' => 'Method not allowed']);
         }
+        $this->verifyCsrf();
         $system = $this->requireSystem();
 
         $id = (int)($_POST['id'] ?? 0);
@@ -387,7 +508,7 @@ class CapaController extends Controller
         if (!$result) {
             return $this->json([
                 'success' => false,
-                'error'   => 'برای محاسبه اثربخشی، قبل و بعد از اقدام لازم است',
+                'error'   => 'برای ارزیابی اثربخشی، نام شاخص، مقدار قبل و بعد و هدف قابل‌قبول را ثبت کنید.',
             ]);
         }
 

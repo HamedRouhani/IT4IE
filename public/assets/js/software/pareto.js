@@ -387,7 +387,6 @@
             if (!data) return;
 
             const unit = window.PARETO_UNIT || '';
-
             new Chart(canvas, {
                 type: 'bar',
                 data: {
