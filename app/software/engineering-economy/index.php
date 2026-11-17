@@ -25,6 +25,7 @@ if (function_exists('it4ie_require_csrf')) {
 
 $controllers = [
     'project' => 'ProjectController',
+    'integration' => 'CostIntegrationController',
     'cashflow' => 'CashFlowController',
     'analysis' => 'AnalysisController',
     'learn' => 'LearnController',
