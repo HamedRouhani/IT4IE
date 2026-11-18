@@ -315,22 +315,25 @@ class AuthController extends Controller
                     $resetToken = bin2hex(random_bytes(32));
                     $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
                     
-                    $userModel->update($user['id'], [
+                    $updated = $userModel->update($user['id'], [
                         'reset_token' => $resetToken,
                         'reset_token_expires' => $expires
                     ]);
                     
-                    // ارسال ایمیل با استفاده از تابع کمکی
-                    $result = sendResetEmail($email, $user['name'], $resetToken);
-                    
-                    if ($result) {
-                        $_SESSION['message'] = 'لینک بازیابی رمز عبور به ایمیل شما ارسال شد.';
+                    if ($updated) {
+                        try {
+                            if (!sendResetEmail($email, $user['name'], $resetToken)) {
+                                error_log('Password reset email could not be sent.');
+                            }
+                        } catch (\Throwable $e) {
+                            error_log('Password reset email failed: ' . $e->getMessage());
+                        }
                     } else {
-                        $_SESSION['error'] = 'خطا در ارسال ایمیل. لطفاً مجدداً تلاش کنید.';
+                        error_log('Password reset token could not be saved.');
                     }
-                } else {
-                    $_SESSION['message'] = 'اگر این ایمیل در سیستم ثبت شده باشد، لینک بازیابی برای شما ارسال خواهد شد.';
                 }
+
+                $_SESSION['message'] = 'اگر این نشانی ایمیل به حسابی تعلق داشته باشد، راهنمای بازیابی ارسال خواهد شد.';
                 $this->redirect('/login');
             }
         }
@@ -466,44 +469,41 @@ class AuthController extends Controller
 
         $this->verifyCsrf('درخواست نامعتبر است. لطفاً صفحه را مجدداً بارگذاری کنید.');
         
-        $email = trim($_POST['email'] ?? '');
-        
-        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $_SESSION['resend_error'] = 'ایمیل معتبر نیست.';
-            $this->redirect('/verify-email-needed');
-            return;
+        $email = trim((string) ($_POST['email'] ?? ''));
+        $pendingEmail = strtolower(trim((string) ($_SESSION['pending_email'] ?? '')));
+        $genericMessage = 'اگر این نشانی ایمیل به حسابی نیازمند تأیید تعلق داشته باشد، پیام تأیید ارسال خواهد شد.';
+
+        if (
+            filter_var($email, FILTER_VALIDATE_EMAIL) &&
+            $pendingEmail !== '' &&
+            hash_equals($pendingEmail, strtolower($email))
+        ) {
+            $userModel = new User();
+            $user = $userModel->findByEmail($email);
+
+            if ($user && empty($user['email_verified'])) {
+                $newToken = bin2hex(random_bytes(32));
+                $updated = $userModel->update($user['id'], [
+                    'verification_token' => $newToken,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+
+                if ($updated) {
+                    try {
+                        if (!sendVerificationEmail($email, $user['name'], $newToken)) {
+                            error_log('Verification email could not be sent.');
+                        }
+                    } catch (\Throwable $e) {
+                        error_log('Verification email resend failed: ' . $e->getMessage());
+                    }
+                } else {
+                    error_log('Verification token could not be saved.');
+                }
+            }
         }
-        
-        $userModel = new User();
-        $user = $userModel->findByEmail($email);
-        
-        if (!$user) {
-            $_SESSION['resend_error'] = 'کاربری با این ایمیل یافت نشد.';
-            $this->redirect('/verify-email-needed');
-            return;
-        }
-        
-        if ($user['email_verified']) {
-            $_SESSION['resend_error'] = 'این ایمیل قبلاً تأیید شده است.';
-            $this->redirect('/login');
-            return;
-        }
-        
-        // تولید توکن جدید
-        $newToken = bin2hex(random_bytes(32));
-        $userModel->update($user['id'], [
-            'verification_token' => $newToken,
-            'updated_at' => date('Y-m-d H:i:s')
-        ]);
-        
-        $sent = sendVerificationEmail($email, $user['name'], $newToken);
-        
-        if ($sent) {
-            $_SESSION['resend_message'] = '✅ ایمیل تأیید مجدداً ارسال شد. Inbox و پوشه Spam را بررسی کنید.';
-        } else {
-            $_SESSION['resend_error'] = '❌ خطا در ارسال ایمیل. لطفاً با پشتیبانی تماس بگیرید.';
-        }
-        
+
+        unset($_SESSION['resend_error']);
+        $_SESSION['resend_message'] = $genericMessage;
         $this->redirect('/verify-email-needed');
     }
 }
