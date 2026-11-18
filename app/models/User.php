@@ -104,6 +104,42 @@ class User extends Model
         ]);
     }
 
+    /** Check the recent failed login count for a hashed client IP. */
+    public function isLoginRateLimited(string $ipHash): bool
+    {
+        if (!$this->db) {
+            throw new \RuntimeException('Authentication storage is unavailable.');
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT COUNT(*) FROM auth_login_attempts
+             WHERE ip_hash = :ip_hash
+               AND attempted_at >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)'
+        );
+        $stmt->execute(['ip_hash' => $ipHash]);
+
+        return (int) $stmt->fetchColumn() >= 30;
+    }
+
+    /** Record a failed login without storing the client IP in clear text. */
+    public function recordFailedLogin(string $ipHash): void
+    {
+        if (!$this->db) {
+            throw new \RuntimeException('Authentication storage is unavailable.');
+        }
+
+        $stmt = $this->db->prepare(
+            'INSERT INTO auth_login_attempts (ip_hash, attempted_at) VALUES (:ip_hash, NOW())'
+        );
+        $stmt->execute(['ip_hash' => $ipHash]);
+
+        if (random_int(1, 64) === 1) {
+            $this->db->exec(
+                'DELETE FROM auth_login_attempts WHERE attempted_at < DATE_SUB(NOW(), INTERVAL 1 DAY)'
+            );
+        }
+    }
+
     /**
      * حذف نرم کاربر (Soft Delete).
      *

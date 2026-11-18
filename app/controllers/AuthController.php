@@ -31,6 +31,13 @@ class AuthController extends Controller
             $remember = isset($_POST['remember']) ? true : false;
             
             $errors = [];
+            $remoteAddress = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+            if (!filter_var($remoteAddress, FILTER_VALIDATE_IP)) {
+                $remoteAddress = 'unknown';
+            }
+            $rateLimitKey = (string) (getenv('DB_PASS') ?: ROOT_PATH);
+            $loginIpHash = hash_hmac('sha256', $remoteAddress, $rateLimitKey);
+
             if (empty($email)) {
                 $errors[] = 'لطفاً ایمیل خود را وارد کنید.';
             }
@@ -40,13 +47,19 @@ class AuthController extends Controller
             if (empty($captchaCode)) {
                 $errors[] = 'لطفاً کد امنیتی را وارد کنید.';
             }
+
+            if (empty($errors)) {
+                $userModel = new User();
+                if ($userModel->isLoginRateLimited($loginIpHash)) {
+                    $errors[] = 'تعداد تلاش‌های ورود زیاد است. لطفاً ۱۵ دقیقه دیگر دوباره تلاش کنید.';
+                }
+            }
             
             if (empty($errors) && !$captcha->verify($captchaCode)) {
                 $errors[] = 'کد امنیتی اشتباه است.';
             }
             
             if (empty($errors)) {
-                $userModel = new User();
                 $user = $userModel->findByEmail($email);
                 
                 if ($user && password_verify($password, $user['password'])) {
@@ -101,6 +114,7 @@ class AuthController extends Controller
                         }
                     }
                 } else {
+                    $userModel->recordFailedLogin($loginIpHash);
                     $errors[] = 'ایمیل یا رمز عبور اشتباه است.';
                 }
             }

@@ -40,7 +40,7 @@ class Captcha
         // تولید ۴ رقم تصادفی
         $code = '';
         for ($i = 0; $i < $this->length; $i++) {
-            $code .= rand(0, 9);
+            $code .= random_int(0, 9);
         }
         
         $_SESSION[$this->sessionKey] = $code;
