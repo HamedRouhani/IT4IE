@@ -191,28 +191,64 @@ class ProfileController extends Controller
      */
     private function uploadAvatar($file, $userId)
     {
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $allowedTypes = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/gif' => 'gif',
+            'image/webp' => 'webp',
+        ];
         $maxSize = 2 * 1024 * 1024; // 2MB
 
         // بررسی نوع فایل
-        if (!in_array($file['type'], $allowedTypes)) {
+        if (
+            !isset($file['error'], $file['tmp_name'], $file['size']) ||
+            $file['error'] !== UPLOAD_ERR_OK ||
+            !is_uploaded_file($file['tmp_name']) ||
+            !is_numeric($file['size']) ||
+            (int) $file['size'] < 1 ||
+            (int) $file['size'] > $maxSize
+        ) {
             return false;
         }
 
         // بررسی اندازه فایل
-        if ($file['size'] > $maxSize) {
+        $fileInfo = @getimagesize($file['tmp_name']);
+        if ($fileInfo === false || empty($fileInfo['mime'])) {
+            return false;
+        }
+
+        try {
+            $detectedMime = (new \finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        if (
+            !isset($allowedTypes[$detectedMime]) ||
+            $fileInfo['mime'] !== $detectedMime ||
+            empty($fileInfo[0]) ||
+            empty($fileInfo[1]) ||
+            $fileInfo[0] > 10000 ||
+            $fileInfo[1] > 10000 ||
+            ($fileInfo[0] * $fileInfo[1]) > 40000000
+        ) {
             return false;
         }
 
         // ایجاد مسیر آپلود
         $uploadDir = PUBLIC_PATH . '/uploads/avatars/';
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
+            if (!mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
+                return false;
+            }
         }
 
         // تولید نام منحصر به فرد
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'avatar_' . $userId . '_' . time() . '.' . $extension;
+        try {
+            $filename = 'avatar_' . (int) $userId . '_' . bin2hex(random_bytes(16)) . '.' . $allowedTypes[$detectedMime];
+        } catch (\Throwable $e) {
+            return false;
+        }
         $filepath = $uploadDir . $filename;
 
         // انتقال فایل

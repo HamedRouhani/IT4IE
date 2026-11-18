@@ -1,0 +1,12 @@
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)\.(php[0-9]?|phtml|phar|cgi|pl)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    <FilesMatch "(?i)\.(php[0-9]?|phtml|phar|cgi|pl)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
