@@ -80,7 +80,7 @@
 <script>
 function deleteProject(id, name) {
     if (confirm('آیا از حذف "' + name + '" مطمئن هستید؟')) {
-        window.location.href = '<?= or_url("controller=transship&action=delete&id=") ?>' + id;
+        orSubmitPost('<?= or_url("controller=transship&action=delete&id=") ?>' + id);
     }
 }
 </script>

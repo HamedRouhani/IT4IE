@@ -127,7 +127,7 @@
 <script>
 function deleteProject(id, name) {
     if (confirm('آیا از حذف پروژه "' + name + '" مطمئن هستید؟')) {
-        window.location.href = '<?= or_url('controller=project&action=delete&id=') ?>' + id;
+        orSubmitPost('<?= or_url('controller=project&action=delete&id=') ?>' + id);
     }
 }
 </script>

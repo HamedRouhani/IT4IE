@@ -335,7 +335,7 @@ function drawChart(r) {
 async function deleteProject(id) {
     if (!confirm('حذف شود؟')) return;
     try {
-        const res = await fetch('<?= or_url('controller=markov&action=delete&id=') ?>' + id);
+        const res = await orPostFetch('<?= or_url('controller=markov&action=delete&id=') ?>' + id);
         if (res.ok) location.reload();
         else alert('خطا در حذف');
     } catch (e) { alert('خطای شبکه: ' + e.message); }

@@ -120,7 +120,7 @@
 <script>
 function deleteProject(id, name) {
     if (confirm('آیا از حذف پروژه "' + name + '" مطمئن هستید؟ این عملیات غیرقابل بازگشت است.')) {
-        window.location.href = '<?= or_url("controller=transport&action=delete&id=") ?>' + id;
+        orSubmitPost('<?= or_url("controller=transport&action=delete&id=") ?>' + id);
     }
 }
 </script>

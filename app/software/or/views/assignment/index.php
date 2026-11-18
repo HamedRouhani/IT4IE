@@ -141,7 +141,7 @@
 function deleteProject(id, name) {
     if (confirm('آیا از حذف پروژه "' + name + '" مطمئن هستید؟ این عملیات غیرقابل بازگشت است.')) {
         // ✅ هدایت به کنترلر اختصاصی assignment برای حذف
-        window.location.href = '<?= or_url("controller=assignment&action=delete&id=") ?>' + id;
+        orSubmitPost('<?= or_url("controller=assignment&action=delete&id=") ?>' + id);
     }
 }
 </script>

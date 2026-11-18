@@ -35,7 +35,7 @@ $ok = ($result['status'] ?? '') === 'ok';
             <a href="<?= or_url('controller=monte_carlo&action=show&id=' . (int)$project['id']) ?>" class="btn btn-sm btn-outline-primary" onclick="location.reload()">
                 <i class="fas fa-sync-alt me-1"></i><span class="d-none d-md-inline">به‌روزرسانی</span>
             </a>
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('آیا از حذف این پروژه مطمئن هستید؟')) location.href='<?= or_url('controller=monte_carlo&action=delete&id=' . (int)$project['id']) ?>'">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('آیا از حذف این پروژه مطمئن هستید؟')) orSubmitPost('<?= or_url('controller=monte_carlo&action=delete&id=' . (int)$project['id']) ?>')">
                 <i class="fas fa-trash me-1"></i><span class="d-none d-md-inline">حذف</span>
             </button>
             <a href="<?= or_url('controller=monte_carlo') ?>" class="btn btn-sm btn-outline-secondary">

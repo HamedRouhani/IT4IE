@@ -23,7 +23,7 @@ $ok = ($result['status'] ?? '') === 'optimal';
             <a href="<?= or_url('controller=ilp&action=edit&id=' . (int)$project['id']) ?>" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-edit me-1"></i><span class="d-none d-md-inline">ویرایش</span>
             </a>
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('آیا از حذف این پروژه مطمئن هستید؟')) location.href='<?= or_url('controller=ilp&action=delete&id=' . (int)$project['id']) ?>'">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('آیا از حذف این پروژه مطمئن هستید؟')) orSubmitPost('<?= or_url('controller=ilp&action=delete&id=' . (int)$project['id']) ?>')">
                 <i class="fas fa-trash me-1"></i><span class="d-none d-md-inline">حذف</span>
             </button>
             <a href="<?= or_url('controller=ilp') ?>" class="btn btn-sm btn-outline-secondary">

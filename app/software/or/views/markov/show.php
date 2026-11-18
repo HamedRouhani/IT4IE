@@ -14,7 +14,7 @@ $ok = ($result['status'] ?? '') === 'ok';
             </div>
         </div>
         <div class="d-flex flex-wrap gap-2">
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('حذف شود؟')) location.href='<?= or_url('controller=markov&action=delete&id=' . (int)$project['id']) ?>'">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('حذف شود؟')) orSubmitPost('<?= or_url('controller=markov&action=delete&id=' . (int)$project['id']) ?>')">
                 <i class="fas fa-trash me-1"></i><span class="d-none d-md-inline">حذف</span>
             </button>
             <a href="<?= or_url('controller=markov') ?>" class="btn btn-sm btn-outline-secondary">

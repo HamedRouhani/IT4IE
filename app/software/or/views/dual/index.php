@@ -282,7 +282,7 @@ function renderResult(r) {
 async function deleteProject(id) {
     if (!confirm('آیا از حذف این پروژه مطمئن هستید؟')) return;
     try {
-        const res = await fetch('<?= or_url('controller=dual&action=delete&id=') ?>' + id);
+        const res = await orPostFetch('<?= or_url('controller=dual&action=delete&id=') ?>' + id);
         if (res.ok) location.reload();
         else alert('خطا در حذف پروژه');
     } catch (e) { alert('خطای شبکه: ' + e.message); }

@@ -62,6 +62,15 @@ class Controller
         else throw new \Exception("OR View not found: {$view}");
         $content = ob_get_clean();
         $content = it4ie_inject_csrf_fields($content);
+        $csrfTokenJson = json_encode(csrf_token(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        $csrfHelpers = '<script>window.OR_CSRF_TOKEN=' . $csrfTokenJson . ';'
+            . 'window.orSubmitPost=function(url){var f=document.createElement("form");f.method="POST";f.action=url;'
+            . 'var i=document.createElement("input");i.type="hidden";i.name="_csrf_token";i.value=window.OR_CSRF_TOKEN;'
+            . 'f.appendChild(i);document.body.appendChild(f);f.submit();};'
+            . 'window.orPostFetch=function(url,options){options=options||{};var h=new Headers(options.headers||{});'
+            . 'h.set("X-CSRF-Token",window.OR_CSRF_TOKEN);h.set("X-Requested-With","XMLHttpRequest");'
+            . 'options.method="POST";options.headers=h;return fetch(url,options);};</script>';
+        $content = $csrfHelpers . $content;
         $lf = VIEWS_PATH . '/layouts/software.php';
         if (file_exists($lf)) include $lf; else echo $content;
     }

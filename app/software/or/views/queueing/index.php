@@ -356,7 +356,7 @@ function drawSensChart(pts) {
 async function deleteProject(id) {
     if (!confirm('آیا از حذف این پروژه مطمئن هستید؟')) return;
     try {
-        const res = await fetch(DELETE_URL + id, { headers: {'X-Requested-With': 'XMLHttpRequest'} });
+        const res = await orPostFetch(DELETE_URL + id, { headers: {'X-Requested-With': 'XMLHttpRequest'} });
         if (res.ok) location.reload();
         else alert('خطا در حذف پروژه');
     } catch (e) { alert('خطای شبکه: ' + e.message); }

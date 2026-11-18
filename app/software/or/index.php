@@ -80,6 +80,13 @@ $controller = $_GET['controller'] ?? 'dashboard';
 $action     = $_GET['action'] ?? 'index';
 $id         = $_GET['id'] ?? null;
 
+$method = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+if (in_array($action, ['delete', 'deleteNode'], true) && $method !== 'POST') {
+    http_response_code(405);
+    header('Allow: POST');
+    exit('Method Not Allowed');
+}
+
 // بررسی AJAX
 $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
           strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';

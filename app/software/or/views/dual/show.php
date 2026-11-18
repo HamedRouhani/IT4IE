@@ -18,7 +18,7 @@ $ok = ($result['status'] ?? '') === 'optimal';
             </div>
         </div>
         <div class="d-flex flex-wrap gap-2">
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('آیا از حذف این پروژه مطمئن هستید؟')) location.href='<?= or_url('controller=dual&action=delete&id=' . (int)$project['id']) ?>'">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('آیا از حذف این پروژه مطمئن هستید؟')) orSubmitPost('<?= or_url('controller=dual&action=delete&id=' . (int)$project['id']) ?>')">
                 <i class="fas fa-trash me-1"></i><span class="d-none d-md-inline">حذف</span>
             </button>
             <a href="<?= or_url('controller=dual') ?>" class="btn btn-sm btn-outline-secondary">
