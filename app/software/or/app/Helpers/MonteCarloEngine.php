@@ -34,7 +34,14 @@ class MonteCarloEngine
         if ($seed !== null) mt_srand($seed);
 
         // اعتبارسنجی متغیرها
+        $variableNames = [];
         foreach ($variables as $v) {
+            $name = $v['name'] ?? null;
+            if (!is_string($name) || !preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/D', $name) || isset($variableNames[$name])) {
+                throw new \InvalidArgumentException('Variable names must be unique identifiers using English letters, numbers, and underscores.');
+            }
+            $variableNames[$name] = true;
+
             if (!isset(self::DISTRIBUTIONS[$v['dist']])) {
                 throw new \Exception("توزیع نامعتبر: {$v['dist']}");
             }
@@ -60,6 +67,7 @@ class MonteCarloEngine
         $varStats = [];
         foreach ($variables as $v) $varStats[$v['name']] = ['sum' => 0, 'sum2' => 0];
 
+        $expressionParser = new ArithmeticExpressionParser($funcExpr, array_keys($variableNames));
         $t0 = microtime(true);
 
         $invalidSamples = 0;
@@ -70,7 +78,7 @@ class MonteCarloEngine
                     $values[$v['name']] = self::sample($v['dist'], $v['params']);
                     if (!is_finite($values[$v['name']])) throw new \UnexpectedValueException('Non-finite random sample');
                 }
-                $y = self::evaluate($funcExpr, $values);
+                $y = $expressionParser->evaluate($values);
                 if (!is_finite($y)) throw new \UnexpectedValueException('Non-finite simulation output');
                 foreach ($variables as $v) {
                     $value = $values[$v['name']];
@@ -186,26 +194,6 @@ class MonteCarloEngine
         }
     }
 
-    /** ارزیابی عبارت ریاضی با متغیرها */
-    private static function evaluate(string $expr, array $values): float
-    {
-        // جایگزینی متغیرها با مقادیر
-        $safeExpr = $expr;
-        foreach ($values as $name => $val) {
-            $safeExpr = preg_replace('/\b' . preg_quote($name, '/') . '\b/', (string)$val, $safeExpr);
-        }
-        // فقط اجازه عملگرهای ریاضی
-        $safeExpr = preg_replace('/[^0-9\.\+\-\*\/\(\)\s\^]/', '', $safeExpr);
-        $safeExpr = str_replace('^', '**', $safeExpr);
-
-        // ارزیابی امن
-        $result = @eval("return ($safeExpr);");
-        if ($result === false || !is_numeric($result) || !is_finite((float)$result)) {
-            throw new \Exception("عبارت نامعتبر: $expr");
-        }
-        return (float)$result;
-    }
-
     /** محاسبه آمار توصیفی */
     private static function computeStats(array $data): array
     {
@@ -313,5 +301,140 @@ class MonteCarloEngine
         else $out[] = "🟢 خروجی همیشه مثبت است (بدون ریسک منفی).";
 
         return implode("\n", $out);
+    }
+}
+
+/** Parses bounded arithmetic expressions without executing PHP code. */
+final class ArithmeticExpressionParser
+{
+    private array $tokens = [];
+    private int $position = 0;
+    private int $depth = 0;
+
+    private array $allowedVariables;
+
+    public function __construct(string $expression, array $allowedVariables)
+    {
+        $this->allowedVariables = array_fill_keys($allowedVariables, true);
+        $this->tokenize($expression);
+        foreach ($this->tokens as $token) {
+            if (preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/D', $token) && !isset($this->allowedVariables[$token])) {
+                throw new \InvalidArgumentException('Unknown variable in arithmetic expression.');
+            }
+        }
+    }
+
+    public function evaluate(array $variables): float
+    {
+        $this->position = 0;
+        $this->depth = 0;
+        $result = $this->parseAdditive($variables);
+        if ($this->position !== count($this->tokens)) {
+            throw new \InvalidArgumentException('Invalid arithmetic expression.');
+        }
+        return self::finite($result);
+    }
+
+    private function tokenize(string $expression): void
+    {
+        if ($expression === '' || strlen($expression) > 256) {
+            throw new \InvalidArgumentException('Expression must contain 1 to 256 characters.');
+        }
+        $length = strlen($expression);
+        $offset = 0;
+        while ($offset < $length) {
+            if (preg_match('/\G\s+/u', $expression, $space, 0, $offset)) {
+                $offset += strlen($space[0]);
+                if ($offset >= $length) break;
+            }
+            if (!preg_match('/\G((?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?|[A-Za-z_][A-Za-z0-9_]*|[()+\-*\/^])/u', $expression, $match, 0, $offset)) {
+                throw new \InvalidArgumentException('Invalid character in arithmetic expression.');
+            }
+            $this->tokens[] = $match[1];
+            $offset += strlen($match[0]);
+            if (count($this->tokens) > 128) {
+                throw new \InvalidArgumentException('Expression contains too many terms.');
+            }
+        }
+        if (!$this->tokens) throw new \InvalidArgumentException('Expression is empty.');
+    }
+
+    private function parseAdditive(array $variables): float
+    {
+        $value = $this->parseMultiplicative($variables);
+        while (($operator = $this->peek()) === '+' || $operator === '-') {
+            $this->position++;
+            $right = $this->parseMultiplicative($variables);
+            $value = self::finite($operator === '+' ? $value + $right : $value - $right);
+        }
+        return $value;
+    }
+
+    private function parseMultiplicative(array $variables): float
+    {
+        $value = $this->parseUnary($variables);
+        while (($operator = $this->peek()) === '*' || $operator === '/') {
+            $this->position++;
+            $right = $this->parseUnary($variables);
+            if ($operator === '/' && $right == 0.0) throw new \InvalidArgumentException('Division by zero in arithmetic expression.');
+            $value = self::finite($operator === '*' ? $value * $right : $value / $right);
+        }
+        return $value;
+    }
+
+    private function parseUnary(array $variables): float
+    {
+        $operator = $this->peek();
+        if ($operator === '+' || $operator === '-') {
+            $this->position++;
+            $value = $this->parseUnary($variables);
+            return $operator === '-' ? -$value : $value;
+        }
+        return $this->parsePower($variables);
+    }
+
+    private function parsePower(array $variables): float
+    {
+        $value = $this->parsePrimary($variables);
+        if ($this->peek() === '^') {
+            $this->position++;
+            $exponent = $this->parseUnary($variables);
+            if (abs($exponent) > 100) throw new \InvalidArgumentException('Exponent is outside the supported range.');
+            $value = self::finite($value ** $exponent);
+        }
+        return $value;
+    }
+
+    private function parsePrimary(array $variables): float
+    {
+        $token = $this->peek();
+        if ($token === null) throw new \InvalidArgumentException('Unexpected end of arithmetic expression.');
+        if ($token === '(') {
+            if (++$this->depth > 32) throw new \InvalidArgumentException('Expression nesting is too deep.');
+            $this->position++;
+            $value = $this->parseAdditive($variables);
+            if ($this->peek() !== ')') throw new \InvalidArgumentException('Unmatched parenthesis in arithmetic expression.');
+            $this->position++;
+            $this->depth--;
+            return $value;
+        }
+        if ($token === ')' || in_array($token, ['+', '-', '*', '/', '^'], true)) {
+            throw new \InvalidArgumentException('Expected a number or variable in arithmetic expression.');
+        }
+        $this->position++;
+        if (is_numeric($token)) return self::finite((float)$token);
+        if (!array_key_exists($token, $variables)) throw new \InvalidArgumentException('Unknown variable in arithmetic expression.');
+        return self::finite((float)$variables[$token]);
+    }
+
+    private function peek(): ?string
+    {
+        return $this->tokens[$this->position] ?? null;
+    }
+
+    private static function finite(float $value): float
+    {
+        if (!is_finite($value)) throw new \InvalidArgumentException('Arithmetic result is outside the supported numeric range.');
+        return $value;
     }
 }
