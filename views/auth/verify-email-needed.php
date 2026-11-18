@@ -9,7 +9,7 @@
         <h1 class="auth-title">ایمیل خود را تأیید کنید</h1>
         
         <p style="color: var(--gray-dark); margin-bottom: 24px; line-height: 1.8;">
-            یک <strong>لینک تأیید حساب کاربری</strong> به ایمیل شما ارسال شد.
+            اگر این حساب نیازمند تأیید باشد، یک <strong>لینک تأیید حساب کاربری</strong> به ایمیل شما ارسال شده است.
             <br>
             برای تکمیل ثبت‌نام، لطفاً ایمیل خود را بررسی کرده و روی لینک داخل آن کلیک کنید.
         </p>
@@ -77,6 +77,10 @@
             <a href="/" style="color: var(--gray-dark); font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                 <i class="fas fa-arrow-right"></i>
                 بازگشت به صفحه اصلی
+            </a>
+            <a href="/login" style="color: var(--primary); font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-right: 14px;">
+                <i class="fas fa-sign-in-alt"></i>
+                ورود به حساب
             </a>
         </div>
     </div>

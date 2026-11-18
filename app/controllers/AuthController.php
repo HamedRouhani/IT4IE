@@ -190,7 +190,11 @@ class AuthController extends Controller
             if (empty($errors)) {
                 $userModel = new User();
                 if ($userModel->findByEmail($email)) {
-                    $errors[] = 'این ایمیل قبلاً ثبت شده است.';
+                    $_SESSION['pending_email'] = $email;
+                    $_SESSION['pending_name'] = $name;
+                    $_SESSION['email_sent'] = false;
+                    $_SESSION['message'] = 'اگر این نشانی برای ثبت‌نام یا تأیید حساب قابل استفاده باشد، راهنمای لازم ارسال خواهد شد.';
+                    $this->redirect('/verify-email-needed');
                 }
             }
             
@@ -214,23 +218,32 @@ class AuthController extends Controller
                 
                 if ($userId) {
                     // ارسال ایمیل تأیید
-                    $emailSent = sendVerificationEmail($email, $name, $verificationToken);
+                    try {
+                        $emailSent = sendVerificationEmail($email, $name, $verificationToken);
+                    } catch (\Throwable $e) {
+                        error_log('Registration verification email failed: ' . $e->getMessage());
+                        $emailSent = false;
+                    }
+                    if (!$emailSent) {
+                        error_log('Registration verification email could not be sent.');
+                    }
                     
                     // ذخیره اطلاعات در session برای صفحه انتظار
                     $_SESSION['pending_email'] = $email;
                     $_SESSION['pending_name'] = $name;
                     $_SESSION['email_sent'] = $emailSent;
                     
-                    if ($emailSent) {
-                        $_SESSION['message'] = '✅ ثبت‌نام با موفقیت انجام شد. لطفاً ایمیل خود را بررسی کنید و روی لینک تأیید کلیک نمایید.';
-                    } else {
-                        $_SESSION['error'] = '⚠️ ثبت‌نام انجام شد اما ارسال ایمیل با مشکل مواجه شد. لطفاً با پشتیبانی تماس بگیرید.';
-                    }
+                    $_SESSION['message'] = 'اگر این نشانی برای ثبت‌نام یا تأیید حساب قابل استفاده باشد، راهنمای لازم ارسال خواهد شد.';
                     
                     // ریدایرکت به صفحه انتظار ایمیل
                     $this->redirect('/verify-email-needed');
                 } else {
-                    $errors[] = 'خطا در ثبت‌نام. لطفاً مجدداً تلاش کنید.';
+                    error_log('Registration could not create a user record.');
+                    $_SESSION['pending_email'] = $email;
+                    $_SESSION['pending_name'] = $name;
+                    $_SESSION['email_sent'] = false;
+                    $_SESSION['message'] = 'اگر این نشانی برای ثبت‌نام یا تأیید حساب قابل استفاده باشد، راهنمای لازم ارسال خواهد شد.';
+                    $this->redirect('/verify-email-needed');
                 }
             }
         }
