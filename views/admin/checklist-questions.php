@@ -13,6 +13,11 @@
             </div>
         </div>
 
+        <div class="checklist-branch-guide">
+            <strong><i class="fas fa-route"></i> تنظیم مسیر هوشمند</strong>
+            <span>اول همهٔ پرسش‌ها را بسازید؛ سپس از ستون عملیات، پرسش را ویرایش کنید و برای هر امتیاز پاسخ مقصد را انتخاب کنید. مقصدها فقط پرسش‌های بعدی همین فهرست هستند. مقصد «سؤال بعدی به ترتیب» یعنی هیچ پرشی انجام نشود.</span>
+        </div>
+
         <?php $isEdit = !empty($editQuestion); ?>
         <?php
             $branchTargets = [];
@@ -121,7 +126,44 @@
                     <?php $total = count($questions); foreach ($questions as $i => $q): ?>
                     <tr>
                         <td><strong><?= $i + 1 ?></strong></td>
-                        <td><?= htmlspecialchars($q['question_text']) ?></td>
+                        <td>
+                            <?= htmlspecialchars($q['question_text']) ?>
+                            <?php
+                                $savedRules = $q['branching_rules'] ?? null;
+                                if (is_string($savedRules)) $savedRules = json_decode($savedRules, true);
+                                $savedRules = is_array($savedRules) ? $savedRules : [];
+                                $routeGroups = [];
+                                foreach (['3', '2', '1', '0'] as $answerValue) {
+                                    $target = (string)($savedRules[$answerValue] ?? 'next');
+                                    $routeGroups[$target][] = $answerValue;
+                                }
+                            ?>
+                            <div class="checklist-route-summary">
+                                <?php if (count($routeGroups) === 1 && isset($routeGroups['next'])): ?>
+                                    <span>مسیر: سؤال بعدی به ترتیب</span>
+                                <?php else: ?>
+                                    <?php foreach ($routeGroups as $target => $answerValues): ?>
+                                        <?php
+                                            $scoreLabels = array_map(function ($score) {
+                                                return 'امتیاز ' . strtr($score, ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳']);
+                                            }, $answerValues);
+                                            if ($target === 'next') $targetLabel = 'سؤال بعدی به ترتیب';
+                                            elseif ($target === 'end') $targetLabel = 'پایان ارزیابی';
+                                            else {
+                                                $targetLabel = 'مقصد حذف‌شده';
+                                                foreach ($questions as $targetPosition => $targetQuestion) {
+                                                    if ((string)$targetQuestion['id'] === (string)$target) {
+                                                        $targetLabel = 'پرسش ' . ($targetPosition + 1) . ': ' . $targetQuestion['question_text'];
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        ?>
+                                        <span><?= htmlspecialchars(implode(' و ', $scoreLabels)) ?> ← <?= htmlspecialchars($targetLabel) ?></span>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </td>
                         <td><code><?= htmlspecialchars($q['category']) ?></code></td>
                         <td><?= $q['weight'] ?></td>
                         <td>
