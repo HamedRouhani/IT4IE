@@ -164,9 +164,9 @@ abstract class Controller
      */
     protected static function requestIsSameOrigin()
     {
-        $expected = strtolower(trim((string) ($_SERVER['HTTP_HOST'] ?? '')));
-        if ($expected === '') {
-            return true;
+        $hostHeader = trim((string) ($_SERVER['HTTP_HOST'] ?? ''));
+        if ($hostHeader === '') {
+            return false;
         }
 
         $source = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
@@ -174,20 +174,34 @@ abstract class Controller
             $source = (string) ($_SERVER['HTTP_REFERER'] ?? '');
         }
         if ($source === '') {
-            return true;
+            return strtolower((string) ($_SERVER['HTTP_SEC_FETCH_SITE'] ?? '')) === 'same-origin';
         }
 
         $parts = parse_url($source);
-        if (!is_array($parts) || empty($parts['host'])) {
+        if (!is_array($parts) || empty($parts['host']) || empty($parts['scheme'])) {
             return false;
         }
 
-        $origin = strtolower((string) $parts['host']);
-        if (!empty($parts['port'])) {
-            $origin .= ':' . (int) $parts['port'];
+        $isHttps = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
+            || (int) ($_SERVER['SERVER_PORT'] ?? 0) === 443;
+        $expectedScheme = $isHttps ? 'https' : 'http';
+        $sourceScheme = strtolower((string) $parts['scheme']);
+        if (!hash_equals($expectedScheme, $sourceScheme)) {
+            return false;
         }
 
-        return hash_equals($expected, $origin);
+        $hostParts = parse_url($expectedScheme . '://' . $hostHeader);
+        if (!is_array($hostParts) || empty($hostParts['host'])) {
+            return false;
+        }
+
+        $expectedHost = strtolower((string) $hostParts['host']);
+        $sourceHost = strtolower((string) $parts['host']);
+        $defaultPort = $isHttps ? 443 : 80;
+        $expectedPort = (int) ($hostParts['port'] ?? $defaultPort);
+        $sourcePort = (int) ($parts['port'] ?? $defaultPort);
+
+        return hash_equals($expectedHost, $sourceHost) && $expectedPort === $sourcePort;
     }
 
     /**
