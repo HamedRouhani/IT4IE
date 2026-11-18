@@ -235,7 +235,7 @@ class WorkOrderController extends Controller
                 'SELECT sp.id AS spare_part_id, sp.code, sp.name AS spare_part_name,
                         i.id AS item_id, i.sku, i.name AS item_name, i.unit, i.on_hand
                  FROM pm_spare_parts sp
-                 JOIN inv_items i ON i.sku=sp.code AND i.workspace_id=? AND i.is_active=1
+                 JOIN inv_items i ON i.sku=sp.code COLLATE utf8mb4_unicode_ci AND i.workspace_id=? AND i.is_active=1
                  WHERE sp.id=? AND sp.system_id=? FOR UPDATE'
             );
             $stmt->execute([$context['workspace_id'], $sparePartId, $systemId]);
@@ -285,7 +285,7 @@ class WorkOrderController extends Controller
     {
         $stmt = $this->db->prepare(
             'SELECT sp.id,sp.code,sp.name,sp.unit,i.on_hand,i.sku
-             FROM pm_spare_parts sp JOIN inv_items i ON i.sku=sp.code AND i.workspace_id=? AND i.is_active=1
+             FROM pm_spare_parts sp JOIN inv_items i ON i.sku=sp.code COLLATE utf8mb4_unicode_ci AND i.workspace_id=? AND i.is_active=1
              WHERE sp.system_id=? ORDER BY sp.name'
         );
         $stmt->execute([$workspaceId, (int) pdm_active_system_id()]);
@@ -432,6 +432,13 @@ class WorkOrderController extends Controller
     public function delete($id)
     {
         $this->requireAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect(pdm_url('workorder'));
+            return;
+        }
+
+        $this->verifyCsrf();
 
         $id = (int) $id;
         $model = new WorkOrder();

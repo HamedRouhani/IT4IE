@@ -21,6 +21,15 @@
             });
         });
 
+        document.querySelectorAll('.pdm-confirm-delete-form').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                const message = this.dataset.message || 'آیا از حذف این مورد اطمینان دارید؟';
+                if (!confirm(message)) {
+                    e.preventDefault();
+                }
+            });
+        });
+
         // ═══════════════════════════════════════════════════
         // ⏰ Auto-hide Alertها بعد از ۵ ثانیه
         // ═══════════════════════════════════════════════════

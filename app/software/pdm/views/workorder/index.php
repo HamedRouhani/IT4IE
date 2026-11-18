@@ -200,13 +200,17 @@
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <?php if (in_array($wo['status'], ['open', 'cancelled'])): ?>
-                                            <a href="<?= pdm_url('workorder', 'delete', ['id' => $wo['id']]) ?>"
-                                               class="btn-pdm-outline btn-sm pdm-confirm-delete"
-                                               data-message="آیا از حذف دستورکار '<?= pdm_e($wo['wo_number']) ?>' اطمینان دارید؟"
-                                               title="حذف"
-                                               style="color: var(--pdm-danger); border-color: var(--pdm-danger);">
-                                                <i class="fas fa-trash"></i>
-                                            </a>
+                                            <form method="POST" action="<?= pdm_url('workorder', 'delete', ['id' => $wo['id']]) ?>"
+                                                  class="d-inline pdm-confirm-delete-form"
+                                                  data-message="آیا از حذف دستورکار '<?= pdm_e($wo['wo_number']) ?>' اطمینان دارید؟">
+                                                <?= $this->csrfField() ?>
+                                                <button type="submit" class="btn-pdm-outline btn-sm"
+                                                        title="حذف"
+                                                        aria-label="حذف دستورکار <?= pdm_e($wo['wo_number']) ?>"
+                                                        style="color: var(--pdm-danger); border-color: var(--pdm-danger);">
+                                                    <i class="fas fa-trash" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
                                         <?php endif; ?>
                                     </div>
                                 </td>
