@@ -164,10 +164,10 @@ class AuthController extends Controller
                 $errors[] = 'ایمیل معتبر نیست.';
             }
             
-            if (empty($password)) {
+            if (!is_string($password) || $password === '') {
                 $errors[] = 'لطفاً رمز عبور را وارد کنید.';
-            } elseif (strlen($password) < 6) {
-                $errors[] = 'رمز عبور باید حداقل ۶ کاراکتر باشد.';
+            } elseif (!User::passwordMeetsMinimum($password)) {
+                $errors[] = 'رمز عبور باید حداقل ۱۲ کاراکتر باشد.';
             }
             
             if ($password !== $passwordConfirm) {
@@ -386,10 +386,10 @@ class AuthController extends Controller
             
             $errors = [];
             
-            if (empty($password)) {
+            if (!is_string($password) || $password === '') {
                 $errors[] = 'لطفاً رمز عبور جدید را وارد کنید.';
-            } elseif (strlen($password) < 6) {
-                $errors[] = 'رمز عبور باید حداقل ۶ کاراکتر باشد.';
+            } elseif (!User::passwordMeetsMinimum($password)) {
+                $errors[] = 'رمز عبور باید حداقل ۱۲ کاراکتر باشد.';
             }
             
             if ($password !== $passwordConfirm) {

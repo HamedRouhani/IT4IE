@@ -156,8 +156,8 @@ class ProfileController extends Controller
             return;
         }
 
-        if (strlen($newPassword) < 6) {
-            $_SESSION['error'] = 'رمز عبور باید حداقل ۶ کاراکتر باشد.';
+        if (!User::passwordMeetsMinimum($newPassword)) {
+            $_SESSION['error'] = 'رمز عبور باید حداقل ۱۲ کاراکتر باشد.';
             $this->redirect('/profile/edit');
             return;
         }

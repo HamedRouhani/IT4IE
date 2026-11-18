@@ -76,8 +76,8 @@
                     <div class="form-group">
                         <label for="new_password">رمز عبور جدید *</label>
                         <input type="password" id="new_password" name="new_password" class="form-control" 
-                               minlength="6" required>
-                        <small class="form-text">حداقل ۶ کاراکتر</small>
+                               minlength="12" required>
+                        <small class="form-text">حداقل ۱۲ کاراکتر</small>
                     </div>
                     <div class="form-group">
                         <label for="confirm_password">تکرار رمز عبور جدید *</label>

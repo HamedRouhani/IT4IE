@@ -5,6 +5,8 @@ use App\Core\Model;
 
 class User extends Model
 {
+    public const MIN_PASSWORD_LENGTH = 12;
+
     protected $table = 'users';
     protected $primaryKey = 'id';
     
@@ -76,10 +78,24 @@ class User extends Model
      */
     public function createUser($data)
     {
+        if (!self::passwordMeetsMinimum($data['password'] ?? null)) {
+            throw new \InvalidArgumentException('رمز عبور باید حداقل ' . self::MIN_PASSWORD_LENGTH . ' کاراکتر باشد.');
+        }
+
         $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         $data['verification_token'] = bin2hex(random_bytes(32));
         $data['created_at'] = date('Y-m-d H:i:s');
         return $this->create($data);
+    }
+
+    public static function passwordMeetsMinimum($password): bool
+    {
+        if (!is_string($password)) {
+            return false;
+        }
+
+        $length = preg_match_all('/[\\s\\S]/u', $password);
+        return $length !== false && $length >= self::MIN_PASSWORD_LENGTH;
     }
     
     /**
@@ -198,6 +214,13 @@ class User extends Model
      */
     public function resetPassword($token, $newPassword)
     {
+        if (!self::passwordMeetsMinimum($newPassword)) {
+            return [
+                'success' => false,
+                'message' => 'رمز عبور باید حداقل ' . self::MIN_PASSWORD_LENGTH . ' کاراکتر باشد.'
+            ];
+        }
+
         // Find user by reset token
         $user = $this->findByResetToken($token);
         if (!$user) {

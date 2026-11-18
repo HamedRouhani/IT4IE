@@ -22,7 +22,7 @@
                 <div class="input-group">
                     <span class="input-icon"><i class="fas fa-lock"></i></span>
                     <input type="password" id="password" name="password" required 
-                           placeholder="حداقل ۶ کاراکتر">
+                           minlength="12" placeholder="حداقل ۱۲ کاراکتر">
                     <button type="button" class="toggle-password">
                         <i class="fas fa-eye"></i>
                     </button>
