@@ -1205,6 +1205,8 @@ class AdminController extends Controller
             $editQuestion = $checklistModel->getQuestion((int)$_GET['edit']);
             if ($editQuestion && (int)$editQuestion['checklist_id'] !== (int)$id) {
                 $editQuestion = null;
+            } elseif ($editQuestion) {
+                $editQuestion['branching_rules'] = json_decode($editQuestion['branching_rules'] ?? '', true) ?: [];
             }
         }
         
@@ -1240,6 +1242,7 @@ class AdminController extends Controller
             'question_text' => trim($_POST['question_text'] ?? ''),
             'weight' => (int)($_POST['weight'] ?? 1),
             'sort_order' => (int)($_POST['sort_order'] ?? 0),
+            'branching_rules' => $this->normalizeChecklistBranchRules($_POST['branching_rules'] ?? [], (int)$id, (int)$q['checklist_id'], $checklistModel),
             'is_active' => (int)($_POST['is_active'] ?? 1)
         ];
         
@@ -1304,6 +1307,7 @@ class AdminController extends Controller
             'question_text' => trim($_POST['question_text'] ?? ''),
             'weight' => (int)($_POST['weight'] ?? 1),
             'sort_order' => (int)($_POST['sort_order'] ?? 0),
+            'branching_rules' => ['0' => 'next', '1' => 'next', '2' => 'next', '3' => 'next'],
             'is_active' => (int)($_POST['is_active'] ?? 1)
         ];
         
@@ -1313,6 +1317,34 @@ class AdminController extends Controller
             $_SESSION['error'] = 'خطا در افزودن سوال';
         }
         $this->redirect('/admin/checklist/questions/' . $checklistId);
+    }
+
+    private function normalizeChecklistBranchRules($submitted, $questionId, $checklistId, $checklistModel)
+    {
+        $ordered = $checklistModel->getOrderedQuestions($checklistId);
+        $currentIndex = -1;
+        foreach ($ordered as $index => $question) {
+            if ((int)$question['id'] === $questionId) {
+                $currentIndex = $index;
+                break;
+            }
+        }
+
+        $allowedTargets = [];
+        if ($currentIndex >= 0) {
+            foreach (array_slice($ordered, $currentIndex + 1) as $question) {
+                if ((int)$question['is_active'] === 1) $allowedTargets[] = (string)(int)$question['id'];
+            }
+        }
+
+        $rules = [];
+        foreach (['0', '1', '2', '3'] as $answer) {
+            $target = is_array($submitted) ? (string)($submitted[$answer] ?? 'next') : 'next';
+            $rules[$answer] = in_array($target, ['next', 'end'], true) || in_array($target, $allowedTargets, true)
+                ? $target
+                : 'next';
+        }
+        return $rules;
     }
 
     public function deleteChecklistQuestion($id)

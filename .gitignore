@@ -9,3 +9,4 @@
 !app/software/inventory/database/beta-install.sql
 !app/software/time-study-analyzer/database/install.sql
 !app/software/engineering-economy/database/install.sql
+!app/database/migrations/*.sql

@@ -151,6 +151,63 @@ class Checklist extends Model
         return is_array($result) ? ($result[0] ?? null) : null;
     }
 
+    /** Resolve the active question IDs reached by a user's answers. */
+    public function resolveExecutionPath(array $questions, array $answers)
+    {
+        if (!$questions) return [];
+
+        $byId = [];
+        $positionById = [];
+        foreach ($questions as $position => $question) {
+            $byId[(int)$question['id']] = $question;
+            $positionById[(int)$question['id']] = $position;
+        }
+
+        $path = [];
+        $visited = [];
+        $currentId = (int)$questions[0]['id'];
+        while ($currentId > 0 && isset($byId[$currentId])) {
+            if (isset($visited[$currentId])) return false;
+            $visited[$currentId] = true;
+            $question = $byId[$currentId];
+            $path[] = $question;
+
+            if (!array_key_exists($currentId, $answers)) return false;
+            $rules = $this->decodeBranchRules($question['branching_rules'] ?? null);
+            $answerKey = (string)(int)$answers[$currentId];
+            $target = $rules[$answerKey] ?? 'next';
+
+            if ($target === 'end') break;
+            if ($target === 'next') {
+                $targetId = 0;
+            } else {
+                $targetId = filter_var($target, FILTER_VALIDATE_INT) ? (int)$target : 0;
+                if (!$targetId || !isset($byId[$targetId]) || isset($visited[$targetId])) $targetId = 0;
+            }
+
+            if (!$targetId) {
+                $currentPosition = $positionById[$currentId];
+                for ($index = $currentPosition + 1; $index < count($questions); $index++) {
+                    $candidateId = (int)$questions[$index]['id'];
+                    if (!isset($visited[$candidateId])) { $targetId = $candidateId; break; }
+                }
+            }
+
+            if (!$targetId) break;
+            $currentId = $targetId;
+        }
+
+        return $path;
+    }
+
+    private function decodeBranchRules($value)
+    {
+        if (is_array($value)) return $value;
+        if (!is_string($value) || trim($value) === '') return [];
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
     public function getOrderedQuestions($checklistId)
     {
         $sql = "SELECT * FROM {$this->questionsTable} 
@@ -163,9 +220,9 @@ class Checklist extends Model
     public function createQuestion($data)
     {
         $sql = "INSERT INTO {$this->questionsTable} 
-                (checklist_id, category, question_text, weight, sort_order, is_active) 
+                (checklist_id, category, question_text, weight, sort_order, branching_rules, is_active)
                 VALUES 
-                (:checklist_id, :category, :question_text, :weight, :sort_order, :is_active)";
+                (:checklist_id, :category, :question_text, :weight, :sort_order, :branching_rules, :is_active)";
         
         try {
             $this->query($sql, [
@@ -174,6 +231,7 @@ class Checklist extends Model
                 ':question_text' => $data['question_text'],
                 ':weight' => (int)($data['weight'] ?? 1),
                 ':sort_order' => (int)($data['sort_order'] ?? 0),
+                ':branching_rules' => json_encode($data['branching_rules'] ?? [], JSON_UNESCAPED_UNICODE),
                 ':is_active' => (int)($data['is_active'] ?? 1)
             ]);
             return true;
@@ -187,7 +245,7 @@ class Checklist extends Model
     {
         $sql = "UPDATE {$this->questionsTable} 
                 SET category = :category, question_text = :question_text, 
-                    weight = :weight, sort_order = :sort_order, is_active = :is_active
+                    weight = :weight, sort_order = :sort_order, branching_rules = :branching_rules, is_active = :is_active
                 WHERE id = :id";
         
         try {
@@ -196,6 +254,7 @@ class Checklist extends Model
                 ':question_text' => $data['question_text'],
                 ':weight' => (int)($data['weight'] ?? 1),
                 ':sort_order' => (int)($data['sort_order'] ?? 0),
+                ':branching_rules' => json_encode($data['branching_rules'] ?? [], JSON_UNESCAPED_UNICODE),
                 ':is_active' => (int)($data['is_active'] ?? 1),
                 ':id' => (int)$id
             ]);

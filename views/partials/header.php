@@ -41,7 +41,7 @@
                     <li class="nav-item">
                         <a href="/checklist" class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], '/checklist') === 0) ? 'active' : ''; ?>">
                             <i class="fas fa-clipboard-list"></i>
-                            <span>چک‌لیست‌های هوشمند</span>
+                            <span>چک‌لیست هوشمند</span>
                         </a>
                     </li>
 

@@ -9,7 +9,7 @@
             <p><?= htmlspecialchars($checklist['description'] ?? '') ?></p>
             <div class="header-meta">
                 <span><i class="fas fa-clock"></i> حدود <?= $checklist['estimated_time'] ?> دقیقه</span>
-                <span><i class="fas fa-question-circle"></i> <?= $checklist['questions_count'] ?> سوال</span>
+                <span><i class="fas fa-question-circle"></i> حداکثر <?= $checklist['questions_count'] ?> پرسش</span>
             </div>
         </div>
 
@@ -37,8 +37,9 @@
                 <input type="hidden" name="checklist_id" value="<?= $checklist['id'] ?>">
                 
                 <div class="smart-flow-progress" aria-live="polite">
-                    <div class="smart-flow-progress-copy"><span id="smartFlowStepLabel">گام ۱</span><span id="smartFlowPercent">۰٪ تکمیل شده</span></div>
+                    <div class="smart-flow-progress-copy"><span id="smartFlowStepLabel">گام ۱</span><span id="smartFlowPercent">۰ پاسخ ثبت شده</span></div>
                     <div class="smart-flow-track"><span id="smartFlowBar"></span></div>
+                    <p class="smart-flow-hint" id="smartFlowHint">با انتخاب پاسخ، مسیر متناسب با آن مشخص می‌شود.</p>
                 </div>
                 <div class="company-field">
                     <label>نام شرکت/پروژه (اختیاری)</label>
@@ -48,7 +49,13 @@
                 <?php foreach ($questions as $category => $catQuestions): ?>
                 <div class="question-category">
                     <?php foreach ($catQuestions as $q): ?>
-                    <div class="question-item smart-flow-question" data-smart-step>
+                    <?php
+                        $questionBranchRules = $q['branching_rules'] ?? [];
+                        if (is_string($questionBranchRules)) $questionBranchRules = json_decode($questionBranchRules, true) ?: [];
+                        if (!is_array($questionBranchRules)) $questionBranchRules = [];
+                        $questionBranchJson = json_encode($questionBranchRules, JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT);
+                    ?>
+                    <div class="question-item smart-flow-question" data-smart-step data-question-id="<?= (int)$q['id'] ?>" data-sort-order="<?= (int)$q['sort_order'] ?>" data-branch-rules="<?= htmlspecialchars($questionBranchJson ?: '{}', ENT_QUOTES, 'UTF-8') ?>">
                         <p class="question-text"><?= htmlspecialchars($q['question_text']) ?></p>
                         <div class="answer-options">
                             <?php

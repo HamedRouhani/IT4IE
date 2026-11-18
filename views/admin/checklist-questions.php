@@ -14,6 +14,27 @@
         </div>
 
         <?php $isEdit = !empty($editQuestion); ?>
+        <?php
+            $branchTargets = [];
+            $currentPosition = -1;
+            if ($isEdit) {
+                foreach ($questions as $position => $question) {
+                    if ((int)$question['id'] === (int)$editQuestion['id']) { $currentPosition = $position; break; }
+                }
+                if ($currentPosition >= 0) {
+                    foreach (array_slice($questions, $currentPosition + 1) as $question) {
+                        if ((int)$question['is_active'] === 1) $branchTargets[] = $question;
+                    }
+                }
+            }
+            $branchRules = $isEdit ? ($editQuestion['branching_rules'] ?? []) : [];
+            $branchAnswers = [
+                '3' => 'بله، به‌شدت · امتیاز ۳',
+                '2' => 'تا حدودی · امتیاز ۲',
+                '1' => 'به ندرت · امتیاز ۱',
+                '0' => 'خیر، اصلاً · امتیاز ۰'
+            ];
+        ?>
 
         <!-- فرم افزودن / ویرایش -->
         <div class="admin-form" style="margin-bottom: 20px;">
@@ -59,6 +80,23 @@
                         </select>
                     </div>
                 </div>
+                <fieldset class="checklist-branch-editor">
+                    <legend><i class="fas fa-code-branch"></i> مسیر بعد از هر پاسخ</legend>
+                    <p>برای هر پاسخ می‌توانید سؤال بعدی را تغییر دهید یا ارزیابی را تمام کنید. «سؤال بعدی به ترتیب» رفتار پیش‌فرض و خطی را حفظ می‌کند.</p>
+                    <?php foreach ($branchAnswers as $answerValue => $answerLabel): ?>
+                    <?php $selectedTarget = (string)($branchRules[$answerValue] ?? 'next'); ?>
+                    <label class="checklist-branch-row">
+                        <span><?= htmlspecialchars($answerLabel) ?></span>
+                        <select name="branching_rules[<?= $answerValue ?>]">
+                            <option value="next" <?= $selectedTarget === 'next' ? 'selected' : '' ?>>سؤال بعدی به ترتیب</option>
+                            <?php foreach ($branchTargets as $targetQuestion): ?>
+                            <option value="<?= (int)$targetQuestion['id'] ?>" <?= $selectedTarget === (string)$targetQuestion['id'] ? 'selected' : '' ?>>رفتن به سؤال <?= (int)$targetQuestion['id'] ?> — <?= htmlspecialchars($targetQuestion['question_text']) ?></option>
+                            <?php endforeach; ?>
+                            <option value="end" <?= $selectedTarget === 'end' ? 'selected' : '' ?>>پایان ارزیابی و نمایش نتیجه</option>
+                        </select>
+                    </label>
+                    <?php endforeach; ?>
+                </fieldset>
                 <button type="submit" class="btn-admin-submit">
                     <i class="fas fa-<?= $isEdit ? 'save' : 'plus' ?>"></i>
                     <?= $isEdit ? 'ذخیره تغییرات' : 'افزودن سوال' ?>

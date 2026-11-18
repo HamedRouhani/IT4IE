@@ -120,16 +120,29 @@ class ChecklistModuleController extends Controller
 
         $company = trim($_POST['company'] ?? 'تعریف نشده');
 
+        $allQuestions = $this->checklistModel->getQuestionsForChecklist($checklistId);
+        $submittedAnswers = [];
+        foreach ($allQuestions as $question) {
+            $field = 'q_' . (int)$question['id'];
+            if (!isset($_POST[$field]) || !is_scalar($_POST[$field]) || !in_array((string)$_POST[$field], ['0', '1', '2', '3'], true)) {
+                continue;
+            }
+            $submittedAnswers[(int)$question['id']] = (int)$_POST[$field];
+        }
+
+        $questions = $this->checklistModel->resolveExecutionPath($allQuestions, $submittedAnswers);
+        if ($questions === false || !$questions) {
+            $_SESSION['error'] = 'مسیر این ارزیابی کامل نشد. لطفاً پاسخ‌ها را دوباره ثبت کنید.';
+            $this->redirect('/checklist/view/' . $checklist['slug']);
+            return;
+        }
+
         $answers = [];
-        $questions = $this->checklistModel->getQuestionsForChecklist($checklistId);
         $totalScore = 0;
         $maxScore = 0;
 
         foreach ($questions as $q) {
-            $answer = (int)($_POST['q_' . $q['id']] ?? 0);
-            if ($answer < 0) $answer = 0;
-            if ($answer > 3) $answer = 3;
-            
+            $answer = $submittedAnswers[(int)$q['id']];
             $answers[$q['id']] = $answer;
             $totalScore += $answer * $q['weight'];
             $maxScore += 3 * $q['weight'];

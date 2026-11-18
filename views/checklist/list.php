@@ -54,7 +54,7 @@ $userName = $_SESSION['user_name'] ?? 'کاربر';
                     <p class="card-desc"><?= htmlspecialchars($cl['description'] ?? '') ?></p>
                     <div class="card-meta">
                         <span><i class="fas fa-clock"></i> <?= $cl['estimated_time'] ?> دقیقه</span>
-                        <span><i class="fas fa-list-check"></i> <?= $cl['questions_count'] ?> پرسش</span>
+                        <span><i class="fas fa-list-check"></i> حداکثر <?= $cl['questions_count'] ?> پرسش</span>
                     </div>
                     <a href="/checklist/view/<?= htmlspecialchars($cl['slug']) ?>" class="btn-start">
                         شروع ارزیابی
