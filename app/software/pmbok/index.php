@@ -179,12 +179,12 @@ try {
         http_response_code(500);
         echo json_encode([
             'success' => false,
-            'error' => $e->getMessage()
+            'error' => 'خطای داخلی رخ داد. لطفاً بعداً دوباره تلاش کنید.'
         ], JSON_UNESCAPED_UNICODE);
     } else {
         echo '<div style="font-family: Vazirmatn, Tahoma; direction: rtl; padding: 50px; text-align: center;">';
         echo '<h1 style="color: #e74c3c;">❌ خطا در پردازش</h1>';
-        echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
+        echo '<p>خطای داخلی رخ داد. لطفاً بعداً دوباره تلاش کنید.</p>';
         echo '<a href="' . CURRENT_MODULE_URL . '" style="color: #7C3AED;">بازگشت به داشبورد</a>';
         echo '</div>';
     }

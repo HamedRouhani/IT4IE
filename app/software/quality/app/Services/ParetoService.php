@@ -158,9 +158,10 @@ class ParetoService
 
         } catch (\Exception $e) {
             $this->analysisModel->rollback();
+            error_log('Quality Pareto analysis failed: ' . $e->getMessage());
             return [
                 'success' => false,
-                'error'   => $e->getMessage(),
+                'error'   => 'تحلیل انجام نشد. لطفاً ورودی‌ها را بررسی و دوباره تلاش کنید.',
             ];
         }
     }
@@ -214,9 +215,10 @@ class ParetoService
 
         } catch (\Exception $e) {
             $this->analysisModel->rollback();
+            error_log('Quality Pareto analysis update failed: ' . $e->getMessage());
             return [
                 'success' => false,
-                'error'   => $e->getMessage(),
+                'error'   => 'به‌روزرسانی تحلیل انجام نشد. لطفاً دوباره تلاش کنید.',
             ];
         }
     }

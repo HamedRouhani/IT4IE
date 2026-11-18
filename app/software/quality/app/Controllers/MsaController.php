@@ -143,8 +143,13 @@ class MsaController extends Controller
             ]);
 
         } catch (\Throwable $e) {
-            http_response_code(400);
-            $this->json(['success' => false, 'error' => $e->getMessage()]);
+            error_log('Quality MSA calculation failed: ' . $e->getMessage());
+            $isInputError = $e instanceof \InvalidArgumentException;
+            http_response_code($isInputError ? 400 : 500);
+            $this->json([
+                'success' => false,
+                'error' => $isInputError ? $e->getMessage() : 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.',
+            ]);
         }
     }
 

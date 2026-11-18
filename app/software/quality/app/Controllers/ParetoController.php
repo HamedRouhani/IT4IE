@@ -448,7 +448,8 @@ class ParetoController extends Controller
             $this->capaModel->commit();
         } catch (\Exception $e) {
             $this->capaModel->rollback();
-            $this->setError('خطا در ثبت CAPA ها: ' . $e->getMessage());
+            error_log('Quality CAPA registration failed: ' . $e->getMessage());
+            $this->setError('ثبت CAPA انجام نشد. لطفاً دوباره تلاش کنید.');
             $this->redirect(CURRENT_MODULE_URL . '?controller=pareto&action=suggestCapa&id=' . $analysisId);
         }
 

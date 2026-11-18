@@ -82,7 +82,7 @@ class AssignmentController extends Controller
 
         } catch (\Exception $e) {
             error_log("Assignment Store Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 
@@ -194,7 +194,7 @@ class AssignmentController extends Controller
 
         } catch (\Exception $e) {
             error_log("Assignment Update Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 
@@ -263,7 +263,7 @@ class AssignmentController extends Controller
 
         } catch (\Exception $e) {
             error_log("Assignment Solve Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 

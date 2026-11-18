@@ -91,10 +91,12 @@ class RequirementController extends Controller
                 'data' => $result
             ], JSON_UNESCAPED_UNICODE);
         } catch (\Exception $e) {
-            http_response_code(400);
+            error_log('BABOK requirement validation failed: ' . $e->getMessage());
+            $isInputError = $e instanceof \InvalidArgumentException;
+            http_response_code($isInputError ? 400 : 500);
             echo json_encode([
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $isInputError ? $e->getMessage() : 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'
             ], JSON_UNESCAPED_UNICODE);
         }
         exit;

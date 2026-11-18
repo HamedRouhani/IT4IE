@@ -220,7 +220,7 @@ class SimplexController extends Controller
 
         } catch (\Exception $e) {
             error_log("Simplex Update Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 
@@ -268,7 +268,7 @@ class SimplexController extends Controller
 
         } catch (\Exception $e) {
             error_log("Simplex Solve Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 

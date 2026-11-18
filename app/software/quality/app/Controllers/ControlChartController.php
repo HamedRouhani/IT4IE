@@ -177,10 +177,12 @@ class ControlChartController extends Controller
             ]);
 
         } catch (\Throwable $e) {
-            http_response_code(400);
+            error_log('Quality control chart calculation failed: ' . $e->getMessage());
+            $isInputError = $e instanceof \InvalidArgumentException;
+            http_response_code($isInputError ? 400 : 500);
             $this->json([
                 'success' => false,
-                'error'   => $e->getMessage(),
+                'error'   => $isInputError ? $e->getMessage() : 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.',
             ]);
         }
     }

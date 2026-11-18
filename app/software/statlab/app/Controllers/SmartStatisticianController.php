@@ -48,7 +48,7 @@ class SmartStatisticianController extends Controller
             $this->json($result);
         } catch (\Throwable $e) {
             error_log('StatLab Smart Analyze Error: ' . $e->getMessage());
-            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 
@@ -120,7 +120,7 @@ class SmartStatisticianController extends Controller
             ]);
         } catch (\Throwable $e) {
             error_log('StatLab Smart Create Error: ' . $e->getMessage());
-            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 }

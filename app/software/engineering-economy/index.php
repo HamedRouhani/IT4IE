@@ -65,12 +65,12 @@ try {
     if ($isAjax) {
         http_response_code(500);
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['success' => false, 'error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً بعداً دوباره تلاش کنید.'], JSON_UNESCAPED_UNICODE);
     } else {
         http_response_code(500);
         echo '<main dir="rtl" style="max-width:760px;margin:3rem auto;padding:2rem;font-family:Vazirmatn,sans-serif">';
         echo '<h1>خطا در ماژول اقتصاد مهندسی</h1>';
-        echo '<p>' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>';
+        echo '<p>خطای داخلی رخ داد. لطفاً بعداً دوباره تلاش کنید.</p>';
         echo '<a href="' . CURRENT_MODULE_URL . '">بازگشت به فهرست پروژه‌ها</a></main>';
     }
 }

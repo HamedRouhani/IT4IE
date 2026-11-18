@@ -84,7 +84,7 @@ class SmartModelerController extends Controller
             $this->json($result);
         } catch (\Exception $e) {
             error_log("SmartModeler Analyze Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 
@@ -159,7 +159,7 @@ class SmartModelerController extends Controller
 
         } catch (\Exception $e) {
             error_log("SmartModeler CreateProject Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 
@@ -315,7 +315,7 @@ class SmartModelerController extends Controller
             $result = QueueingEngine::solve($modelCode, $params);
         } catch (\Throwable $e) {
             error_log('SmartModeler Queueing Error: ' . $e->getMessage());
-            $result = ['status' => 'error', 'message' => $e->getMessage()];
+            $result = ['status' => 'error', 'message' => 'خطای داخلی رخ داد.'];
         }
 
         $model = new QueueingProject();
@@ -355,7 +355,7 @@ class SmartModelerController extends Controller
             $result = MarkovEngine::solve($states, $matrix, $initial, $steps);
         } catch (\Throwable $e) {
             error_log('SmartModeler Markov Error: ' . $e->getMessage());
-            $result = ['status' => 'error', 'errors' => [$e->getMessage()]];
+            $result = ['status' => 'error', 'errors' => ['خطای داخلی رخ داد.']];
         }
 
         $model = new MarkovProject();
@@ -390,7 +390,7 @@ class SmartModelerController extends Controller
             $result = GameTheoryEngine::solve($gameType, $p1, $p2, $A, $B);
         } catch (\Throwable $e) {
             error_log('SmartModeler Game Error: ' . $e->getMessage());
-            $result = ['status' => 'error', 'message' => $e->getMessage()];
+            $result = ['status' => 'error', 'message' => 'خطای داخلی رخ داد.'];
         }
 
         $model = new GameTheoryProject();
@@ -426,7 +426,7 @@ class SmartModelerController extends Controller
             }
         } catch (\Throwable $e) {
             error_log('SmartModeler MonteCarlo Error: ' . $e->getMessage());
-            $result = ['status' => 'error', 'message' => $e->getMessage()];
+            $result = ['status' => 'error', 'message' => 'خطای داخلی رخ داد.'];
         }
 
         $model = new MonteCarloProject();
@@ -471,7 +471,7 @@ class SmartModelerController extends Controller
             $result = ILPEngine::solve($c, $A, $b, $types, $intVars, $sense);
         } catch (\Throwable $e) {
             error_log('SmartModeler ILP Error: ' . $e->getMessage());
-            $result = ['status' => 'error', 'message' => $e->getMessage()];
+            $result = ['status' => 'error', 'message' => 'خطای داخلی رخ داد.'];
         }
 
         $model = new ILPProject();
@@ -516,7 +516,7 @@ class SmartModelerController extends Controller
             $result = DualSimplexEngine::solve($c, $A, $b, $types, $sense);
         } catch (\Throwable $e) {
             error_log('SmartModeler Dual Error: ' . $e->getMessage());
-            $result = ['status' => 'error', 'message' => $e->getMessage()];
+            $result = ['status' => 'error', 'message' => 'خطای داخلی رخ داد.'];
         }
 
         $model = new DualProject();

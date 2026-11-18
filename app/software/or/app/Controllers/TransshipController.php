@@ -91,7 +91,7 @@ class TransshipController extends Controller
 
         } catch (\Exception $e) {
             error_log("Transship Store Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 
@@ -207,7 +207,7 @@ class TransshipController extends Controller
 
         } catch (\Exception $e) {
             error_log("Transship Update Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 
@@ -274,7 +274,7 @@ class TransshipController extends Controller
 
         } catch (\Exception $e) {
             error_log("Transship Solve Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 }

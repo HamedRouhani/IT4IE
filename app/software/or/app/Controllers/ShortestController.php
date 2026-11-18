@@ -77,7 +77,7 @@ class ShortestController extends Controller
 
         } catch (\Exception $e) {
             error_log("Shortest Store Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 
@@ -180,7 +180,7 @@ class ShortestController extends Controller
 
         } catch (\Exception $e) {
             error_log("Shortest Update Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 
@@ -288,7 +288,7 @@ class ShortestController extends Controller
 
         } catch (\Exception $e) {
             error_log("Shortest Solve Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => 'خطای داخلی: ' . $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 }

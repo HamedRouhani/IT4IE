@@ -171,14 +171,12 @@ try {
         header('Content-Type: application/json');
         echo json_encode([
             'success' => false,
-            'error'   => $e->getMessage(),
-            'file'    => basename($e->getFile()),
-            'line'    => $e->getLine()
+            'error'   => 'خطای داخلی رخ داد. لطفاً بعداً دوباره تلاش کنید.'
         ], JSON_UNESCAPED_UNICODE);
     } else {
         echo '<div style="font-family:Tahoma;direction:rtl;padding:50px;text-align:center;">';
         echo '<h1 style="color:#e74c3c;">❌ خطا در ماژول Quality Analyzer</h1>';
-        echo '<p>' . htmlspecialchars($e->getMessage()) . '</p>';
+        echo '<p>خطای داخلی رخ داد. لطفاً بعداً دوباره تلاش کنید.</p>';
         if (defined('APP_DEBUG') && APP_DEBUG) {
             echo '<pre style="direction:ltr;text-align:left;background:#1e293b;color:#10b981;padding:20px;">';
             echo $e->getTraceAsString();

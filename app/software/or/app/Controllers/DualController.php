@@ -84,12 +84,7 @@ class DualController extends Controller
             $errorOutput = ob_get_clean();
             error_log('OR Dual Error: ' . $e->getMessage() . ' | Output: ' . $errorOutput);
             
-            $errorMsg = $e->getMessage();
-            if (!empty($errorOutput)) {
-                $errorMsg .= ' | جزئیات فنی: ' . strip_tags($errorOutput);
-            }
-            
-            $this->json(['success' => false, 'error' => $errorMsg], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 

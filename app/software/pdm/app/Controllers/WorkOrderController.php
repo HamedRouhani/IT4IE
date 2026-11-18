@@ -262,7 +262,10 @@ class WorkOrderController extends Controller
         } catch (\Throwable $e) {
             if ($this->db->inTransaction()) $this->db->rollBack();
             error_log('PdM inventory issue failed: ' . $e->getMessage());
-            pdm_flash_set('danger', $e instanceof \RuntimeException ? $e->getMessage() : 'ثبت مصرف انجام نشد؛ هیچ تغییری در موجودی ذخیره نشد.');
+            $message = $e instanceof \RuntimeException && !($e instanceof \PDOException)
+                ? $e->getMessage()
+                : 'ثبت مصرف انجام نشد؛ هیچ تغییری در موجودی ذخیره نشد.';
+            pdm_flash_set('danger', $message);
         }
         $this->redirect(pdm_url('workorder', 'show', ['id' => $workOrderId]));
     }

@@ -574,14 +574,12 @@ try {
         http_response_code(500);
         echo json_encode([
             'success' => false,
-            'error' => $e->getMessage(),
-            'file' => basename($e->getFile()),
-            'line' => $e->getLine()
+            'error' => 'خطای داخلی رخ داد. لطفاً بعداً دوباره تلاش کنید.'
         ], JSON_UNESCAPED_UNICODE);
     } else {
         echo '<div style="font-family: Tahoma; direction: rtl; padding: 50px; text-align: center;">';
         echo '<h1 style="color: #e74c3c;">❌ خطا در پردازش</h1>';
-        echo '<p style="font-size: 1.1rem;">' . htmlspecialchars($e->getMessage()) . '</p>';
+        echo '<p style="font-size: 1.1rem;">خطای داخلی رخ داد. لطفاً بعداً دوباره تلاش کنید.</p>';
         
         // فقط در حالت development جزئیات بیشتر نمایش داده شود
         if (defined('APP_DEBUG') && APP_DEBUG) {

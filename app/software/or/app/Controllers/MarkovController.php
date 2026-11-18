@@ -71,7 +71,7 @@ class MarkovController extends Controller
 
         } catch (\Throwable $e) {
             error_log('OR Markov Error: ' . $e->getMessage());
-            $this->json(['success' => false, 'error' => $e->getMessage()], 500);
+            $this->json(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.'], 500);
         }
     }
 

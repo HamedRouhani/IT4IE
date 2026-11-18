@@ -119,7 +119,10 @@ class DistributionController extends Controller
 
         } catch (\Throwable $e) {
             error_log("StatLab Distribution Error: " . $e->getMessage());
-            $this->json(['success' => false, 'error' => $e->getMessage()], $e instanceof \InvalidArgumentException ? 422 : 500);
+            $this->json([
+                'success' => false,
+                'error' => $e instanceof \InvalidArgumentException ? $e->getMessage() : 'خطای داخلی رخ داد. لطفاً دوباره تلاش کنید.',
+            ], $e instanceof \InvalidArgumentException ? 422 : 500);
         }
     }
 }
