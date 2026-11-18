@@ -6,8 +6,14 @@ $userName = $_SESSION['user_name'] ?? 'کاربر';
 <div class="checklist-list-page">
     <div class="container">
         <div class="page-hero">
-            <h1>📋 چک‌لیست‌های تخصصی IT4IE</h1>
-            <p>ابزارهای تعاملی برای ارزیابی و بهبود پروژه‌ها و فرآیندهای کسب‌وکار شما</p>
+            <div class="smart-checklist-kicker"><i class="fas fa-wand-magic-sparkles"></i> راهنمای تصمیم‌گیری تعاملی</div>
+            <h1>چک‌لیست‌های هوشمند IT4IE</h1>
+            <p>به‌جای فرم‌های طولانی، قدم‌به‌قدم پیش بروید؛ پاسخ‌ها را ثبت کنید و در پایان، ارزیابی و پیشنهادهای متناسب با حوزهٔ کاری‌تان را ببینید.</p>
+            <div class="smart-checklist-benefits" aria-label="ویژگی‌های چک‌لیست‌ها">
+                <span><i class="fas fa-route"></i> مسیر ساده و مرحله‌ای</span>
+                <span><i class="fas fa-lightbulb"></i> پیشنهادهای کاربردی</span>
+                <span><i class="fas fa-clock"></i> شروع رایگان</span>
+            </div>
             
             <?php if ($isLoggedIn): ?>
             <div class="user-checklist-actions">
@@ -27,6 +33,10 @@ $userName = $_SESSION['user_name'] ?? 'کاربر';
             <?php endif; ?>
         </div>
 
+        <div class="smart-checklist-section-head">
+            <div><span class="smart-checklist-eyebrow">کتابخانه ابزارها</span><h2>از کجا شروع می‌کنید؟</h2></div>
+            <p>یک موضوع را انتخاب کنید؛ هر ارزیابی چند دقیقه زمان می‌برد.</p>
+        </div>
         <div class="checklist-grid">
             <?php if (empty($checklists)): ?>
                 <div class="empty-state">
@@ -39,11 +49,12 @@ $userName = $_SESSION['user_name'] ?? 'کاربر';
                     <div class="card-icon">
                         <i class="fas <?= htmlspecialchars($cl['icon']) ?>"></i>
                     </div>
+                    <div class="smart-card-tag"><i class="fas fa-sparkles"></i> ارزیابی هوشمند</div>
                     <h3><?= htmlspecialchars($cl['title']) ?></h3>
                     <p class="card-desc"><?= htmlspecialchars($cl['description'] ?? '') ?></p>
                     <div class="card-meta">
                         <span><i class="fas fa-clock"></i> <?= $cl['estimated_time'] ?> دقیقه</span>
-                        <span><i class="fas fa-question-circle"></i> <?= $cl['questions_count'] ?> سوال</span>
+                        <span><i class="fas fa-list-check"></i> <?= $cl['questions_count'] ?> پرسش</span>
                     </div>
                     <a href="/checklist/view/<?= htmlspecialchars($cl['slug']) ?>" class="btn-start">
                         شروع ارزیابی

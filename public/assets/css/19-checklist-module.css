@@ -1093,3 +1093,45 @@
         transition-duration: .01ms !important;
     }
 }
+
+/* Smart checklist discovery and guided question flow */
+.checklist-list-page .page-hero { padding: clamp(28px, 5vw, 54px); }
+.smart-checklist-kicker,
+.smart-checklist-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #6038c9;
+    font-size: .84rem;
+    font-weight: 800;
+}
+.smart-checklist-kicker { margin-bottom: 12px; padding: 7px 12px; border: 1px solid #e3dcf7; border-radius: 999px; background: #fff; }
+.checklist-list-page .page-hero p { max-width: 720px; }
+.smart-checklist-benefits { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.smart-checklist-benefits span { display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; border: 1px solid #e7eaf0; border-radius: 999px; background: rgba(255,255,255,.8); color: #475569; font-size: .86rem; font-weight: 650; }
+.smart-checklist-benefits i { color: #148f83; }
+.smart-checklist-section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 34px 0 18px; }
+.smart-checklist-section-head h2 { margin: 5px 0 0; color: #17233b; font-size: clamp(1.2rem, 2.3vw, 1.6rem); }
+.smart-checklist-section-head p { margin: 0 0 3px; color: #64748b; }
+.smart-card-tag { display: inline-flex; align-items: center; gap: 6px; margin: -2px 0 9px; color: #148f83; font-size: .76rem; font-weight: 750; }
+.checklist-view-page .smart-flow-progress { margin: 0 0 18px; padding: 17px 20px; border: 1px solid #e3dcf7; border-radius: 16px; background: linear-gradient(120deg,#fff,#f8f6ff); }
+.smart-flow-progress-copy { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; color: #52617a; font-size: .88rem; font-weight: 700; }
+.smart-flow-progress-copy span:first-child { color: #6038c9; }
+.smart-flow-track { height: 7px; overflow: hidden; border-radius: 99px; background: #e9e5f3; }
+.smart-flow-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#14a892,#7551d8); transition: width .25s ease; }
+.checklist-view-page .question-item[hidden], .checklist-view-page [hidden] { display: none !important; }
+.checklist-view-page .question-category { min-height: 130px; }
+.smart-flow-needs-answer { animation: smart-flow-nudge .28s ease-in-out 2; }
+@keyframes smart-flow-nudge { 50% { transform: translateX(-4px); border-color: #ef9a82; } }
+.smart-flow-controls { display: flex; justify-content: space-between; gap: 12px; margin: 18px 0; }
+.smart-flow-controls button { min-height: 46px; padding: 0 20px; border: 1px solid #ded6f5; border-radius: 12px; background: #fff; color: #4827a5; font: inherit; font-weight: 750; cursor: pointer; }
+.smart-flow-controls [data-smart-next] { margin-inline-start: auto; border-color: transparent; background: linear-gradient(135deg,#6038c9,#7959d5); color: #fff; box-shadow: 0 7px 16px rgba(96,56,201,.18); }
+.smart-flow-controls button:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(42,30,91,.1); }
+.smart-flow-controls button:focus-visible { outline: 3px solid rgba(96,56,201,.25); outline-offset: 2px; }
+@media (max-width: 600px) {
+    .smart-checklist-section-head { display: block; margin-top: 26px; }
+    .smart-checklist-section-head p { margin-top: 8px; }
+    .smart-checklist-benefits { gap: 7px; }
+    .smart-checklist-benefits span { font-size: .78rem; }
+    .checklist-view-page .question-category { min-height: 150px; }
+}

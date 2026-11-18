@@ -36,6 +36,10 @@
             <form method="POST" action="/checklist/submit" id="checklistForm">
                 <input type="hidden" name="checklist_id" value="<?= $checklist['id'] ?>">
                 
+                <div class="smart-flow-progress" aria-live="polite">
+                    <div class="smart-flow-progress-copy"><span id="smartFlowStepLabel">گام ۱</span><span id="smartFlowPercent">۰٪ تکمیل شده</span></div>
+                    <div class="smart-flow-track"><span id="smartFlowBar"></span></div>
+                </div>
                 <div class="company-field">
                     <label>نام شرکت/پروژه (اختیاری)</label>
                     <input type="text" name="company" placeholder="مثال: شرکت نمونه">
@@ -44,7 +48,7 @@
                 <?php foreach ($questions as $category => $catQuestions): ?>
                 <div class="question-category">
                     <?php foreach ($catQuestions as $q): ?>
-                    <div class="question-item">
+                    <div class="question-item smart-flow-question" data-smart-step>
                         <p class="question-text"><?= htmlspecialchars($q['question_text']) ?></p>
                         <div class="answer-options">
                             <?php
@@ -68,7 +72,11 @@
                 </div>
                 <?php endforeach; ?>
 
-                <div class="submit-section">
+                <div class="smart-flow-controls" data-smart-controls hidden>
+                    <button type="button" class="smart-flow-back" data-smart-back><i class="fas fa-arrow-right"></i> قبلی</button>
+                    <button type="button" class="smart-flow-next" data-smart-next>گام بعدی <i class="fas fa-arrow-left"></i></button>
+                </div>
+                <div class="submit-section" data-smart-submit>
                     <button type="submit" class="btn-submit">
                         <i class="fas fa-chart-pie"></i>
                         مشاهده نتیجه و توصیه‌ها
@@ -78,3 +86,4 @@
         <?php endif; ?>
     </div>
 </div>
+<script src="/assets/js/checklist-smart-flow.js" defer></script>
