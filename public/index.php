@@ -29,13 +29,15 @@ if (file_exists($envFile)) {
 
 // ============================================
 // ERROR HANDLING
-// فقط وقتی APP_DEBUG در .env روشن باشد جزئیات خطا نمایش داده می‌شود.
+// جزئیات خطا فقط وقتی APP_ENV=development و APP_DEBUG=true باشد نمایش داده می‌شود.
 // ============================================
-$appDebug = filter_var(getenv('APP_DEBUG') ?: 'false', FILTER_VALIDATE_BOOLEAN);
+$appEnvironment = strtolower(trim((string) (getenv('APP_ENV') ?: 'production')));
+$debugRequested = filter_var(getenv('APP_DEBUG') ?: 'false', FILTER_VALIDATE_BOOLEAN);
+$appDebug = $appEnvironment === 'development' && $debugRequested;
 if (!defined('APP_DEBUG')) {
     define('APP_DEBUG', $appDebug);
 }
-error_reporting($appDebug ? E_ALL : 0);
+error_reporting(E_ALL);
 ini_set('display_errors', $appDebug ? '1' : '0');
 ini_set('log_errors', '1');
 
@@ -412,41 +414,6 @@ if (preg_match('/^software\/([a-z0-9\-]+)(\/.*)?$/', $url, $m)) {
         // 🎯 مسیر صحیح: app/software/{moduleName}
         $modulePath = APP_PATH . '/software/' . $moduleName;
         
-        // 🔍 دیباگ - با ?debug=1
-        if (isset($_GET['debug'])) {
-            echo "<pre style='direction:ltr;text-align:left;background:#1e293b;color:#10b981;padding:20px;font-family:monospace'>";
-            echo "=== Module Debug ===\n";
-            echo "URL: " . htmlspecialchars($url) . "\n";
-            echo "Slug: {$slugOrModule}\n";
-            echo "Resolved Module: {$moduleName}\n";
-            echo "Module Path: {$modulePath}\n";
-            echo "Path Exists: " . (is_dir($modulePath) ? '✅ YES' : '❌ NO') . "\n";
-            echo "APP_PATH: " . APP_PATH . "\n";
-            echo "ROOT_PATH: " . ROOT_PATH . "\n\n";
-            
-            if (is_dir(APP_PATH . '/software')) {
-                echo "Contents of app/software/:\n";
-                foreach (scandir(APP_PATH . '/software') as $item) {
-                    if ($item !== '.' && $item !== '..') {
-                        $type = is_dir(APP_PATH . '/software/' . $item) ? '📁' : '📄';
-                        echo "  {$type} {$item}\n";
-                    }
-                }
-            }
-            
-            if (is_dir($modulePath)) {
-                echo "\nContents of {$moduleName}/:\n";
-                foreach (scandir($modulePath) as $item) {
-                    if ($item !== '.' && $item !== '..') {
-                        $type = is_dir($modulePath . '/' . $item) ? '📁' : '📄';
-                        echo "  {$type} {$item}\n";
-                    }
-                }
-            }
-            echo "</pre>";
-            exit;
-        }
-        
         if (is_dir($modulePath)) {
             // تعریف ثابت‌های ماژول
             if (!defined('MODULAR_APP_PATH')) {
@@ -469,14 +436,13 @@ if (preg_match('/^software\/([a-z0-9\-]+)(\/.*)?$/', $url, $m)) {
                 exit;
             } else {
                 http_response_code(500);
-                echo "❌ Entry file not found: {$entryFile}";
+                echo 'خطای داخلی رخ داد. لطفاً بعداً دوباره تلاش کنید.';
                 exit;
             }
         } else {
             // ماژول یافت نشد
             http_response_code(404);
-            echo "❌ Software not found: {$slugOrModule} (resolved: {$moduleName})<br>";
-            echo "Expected path: {$modulePath}";
+            echo 'نرم‌افزار درخواستی یافت نشد.';
             exit;
         }
     }

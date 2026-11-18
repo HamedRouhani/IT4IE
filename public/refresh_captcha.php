@@ -3,6 +3,9 @@
 session_start();
 
 // Error details are never printed here; failures are reported through the log.
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+error_reporting(E_ALL);
 
 // Define base paths
 define('ROOT_PATH', dirname(__DIR__));
@@ -24,13 +27,16 @@ if (file_exists($envFile)) {
 
 // Check if GD extension is loaded
 if (!extension_loaded('gd')) {
-    die('❌ GD extension is not loaded. Please enable GD extension in php.ini');
+    http_response_code(503);
+    exit('سرویس تولید تصویر موقتاً در دسترس نیست.');
 }
 
 // Direct include Captcha
 $captchaFile = APP_PATH . '/helpers/Captcha.php';
 if (!file_exists($captchaFile)) {
-    die('❌ Captcha helper file not found: ' . $captchaFile);
+    error_log('Captcha helper file is missing.');
+    http_response_code(500);
+    exit('خطای داخلی رخ داد.');
 }
 
 require_once $captchaFile;
