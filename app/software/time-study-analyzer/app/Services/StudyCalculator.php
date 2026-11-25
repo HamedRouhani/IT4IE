@@ -232,20 +232,26 @@ final class StudyCalculator
             $p = $observed > 0 ? $count / $observed : null;
             [$lower, $upper] = $p === null ? [null, null] : self::wilson($count, $observed, $z);
             $requiredCount = null;
+            $missingCount = null;
             $achievedPrecision = null;
             $categorySufficient = null;
 
             if ($p !== null) {
-                $variance = $p * (1.0 - $p);
+                // The normal approximation collapses at p=0 or p=1; use the
+                // conservative maximum variance there instead of reporting zero error.
+                $variance = ($p <= 0.0 || $p >= 1.0) ? 0.25 : $p * (1.0 - $p);
+                // This is the total valid sample size needed to estimate this category's share.
                 $requiredCount = (int) ceil(($z * $z * $variance) / ($precision * $precision));
+                $missingCount = max(0, $requiredCount - $observed);
                 $achievedPrecision = $observed > 0 ? 100.0 * $z * sqrt($variance / $observed) : null;
-                $categorySufficient = $count >= $requiredCount;
+                $categorySufficient = $observed >= $requiredCount;
             }
 
             $rows[] = [
                 'category' => $category, 'count' => $count, 'share' => $p,
                 'lower' => $lower, 'upper' => $upper,
                 'required_count' => $requiredCount,
+                'missing_count' => $missingCount,
                 'achieved_precision_pct' => $achievedPrecision,
                 'is_sufficient' => $categorySufficient,
             ];
@@ -255,10 +261,13 @@ final class StudyCalculator
         $void = count(array_filter($slots, static fn($slot) => $slot['slot_status'] === 'void'));
         $resolved = $observed + $missed + $void;
 
-        // دقت واقعی بهدست‌آمده برای سهم فعالیت مولد (بر پایهٔ دادهٔ فعلی، نه بدترین حالت p=0.5)
+        // دقت تقریبی سهم مولد؛ در مرزهای صفر و یک از واریانس بدترین‌حالت استفاده می‌شود.
         $productiveShareValue = $observed > 0 ? $productive / $observed : null;
+        $productiveVariance = ($productiveShareValue !== null && ($productiveShareValue <= 0.0 || $productiveShareValue >= 1.0))
+            ? 0.25
+            : ($productiveShareValue === null ? null : $productiveShareValue * (1.0 - $productiveShareValue));
         $achievedPrecision = ($productiveShareValue !== null && $observed > 0)
-            ? 100.0 * $z * sqrt($productiveShareValue * (1.0 - $productiveShareValue) / $observed) : null;
+            ? 100.0 * $z * sqrt($productiveVariance / $observed) : null;
 
         $warnings = [];
         if ($observed < $required) {
