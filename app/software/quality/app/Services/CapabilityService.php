@@ -169,8 +169,18 @@ class CapabilityService
      */
     public function estimatePpm(float $mean, float $std, float $lsl, float $usl): array
     {
-        if ($std <= 0) {
-            return ['ppm_below' => 0.0, 'ppm_above' => 0.0, 'ppm_total' => 0.0];
+        if (!is_finite($mean) || !is_finite($std) || !is_finite($lsl) || !is_finite($usl) || $std < 0 || $usl <= $lsl) {
+            throw new \InvalidArgumentException('میانگین، انحراف معیار و حدود مشخصات باید معتبر باشند.');
+        }
+
+        if ($std === 0.0) {
+            $ppmBelow = $mean < $lsl ? 1_000_000.0 : 0.0;
+            $ppmAbove = $mean > $usl ? 1_000_000.0 : 0.0;
+            return [
+                'ppm_below' => $ppmBelow,
+                'ppm_above' => $ppmAbove,
+                'ppm_total' => $ppmBelow + $ppmAbove,
+            ];
         }
         $zLsl = ($lsl - $mean) / $std;
         $zUsl = ($usl - $mean) / $std;

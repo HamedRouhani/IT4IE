@@ -131,6 +131,7 @@ $badgeClass = $colorMap[$verdictColor] ?? 'qc-status-inactive';
                         <strong style="color:#DC2626;"><?= number_format((float)$ppm['ppm_total'], 2) ?></strong>
                     </div>
                 </div>
+                <p class="qc-text-muted" style="margin:1rem 0 0;">این مقدار با فرض توزیع نرمال و انحراف معیار کلی برآورد می‌شود؛ نرخ عیب مشاهده‌شده در نمونه نیست. اگر انحراف معیار صفر باشد، نتیجه بر اساس قرارگرفتن میانگین نسبت به حدود مشخصات تعیین می‌شود.</p>
             </div>
         </div>
     <?php endif; ?>
