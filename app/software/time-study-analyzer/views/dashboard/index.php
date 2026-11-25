@@ -1,7 +1,7 @@
 <section class="ts-page" dir="rtl">
     <header class="ts-hero">
         <div><span class="ts-eyebrow">نسخهٔ پایدار 1.0.0 · سامانهٔ مطالعهٔ کار</span><h1><i class="fa-solid fa-stopwatch"></i> Time Study Analyzer</h1><p>روش استاندارد را مستند کنید، زمان را با ردپای داده بسنجید و نتیجه را با فرض‌های شفاف گزارش کنید.</p></div>
-        <a class="ts-button ts-button-primary" href="<?= ts_e(ts_url('study', 'index')) ?>"><i class="fa-solid fa-folder-open"></i> مطالعات</a>
+        <div class="ts-head-actions"><a class="ts-button ts-button-outline" href="<?= ts_e(ts_url('learn', 'index')) ?>"><i class="fa-solid fa-graduation-cap"></i> مرکز آموزش</a><a class="ts-button ts-button-primary" href="<?= ts_e(ts_url('study', 'index')) ?>"><i class="fa-solid fa-folder-open"></i> مطالعات</a></div>
     </header>
 
     <section class="ts-stats" aria-label="خلاصه مطالعات">

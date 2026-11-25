@@ -7,6 +7,7 @@
         </div>
         <div class="inv-head-actions">
             <a class="inv-btn inv-btn-primary" href="<?= inv_e(inv_url('item', 'create')) ?>"><i class="fa-solid fa-plus"></i> افزودن قلم</a>
+            <a class="inv-btn inv-btn-secondary" href="<?= inv_e(inv_url('learn', 'index')) ?>"><i class="fa-solid fa-graduation-cap"></i> مرکز آموزش</a>
             <a class="inv-btn inv-btn-secondary" href="<?= inv_e(inv_url('purchase_order', 'create', ['suggested' => 1])) ?>"><i class="fa-solid fa-file-circle-plus"></i> پیش‌نویس سفارش پیشنهادی</a>
             <a class="inv-btn inv-btn-secondary" href="<?= inv_e(inv_url('movement')) ?>"><i class="fa-solid fa-arrow-right-arrow-left"></i> ثبت گردش</a>
         </div>
