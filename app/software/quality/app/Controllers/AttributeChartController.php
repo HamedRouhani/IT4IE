@@ -162,11 +162,11 @@ class AttributeChartController extends Controller
 
             $seriesForRules = $result['series'] ?? [];
             $cl    = (float) ($result['center_line'] ?? 0);
-            $sigma = (float) ($result['sigma_hat']   ?? 0);
+            $sigma = $result['sigma_series'] ?? (float) ($result['sigma_hat'] ?? 0);
 
             $nelsonService = new NelsonRulesService();
             $violations = [];
-            if ($sigma > 0 && !empty($seriesForRules)) {
+            if (!empty($seriesForRules)) {
                 $violations = $nelsonService->detect($seriesForRules, $cl, $sigma);
             }
 

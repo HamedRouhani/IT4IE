@@ -101,6 +101,7 @@ class ControlChartService
         $a2 = self::A2[$n];
         $d3 = self::D3[$n];
         $d4 = self::D4[$n];
+        $sigmaXbar = ($rBar / self::D2[$n]) / sqrt($n);
 
         return [
             'center_line'   => round($xbarBar, 6),
@@ -112,6 +113,7 @@ class ControlChartService
             'sigma_hat'     => round($rBar / self::D2[$n], 6),
             'xbar_series'   => array_map(fn($v) => round($v, 6), $xbar),
             'r_series'      => array_map(fn($v) => round($v, 6), $r),
+            'sigma_series'  => array_fill(0, $k, $sigmaXbar),
             'subgroup_size' => $n,
             'num_subgroups' => $k,
         ];
@@ -151,6 +153,7 @@ class ControlChartService
         // UCL/LCL برای S: S̄ ± 3·S̄·√(1-c4²)/c4
         $b3 = max(0.0, 1.0 - 3.0 * sqrt(1.0 - $c4 ** 2) / $c4);
         $b4 = 1.0 + 3.0 * sqrt(1.0 - $c4 ** 2) / $c4;
+        $sigmaXbar = ($sBar / $c4) / sqrt($n);
 
         return [
             'center_line'   => round($xbarBar, 6),
@@ -162,6 +165,7 @@ class ControlChartService
             'sigma_hat'     => round($sBar / $c4, 6),
             'xbar_series'   => array_map(fn($v) => round($v, 6), $xbar),
             's_series'      => array_map(fn($v) => round($v, 6), $s),
+            'sigma_series'  => array_fill(0, $k, $sigmaXbar),
             'subgroup_size' => $n,
             'num_subgroups' => $k,
         ];
@@ -245,6 +249,7 @@ class ControlChartService
         $series  = [];
         $uclList = [];
         $lclList = [];
+        $sigmaList = [];
 
         foreach ($data as $row) {
             $n = (int) $row['sample_size'];
@@ -255,9 +260,11 @@ class ControlChartService
 
             if ($n > 0) {
                 $sigma = sqrt($pBar * (1 - $pBar) / $n);
+                $sigmaList[] = $sigma;
                 $uclList[] = round(min(1.0, $pBar + 3.0 * $sigma), 6);
                 $lclList[] = round(max(0.0, $pBar - 3.0 * $sigma), 6);
             } else {
+                $sigmaList[] = 0.0;
                 $uclList[] = round($pBar, 6);
                 $lclList[] = round($pBar, 6);
             }
@@ -276,6 +283,7 @@ class ControlChartService
             'series'      => $series,
             'ucl_series'  => $uclList,
             'lcl_series'  => $lclList,
+            'sigma_series' => $sigmaList,
         ];
     }
 
@@ -374,6 +382,7 @@ class ControlChartService
         $series  = [];
         $uclList = [];
         $lclList = [];
+        $sigmaList = [];
 
         foreach ($data as $row) {
             [$n, $c] = $this->validateAttributeCounts($row, 'defects');
@@ -383,9 +392,11 @@ class ControlChartService
 
             if ($n > 0) {
                 $sigma = sqrt($uBar / $n);
+                $sigmaList[] = $sigma;
                 $uclList[] = round($uBar + 3.0 * $sigma, 6);
                 $lclList[] = round(max(0.0, $uBar - 3.0 * $sigma), 6);
             } else {
+                $sigmaList[] = 0.0;
                 $uclList[] = round($uBar, 6);
                 $lclList[] = round($uBar, 6);
             }
@@ -403,6 +414,7 @@ class ControlChartService
             'series'      => $series,
             'ucl_series'  => $uclList,
             'lcl_series'  => $lclList,
+            'sigma_series' => $sigmaList,
         ];
     }
 

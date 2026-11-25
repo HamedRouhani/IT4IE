@@ -18,22 +18,60 @@ class NelsonRulesService
      *
      * @param array $series  سری داده‌ها
      * @param float $cl      خط مرکزی
-     * @param float $sigma   انحراف معیار تخمینی
+     * @param float|array $sigma انحراف معیار ثابت یا انحراف معیار هر نقطه
      * @return array
      */
-    public function detect(array $series, float $cl, float $sigma): array
+    public function detect(array $series, float $cl, float|array $sigma): array
     {
         $violations = [];
+        $series = array_values($series);
         $n = count($series);
 
-        if ($sigma <= 0 || $n < 2) {
+        if ($n < 2) {
             return $violations;
         }
+        if (!is_finite($cl)) {
+            throw new \InvalidArgumentException('خط مرکزی باید عددی و متناهی باشد.');
+        }
 
-        // z-score
+        $sigmaValues = null;
+        if (is_array($sigma)) {
+            $sigmaValues = array_values($sigma);
+            if (count($sigmaValues) !== $n) {
+                throw new \InvalidArgumentException('برای هر نقطه باید یک انحراف معیار ارائه شود.');
+            }
+            $hasPositiveSigma = false;
+            foreach ($sigmaValues as $i => $pointSigma) {
+                if (!is_numeric($pointSigma) || !is_finite((float) $pointSigma) || (float) $pointSigma < 0) {
+                    throw new \InvalidArgumentException('انحراف معیار هر نقطه باید متناهی و نامنفی باشد.');
+                }
+                $sigmaValues[$i] = (float) $pointSigma;
+                $hasPositiveSigma = $hasPositiveSigma || $sigmaValues[$i] > 0;
+            }
+            if (!$hasPositiveSigma) {
+                return $violations;
+            }
+        } else {
+            if (!is_finite($sigma)) {
+                throw new \InvalidArgumentException('انحراف معیار باید متناهی باشد.');
+            }
+            if ($sigma <= 0) {
+                return $violations;
+            }
+        }
+
+        // مقادیر هر نقطه را با انحراف معیار متناسب با حجم نمونه استاندارد می‌کنیم.
+        $values = [];
         $z = [];
         foreach ($series as $v) {
-            $z[] = ((float) $v - $cl) / $sigma;
+            if (!is_numeric($v) || !is_finite((float) $v)) {
+                throw new \InvalidArgumentException('مقادیر نمودار باید عددی و متناهی باشند.');
+            }
+            $values[] = (float) $v;
+        }
+        foreach ($values as $i => $value) {
+            $pointSigma = $sigmaValues[$i] ?? $sigma;
+            $z[] = $pointSigma > 0 ? ($value - $cl) / $pointSigma : 0.0;
         }
 
         // قانون ۱: یک نقطه خارج از 3σ
@@ -65,7 +103,7 @@ class NelsonRulesService
         }
 
         // قانون ۳: ۶ نقطه متوالی صعودی یا نزولی
-        $r3 = $this->trend($z, 6);
+        $r3 = $this->trend($values, 6);
         if (!empty($r3)) {
             $violations[] = [
                 'rule'   => 3,
@@ -75,7 +113,7 @@ class NelsonRulesService
         }
 
         // قانون ۴: ۱۴ نقطه با جهت افزایش و کاهش متناوب
-        $r4 = $this->alternating($z, 14);
+        $r4 = $this->alternating($values, 14);
         if (!empty($r4)) {
             $violations[] = [
                 'rule'   => 4,
