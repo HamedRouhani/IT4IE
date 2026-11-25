@@ -134,9 +134,22 @@ class ProjectController extends Controller
     /**
      * حذف پروژه
      */
-    public function delete(int $id): void
+    public function delete(?int $id = null): void
     {
         $this->requireAuth();
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            $this->flashError('برای حذف پروژه از دکمهٔ حذف در صفحهٔ پروژه استفاده کنید.');
+            $this->redirect('controller=project');
+            return;
+        }
+        it4ie_require_csrf();
+
+        if (!$id || $id < 1) {
+            $this->flashError('شناسهٔ پروژه معتبر نیست.');
+            $this->redirect('controller=project');
+            return;
+        }
 
         $project = $this->projectModel->find($id);
         if (!$project || (int)$project['user_id'] !== (int)$this->currentUserId) {
@@ -145,11 +158,17 @@ class ProjectController extends Controller
             return;
         }
 
-        // حذف cascade توسط FK در دیتابیس انجام می‌شود
-        $this->projectModel->delete($id);
-
-        $this->logActivity('delete_project', 'project', $id);
-        $this->flashSuccess('پروژه با موفقیت حذف شد.');
+        try {
+            // حذف داده‌های وابسته مطابق رابطه‌های تعریف‌شده در پایگاه‌داده انجام می‌شود.
+            if (!$this->projectModel->deleteOwned($id, (int) $this->currentUserId)) {
+                throw new \RuntimeException('Owned StatLab project was not deleted.');
+            }
+            $this->logActivity('delete_project', 'project', $id);
+            $this->flashSuccess('پروژه با موفقیت حذف شد.');
+        } catch (\Throwable $e) {
+            error_log('StatLab project deletion failed: ' . $e->getMessage());
+            $this->flashError('حذف پروژه انجام نشد. اطلاعات تغییری نکرد؛ دوباره تلاش کنید.');
+        }
         $this->redirect('controller=project');
     }
 

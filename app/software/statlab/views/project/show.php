@@ -442,7 +442,8 @@ async function copyModalContent() {
 // ═══════════════════════════════════════════════════════
 function deleteProject(id) {
     if (confirm('⚠️ آیا از حذف کامل این پروژه مطمئن هستید؟\nاین عملیات غیرقابل بازگشت است.')) {
-        window.location.href = '<?= stat_url('controller=project&action=delete&id=') ?>' + id;
+        statDeleteProject(id);
     }
 }
 </script>
+<?php include __DIR__ . '/_delete_form.php'; ?>

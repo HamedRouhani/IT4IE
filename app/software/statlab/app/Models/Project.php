@@ -7,6 +7,18 @@ class Project extends Model
 {
     protected $table = 'projects';
 
+    public function deleteOwned(int $projectId, int $userId): bool
+    {
+        if (!$this->db) return false;
+
+        $stmt = $this->db->prepare(
+            "DELETE FROM `{$this->getTableName()}` WHERE id = :id AND user_id = :user_id"
+        );
+        $stmt->execute(['id' => $projectId, 'user_id' => $userId]);
+
+        return $stmt->rowCount() === 1;
+    }
+
     public function countByUser(int $userId): int
     {
         return $this->count(['user_id' => $userId]);
