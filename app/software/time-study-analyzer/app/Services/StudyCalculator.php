@@ -108,7 +108,9 @@ final class StudyCalculator
         $critical = self::criticalValue($confidence, $n > 1 ? $n - 1 : null);
         $requiredN = ($meanCycle !== null && $cycleStd !== null)
             ? self::requiredSampleSize($confidence, $cycleStd, $meanCycle, $precision) : null;
-        $margin = ($n > 1 && $cycleStd !== null) ? $critical * $cycleStd / sqrt($n) : null;
+        $margin = ($n > 1 && $cycleStd !== null && $cycleStd > 0.0)
+            ? $critical * $cycleStd / sqrt($n)
+            : null;
 
         // ---- کفایت نمونهٔ هر عنصر (روش استاندارد: هر عنصر جداگانه باید نمونهٔ کافی داشته باشد) ----
         foreach ($elementStats as &$stats) {
@@ -121,7 +123,7 @@ final class StudyCalculator
             $std = $stats['std_dev'];
             $count = (int) $stats['valid_count'];
 
-            if (!$stats['normal'] || $meanNormal === null || $meanNormal <= 0 || $std === null || $count < 2) continue;
+            if (!$stats['normal'] || $meanNormal === null || $meanNormal <= 0 || $std === null || $std <= 0.0 || $count < 2) continue;
 
             $required = self::requiredSampleSize($confidence, $std, $meanNormal, $precision);
             $stats['required_count'] = $required;
@@ -158,10 +160,16 @@ final class StudyCalculator
         } elseif ($n < 5) {
             $warnings[] = 'تعداد چرخه‌های کامل معتبر (' . $n . ') کمتر از حداقل توصیه‌شده (۵) است؛ برآورد پراکندگی ناپایدار می‌ماند.';
         }
+        if ($n > 1 && $cycleStd === 0.0) {
+            $warnings[] = 'زمان چرخه‌های ثبت‌شده هیچ پراکندگی نشان نمی‌دهد؛ از این داده نمی‌توان حجم نمونه یا بازهٔ اطمینان معنادار برآورد کرد. دقت ثبت و ابزار اندازه‌گیری را بازبینی و چرخه‌های نمایندهٔ بیشتری جمع‌آوری کنید.';
+        }
         if ($requiredN !== null && $n < $requiredN) {
             $warnings[] = 'برای دقت هدف، دست‌کم ' . $requiredN . ' چرخهٔ کامل معتبر لازم است.';
         }
         foreach ($elementStats as $stats) {
+            if ((int) $stats['valid_count'] > 1 && $stats['std_dev'] === 0.0) {
+                $warnings[] = 'زمان ثبت‌شدهٔ عنصر «' . $stats['element']['name'] . '» در همهٔ مشاهدات یکسان است؛ کفایت نمونه برای این عنصر قابل برآورد نیست.';
+            }
             if (!empty($stats['missing_count'])) {
                 $warnings[] = 'عنصر «' . $stats['element']['name'] . '» به ' . (int) $stats['missing_count'] . ' مشاهدهٔ معتبر دیگر نیاز دارد.';
             }
@@ -192,7 +200,7 @@ final class StudyCalculator
             'confidence_lower' => $margin !== null ? max(0.0, $meanCycle - $margin) : null,
             'confidence_upper' => $margin !== null ? $meanCycle + $margin : null,
             'required_cycles' => $requiredN,
-            'sample_is_sufficient' => $requiredN !== null && $n >= $requiredN,
+            'sample_is_sufficient' => $requiredN !== null ? $n >= $requiredN : null,
             'capacity_per_hour' => ($standardCycle !== null && $standardCycle > 0) ? 3600.0 / $standardCycle : null,
             'z_value' => $z,
             'critical_value' => $critical,
@@ -307,10 +315,11 @@ final class StudyCalculator
      * به مقدار پایدار برسد؛ این روش از تخمین تک‌مرحله‌ای با t (که برای نمونهٔ کوچک
      * عدد هدف را به‌شدت متورم می‌کند) دقیق‌تر و واقع‌بینانه‌تر است.
      */
-    private static function requiredSampleSize(string $confidence, float $std, float $mean, float $precision): int
+    private static function requiredSampleSize(string $confidence, float $std, float $mean, float $precision): ?int
     {
+        if ($mean <= 0 || $std <= 0 || $precision <= 0) return null;
+
         $z = self::Z[$confidence] ?? self::Z['95'];
-        if ($mean <= 0 || $std <= 0 || $precision <= 0) return 1;
 
         $estimate = max(1, (int) ceil(($z * $std / ($precision * $mean)) ** 2));
 

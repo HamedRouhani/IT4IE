@@ -162,14 +162,16 @@ final class LearnController extends StudyControllerBase
             'columns' => [],
             'rows' => [],
             'metrics' => [
-                ['label' => 'تعداد چرخهٔ لازم', 'value' => (string) $required],
+                ['label' => 'تعداد چرخهٔ لازم', 'value' => $required === null ? 'با انحراف معیار صفر قابل برآورد نیست' : (string) $required],
                 ['label' => 'ضریب تغییرات (CV)', 'value' => $cv === null ? '—' : ts_num($cv, 1) . '٪'],
                 ['label' => 'دقت نسبی هدف', 'value' => ts_num($precision * 100, 1) . '٪'],
                 ['label' => 'سطح اطمینان', 'value' => ts_num((float) $confidence, 0) . '٪'],
             ],
-            'note' => $cv !== null && $cv >= 25
+            'note' => $std <= 0.0
+                ? 'انحراف معیار مشاهده‌شده صفر است؛ این مقدار نبود پراکندگی واقعی فرایند را ثابت نمی‌کند و حجم نمونهٔ لازم از این داده قابل برآورد نیست. دقت ابزار/ثبت را بازبینی و نمونهٔ نمایندهٔ بیشتری گردآوری کنید.'
+                : ($cv !== null && $cv >= 25
                 ? 'پراکندگی بالاست (CV ≥ ۲۵٪)؛ پیش از افزایش تعداد چرخه، مرز عناصر و پایداری روش را بازبینی کنید.'
-                : 'این عدد با مقدار بحرانی t و حل تکراری محاسبه شده است؛ نمونهٔ کمتر از آن، دقت هدف را تضمین نمی‌کند.',
+                : 'این عدد با مقدار بحرانی t و حل تکراری محاسبه شده است؛ نمونهٔ کمتر از آن، دقت هدف را تضمین نمی‌کند.'),
         ], [
             'mean' => $mean,
             'std' => $std,
@@ -293,6 +295,7 @@ final class LearnController extends StudyControllerBase
 
         $critical = $this->criticalValue($confidence, $count - 1);
         $margin = $critical * $std / sqrt($count);
+        $zeroDispersion = $std <= 0.0;
 
         return [[
             'tool' => 'confidence',
@@ -301,13 +304,15 @@ final class LearnController extends StudyControllerBase
             'rows' => [],
             'metrics' => [
                 ['label' => 'میانگین', 'value' => ts_num($mean, 3) . ' ثانیه'],
-                ['label' => 'حاشیهٔ خطا', 'value' => ts_num($margin, 3) . ' ثانیه'],
-                ['label' => 'بازهٔ اطمینان', 'value' => ts_num(max(0, $mean - $margin), 3) . ' تا ' . ts_num($mean + $margin, 3) . ' ثانیه'],
-                ['label' => 'دقت نسبی فعلی', 'value' => $mean > 0 ? ts_num(100 * $margin / $mean, 2) . '٪' : '—'],
+                ['label' => 'حاشیهٔ خطا', 'value' => $zeroDispersion ? 'قابل برآورد نیست (SD=0)' : ts_num($margin, 3) . ' ثانیه'],
+                ['label' => 'بازهٔ اطمینان', 'value' => $zeroDispersion ? 'با دادهٔ فعلی قابل برآورد نیست' : ts_num(max(0, $mean - $margin), 3) . ' تا ' . ts_num($mean + $margin, 3) . ' ثانیه'],
+                ['label' => 'دقت نسبی فعلی', 'value' => $zeroDispersion || $mean <= 0 ? '—' : ts_num(100 * $margin / $mean, 2) . '٪'],
                 ['label' => 'مقدار بحرانی', 'value' => ($count - 1 <= 30 ? 't' : 'z') . ' = ' . ts_num($critical, 3)],
                 ['label' => 'ضریب تغییرات', 'value' => $mean > 0 ? ts_num(100 * $std / $mean, 1) . '٪' : '—'],
             ],
-            'note' => $count < 5 ? 'با کمتر از ۵ چرخه، برآورد پراکندگی ناپایدار است و بازهٔ اطمینان خوش‌بینانه می‌شود.' : 'برای نمونهٔ کوچک از t با درجهٔ آزادی n−۱ استفاده شده است.',
+            'note' => $std <= 0.0
+                ? 'پراکندگی مشاهده‌شده صفر است؛ فرمول ساده در این حالت بازهٔ صفرعرض می‌دهد، اما برای جلوگیری از برداشت نادرست آن را نمایش نمی‌دهیم. این نتیجه نبود تغییرپذیری واقعی را ثابت نمی‌کند. ابزار و دقت ثبت را بررسی و دادهٔ نمایندهٔ بیشتری جمع‌آوری کنید.'
+                : ($count < 5 ? 'با کمتر از ۵ چرخه، برآورد پراکندگی ناپایدار است و بازهٔ اطمینان خوش‌بینانه می‌شود.' : 'برای نمونهٔ کوچک از t با درجهٔ آزادی n−۱ استفاده شده است.'),
         ], ['mean' => $mean, 'std' => $std, 'count' => $count, 'confidence' => $confidence]];
     }
 
@@ -392,9 +397,9 @@ final class LearnController extends StudyControllerBase
     /**
      * کوچک‌ترین n که با مقدار t خودش شرط دقت را برآورده می‌کند.
      */
-    private function requiredSampleSize(string $confidence, float $std, float $mean, float $precision): int
+    private function requiredSampleSize(string $confidence, float $std, float $mean, float $precision): ?int
     {
-        if ($mean <= 0 || $std <= 0 || $precision <= 0) return 1;
+        if ($mean <= 0 || $std <= 0 || $precision <= 0) return null;
 
         $z = (float) (self::Z[$confidence] ?? self::Z['95']);
         $estimate = max(1, (int) ceil(($z * $std / ($precision * $mean)) ** 2));
