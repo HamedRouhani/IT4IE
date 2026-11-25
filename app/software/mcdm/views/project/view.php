@@ -362,6 +362,7 @@ foreach ($evaluations ?? [] as $evaluation) {
 
 <?php elseif ($tab === 'results'): ?>
     <div class="card"><div class="card-body">
+        <div class="alert alert-info" role="note"><strong>روش محاسبه:</strong> <?= mcdm_e(mcdm_getRankingExplanation($project['method_code'] ?? '')) ?></div>
         <?php if (empty($results)): ?>
             <div class="alert alert-warning mb-0">هنوز رتبه‌بندی محاسبه نشده است. از تب «ماتریس ارزیابی» اقدام کنید.</div>
         <?php else: ?>

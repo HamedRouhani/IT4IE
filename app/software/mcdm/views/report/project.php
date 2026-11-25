@@ -11,6 +11,8 @@
     </div>
 </div></div>
 
+<div class="alert alert-info" role="note"><strong>روش محاسبه:</strong> <?= mcdm_e(mcdm_getRankingExplanation($project['method_code'] ?? '')) ?></div>
+
 <div class="card"><div class="card-header">رتبه‌بندی نهایی گزینه‌ها</div>
     <div class="table-responsive">
         <table class="table table-bordered align-middle mb-0">
