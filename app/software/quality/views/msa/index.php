@@ -100,12 +100,14 @@ $avgGrr  = $avgGrr  ?? null;
                                        class="btn-qc-outline btn-sm" title="نمایش">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="<?= CURRENT_MODULE_URL ?>?controller=msa&action=delete&id=<?= (int)$s['id'] ?>"
-                                       class="btn-qc-danger btn-sm qc-confirm-delete"
-                                       data-message="آیا از حذف مطالعه «<?= htmlspecialchars($s['name']) ?>» اطمینان دارید؟"
-                                       title="حذف">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+                                    <form method="post" action="<?= CURRENT_MODULE_URL ?>?controller=msa&action=delete&id=<?= (int)$s['id'] ?>" style="display:inline; margin:0;">
+                                        <?= $this->csrfField() ?>
+                                        <button type="submit" class="btn-qc-danger btn-sm qc-confirm-delete"
+                                                data-message="آیا از حذف مطالعه «<?= htmlspecialchars($s['name'], ENT_QUOTES, 'UTF-8') ?>» اطمینان دارید؟"
+                                                title="حذف">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

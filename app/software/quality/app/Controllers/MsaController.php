@@ -181,6 +181,11 @@ class MsaController extends Controller
     public function delete($id): void
     {
         $system = $this->requireSystem();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect(CURRENT_MODULE_URL . '?controller=msa');
+        }
+        $this->verifyCsrf();
+
         $systemId = (int) $system['id'];
         $id = (int) $id;
 
