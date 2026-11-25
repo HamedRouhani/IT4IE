@@ -574,6 +574,64 @@ class ProjectController extends Controller
         $this->redirect("controller=project&action=show&id={$projectId}&tab=tasks");
     }
 
+    public function delete($id = null)
+    {
+        $this->requireAuth();
+
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            $this->flashError('برای حذف پروژه از دکمهٔ حذف در فهرست پروژه‌ها استفاده کنید.');
+            $this->redirect('controller=project');
+            return;
+        }
+
+        $projectId = filter_var($id, FILTER_VALIDATE_INT);
+        if (!$projectId || $projectId < 1) {
+            $this->flashError('شناسهٔ پروژه معتبر نیست.');
+            $this->redirect('controller=project');
+            return;
+        }
+
+        try {
+            $this->db->beginTransaction();
+
+            $projectStmt = $this->db->prepare(
+                "SELECT id FROM {$this->prefix}projects WHERE id = ? AND user_id = ? FOR UPDATE"
+            );
+            $projectStmt->execute([$projectId, $this->currentUserId]);
+            if (!$projectStmt->fetchColumn()) {
+                $this->db->rollBack();
+                $this->flashError('پروژه پیدا نشد یا اجازهٔ حذف آن را ندارید.');
+                $this->redirect('controller=project');
+                return;
+            }
+
+            foreach (['project_tasks', 'risks', 'deliverables', 'project_stakeholders'] as $table) {
+                $stmt = $this->db->prepare(
+                    "DELETE FROM {$this->prefix}{$table} WHERE project_id = ? AND user_id = ?"
+                );
+                $stmt->execute([$projectId, $this->currentUserId]);
+            }
+
+            $deleteProject = $this->db->prepare(
+                "DELETE FROM {$this->prefix}projects WHERE id = ? AND user_id = ?"
+            );
+            $deleteProject->execute([$projectId, $this->currentUserId]);
+            if ($deleteProject->rowCount() !== 1) {
+                throw new \RuntimeException('Expected one owned PMBOK project to be deleted.');
+            }
+
+            $this->db->commit();
+            $this->logActivity('delete', 'project', $projectId);
+            $this->flashSuccess('پروژه و اطلاعات وابسته با موفقیت حذف شدند.');
+        } catch (\Throwable $e) {
+            if ($this->db->inTransaction()) $this->db->rollBack();
+            error_log('PMBOK project deletion failed: ' . $e->getMessage());
+            $this->flashError('حذف پروژه انجام نشد. اطلاعات تغییری نکرد؛ دوباره تلاش کنید.');
+        }
+
+        $this->redirect('controller=project');
+    }
+
     private function getUserProject($id)
     {
         $stmt = $this->db->prepare("SELECT * FROM {$this->prefix}projects WHERE id = ? AND user_id = ?");
