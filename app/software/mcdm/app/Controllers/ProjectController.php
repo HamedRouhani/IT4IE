@@ -230,7 +230,14 @@ class ProjectController extends Controller
             $this->json(['success' => false, 'error' => 'معیار و گزینه باید متعلق به همین پروژه و فعال باشند.'], 422);
         }
 
-        $rawValue = trim((string)($_POST['value'] ?? ''));
+        $rawValue = strtr(trim((string)($_POST['value'] ?? '')), [
+            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+            '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+            '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+            '٫' => '.', '−' => '-',
+        ]);
+        $rawValue = str_replace(['٬', '،', ','], '', $rawValue);
         if ($rawValue === '') {
             $this->model->clearEvaluation($projectId, $criterionId, $alternativeId);
         } elseif (!is_numeric($rawValue) || !is_finite((float)$rawValue)) {

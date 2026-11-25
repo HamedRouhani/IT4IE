@@ -41,7 +41,13 @@ abstract class InventoryController extends Controller
 
     protected function decimalValue(string $raw, string $label, int $scale = 4, int $precision = 18): float
     {
-        $raw = str_replace([',', '٬', '٫'], ['', '', '.'], trim($raw));
+        $raw = strtr(trim($raw), [
+            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+            '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+            '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+        ]);
+        $raw = str_replace([',', '٬', '٫', '،'], ['', '', '.', ''], $raw);
         if (!preg_match('/^\d+(?:\.\d+)?$/D', $raw)) {
             throw new \InvalidArgumentException("مقدار «{$label}» باید عددی نامنفی باشد.");
         }
