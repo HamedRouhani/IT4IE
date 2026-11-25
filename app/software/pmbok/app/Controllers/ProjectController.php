@@ -522,7 +522,14 @@ class ProjectController extends Controller
         $status = $_POST['status'] ?? 'not_started';
         $notes = trim($_POST['notes'] ?? '');
         $hasActualCostInput = array_key_exists('actual_cost', $_POST);
-        $actualCostInput = trim((string)($_POST['actual_cost'] ?? ''));
+        $actualCostInput = strtr(trim((string)($_POST['actual_cost'] ?? '')), [
+            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+            '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+            '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+            '٫' => '.', '−' => '-',
+        ]);
+        $actualCostInput = str_replace(['٬', '،', ','], '', $actualCostInput);
         if ($actualCostInput !== '' && (!is_numeric($actualCostInput) || !is_finite((float)$actualCostInput) || (float)$actualCostInput < 0)) {
             $this->flashError('هزینهٔ واقعی باید عددی نامنفی باشد.');
             $this->redirect("controller=project&action=show&id={$projectId}&tab=tasks");

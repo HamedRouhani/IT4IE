@@ -214,7 +214,15 @@ class WorkOrderController extends Controller
 
         $workOrderId = (int) $id;
         $sparePartId = (int) ($_POST['spare_part_id'] ?? 0);
-        $quantity = filter_var($_POST['quantity'] ?? null, FILTER_VALIDATE_FLOAT);
+        $rawQuantity = strtr(trim((string) ($_POST['quantity'] ?? '')), [
+            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+            '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+            '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+            '٫' => '.',
+        ]);
+        $rawQuantity = str_replace(['٬', '،', ','], '', $rawQuantity);
+        $quantity = filter_var($rawQuantity, FILTER_VALIDATE_FLOAT);
         $userId = (int) ($_SESSION['user_id'] ?? 0);
         $systemId = (int) (pdm_active_system_id() ?? 0);
         $context = $this->inventoryContext();
