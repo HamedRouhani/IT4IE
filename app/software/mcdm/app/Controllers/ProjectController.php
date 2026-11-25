@@ -44,6 +44,61 @@ class ProjectController extends Controller
         ]);
     }
 
+    public function edit($id)
+    {
+        $this->requireAuth();
+        $project = $this->model->getWithDetails((int)$id);
+        if (!$project) {
+            $this->flashError('پروژه پیدا نشد.');
+            $this->redirect('controller=project');
+        }
+        if (!$this->authorizeOwnership($project['user_id'])) return;
+        $this->view('project/edit', [
+            'pageTitle' => 'ویرایش پروژه',
+            'currentPage' => 'project',
+            'project' => $project,
+            'industries' => (new Industry())->findAll([], 'name_fa ASC'),
+        ]);
+    }
+
+    public function update($id)
+    {
+        $this->requireAuth();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('controller=project&action=edit&id=' . (int)$id);
+        }
+        $project = $this->model->find((int)$id);
+        if (!$project) {
+            $this->flashError('پروژه پیدا نشد.');
+            $this->redirect('controller=project');
+        }
+        if (!$this->authorizeOwnership($project['user_id'])) return;
+
+        $name = trim($_POST['name'] ?? '');
+        $industry = trim($_POST['industry'] ?? 'general');
+        $validIndustries = array_map(
+            static function ($row) { return (string)($row['code'] ?? $row['id']); },
+            (new Industry())->findAll()
+        );
+        $validIndustries[] = 'general';
+        if ($name === '' || !in_array($industry, $validIndustries, true)) {
+            $this->flashError($name === '' ? 'نام پروژه الزامی است.' : 'صنعت انتخاب‌شده معتبر نیست.');
+            $this->redirect('controller=project&action=edit&id=' . (int)$id);
+        }
+        $updated = $this->model->update((int)$id, [
+            'name' => $name,
+            'description' => trim($_POST['description'] ?? ''),
+            'industry' => $industry,
+        ]);
+        if (!$updated) {
+            $this->flashError('ذخیرهٔ تغییرات انجام نشد. دوباره تلاش کنید.');
+            $this->redirect('controller=project&action=edit&id=' . (int)$id);
+        }
+        $this->logActivity('update', 'project', (int)$id);
+        $this->flashSuccess('تغییرات پروژه ذخیره شد.');
+        $this->redirect('controller=project&action=show&id=' . (int)$id);
+    }
+
     public function store()
     {
         $this->requireAuth();
@@ -191,9 +246,17 @@ class ProjectController extends Controller
     {
         $this->requireAuth();
 
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('controller=project');
+        }
+
         $project = $this->model->find((int)$id);
         if ($project && $this->authorizeOwnership($project['user_id'])) {
-            $this->model->delete((int)$id);
+            $deleted = $this->model->deleteWithDependents((int)$id);
+            if (!$deleted) {
+                $this->flashError('حذف پروژه انجام نشد. دوباره تلاش کنید.');
+                $this->redirect('controller=project');
+            }
             $this->logActivity('delete', 'project', (int)$id);
             $this->flashSuccess('پروژه حذف شد.');
         }

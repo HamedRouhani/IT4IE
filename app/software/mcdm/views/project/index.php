@@ -40,6 +40,12 @@
                             <td>
                                 <a href="<?= mcdm_url('controller=project&action=show&id=' . (int)$prj['id']) ?>"
                                    class="btn btn-sm btn-outline-primary">مشاهده</a>
+                                <a href="<?= mcdm_url('controller=project&action=edit&id=' . (int)$prj['id']) ?>"
+                                   class="btn btn-sm btn-outline-secondary">ویرایش</a>
+                                <form method="post" action="<?= mcdm_url('controller=project&action=delete&id=' . (int)$prj['id']) ?>"
+                                      class="d-inline" onsubmit="return confirm('حذف این پروژه و داده‌های مرتبط با آن بازگشت‌پذیر نیست. ادامه می‌دهید؟');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">حذف</button>
+                                </form>
                             </td>
                         </tr>
                     <?php endforeach; ?>

@@ -108,4 +108,33 @@ class Project extends Model
                 ORDER BY r.rank ASC";
         return $this->query($sql, [$projectId]);
     }
+
+    public function deleteWithDependents($projectId)
+    {
+        if (!$this->db) return false;
+        $projectId = (int)$projectId;
+        $tables = [
+            'project_evaluations',
+            'project_results',
+            'project_criteria',
+            'project_alternatives',
+        ];
+
+        try {
+            $this->db->beginTransaction();
+            foreach ($tables as $table) {
+                $stmt = $this->db->prepare('DELETE FROM ' . $this->tablePrefix . $table . ' WHERE project_id = ?');
+                $stmt->execute([$projectId]);
+            }
+            $stmt = $this->db->prepare('DELETE FROM ' . $this->getTableName() . ' WHERE id = ?');
+            $stmt->execute([$projectId]);
+            $deleted = $stmt->rowCount() > 0;
+            $this->db->commit();
+            return $deleted;
+        } catch (\Throwable $e) {
+            if ($this->db->inTransaction()) $this->db->rollBack();
+            error_log('MCDM project deletion failed: ' . $e->getMessage());
+            return false;
+        }
+    }
 }
