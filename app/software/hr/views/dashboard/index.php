@@ -33,6 +33,23 @@
         </div>
     </div>
 
+    <section class="card hr-mb-4" aria-labelledby="hr-learning-path-title">
+        <div class="card-header">
+            <h3 class="card-title" id="hr-learning-path-title"><i class="fas fa-graduation-cap"></i> مسیر شروع منابع انسانی</h3>
+            <span class="hr-status-badge hr-status-info">راهنمای کاربردی</span>
+        </div>
+        <div class="card-body">
+            <p class="hr-text-muted">برای تحلیل قابل اتکا، ابتدا ساختار و نقش‌ها را تعریف کنید؛ سپس دادهٔ کارکنان را ثبت کنید و در پایان، شاخص‌ها را در یک بازهٔ زمانی مشخص تفسیر کنید.</p>
+            <div class="hr-flex hr-gap-2" style="flex-wrap: wrap;">
+                <a href="<?= hr_url('department') ?>" class="btn-hr-outline"><i class="fas fa-building"></i> ۱. تعریف دپارتمان‌ها</a>
+                <a href="<?= hr_url('position') ?>" class="btn-hr-outline"><i class="fas fa-briefcase"></i> ۲. تعریف نقش‌ها</a>
+                <a href="<?= hr_url('employee', 'create') ?>" class="btn-hr-outline"><i class="fas fa-user-plus"></i> ۳. ثبت کارکنان</a>
+                <a href="<?= hr_url('report', 'index') ?>" class="btn-hr-outline"><i class="fas fa-chart-line"></i> ۴. بررسی گزارش‌ها</a>
+            </div>
+            <small class="hr-text-muted hr-mt-2" style="display:block;">مثال: نرخ ترک خدمت = تعداد خروج در بازه ÷ میانگین کارکنان همان بازه × ۱۰۰. تعریف «خروج» و بازهٔ زمانی را در همهٔ گزارش‌ها یکسان نگه دارید.</small>
+        </div>
+    </section>
+
     <!-- پیام Flash -->
     <?php if (!empty($flash)): ?>
         <div class="hr-alert <?= hr_e($flash['type']) ?>">

@@ -27,6 +27,17 @@ $statCards = [
 $displayProjects = !empty($activeProjects) ? $activeProjects : $recentProjects;
 ?>
 
+<section class="card" style="margin-bottom: 1.25rem;" aria-labelledby="pmbok-learning-path-title">
+    <h2 class="card-title" id="pmbok-learning-path-title"><i class="fas fa-graduation-cap"></i> مسیر شروع مدیریت پروژه</h2>
+    <p class="text-muted">پروژه را با هدف و محدودهٔ روشن آغاز کنید، برنامه‌ها و مسئولیت‌ها را متناسب با روش اجرا بسازید و ریسک‌ها و تحویل‌دادنی‌ها را در طول کار بازبینی کنید.</p>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="?controller=project&action=create" class="btn btn-primary"><i class="fas fa-plus"></i> ۱. تعریف پروژه</a>
+        <a href="?controller=knowledgeArea" class="btn btn-secondary"><i class="fas fa-sitemap"></i> ۲. مرور حوزه‌ها و فرایندها</a>
+        <a href="?controller=risk" class="btn btn-secondary"><i class="fas fa-triangle-exclamation"></i> ۳. ثبت و بازبینی ریسک</a>
+    </div>
+    <small class="text-muted" style="display:block;margin-top:.75rem;">مثال: ریسک «تأخیر تأمین» را با علت، رویداد و پیامد بنویسید؛ احتمال و اثر را جدا ارزیابی کنید و برای پاسخ، مسئول و موعد تعیین کنید. امتیاز ریسک به‌تنهایی جای قضاوت تیم را نمی‌گیرد.</small>
+</section>
+
 <!-- کارت‌های آمار -->
 <div class="stats-grid">
     <?php foreach ($statCards as $s): ?>

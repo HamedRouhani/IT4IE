@@ -20,6 +20,18 @@ $activePage = 'home';
     </div>
 </section>
 
+<section class="card" style="margin-bottom: 20px;" aria-labelledby="babok-learning-path-title">
+    <h3 class="card-title" id="babok-learning-path-title"><i class="fas fa-graduation-cap"></i> مسیر شروع تحلیل کسب‌وکار</h3>
+    <p class="text-muted">از مسئله و ارزش مورد انتظار شروع کنید؛ نیازمندی‌ها را با ذی‌نفعان روشن و اعتبارسنجی کنید؛ سپس آن‌ها را به راهکار، وظایف و معیار پذیرش پیوند دهید.</p>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="?route=requirement" class="btn btn-primary"><i class="fas fa-magnifying-glass"></i> ۱. تحلیل نیازمندی</a>
+        <a href="?route=knowledge_areas" class="btn btn-secondary"><i class="fas fa-sitemap"></i> ۲. مرور حوزه‌های دانشی</a>
+        <a href="?route=techniques" class="btn btn-secondary"><i class="fas fa-toolbox"></i> ۳. انتخاب تکنیک</a>
+        <a href="?route=tasks" class="btn btn-secondary"><i class="fas fa-list-check"></i> ۴. پیگیری وظایف</a>
+    </div>
+    <small class="text-muted" style="display:block;margin-top:12px;">مثال: «سامانه کند است» را به نیاز قابل ارزیابی تبدیل کنید؛ مثلاً «۹۵٪ جست‌وجوها در شرایط بار توافق‌شده حداکثر طی ۲ ثانیه پاسخ دهند». آستانه و شرایط اندازه‌گیری باید با ذی‌نفعان تأیید شود.</small>
+</section>
+
 <!-- کارت‌های آمار -->
 <div class="stats-grid">
     <div class="ds-stat ds-stat--1">
