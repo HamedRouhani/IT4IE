@@ -74,13 +74,13 @@ class NelsonRulesService
             ];
         }
 
-        // قانون ۴: ۱۴ نقطه متناوب بالا/پایین
+        // قانون ۴: ۱۴ نقطه با جهت افزایش و کاهش متناوب
         $r4 = $this->alternating($z, 14);
         if (!empty($r4)) {
             $violations[] = [
                 'rule'   => 4,
                 'points' => $r4,
-                'desc'   => '۱۴ نقطه متناوب بالا/پایین',
+                'desc'   => '۱۴ نقطهٔ پیاپی با جهت افزایش و کاهش یکی‌درمیان',
             ];
         }
 
@@ -193,7 +193,7 @@ class NelsonRulesService
     }
 
     /**
-     * تشخیص تناوب
+     * تشخیص افزایش و کاهش متناوب در تغییرات متوالی نقاط
      */
     private function alternating(array $z, int $length): array
     {
@@ -203,13 +203,14 @@ class NelsonRulesService
 
         for ($i = 0; $i <= $n - $length; $i++) {
             $ok = true;
+            $previousDirection = 0;
             for ($j = $i; $j < $i + $length - 1; $j++) {
-                $sign1 = $z[$j]     > 0 ? 1 : -1;
-                $sign2 = $z[$j + 1] > 0 ? 1 : -1;
-                if ($sign1 === $sign2) {
+                $direction = $z[$j + 1] <=> $z[$j];
+                if ($direction === 0 || $direction === $previousDirection) {
                     $ok = false;
                     break;
                 }
+                $previousDirection = $direction;
             }
             if ($ok) {
                 for ($j = $i; $j < $i + $length; $j++) {
