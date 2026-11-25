@@ -56,14 +56,24 @@ body {
 }
 
 .badge.bg-info {
-    background-color: #5A7D3A !important; /* سبز روشن‌تر اما همچنان خوانا با متن سفید */
+    background-color: #3F6212 !important;
     color: var(--mcdm-text-on-green) !important;
 }
 
 .badge.bg-warning {
     background-color: var(--mcdm-gold) !important;
-    color: #1A2E05 !important; /* متن تیره روی طلایی برای خوانایی */
+    color: #1A2E05 !important;
     font-weight: 700;
+}
+
+.badge.bg-secondary {
+    background-color: #475569 !important;
+    color: #FFFFFF !important;
+}
+
+.badge.bg-danger {
+    background-color: #B91C1C !important;
+    color: #FFFFFF !important;
 }
 
 /* ─────────────────────────────────────────────

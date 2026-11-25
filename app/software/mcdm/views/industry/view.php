@@ -69,7 +69,7 @@
                     امتیاز مرتبط بودن: <?= $method['relevance_score'] ?? 0 ?>/10
                 </p>
                 <?php if (!empty($method['priority'])): ?>
-                <span class="badge badge-<?= $method['priority'] === 'critical' ? 'danger' : ($method['priority'] === 'high' ? 'warning' : 'info') ?>">
+                <span class="badge bg-<?= $method['priority'] === 'critical' ? 'danger' : ($method['priority'] === 'high' ? 'warning' : 'info') ?>">
                     <?= $method['priority'] === 'critical' ? 'حیاتی' : ($method['priority'] === 'high' ? 'بالا' : 'متوسط') ?>
                 </span>
                 <?php endif; ?>

@@ -12,7 +12,8 @@ $title = 'گزارش‌ها';
 </div>
 
 <div class="card">
-    <h3 class="card-title">پروژه‌های تکمیل‌شده</h3>
+    <h3 class="card-title">گزارش پروژه‌ها</h3>
+    <p class="text-muted">پروژه‌ها در همهٔ فازها نمایش داده می‌شوند؛ فاز فعلی را از برچسب هر ردیف ببینید.</p>
     
     <?php if (empty($projects)): ?>
     <div class="empty-state">
@@ -45,13 +46,13 @@ $title = 'گزارش‌ها';
                         <small style="color: #666;"><?= htmlspecialchars(mb_substr($project['description'] ?? '', 0, 50)) ?></small>
                     </td>
                     <td>
-                        <span class="badge badge-info">
+                        <span class="badge bg-info">
                             <?= htmlspecialchars($project['method_name'] ?? '-') ?>
                         </span>
                     </td>
                     <td>
-                        <span class="badge badge-<?= $project['phase'] === 'decision' ? 'success' : 'warning' ?>">
-                            <?= htmlspecialchars($project['phase']) ?>
+                        <span class="badge bg-<?= htmlspecialchars(mcdm_getPhaseColor($project['phase'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
+                            <?= mcdm_e(mcdm_getPhaseLabel($project['phase'] ?? '')) ?>
                         </span>
                     </td>
                     <td><?= (int)($project['criteria_count'] ?? 0) ?></td>

@@ -29,13 +29,14 @@ function mcdm_e($string)
 function mcdm_getPhaseLabel($phase)
 {
     $labels = [
-        'definition'     => 'تعریف مسئله',
-        'criteria_design'=> 'طراحی معیارها',
-        'evaluation'     => 'ارزیابی',
-        'analysis'       => 'تحلیل',
-        'decision'       => 'تصمیم‌گیری'
+        'definition' => 'تعریف مسئله',
+        'criteria_design' => 'طراحی معیارها',
+        'evaluation' => 'ارزیابی گزینه‌ها',
+        'analysis' => 'تحلیل نتایج',
+        'decision' => 'تصمیم‌گیری',
     ];
-    return $labels[$phase] ?? $phase;
+    $phase = strtolower(trim((string) $phase));
+    return $labels[$phase] ?? 'نامشخص';
 }
 
 function mcdm_getPhaseColor($phase)
