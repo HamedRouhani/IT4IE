@@ -26,19 +26,27 @@ require_once MODULAR_APP_PATH . '/app/Helpers/Functions.php';
 
 $controllers = [
     'dashboard' => 'DashboardController',
+    'project' => 'ProjectController',
     'learn' => 'LearnController',
+];
+$allowedActions = [
+    'dashboard' => ['index'],
+    'project' => ['index', 'create', 'store', 'show', 'edit', 'update', 'delete'],
+    'learn' => ['index', 'show'],
 ];
 $controllerKey = strtolower((string) ($_GET['controller'] ?? 'dashboard'));
 $action = (string) ($_GET['action'] ?? 'index');
+$id = isset($_GET['id']) ? filter_var($_GET['id'], FILTER_VALIDATE_INT) : null;
 $isAjax = strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest';
 
 try {
+    if (function_exists('it4ie_require_csrf')) it4ie_require_csrf();
     if ($controllerKey === 'exit') {
         unset($_SESSION['current_software']);
         header('Location: /software');
         exit;
     }
-    if (!isset($controllers[$controllerKey]) || !preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $action)) {
+    if (!isset($controllers[$controllerKey]) || !in_array($action, $allowedActions[$controllerKey] ?? [], true)) {
         http_response_code(404);
         throw new RuntimeException('بخش درخواستی پیدا نشد.');
     }
@@ -46,11 +54,15 @@ try {
     $class = 'App\\Software\\FactoryLayoutAnalyzer\\Controllers\\' . $controllers[$controllerKey];
     if (!class_exists($class)) throw new RuntimeException('بارگذاری بخش درخواستی ممکن نشد.');
     $controller = new $class();
-    if (!method_exists($controller, $action) || str_starts_with($action, '_')) {
-        http_response_code(404);
-        throw new RuntimeException('عملیات درخواستی پیدا نشد.');
+    if ($controllerKey === 'project' && in_array($action, ['show', 'edit', 'update', 'delete'], true)) {
+        if (!is_int($id) || $id < 1) {
+            http_response_code(404);
+            throw new RuntimeException('پروژهٔ درخواستی پیدا نشد.');
+        }
+        $controller->{$action}($id);
+    } else {
+        $controller->{$action}();
     }
-    $controller->{$action}();
 } catch (Throwable $e) {
     error_log('Factory Layout Analyzer error: ' . $e->getMessage());
     if ($isAjax) {

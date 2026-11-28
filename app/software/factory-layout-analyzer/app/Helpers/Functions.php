@@ -18,3 +18,30 @@ if (!function_exists('fl_url')) {
         ], $params));
     }
 }
+
+if (!function_exists('fl_flash_set')) {
+    function fl_flash_set(string $type, string $message): void
+    {
+        $_SESSION['fl_flash'] = ['type' => $type, 'message' => $message];
+    }
+}
+
+if (!function_exists('fl_flash_get')) {
+    function fl_flash_get(): ?array
+    {
+        $flash = $_SESSION['fl_flash'] ?? null;
+        unset($_SESSION['fl_flash']);
+        return is_array($flash) ? $flash : null;
+    }
+}
+
+if (!function_exists('fl_latin_digits')) {
+    function fl_latin_digits(string $value): string
+    {
+        return strtr($value, [
+            '۰'=>'0','۱'=>'1','۲'=>'2','۳'=>'3','۴'=>'4','۵'=>'5','۶'=>'6','۷'=>'7','۸'=>'8','۹'=>'9',
+            '٠'=>'0','١'=>'1','٢'=>'2','٣'=>'3','٤'=>'4','٥'=>'5','٦'=>'6','٧'=>'7','٨'=>'8','٩'=>'9',
+            '٫'=>'.','٬'=>'',
+        ]);
+    }
+}

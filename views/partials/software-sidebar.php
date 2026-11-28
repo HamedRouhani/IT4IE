@@ -172,6 +172,7 @@ $moduleMenus = [
         'param' => 'controller',
         'menus' => [
             ['route' => 'dashboard', 'icon' => 'fas fa-house', 'label' => 'معرفی ماژول'],
+            ['route' => 'project', 'icon' => 'fas fa-folder-open', 'label' => 'پروژه‌های چیدمان'],
             ['route' => 'learn', 'icon' => 'fas fa-graduation-cap', 'label' => 'مرکز آموزش'],
         ],
     ],

@@ -4,7 +4,9 @@
         <h1>طراحی چیدمان کارخانه را از مبانی یاد بگیرید</h1>
         <p>از شناخت محصول و جریان تا نمودار روابط، نیاز فضا و ساخت گزینه‌های چیدمان؛ با فرمول‌های روشن، مثال حل‌شده و تمرین.</p>
         <div class="fl-actions">
-            <a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('learn', 'index')) ?>"><i class="fa-solid fa-graduation-cap"></i> شروع مسیر آموزش</a>
+            <a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('project', 'index')) ?>"><i class="fa-solid fa-folder-open"></i> پروژه‌های من</a>
+            <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'create')) ?>"><i class="fa-solid fa-plus"></i> پروژهٔ جدید</a>
+            <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('learn', 'index')) ?>"><i class="fa-solid fa-graduation-cap"></i> شروع مسیر آموزش</a>
             <?php if ($firstLesson): ?><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('learn', 'show', ['lesson' => $firstLesson['id']])) ?>">رفتن به درس اول <i class="fa-solid fa-arrow-left"></i></a><?php endif; ?>
         </div>
     </header>
@@ -25,5 +27,5 @@
         </ol>
     </section>
 
-    <aside class="fl-note"><i class="fa-solid fa-circle-info"></i><div><strong>وضعیت توسعه</strong><p>این گام، پایهٔ آموزشی و تعاریف را فراهم می‌کند. محیط ثبت پروژه و ترسیم چیدمان در مرحله‌های بعدی ساخته می‌شود؛ بنابراین هنوز خروجی اجرایی یا نقشهٔ قابل ساخت تولید نمی‌کند.</p></div></aside>
+    <aside class="fl-note"><i class="fa-solid fa-circle-info"></i><div><strong>وضعیت توسعه</strong><p>در این مرحله مشخصات پروژه و تقویم کاری ثبت می‌شود. ثبت محصولات و مقادیر تولید، مسیر عملیات، خدمات پشتیبان و تحلیل گزینه‌های چیدمان به گام‌های بعدی تعلق دارد؛ این نسخه هنوز نقشهٔ اجرایی تولید نمی‌کند.</p></div></aside>
 </main>
