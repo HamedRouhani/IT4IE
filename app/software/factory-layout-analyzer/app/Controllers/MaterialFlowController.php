@@ -100,8 +100,8 @@ final class MaterialFlowController extends Controller
     private function measurePayload(): array
     {
         $quantity = fl_latin_digits($this->postText('load_moves'));
-        if (!preg_match('/^(?:0|[1-9]\\d{0,9})(?:\\.\\d{1,4})?$/', $quantity) || (float) $quantity <= 0) {
-            throw new \InvalidArgumentException('تعداد جابه‌جایی بار باید عددی مثبت با حداکثر چهار رقم اعشار باشد.');
+        if (!preg_match('/^(?:0|[1-9]\\d{0,9})(?:\\.\\d{1,4})?$/', $quantity) || (float) $quantity < 0) {
+            throw new \InvalidArgumentException('تعداد جابه‌جایی بار باید صفر یا عددی مثبت با حداکثر چهار رقم اعشار باشد.');
         }
         $period = $this->postText('flow_period');
         if (!isset(self::PERIODS[$period])) {

@@ -16,5 +16,5 @@ CREATE TABLE IF NOT EXISTS SLP_material_flows (
     CONSTRAINT fk_SLP_material_flows_project FOREIGN KEY (project_id)
         REFERENCES SLP_projects (id) ON DELETE CASCADE,
     CONSTRAINT chk_SLP_material_flows_distinct CHECK (from_area <> to_area),
-    CONSTRAINT chk_SLP_material_flows_positive CHECK (load_moves > 0)
+    CONSTRAINT chk_SLP_material_flows_nonnegative CHECK (load_moves >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

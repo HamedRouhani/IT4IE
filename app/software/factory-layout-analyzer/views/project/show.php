@@ -204,13 +204,13 @@
     <section class="fl-card fl-flow-section">
         <div class="fl-card-head"><div><span class="fl-eyebrow">SLP · جریان مواد</span><h2>ثبت جریان و ماتریس From-To</h2></div><span class="fl-readiness-count"><?= count($materialFlows) ?> مسیر ثبت‌شده</span></div>
         <p class="fl-section-intro">برای هر مسیر جهت‌دار، تعداد جابه‌جایی بار، دورهٔ مشاهده و مبنای داده را ثبت کنید. ردیف A به B با B به A متفاوت است و خانهٔ ثبت‌نشده به معنی صفر حرکت نیست.</p>
-        <aside class="fl-inline-note"><i class="fa-solid fa-circle-info"></i><span>واحد این نسخه «تعداد جابه‌جایی بار» است، نه وزن یا حجم مواد. برای مقایسهٔ معتبر، تعریف یک بار را بین مسیرها یکسان کنید و دورهٔ مشاهده را متناسب با دادهٔ واقعی انتخاب کنید.</span></aside>
+        <aside class="fl-inline-note"><i class="fa-solid fa-circle-info"></i><span>واحد این نسخه «تعداد جابه‌جایی بار» است، نه وزن یا حجم مواد. صفر را فقط وقتی ثبت کنید که مسیر را در دورهٔ مشخص بررسی کرده‌اید و واقعاً حرکتی رخ نداده است؛ خانهٔ خالی یعنی هنوز داده‌ای ثبت نشده. برای مقایسهٔ معتبر، تعریف یک بار را بین مسیرها یکسان کنید.</span></aside>
         <?php if (count($activityAreas) >= 2): ?>
             <form class="fl-flow-form" method="post" action="<?= fl_e(fl_url('flow', 'store', ['project_id' => (int) $project['id']])) ?>">
                 <?= $csrfField ?>
                 <label>مبدأ<select name="from_area" required><option value="">انتخاب فعالیت</option><?php foreach ($activityAreas as $activityArea): ?><option value="<?= fl_e($activityArea) ?>"><?= fl_e($activityArea) ?></option><?php endforeach; ?></select></label>
                 <label>مقصد<select name="to_area" required><option value="">انتخاب فعالیت</option><?php foreach ($activityAreas as $activityArea): ?><option value="<?= fl_e($activityArea) ?>"><?= fl_e($activityArea) ?></option><?php endforeach; ?></select></label>
-                <label>تعداد جابه‌جایی بار *<input name="load_moves" type="text" inputmode="decimal" pattern="[0-9۰-۹٠-٩]+([٫.][0-9۰-۹٠-٩]{1,4})?" maxlength="15" required placeholder="مثلاً ۱۲۵"></label>
+                <label>تعداد جابه‌جایی بار (صفر مجاز است) *<input name="load_moves" type="text" inputmode="decimal" pattern="[0-9۰-۹٠-٩]+([٫.][0-9۰-۹٠-٩]{1,4})?" maxlength="15" required placeholder="مثلاً ۱۲۵ یا ۰"></label>
                 <label>دورهٔ مشاهده *<select name="flow_period" required><?php foreach ($flowPeriods as $key => $label): ?><option value="<?= fl_e($key) ?>" <?= $key === $project['planning_period'] ? 'selected' : '' ?>><?= fl_e($label) ?></option><?php endforeach; ?></select></label>
                 <label class="fl-flow-evidence">منبع یا مبنای داده *<input name="evidence" maxlength="500" required placeholder="مثلاً شمارش برگه‌های انتقال در هفتهٔ کاری نمونه"></label>
                 <button class="fl-button fl-button-primary" type="submit"><i class="fa-solid fa-plus"></i> ثبت جریان</button>
@@ -225,7 +225,7 @@
                 <thead><tr><th scope="col">مبدأ ↓ / مقصد →</th><?php foreach ($activityAreas as $activityArea): ?><th scope="col" title="<?= fl_e($activityArea) ?>"><?= fl_e($activityArea) ?></th><?php endforeach; ?></tr></thead>
                 <tbody><?php foreach ($activityAreas as $rowIndex => $fromArea): ?><tr><th scope="row"><?= fl_e($fromArea) ?></th><?php foreach ($activityAreas as $columnIndex => $toArea): ?>
                     <?php if ($rowIndex === $columnIndex): ?><td class="fl-flow-diagonal" aria-label="مبدأ و مقصد یکسان">—</td>
-                    <?php elseif (isset($flowByPair[$fromArea][$toArea])): $matrixFlow = $flowByPair[$fromArea][$toArea]; ?><td><strong><?= fl_e($matrixFlow['load_moves']) ?></strong><small><?= fl_e($flowPeriods[$matrixFlow['flow_period']] ?? 'دوره نامشخص') ?></small></td>
+                    <?php elseif (isset($flowByPair[$fromArea][$toArea])): $matrixFlow = $flowByPair[$fromArea][$toArea]; $observedZero = (float) $matrixFlow['load_moves'] === 0.0; ?><td class="<?= $observedZero ? 'fl-flow-zero' : '' ?>" title="<?= fl_e($matrixFlow['evidence']) ?>"><strong><?= fl_e($matrixFlow['load_moves']) ?></strong><small><?= $observedZero ? 'صفرِ مشاهده‌شده · ' : '' ?><?= fl_e($flowPeriods[$matrixFlow['flow_period']] ?? 'دوره نامشخص') ?></small></td>
                     <?php else: ?><td class="fl-flow-unrecorded" title="جریانی ثبت نشده" aria-label="جریانی ثبت نشده">·</td><?php endif; ?>
                 <?php endforeach; ?></tr><?php endforeach; ?></tbody>
             </table></div></div>
@@ -242,7 +242,7 @@
                 <dialog class="fl-flow-dialog" id="<?= fl_e($flowDialogId) ?>" aria-labelledby="<?= fl_e($flowDialogId) ?>-title"><div class="fl-flow-dialog-card">
                     <div class="fl-flow-dialog-head"><div><span class="fl-eyebrow">ویرایش جریان جهت‌دار</span><h3 id="<?= fl_e($flowDialogId) ?>-title"><?= fl_e($flow['from_area']) ?> → <?= fl_e($flow['to_area']) ?></h3></div><button class="fl-button fl-button-ghost" type="button" aria-label="بستن پنجره" onclick="this.closest('dialog').close()">×</button></div>
                     <form method="post" action="<?= fl_e(fl_url('flow', 'update', ['id' => (int) $flow['id']])) ?>"><?= $csrfField ?>
-                        <label>تعداد جابه‌جایی بار *<input name="load_moves" type="text" inputmode="decimal" pattern="[0-9۰-۹٠-٩]+([٫.][0-9۰-۹٠-٩]{1,4})?" maxlength="15" required value="<?= fl_e($flow['load_moves']) ?>"></label>
+                        <label>تعداد جابه‌جایی بار (صفر مجاز است) *<input name="load_moves" type="text" inputmode="decimal" pattern="[0-9۰-۹٠-٩]+([٫.][0-9۰-۹٠-٩]{1,4})?" maxlength="15" required value="<?= fl_e($flow['load_moves']) ?>"></label>
                         <label>دورهٔ مشاهده *<select name="flow_period" required><?php foreach ($flowPeriods as $key => $label): ?><option value="<?= fl_e($key) ?>" <?= $flow['flow_period'] === $key ? 'selected' : '' ?>><?= fl_e($label) ?></option><?php endforeach; ?></select></label>
                         <label>منبع یا مبنای داده *<input name="evidence" maxlength="500" required value="<?= fl_e($flow['evidence']) ?>"></label>
                         <div class="fl-flow-dialog-actions"><button class="fl-button fl-button-primary" type="submit">ذخیرهٔ تغییرات</button><button class="fl-button fl-button-ghost" type="button" onclick="this.closest('dialog').close()">انصراف</button></div>

@@ -199,6 +199,8 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
 .fl-flow-matrix td small { margin-top: 3px; color: #64748b; font-size: .76rem; }
 .fl-flow-matrix .fl-flow-diagonal, .fl-flow-matrix .fl-flow-unrecorded { color: #94a3b8; background: #f8fafc; }
 .fl-flow-matrix .fl-flow-unrecorded { font-size: 1.35rem; }
+.fl-flow-matrix .fl-flow-zero { color: #166534; background: #f0fdf4; }
+.fl-flow-matrix .fl-flow-zero small { color: #166534; font-weight: 700; }
 .fl-flow-table td:nth-child(5) { min-width: 230px; overflow-wrap: anywhere; }
 .fl-flow-dialog { width: min(540px, calc(100% - 28px)); max-width: 540px; max-height: calc(100% - 28px); padding: 0; overflow: auto; border: 0; border-radius: 16px; color: #172554; background: #fff; box-shadow: 0 24px 70px rgba(15, 23, 42, .28); }
 .fl-flow-dialog::backdrop { background: rgba(15, 23, 42, .58); backdrop-filter: blur(2px); }
