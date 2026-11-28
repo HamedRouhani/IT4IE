@@ -340,21 +340,25 @@
         <p class="fl-area-caveat">این جمع، برآورد اولیهٔ مساحت تولیدی است؛ مساحت خدمات پشتیبان در گام جداگانهٔ خودش می‌ماند. راهروهای اصلی، ستون‌ها، هم‌پوشانی‌ها و الزامات ایمنی را جداگانه بررسی کنید و این جمع را مساحت نهایی ساختمان تلقی نکنید.</p>
         <?php if ($productionAreas): ?>
             <div class="fl-table-wrap"><table class="fl-table fl-production-space-table">
-                <thead><tr><th>بخش تولیدی</th><th>مساحت موردنیاز</th><th>مبنای ثبت‌شده</th><th>ورود یا ویرایش</th><th>عملیات</th></tr></thead>
-                <tbody><?php foreach ($productionAreas as $areaName): $spaceRequirement = $productionSpacesByArea[$areaName] ?? null; ?>
+                <thead><tr><th>بخش تولیدی</th><th>مساحت موردنیاز</th><th>مبنای ثبت‌شده</th><th>ثبت یا ویرایش</th><th>عملیات</th></tr></thead>
+                <tbody><?php foreach ($productionAreas as $spaceIndex => $areaName): $spaceRequirement = $productionSpacesByArea[$areaName] ?? null; $spaceDialogId = 'fl-space-edit-' . (int) $project['id'] . '-' . (int) $spaceIndex; $spaceFormData = ($oldSpaceForm['area_name'] ?? null) === $areaName ? $oldSpaceForm : []; ?>
                     <tr>
                         <td><strong><?= fl_e($areaName) ?></strong></td>
                         <td><?= $spaceRequirement ? fl_e($spaceRequirement['area_m2']) . ' مترمربع' : '<span class="fl-space-missing">برآورد نشده</span>' ?></td>
                         <td><?= $spaceRequirement ? fl_e($spaceRequirement['area_basis']) : '—' ?><?php if ($spaceRequirement && !empty($spaceRequirement['notes'])): ?><small><?= fl_e($spaceRequirement['notes']) ?></small><?php endif; ?></td>
-                        <td><details class="fl-space-editor"><summary><?= $spaceRequirement ? 'ویرایش برآورد' : 'ثبت برآورد' ?></summary>
-                            <form method="post" action="<?= fl_e(fl_url('space', 'store', ['project_id' => (int) $project['id']])) ?>">
-                                <?= $csrfField ?><input type="hidden" name="area_name" value="<?= fl_e($areaName) ?>">
-                                <label>مساحت موردنیاز (مترمربع) *<input name="area_m2" type="text" inputmode="decimal" pattern="[0-9۰-۹٠-٩]+([٫.][0-9۰-۹٠-٩]{1,3})?" maxlength="14" required value="<?= fl_e($spaceRequirement['area_m2'] ?? '') ?>" placeholder="مثلاً ۴۸٫۵"></label>
-                                <label>مبنای برآورد *<input name="area_basis" maxlength="500" required value="<?= fl_e($spaceRequirement['area_basis'] ?? '') ?>" placeholder="مثلاً جانمایی ماشین‌آلات به‌همراه دسترسی اپراتور"></label>
-                                <label>یادداشت تکمیلی<input name="notes" maxlength="1000" value="<?= fl_e($spaceRequirement['notes'] ?? '') ?>" placeholder="فرض‌ها یا محدودیت‌های برآورد"></label>
-                                <button class="fl-button fl-button-primary" type="submit">ذخیرهٔ برآورد</button>
-                            </form>
-                        </details></td>
+                        <td><button class="fl-button fl-button-ghost" type="button" aria-haspopup="dialog" aria-controls="<?= fl_e($spaceDialogId) ?>" onclick="document.getElementById('<?= fl_e($spaceDialogId) ?>').showModal()"><?= $spaceRequirement ? 'ویرایش برآورد' : 'ثبت برآورد' ?></button>
+                            <dialog class="fl-space-dialog" id="<?= fl_e($spaceDialogId) ?>" aria-labelledby="<?= fl_e($spaceDialogId) ?>-title"><div class="fl-space-dialog-card">
+                                <div class="fl-space-dialog-head"><div><span class="fl-eyebrow">SLP · نیاز فضا</span><h3 id="<?= fl_e($spaceDialogId) ?>-title"><?= $spaceRequirement ? 'ویرایش برآورد' : 'ثبت برآورد' ?> · <?= fl_e($areaName) ?></h3></div><button class="fl-button fl-button-ghost" type="button" aria-label="بستن پنجره" onclick="this.closest('dialog').close()">×</button></div>
+                                <form method="post" action="<?= fl_e(fl_url('space', 'store', ['project_id' => (int) $project['id']])) ?>">
+                                    <?= $csrfField ?><input type="hidden" name="area_name" value="<?= fl_e($areaName) ?>">
+                                    <label>مساحت موردنیاز (مترمربع) *<input name="area_m2" type="text" inputmode="decimal" pattern="[0-9۰-۹٠-٩]+([٫.][0-9۰-۹٠-٩]{1,3})?" maxlength="14" required value="<?= fl_e($spaceFormData['area_m2'] ?? $spaceRequirement['area_m2'] ?? '') ?>" placeholder="مثلاً ۴۸٫۵"></label>
+                                    <label>مبنای برآورد *<input name="area_basis" maxlength="500" required value="<?= fl_e($spaceFormData['area_basis'] ?? $spaceRequirement['area_basis'] ?? '') ?>" placeholder="مثلاً جانمایی ماشین‌آلات به‌همراه دسترسی اپراتور"></label>
+                                    <label>یادداشت تکمیلی<input name="notes" maxlength="1000" value="<?= fl_e($spaceFormData['notes'] ?? $spaceRequirement['notes'] ?? '') ?>" placeholder="فرض‌ها یا محدودیت‌های برآورد"></label>
+                                    <div class="fl-space-dialog-actions"><button class="fl-button fl-button-primary" type="submit">ذخیرهٔ برآورد</button><button class="fl-button fl-button-ghost" type="button" onclick="this.closest('dialog').close()">انصراف</button></div>
+                                </form>
+                            </div></dialog>
+                            <?php if ($spaceFormData): ?><script>document.getElementById('<?= fl_e($spaceDialogId) ?>').showModal();</script><?php endif; ?>
+                        </td>
                         <td><?php if ($spaceRequirement): ?><form method="post" action="<?= fl_e(fl_url('space', 'delete', ['id' => (int) $spaceRequirement['id']])) ?>" onsubmit="return confirm('برآورد فضای این بخش حذف شود؟');"><?= $csrfField ?><button class="fl-button fl-button-danger" type="submit">حذف برآورد</button></form><?php else: ?>—<?php endif; ?></td>
                     </tr>
                 <?php endforeach; ?></tbody>

@@ -71,6 +71,20 @@ final class ProjectController extends Controller
             fl_flash_set('danger', 'پروژه پیدا نشد یا دسترسی به آن ندارید.');
             $this->redirect(fl_url('project', 'index'));
         }
+        $oldSpaceForm = [];
+        $savedSpaceForm = $_SESSION['fl_old_space'] ?? null;
+        unset($_SESSION['fl_old_space']);
+        if (
+            is_array($savedSpaceForm)
+            && (int) ($savedSpaceForm['at'] ?? 0) >= time() - 900
+            && is_array($savedSpaceForm['data'] ?? null)
+        ) {
+            foreach (['area_name', 'area_m2', 'area_basis', 'notes'] as $field) {
+                $oldSpaceForm[$field] = is_string($savedSpaceForm['data'][$field] ?? null)
+                    ? trim($savedSpaceForm['data'][$field])
+                    : '';
+            }
+        }
         $products = (new ProductRepository())->listForProject($userId, $id);
         $routeStepsByProduct = [];
         foreach ((new RouteStepRepository())->listForProject($userId, $id) as $routeStep) {
@@ -174,6 +188,7 @@ final class ProjectController extends Controller
             'activityRelationships' => $activityRelationships,
             'materialFlows' => $materialFlows,
             'productionAreas' => $productionAreas,
+            'oldSpaceForm' => $oldSpaceForm,
             'productionSpacesByArea' => $productionSpacesByArea,
             'orphanedProductionSpaces' => $orphanedProductionSpaces,
             'productionSpaceSummary' => [

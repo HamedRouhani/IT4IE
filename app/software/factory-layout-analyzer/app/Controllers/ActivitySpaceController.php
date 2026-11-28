@@ -15,15 +15,18 @@ final class ActivitySpaceController extends Controller
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
             $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'space']));
         }
+        unset($_SESSION['fl_old_space']);
 
         try {
             (new ProductionAreaSpaceRepository())->save($userId, $projectId, $this->payload());
             fl_flash_set('success', 'نیاز فضای بخش تولیدی ثبت شد.');
         } catch (\InvalidArgumentException $e) {
             fl_flash_set('danger', $e->getMessage());
+            $this->rememberSubmittedValues();
         } catch (\Throwable $e) {
             error_log('Factory Layout production area space save failed: ' . $e->getMessage());
             fl_flash_set('danger', 'ثبت نیاز فضا انجام نشد؛ ورودی‌ها را بررسی کنید.');
+            $this->rememberSubmittedValues();
         }
         $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'space']));
     }
@@ -97,5 +100,19 @@ final class ActivitySpaceController extends Controller
             throw new \InvalidArgumentException('یکی از ورودی‌های متنی قالب معتبر ندارد.');
         }
         return trim($value);
+    }
+
+    private function rememberSubmittedValues(): void
+    {
+        $_SESSION['fl_old_space'] = [
+            'at' => time(),
+            'data' => array_intersect_key($_POST, array_flip(['area_name', 'area_m2', 'area_basis', 'notes'])),
+        ];
+    }
+
+    private function userId(): int
+    {
+        $this->requireAuth();
+        return (int) ($_SESSION['user_id'] ?? 0);
     }
 }

@@ -116,13 +116,21 @@ try {
             throw new RuntimeException('برآورد فضای درخواستی پیدا نشد.');
         }
         $controller->{$action}($id);
+    } elseif ($controllerKey === 'space' && $action === 'store') {
+        if (!is_int($projectId) || $projectId < 1) {
+            http_response_code(400);
+            fl_flash_set('danger', 'شناسهٔ پروژه برای ثبت برآورد معتبر نیست؛ از صفحهٔ پروژه دوباره تلاش کنید.');
+            header('Location: ' . fl_url('project', 'index'), true, 303);
+            exit;
+        }
+        $controller->store($projectId);
     } elseif ($controllerKey === 'service' && in_array($action, ['edit', 'update', 'delete'], true)) {
         if (!is_int($id) || $id < 1) {
             http_response_code(404);
             throw new RuntimeException('خدمت پشتیبان درخواستی پیدا نشد.');
         }
         $controller->{$action}($id);
-    } elseif (in_array($controllerKey, ['service', 'relationship', 'flow', 'space'], true) && in_array($action, ['create', 'store'], true)) {
+    } elseif (in_array($controllerKey, ['service', 'relationship', 'flow'], true) && in_array($action, ['create', 'store'], true)) {
         if (!is_int($projectId) || $projectId < 1) {
             http_response_code(404);
             throw new RuntimeException('پروژهٔ درخواستی پیدا نشد.');
@@ -133,6 +141,15 @@ try {
     }
 } catch (Throwable $e) {
     error_log('Factory Layout Analyzer error: ' . $e->getMessage());
+    if (!$isAjax && $controllerKey === 'space' && $action === 'store' && is_int($projectId) && $projectId > 0) {
+        $_SESSION['fl_old_space'] = [
+            'at' => time(),
+            'data' => array_intersect_key($_POST, array_flip(['area_name', 'area_m2', 'area_basis', 'notes'])),
+        ];
+        fl_flash_set('danger', 'ثبت برآورد کامل نشد؛ اطلاعات واردشده نگه داشته شد. صفحه را تازه کنید و دوباره تلاش کنید.');
+        header('Location: ' . fl_url('project', 'show', ['id' => $projectId, 'step' => 'space']), true, 303);
+        exit;
+    }
     if ($isAjax) {
         http_response_code(500);
         header('Content-Type: application/json; charset=utf-8');
