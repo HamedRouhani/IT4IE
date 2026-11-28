@@ -154,6 +154,27 @@
         <?php else: ?>
             <p class="fl-relationship-empty">هنوز رابطه‌ای ثبت نشده است. هر زوج فعالیت فقط یک‌بار وارد نمودار می‌شود.</p>
         <?php endif; ?>
+        <?php if (count($activityAreas) >= 2): ?>
+            <?php
+            $relationshipByPair = [];
+            foreach ($activityRelationships as $relationship) {
+                $relationshipByPair[$relationship['area_a']][$relationship['area_b']] = $relationship;
+                $relationshipByPair[$relationship['area_b']][$relationship['area_a']] = $relationship;
+            }
+            ?>
+            <div class="fl-rel-matrix-block">
+                <h3>ماتریس روابط فعالیت‌ها</h3>
+                <p class="fl-relationship-empty">ماتریس متقارن است؛ خانهٔ «—» روی قطر، رابطهٔ یک فعالیت با خودش را نشان می‌دهد. نقطهٔ خاکستری یعنی این زوج هنوز ارزیابی نشده است.</p>
+                <div class="fl-table-wrap"><table class="fl-table fl-rel-matrix"><thead><tr><th scope="col">فعالیت</th><?php foreach ($activityAreas as $activityArea): ?><th scope="col" title="<?= fl_e($activityArea) ?>"><?= fl_e($activityArea) ?></th><?php endforeach; ?></tr></thead>
+                    <tbody><?php foreach ($activityAreas as $rowIndex => $rowArea): ?><tr><th scope="row"><?= fl_e($rowArea) ?></th><?php foreach ($activityAreas as $columnIndex => $columnArea): ?>
+                        <?php if ($rowIndex === $columnIndex): ?><td class="fl-rel-diagonal" aria-label="قطر اصلی">—</td>
+                        <?php elseif (isset($relationshipByPair[$rowArea][$columnArea])): $matrixRelationship = $relationshipByPair[$rowArea][$columnArea]; ?><td><span class="fl-rel-code rel-<?= fl_e($matrixRelationship['closeness_code']) ?>" title="<?= fl_e($matrixRelationship['reason']) ?>"><?= fl_e($matrixRelationship['closeness_code']) ?></span></td>
+                        <?php else: ?><td class="fl-rel-unrated" title="ارزیابی‌نشده" aria-label="ارزیابی‌نشده">·</td><?php endif; ?>
+                    <?php endforeach; ?></tr><?php endforeach; ?></tbody>
+                </table></div>
+                <div class="fl-rel-legend" aria-label="راهنمای کدهای رابطه"><?php foreach ($relationshipLabels as $code => $label): ?><span><b class="fl-rel-code rel-<?= fl_e($code) ?>"><?= fl_e($code) ?></b><?= fl_e($label) ?></span><?php endforeach; ?></div>
+            </div>
+        <?php endif; ?>
         <p class="fl-area-caveat">فعالیت‌ها در این نسخه از نام ایستگاه‌های مسیر و نام خدمات پشتیبان ساخته می‌شوند. رابطه‌ها نام فعالیت را هنگام ثبت نگه می‌دارند؛ اگر نام ایستگاهی را تغییر دادید، رابطه‌های مرتبط را بازبینی کنید.</p>
     </section>
     <aside class="fl-note"><i class="fa-solid fa-graduation-cap"></i><div><strong>نکتهٔ آموزشی SLP</strong><p>P محصول یا خانوادهٔ محصول و Q مقدار تولید است. واحد هر مقدار باید روشن باشد؛ برای تبدیل واحد یا مقایسهٔ محصولات ناهمگون، ضرایب و قواعد تبدیل را در مرحلهٔ جریان مواد تعریف می‌کنیم.</p><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('learn', 'show', ['lesson' => 'slp-overview'])) ?>">مرور درس مبانی SLP</a></div></aside>
