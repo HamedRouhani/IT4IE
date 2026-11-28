@@ -18,7 +18,7 @@
         'routes' => count($products) > 0 && $slpReadiness['routedProducts'] === count($products),
         'flows' => count($materialFlows) > 0,
         'services' => count($supportServices) > 0,
-        'relationships' => count($activityRelationships) > 0,
+        'relationships' => $slpReadiness['relationshipsComplete'],
         'space' => count($productionAreas) > 0 && $slpReadiness['documentedProductionAreas'] === count($productionAreas),
     ];
     $activePosition = array_search($activeStep, $workflowSteps, true);
@@ -69,6 +69,7 @@
         ['code' => 'P–Q', 'label' => 'محصول و مقدار تولید', 'value' => $slpReadiness['products'] . ' محصول ثبت‌شده', 'ready' => $slpReadiness['products'] > 0],
         ['code' => 'R', 'label' => 'مسیر عملیات', 'value' => $slpReadiness['routedProducts'] . ' از ' . $slpReadiness['products'] . ' محصول دارای مسیر', 'ready' => $slpReadiness['products'] > 0 && $slpReadiness['routedProducts'] === $slpReadiness['products']],
         ['code' => 'From-To', 'label' => 'جریان‌های جهت‌دار مواد', 'value' => $slpReadiness['flows'] . ' مسیر دارای داده', 'ready' => $slpReadiness['flows'] > 0],
+        ['code' => 'REL', 'label' => 'ارزیابی زوج‌های فعالیت', 'value' => $slpReadiness['ratedRelationshipPairCount'] . ' از ' . $slpReadiness['possibleRelationshipPairCount'] . ' زوج' . ($slpReadiness['staleRelationshipCount'] > 0 ? ' · ' . $slpReadiness['staleRelationshipCount'] . ' رابطهٔ قدیمی برای بازبینی' : ''), 'ready' => $slpReadiness['relationshipsComplete']],
         ['code' => 'S', 'label' => 'خدمات پشتیبان', 'value' => $slpReadiness['supportServices'] . ' خدمت ثبت‌شده', 'ready' => $slpReadiness['supportServices'] > 0],
         ['code' => 'A', 'label' => 'نیاز فضای تولیدی', 'value' => $slpReadiness['documentedProductionAreas'] . ' از ' . $slpReadiness['productionAreas'] . ' بخش دارای برآورد', 'ready' => $slpReadiness['productionAreas'] > 0 && $slpReadiness['documentedProductionAreas'] === $slpReadiness['productionAreas']],
         ['code' => 'T', 'label' => 'تقویم و زمان‌بندی', 'value' => $periodLabel . ' · ' . (int) $project['shifts_per_day'] . ' شیفت، ' . $project['hours_per_shift'] . ' ساعت', 'ready' => $slpReadiness['calendarConfigured']],
@@ -262,6 +263,11 @@
         <div class="fl-card-head"><div><span class="fl-eyebrow">REL · روابط غیرمادی</span><h2>ثبت روابط فعالیت‌ها (REL)</h2></div><span class="fl-readiness-count"><?= count($activityRelationships) ?> رابطه</span></div>
         <p class="fl-section-intro">برای هر زوج، کد نزدیکی و دلیل قابل‌بررسی ثبت کنید. کدها امتیاز عددی نیستند و زوج‌های ثبت‌نشده هنوز ارزیابی نشده‌اند (معادل U نیستند). رابطهٔ X را با دلیل روشن و ملاحظهٔ ایمنی مستند کنید.</p>
         <?php if (count($activityAreas) >= 2): ?>
+            <div class="fl-rel-coverage <?= $slpReadiness['relationshipsComplete'] ? 'is-complete' : 'is-pending' ?>" role="status">
+                <strong>پوشش ماتریس: <?= (int) $slpReadiness['ratedRelationshipPairCount'] ?> از <?= (int) $slpReadiness['possibleRelationshipPairCount'] ?> زوج ارزیابی شده</strong>
+                <span>برای تکمیل بازبینی، هر زوج فعالیت را ارزیابی کنید. U یعنی پس از بررسی، نزدیکی ناچیز است؛ خانهٔ خالی هنوز ارزیابی نشده است.</span>
+                <?php if ($slpReadiness['staleRelationshipCount'] > 0): ?><span class="fl-rel-stale"><?= (int) $slpReadiness['staleRelationshipCount'] ?> رابطه به‌دلیل تغییر یا حذف نام فعالیت، نیازمند بازبینی یا حذف است.</span><?php endif; ?>
+            </div>
             <form class="fl-relationship-form" method="post" action="<?= fl_e(fl_url('relationship', 'store', ['project_id' => (int) $project['id']])) ?>">
                 <?= $csrfField ?>
                 <label>فعالیت اول<select name="area_a" required><option value="">انتخاب کنید</option><?php foreach ($activityAreas as $activityArea): ?><option value="<?= fl_e($activityArea) ?>"><?= fl_e($activityArea) ?></option><?php endforeach; ?></select></label>

@@ -80,6 +80,30 @@ final class ProjectController extends Controller
         $relationshipRepository = new ActivityRelationshipRepository();
         $activityAreas = $relationshipRepository->activityAreas($userId, $id);
         $activityRelationships = $relationshipRepository->listForProject($userId, $id);
+        $activityAreaSet = array_fill_keys($activityAreas, true);
+        $ratedRelationshipPairs = [];
+        $staleRelationshipCount = 0;
+        foreach ($activityRelationships as $relationship) {
+            $areaA = (string) $relationship['area_a'];
+            $areaB = (string) $relationship['area_b'];
+            if ($areaA === $areaB || !isset($activityAreaSet[$areaA], $activityAreaSet[$areaB])) {
+                $staleRelationshipCount++;
+                continue;
+            }
+            if (!isset($ratedRelationshipPairs[$areaA][$areaB])) {
+                $ratedRelationshipPairs[$areaA][$areaB] = true;
+                $ratedRelationshipPairs[$areaB][$areaA] = true;
+            }
+        }
+        $ratedRelationshipPairCount = 0;
+        foreach ($ratedRelationshipPairs as $relatedAreas) {
+            $ratedRelationshipPairCount += count($relatedAreas);
+        }
+        $ratedRelationshipPairCount = intdiv($ratedRelationshipPairCount, 2);
+        $possibleRelationshipPairCount = intdiv(count($activityAreas) * (count($activityAreas) - 1), 2);
+        $relationshipsComplete = $possibleRelationshipPairCount > 0
+            && $ratedRelationshipPairCount === $possibleRelationshipPairCount
+            && $staleRelationshipCount === 0;
         $materialFlows = (new MaterialFlowRepository())->listForProject($userId, $id);
         $spaceRepository = new ProductionAreaSpaceRepository();
         $productionAreas = $spaceRepository->productionAreasForProject($userId, $id);
@@ -167,6 +191,10 @@ final class ProjectController extends Controller
                 'products' => count($products),
                 'routedProducts' => $routedProductCount,
                 'flows' => count($materialFlows),
+                'ratedRelationshipPairCount' => $ratedRelationshipPairCount,
+                'possibleRelationshipPairCount' => $possibleRelationshipPairCount,
+                'staleRelationshipCount' => $staleRelationshipCount,
+                'relationshipsComplete' => $relationshipsComplete,
                 'supportServices' => count($supportServices),
                 'productionAreas' => count($productionAreas),
                 'documentedProductionAreas' => $documentedProductionAreas,
