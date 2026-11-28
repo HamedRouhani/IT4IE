@@ -7,6 +7,7 @@ namespace App\Software\FactoryLayoutAnalyzer\Controllers;
 use App\Core\Controller;
 use App\Software\FactoryLayoutAnalyzer\Models\ProductRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\ProjectRepository;
+use App\Software\FactoryLayoutAnalyzer\Models\RouteStepRepository;
 
 final class ProjectController extends Controller
 {
@@ -64,12 +65,17 @@ final class ProjectController extends Controller
             fl_flash_set('danger', 'پروژه پیدا نشد یا دسترسی به آن ندارید.');
             $this->redirect(fl_url('project', 'index'));
         }
+        $routeStepsByProduct = [];
+        foreach ((new RouteStepRepository())->listForProject($userId, $id) as $routeStep) {
+            $routeStepsByProduct[(int) $routeStep['product_id']][] = $routeStep;
+        }
         $this->renderSoftware('project/show', [
             'pageTitle' => $project['title'],
             'title' => $project['title'] . ' - چیدمان کارخانه',
             'softwareName' => 'Factory Layout Analyzer',
             'project' => $project,
             'products' => (new ProductRepository())->listForProject($userId, $id),
+            'routeStepsByProduct' => $routeStepsByProduct,
             'periodLabel' => self::PERIODS[$project['planning_period']] ?? 'نامشخص',
             'flash' => fl_flash_get(),
             'csrfField' => $this->csrfField(),

@@ -28,18 +28,21 @@ $controllers = [
     'dashboard' => 'DashboardController',
     'project' => 'ProjectController',
     'product' => 'ProductController',
+    'route' => 'RouteController',
     'learn' => 'LearnController',
 ];
 $allowedActions = [
     'dashboard' => ['index'],
     'project' => ['index', 'create', 'store', 'show', 'edit', 'update', 'delete'],
     'product' => ['create', 'store', 'edit', 'update', 'delete'],
+    'route' => ['create', 'store', 'edit', 'update', 'delete', 'move'],
     'learn' => ['index', 'show'],
 ];
 $controllerKey = strtolower((string) ($_GET['controller'] ?? 'dashboard'));
 $action = (string) ($_GET['action'] ?? 'index');
 $id = isset($_GET['id']) ? filter_var($_GET['id'], FILTER_VALIDATE_INT) : null;
 $projectId = filter_var($_GET['project_id'] ?? $_POST['project_id'] ?? null, FILTER_VALIDATE_INT);
+$productId = filter_var($_GET['product_id'] ?? $_POST['product_id'] ?? null, FILTER_VALIDATE_INT);
 $isAjax = strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest';
 
 try {
@@ -75,6 +78,18 @@ try {
             throw new RuntimeException('پروژهٔ درخواستی پیدا نشد.');
         }
         $controller->{$action}($projectId);
+    } elseif ($controllerKey === 'route' && in_array($action, ['edit', 'update', 'delete', 'move'], true)) {
+        if (!is_int($id) || $id < 1) {
+            http_response_code(404);
+            throw new RuntimeException('گام مسیر درخواستی پیدا نشد.');
+        }
+        $controller->{$action}($id);
+    } elseif ($controllerKey === 'route' && in_array($action, ['create', 'store'], true)) {
+        if (!is_int($productId) || $productId < 1) {
+            http_response_code(404);
+            throw new RuntimeException('محصول درخواستی پیدا نشد.');
+        }
+        $controller->{$action}($productId);
     } else {
         $controller->{$action}();
     }

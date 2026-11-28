@@ -38,6 +38,36 @@
                     </tr>
                 <?php endforeach; ?></tbody>
             </table></div>
+            <div class="fl-route-area">
+                <div class="fl-route-heading"><div><span class="fl-eyebrow">R · مسیر عملیات</span><h3>توالی فعالیت‌ها برای هر محصول</h3></div><p>ترتیب واقعی حرکت و پردازش را ثبت کنید؛ جابه‌جایی گام‌ها از همین‌جا انجام می‌شود.</p></div>
+                <?php $typeLabels = ['operation' => 'عملیات', 'inspection' => 'بازرسی', 'transport' => 'حمل‌ونقل', 'storage' => 'انبارش', 'delay' => 'تأخیر']; ?>
+                <?php foreach ($products as $item): $steps = $routeStepsByProduct[(int) $item['id']] ?? []; ?>
+                    <section class="fl-route-product">
+                        <div class="fl-route-product-head"><h4><?= fl_e($item['name']) ?></h4><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('route', 'create', ['product_id' => (int) $item['id']])) ?>"><i class="fa-solid fa-plus"></i> افزودن گام مسیر</a></div>
+                        <?php if ($steps): ?>
+                            <ol class="fl-route-steps">
+                                <?php foreach ($steps as $position => $step): ?>
+                                    <li>
+                                        <span class="fl-route-number"><?= (int) $step['step_no'] ?></span>
+                                        <div class="fl-route-copy"><strong><?= fl_e($step['area_name']) ?></strong><span class="fl-route-type"><?= fl_e($typeLabels[$step['activity_type']] ?? 'فعالیت') ?></span>
+                                            <?php if (!empty($step['description'])): ?><small><?= fl_e($step['description']) ?></small><?php endif; ?>
+                                            <?php if (!empty($step['notes'])): ?><small class="fl-route-notes">یادداشت: <?= fl_e($step['notes']) ?></small><?php endif; ?>
+                                        </div>
+                                        <div class="fl-row-actions fl-route-actions">
+                                            <?php if ($position > 0): ?><form method="post" action="<?= fl_e(fl_url('route', 'move', ['id' => (int) $step['id']])) ?>"><?= $csrfField ?><input type="hidden" name="direction" value="up"><button class="fl-button fl-button-ghost fl-icon-button" type="submit" aria-label="انتقال گام به بالا" title="انتقال به بالا"><i class="fa-solid fa-arrow-up"></i></button></form><?php endif; ?>
+                                            <?php if ($position < count($steps) - 1): ?><form method="post" action="<?= fl_e(fl_url('route', 'move', ['id' => (int) $step['id']])) ?>"><?= $csrfField ?><input type="hidden" name="direction" value="down"><button class="fl-button fl-button-ghost fl-icon-button" type="submit" aria-label="انتقال گام به پایین" title="انتقال به پایین"><i class="fa-solid fa-arrow-down"></i></button></form><?php endif; ?>
+                                            <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('route', 'edit', ['id' => (int) $step['id']])) ?>">ویرایش</a>
+                                            <form method="post" action="<?= fl_e(fl_url('route', 'delete', ['id' => (int) $step['id']])) ?>" onsubmit="return confirm('این گام از مسیر محصول حذف شود؟');"><?= $csrfField ?><button class="fl-button fl-button-danger" type="submit">حذف</button></form>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ol>
+                        <?php else: ?>
+                            <p class="fl-route-empty">برای این محصول هنوز مسیری ثبت نشده است. گام نخست را از ایستگاه یا فعالیتی که فرایند واقعاً از آن شروع می‌شود وارد کنید.</p>
+                        <?php endif; ?>
+                    </section>
+                <?php endforeach; ?>
+            </div>
         <?php else: ?>
             <div class="fl-empty"><i class="fa-solid fa-box-open"></i><strong>هنوز محصولی ثبت نشده است</strong><span>برای آغاز تحلیل مقدار تولید، محصول یا خانوادهٔ محصول را با واحد مشخص و مقدار دوره‌ای ثبت کنید.</span><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('product', 'create', ['project_id' => (int) $project['id']])) ?>">ثبت اولین محصول</a></div>
         <?php endif; ?>

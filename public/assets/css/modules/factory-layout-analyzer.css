@@ -110,6 +110,24 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
 .fl-product-table td { vertical-align: middle; }
 .fl-product-table td:nth-child(3) { white-space: nowrap; }
 .fl-product-table td:nth-child(4) { min-width: 170px; overflow-wrap: anywhere; }
+.fl-route-area { margin-top: 24px; padding-top: 22px; border-top: 1px solid #e2e8f0; }
+.fl-route-heading, .fl-route-product-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fl-route-heading h3, .fl-route-product-head h4 { margin: 4px 0 10px; color: var(--fl-ink, #172554); line-height: 1.7; }
+.fl-route-heading p { max-width: 530px; margin: 0; color: #64748b; line-height: 1.8; }
+.fl-route-product { margin-top: 14px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 13px; background: #fbfdff; }
+.fl-route-product-head { padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
+.fl-route-product-head h4 { margin: 0; }
+.fl-route-steps { display: grid; gap: 9px; margin: 12px 0 0; padding: 0; list-style: none; }
+.fl-route-steps > li { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 11px; border: 1px solid #e2e8f0; border-radius: 11px; background: #fff; }
+.fl-route-number { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 10px; color: #1e3a8a; background: #dbeafe; font-weight: 800; }
+.fl-route-copy { display: grid; justify-items: start; gap: 4px; min-width: 0; }
+.fl-route-copy strong { color: #172554; }
+.fl-route-copy small { color: #475569; line-height: 1.7; overflow-wrap: anywhere; }
+.fl-route-notes { color: #64748b !important; }
+.fl-route-type { display: inline-flex; padding: 2px 8px; border-radius: 999px; color: #334155; background: #f1f5f9; font-size: .82rem; }
+.fl-route-actions { justify-content: flex-end; }
+.fl-icon-button { width: 38px; min-height: 38px; padding: 6px; }
+.fl-route-empty { margin: 12px 0 0; color: #64748b; line-height: 1.9; }
 .fl-answer { display: flex; gap: 9px; align-items: flex-start; margin: 14px 0 0; padding: 12px; border-radius: 10px; color: #14532d !important; background: #f0fdf4; }
 .fl-answer i { margin-top: 5px; }
 .fl-pitfalls li::marker { color: #b45309; }
@@ -131,6 +149,9 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
     .fl-form-grid, .fl-details { grid-template-columns: 1fr; }
     .fl-span-2, .fl-details .fl-detail-wide { grid-column: auto; }
     .fl-product-table { min-width: 760px; }
+    .fl-route-heading, .fl-route-product-head { align-items: flex-start; flex-direction: column; }
+    .fl-route-steps > li { grid-template-columns: 34px minmax(0, 1fr); }
+    .fl-route-actions { grid-column: 1 / -1; justify-content: flex-start; }
 }
 @media (max-width: 480px) {
     .fl-lesson { grid-template-columns: 30px minmax(0, 1fr) 18px; gap: 9px; padding: 11px; }

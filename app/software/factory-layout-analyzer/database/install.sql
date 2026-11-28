@@ -43,6 +43,25 @@ CREATE TABLE IF NOT EXISTS SLP_products (
     CONSTRAINT chk_SLP_products_quantity CHECK (production_quantity > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Ordered process routes (R in SLP), scoped to a product family.
+CREATE TABLE IF NOT EXISTS SLP_route_steps (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    product_id BIGINT UNSIGNED NOT NULL,
+    step_no SMALLINT UNSIGNED NOT NULL,
+    area_name VARCHAR(180) NOT NULL,
+    activity_type ENUM('operation','inspection','transport','storage','delay') NOT NULL DEFAULT 'operation',
+    description VARCHAR(500) NULL,
+    notes VARCHAR(1000) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_SLP_route_steps_product_order (product_id, step_no),
+    KEY idx_SLP_route_steps_product (product_id, step_no, id),
+    CONSTRAINT fk_SLP_route_steps_product FOREIGN KEY (product_id)
+        REFERENCES SLP_products (id) ON DELETE CASCADE,
+    CONSTRAINT chk_SLP_route_steps_order CHECK (step_no BETWEEN 1 AND 100)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT INTO software
     (name, slug, description, version, demo_url, features, tech_stack, db_config,
      module_path, route_prefix, icon_class, requires_license, status, download_count,
@@ -50,10 +69,10 @@ INSERT INTO software
 VALUES
     ('Factory Layout Analyzer', 'factory-layout-analyzer',
      'مدیریت پروژهٔ چیدمان کارخانه و تقویم تولید، به‌همراه مرکز آموزش طراحی نظام‌مند چیدمان (SLP).',
-     '0.3.0', '/software/factory-layout-analyzer/',
-     '["ساخت، ویرایش، مشاهده و حذف امن پروژه‌های شخصی","ثبت محصول و خانوادهٔ محصول و مقدار تولید دوره‌ای P-Q با واحد مستقل","ثبت دورهٔ مبنای تولید و تقویم شیفت‌ها به‌عنوان ورودی‌های T","مرکز آموزش SLP از داده‌های P-Q-R-S-T تا ارزیابی چیدمان بلوکی","درس جریان مواد و شاخص بار-فاصله با کنترل واحدها","آموزش کدهای رابطهٔ فعالیت‌ها به‌همراه ثبت دلیل","مثال عددی، خطاهای رایج و خودآزمایی در هر درس"]',
+     '0.4.0', '/software/factory-layout-analyzer/',
+     '["ساخت، ویرایش، مشاهده و حذف امن پروژه‌های شخصی","ثبت محصول و خانوادهٔ محصول و مقدار تولید دوره‌ای P-Q با واحد مستقل","ثبت و مرتب‌سازی امن توالی فعالیت‌های هر محصول برای ورودی R","ثبت دورهٔ مبنای تولید و تقویم شیفت‌ها به‌عنوان ورودی‌های T","مرکز آموزش SLP از داده‌های P-Q-R-S-T تا ارزیابی چیدمان بلوکی","درس جریان مواد و شاخص بار-فاصله با کنترل واحدها","آموزش کدهای رابطهٔ فعالیت‌ها به‌همراه ثبت دلیل","مثال عددی، خطاهای رایج و خودآزمایی در هر درس"]',
      '["PHP 8.2", "MySQL 8", "Bootstrap 5", "Vanilla JavaScript"]',
-     '{"prefix":"SLP_","tables":["projects","products"]}',
+     '{"prefix":"SLP_","tables":["projects","products","route_steps"]}',
      'app/software/factory-layout-analyzer', 'factory-layout-analyzer', 'fas fa-industry', 0,
      'development', 0, 1, 'app/software/factory-layout-analyzer/index.php',
      '{"module_path":"app/software/factory-layout-analyzer","db_prefix":"SLP_","sidebar_enabled":true,"theme":"factory-layout-analyzer","color":"#1D4ED8","accent":"#F4B942"}')
