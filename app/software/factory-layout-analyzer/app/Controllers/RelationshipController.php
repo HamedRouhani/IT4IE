@@ -48,6 +48,43 @@ final class RelationshipController extends Controller
         $this->redirect($projectId > 0 ? fl_url('project', 'show', ['id' => $projectId]) : fl_url('project', 'index'));
     }
 
+    public function update(int $id): void
+    {
+        $userId = $this->userId();
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            $this->redirect(fl_url('project', 'index'));
+        }
+
+        $repository = new ActivityRelationshipRepository();
+        $relationship = $repository->findForUser($userId, $id);
+        if (!$relationship) {
+            http_response_code(404);
+            fl_flash_set('danger', 'رابطه پیدا نشد یا دسترسی به آن ندارید.');
+            $this->redirect(fl_url('project', 'index'));
+        }
+        $projectId = (int) $relationship['project_id'];
+        try {
+            $code = strtoupper($this->postText('closeness_code'));
+            $reason = $this->postText('reason');
+            $length = function_exists('mb_strlen') ? mb_strlen($reason, 'UTF-8') : strlen($reason);
+            if (!in_array($code, self::CODES, true)) {
+                throw new \InvalidArgumentException('کد نزدیکی انتخاب‌شده معتبر نیست.');
+            }
+            if ($reason === '' || $length > 500) {
+                throw new \InvalidArgumentException('دلیل رابطه الزامی است و حداکثر ۵۰۰ نویسه دارد.');
+            }
+            $repository->update($userId, $id, [
+                'closeness_code' => $code,
+                'reason' => $reason,
+            ]);
+            fl_flash_set('success', 'کد و دلیل رابطهٔ فعالیت‌ها به‌روزرسانی شد.');
+        } catch (\Throwable $e) {
+            error_log('Factory Layout activity relationship update failed: ' . $e->getMessage());
+            fl_flash_set('danger', $e instanceof \InvalidArgumentException ? $e->getMessage() : 'به‌روزرسانی رابطه انجام نشد.');
+        }
+        $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+    }
+
     /** @return array{area_a:string,area_b:string,closeness_code:string,reason:string} */
     private function payload(): array
     {

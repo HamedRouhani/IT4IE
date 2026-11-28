@@ -59,6 +59,37 @@ final class ActivityRelationshipRepository
         }
     }
 
+    /** @return array<string,mixed>|null */
+    public function findForUser(int $userId, int $relationshipId): ?array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT ar.id, ar.project_id, ar.area_a, ar.area_b, ar.closeness_code, ar.reason
+             FROM SLP_activity_relationships ar
+             INNER JOIN SLP_projects pj ON pj.id = ar.project_id
+             WHERE pj.user_id = ? AND ar.id = ? LIMIT 1'
+        );
+        $stmt->execute([$userId, $relationshipId]);
+        $relationship = $stmt->fetch(PDO::FETCH_ASSOC);
+        return is_array($relationship) ? $relationship : null;
+    }
+
+    /** @param array{closeness_code:string,reason:string} $data */
+    public function update(int $userId, int $relationshipId, array $data): int
+    {
+        $relationship = $this->findForUser($userId, $relationshipId);
+        if (!$relationship) {
+            throw new \InvalidArgumentException('رابطه پیدا نشد یا دسترسی به آن ندارید.');
+        }
+        $stmt = $this->db->prepare(
+            'UPDATE SLP_activity_relationships SET closeness_code = ?, reason = ? WHERE id = ? AND project_id = ?'
+        );
+        $stmt->execute([$data['closeness_code'], $data['reason'], $relationshipId, (int) $relationship['project_id']]);
+        if ($stmt->rowCount() < 1 && !$this->findForUser($userId, $relationshipId)) {
+            throw new \InvalidArgumentException('رابطه پیدا نشد یا دسترسی به آن ندارید.');
+        }
+        return (int) $relationship['project_id'];
+    }
+
     public function delete(int $userId, int $relationshipId): int
     {
         $lookup = $this->db->prepare(

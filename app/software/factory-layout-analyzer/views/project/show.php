@@ -147,10 +147,25 @@
             <div class="fl-table-wrap"><table class="fl-table fl-relationship-table">
                 <thead><tr><th>فعالیت اول</th><th>کد</th><th>فعالیت دوم</th><th>دلیل ثبت‌شده</th><th>عملیات</th></tr></thead>
                 <tbody><?php foreach ($activityRelationships as $relationship): ?>
+                    <?php $relationshipDialogId = 'fl-rel-edit-' . (int) $relationship['id']; ?>
                     <tr><td><?= fl_e($relationship['area_a']) ?></td><td><span class="fl-rel-code rel-<?= fl_e($relationship['closeness_code']) ?>"><?= fl_e($relationship['closeness_code']) ?> · <?= fl_e($relationshipLabels[$relationship['closeness_code']] ?? 'نامشخص') ?></span></td><td><?= fl_e($relationship['area_b']) ?></td><td><?= fl_e($relationship['reason']) ?></td>
-                        <td><form method="post" action="<?= fl_e(fl_url('relationship', 'delete', ['id' => (int) $relationship['id']])) ?>" onsubmit="return confirm('این رابطه حذف شود؟');"><?= $csrfField ?><button class="fl-button fl-button-danger" type="submit">حذف</button></form></td></tr>
+                        <td><div class="fl-row-actions"><button class="fl-button fl-button-ghost" type="button" aria-haspopup="dialog" aria-controls="<?= fl_e($relationshipDialogId) ?>" onclick="document.getElementById('<?= fl_e($relationshipDialogId) ?>').showModal()">ویرایش</button><form method="post" action="<?= fl_e(fl_url('relationship', 'delete', ['id' => (int) $relationship['id']])) ?>" onsubmit="return confirm('این رابطه حذف شود؟');"><?= $csrfField ?><button class="fl-button fl-button-danger" type="submit">حذف</button></form></div></td></tr>
                 <?php endforeach; ?></tbody>
             </table></div>
+            <?php foreach ($activityRelationships as $relationship): ?>
+                <?php $relationshipDialogId = 'fl-rel-edit-' . (int) $relationship['id']; ?>
+                <dialog class="fl-rel-dialog" id="<?= fl_e($relationshipDialogId) ?>" aria-labelledby="<?= fl_e($relationshipDialogId) ?>-title">
+                    <div class="fl-rel-dialog-card">
+                        <div class="fl-rel-dialog-head"><div><span class="fl-eyebrow">ویرایش رابطهٔ فعالیت</span><h3 id="<?= fl_e($relationshipDialogId) ?>-title"><?= fl_e($relationship['area_a']) ?> · <?= fl_e($relationship['area_b']) ?></h3></div><button class="fl-button fl-button-ghost" type="button" aria-label="بستن پنجره" onclick="this.closest('dialog').close()">×</button></div>
+                        <form method="post" action="<?= fl_e(fl_url('relationship', 'update', ['id' => (int) $relationship['id']])) ?>">
+                            <?= $csrfField ?>
+                            <label>کد نزدیکی<select name="closeness_code" required><?php foreach ($relationshipLabels as $code => $label): ?><option value="<?= fl_e($code) ?>" <?= $relationship['closeness_code'] === $code ? 'selected' : '' ?>><?= fl_e($code . ' · ' . $label) ?></option><?php endforeach; ?></select></label>
+                            <label>دلیل رابطه<input name="reason" maxlength="500" required value="<?= fl_e($relationship['reason']) ?>"></label>
+                            <div class="fl-rel-dialog-actions"><button class="fl-button fl-button-primary" type="submit">ذخیرهٔ تغییرات</button><button class="fl-button fl-button-ghost" type="button" onclick="this.closest('dialog').close()">انصراف</button></div>
+                        </form>
+                    </div>
+                </dialog>
+            <?php endforeach; ?>
         <?php else: ?>
             <p class="fl-relationship-empty">هنوز رابطه‌ای ثبت نشده است. هر زوج فعالیت فقط یک‌بار وارد نمودار می‌شود.</p>
         <?php endif; ?>

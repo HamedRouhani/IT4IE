@@ -39,7 +39,7 @@ $allowedActions = [
     'product' => ['create', 'store', 'edit', 'update', 'delete'],
     'route' => ['create', 'store', 'edit', 'update', 'delete', 'move'],
     'service' => ['create', 'store', 'edit', 'update', 'delete'],
-    'relationship' => ['store', 'delete'],
+    'relationship' => ['store', 'update', 'delete'],
     'learn' => ['index', 'show'],
 ];
 $controllerKey = strtolower((string) ($_GET['controller'] ?? 'dashboard'));
@@ -94,12 +94,12 @@ try {
             throw new RuntimeException('محصول درخواستی پیدا نشد.');
         }
         $controller->{$action}($productId);
-    } elseif ($controllerKey === 'relationship' && $action === 'delete') {
+    } elseif ($controllerKey === 'relationship' && in_array($action, ['delete', 'update'], true)) {
         if (!is_int($id) || $id < 1) {
             http_response_code(404);
             throw new RuntimeException('Relationship not found.');
         }
-        $controller->delete($id);
+        $controller->{$action}($id);
     } elseif ($controllerKey === 'service' && in_array($action, ['edit', 'update', 'delete'], true)) {
         if (!is_int($id) || $id < 1) {
             http_response_code(404);
