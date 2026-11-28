@@ -1,0 +1,1 @@
+<main class="fl-page" dir="rtl"><section class="fl-card fl-empty"><i class="fa-regular fa-face-frown"></i><h1>این درس پیدا نشد</h1><p>ممکن است نشانی درس نادرست یا قدیمی باشد.</p><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('learn', 'index')) ?>">بازگشت به مرکز آموزش</a></section></main>

@@ -1,0 +1,66 @@
+<?php
+
+declare(strict_types=1);
+
+/** Factory Layout Analyzer — educational foundation (development release). */
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!defined('MODULAR_APP_PATH')) define('MODULAR_APP_PATH', __DIR__);
+if (!defined('CURRENT_MODULE')) define('CURRENT_MODULE', 'factory-layout-analyzer');
+if (!defined('CURRENT_MODULE_URL')) define('CURRENT_MODULE_URL', '/software/factory-layout-analyzer/');
+
+spl_autoload_register(static function (string $class): bool {
+    $prefix = 'App\\Software\\FactoryLayoutAnalyzer\\';
+    if (!str_starts_with($class, $prefix)) return false;
+
+    $relative = substr($class, strlen($prefix));
+    $file = MODULAR_APP_PATH . '/app/' . str_replace('\\', '/', $relative) . '.php';
+    if (!is_file($file)) return false;
+    require_once $file;
+    return true;
+}, true, true);
+
+require_once MODULAR_APP_PATH . '/app/Helpers/Functions.php';
+
+$controllers = [
+    'dashboard' => 'DashboardController',
+    'learn' => 'LearnController',
+];
+$controllerKey = strtolower((string) ($_GET['controller'] ?? 'dashboard'));
+$action = (string) ($_GET['action'] ?? 'index');
+$isAjax = strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest';
+
+try {
+    if ($controllerKey === 'exit') {
+        unset($_SESSION['current_software']);
+        header('Location: /software');
+        exit;
+    }
+    if (!isset($controllers[$controllerKey]) || !preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $action)) {
+        http_response_code(404);
+        throw new RuntimeException('بخش درخواستی پیدا نشد.');
+    }
+
+    $class = 'App\\Software\\FactoryLayoutAnalyzer\\Controllers\\' . $controllers[$controllerKey];
+    if (!class_exists($class)) throw new RuntimeException('بارگذاری بخش درخواستی ممکن نشد.');
+    $controller = new $class();
+    if (!method_exists($controller, $action) || str_starts_with($action, '_')) {
+        http_response_code(404);
+        throw new RuntimeException('عملیات درخواستی پیدا نشد.');
+    }
+    $controller->{$action}();
+} catch (Throwable $e) {
+    error_log('Factory Layout Analyzer error: ' . $e->getMessage());
+    if ($isAjax) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'error' => 'خطای داخلی رخ داد. لطفاً بعداً دوباره تلاش کنید.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    if (http_response_code() < 400) http_response_code(500);
+    echo '<main dir="rtl" style="max-width:760px;margin:3rem auto;padding:2rem;font-family:Vazirmatn,sans-serif">';
+    echo '<h1>خطا در ماژول طراحی چیدمان کارخانه</h1><p>امکان نمایش این بخش وجود ندارد.</p>';
+    echo '<a href="' . htmlspecialchars(CURRENT_MODULE_URL, ENT_QUOTES, 'UTF-8') . '">بازگشت به صفحهٔ اصلی</a></main>';
+}

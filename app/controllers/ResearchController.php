@@ -15,14 +15,14 @@ class ResearchController extends Controller
     private const ALLOWED_TOOLS = [
         'statlab-analyzer', 'babok-analyzer', 'pmbok-analyzer', 'mcdm-analyzer', 'or-analyzer',
         'pdm-analyzer', 'inventory-analyzer', 'time-study-analyzer', 'hr-analyzer',
-        'quality-analyzer', 'engineering-economy',
+        'quality-analyzer', 'engineering-economy', 'factory-layout-analyzer',
     ];
 
     private const RESEARCH_CATEGORIES = [
         'analytics' => ['title' => 'تحلیل داده و کیفیت', 'tools' => ['statlab-analyzer', 'quality-analyzer']],
         'decision' => ['title' => 'تصمیم‌گیری و بهینه‌سازی', 'tools' => ['mcdm-analyzer', 'or-analyzer', 'engineering-economy']],
         'process' => ['title' => 'فرایند و مدیریت پروژه', 'tools' => ['babok-analyzer', 'pmbok-analyzer']],
-        'operations' => ['title' => 'عملیات و بهره‌وری', 'tools' => ['inventory-analyzer', 'pdm-analyzer', 'time-study-analyzer', 'hr-analyzer']],
+        'operations' => ['title' => 'عملیات و بهره‌وری', 'tools' => ['inventory-analyzer', 'pdm-analyzer', 'time-study-analyzer', 'hr-analyzer', 'factory-layout-analyzer']],
     ];
 
     private const SOFTWARE_CATALOG = [
@@ -37,6 +37,7 @@ class ResearchController extends Controller
         ['slug'=>'hr-analyzer', 'name'=>'HR Analyzer', 'title'=>'مدیریت منابع انسانی', 'description'=>'پشتیبانی از فرایندهای جذب، آموزش، ارزیابی و توسعهٔ منابع انسانی.', 'research'=>'نیاز آموزشی، جذب و ارزیابی عملکرد', 'icon'=>'fa-users'],
         ['slug'=>'quality-analyzer', 'name'=>'Quality Analyzer', 'title'=>'تحلیل و کنترل کیفیت', 'description'=>'پایش پایداری فرایند، قابلیت فرایند، سیستم اندازه‌گیری و اقدام اصلاحی.', 'research'=>'SPC، قابلیت، MSA، پارتو و CAPA', 'icon'=>'fa-circle-check'],
         ['slug'=>'engineering-economy', 'name'=>'Engineering Economy Analyzer', 'title'=>'اقتصاد مهندسی', 'description'=>'مقایسهٔ اقتصادی گزینه‌ها بر پایهٔ جریان نقدی و ارزش زمانی پول.', 'research'=>'NPV، IRR، هزینهٔ چرخهٔ عمر و جایگزینی دارایی', 'icon'=>'fa-coins'],
+        ['slug'=>'factory-layout-analyzer', 'name'=>'Factory Layout Analyzer', 'title'=>'طراحی چیدمان کارخانه', 'description'=>'آموزش SLP، تحلیل جریان، رابطهٔ فعالیت‌ها، نیاز فضا و ارزیابی گزینه‌های چیدمان.', 'research'=>'برنامه‌ریزی چیدمان، نمودار از-به، بار-فاصله و طراحی بلوکی', 'icon'=>'fa-industry'],
     ];
 
     /** Executable, self-contained examples used when the research library has no published DB template for a module. */
@@ -143,6 +144,7 @@ class ResearchController extends Controller
             'inventory-analyzer' => 'Inventory · کنترل موجودی',
             'time-study-analyzer' => 'Time Study · زمان‌سنجی',
             'engineering-economy' => 'اقتصاد مهندسی',
+            'factory-layout-analyzer' => 'طراحی چیدمان کارخانه',
         ];
         $toolInfo = $this->toolInfo($template['tool_slug']);
 

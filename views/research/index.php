@@ -7,7 +7,7 @@ $methodLabels = [
     'Preventive Maintenance'=>'نگهداری پیشگیرانه', 'I-MR'=>'نمودار I-MR', 'EOQ و نقطه سفارش'=>'EOQ و نقطه سفارش',
     'زمان‌سنجی مستقیم'=>'زمان‌سنجی مستقیم', 'NPV و تحلیل هزینه'=>'NPV و تحلیل هزینه',
 ];
-$icons = ['statlab-analyzer'=>'fa-chart-column','babok-analyzer'=>'fa-magnifying-glass-chart','pmbok-analyzer'=>'fa-diagram-project','mcdm-analyzer'=>'fa-scale-balanced','or-analyzer'=>'fa-diagram-project','pdm-analyzer'=>'fa-screwdriver-wrench','inventory-analyzer'=>'fa-boxes-stacked','time-study-analyzer'=>'fa-stopwatch','hr-analyzer'=>'fa-users','quality-analyzer'=>'fa-circle-check','engineering-economy'=>'fa-coins'];
+$icons = ['statlab-analyzer'=>'fa-chart-column','babok-analyzer'=>'fa-magnifying-glass-chart','pmbok-analyzer'=>'fa-diagram-project','mcdm-analyzer'=>'fa-scale-balanced','or-analyzer'=>'fa-diagram-project','pdm-analyzer'=>'fa-screwdriver-wrench','inventory-analyzer'=>'fa-boxes-stacked','time-study-analyzer'=>'fa-stopwatch','hr-analyzer'=>'fa-users','quality-analyzer'=>'fa-circle-check','engineering-economy'=>'fa-coins','factory-layout-analyzer'=>'fa-industry'];
 ?>
 <section class="research-library" dir="rtl">
     <header class="research-hero">

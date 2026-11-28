@@ -165,6 +165,17 @@ $moduleMenus = [
         ],
     ],
 
+    // -------- Factory Layout Analyzer --------
+    'factory-layout-analyzer' => [
+        'name' => 'Factory Layout Analyzer',
+        'icon' => 'fas fa-industry',
+        'param' => 'controller',
+        'menus' => [
+            ['route' => 'dashboard', 'icon' => 'fas fa-house', 'label' => 'معرفی ماژول'],
+            ['route' => 'learn', 'icon' => 'fas fa-graduation-cap', 'label' => 'مرکز آموزش'],
+        ],
+    ],
+
     // -------- HR Analyzer --------
     'hr' => [
         'name'  => 'HR Analyzer',
