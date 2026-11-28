@@ -15,7 +15,7 @@ final class MaterialFlowController extends Controller
     {
         $userId = $this->userId();
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-            $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+            $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'flows']));
         }
         try {
             (new MaterialFlowRepository())->create($userId, $projectId, $this->createPayload());
@@ -26,7 +26,7 @@ final class MaterialFlowController extends Controller
             error_log('Factory Layout material flow create failed: ' . $e->getMessage());
             fl_flash_set('danger', 'ثبت جریان مواد انجام نشد؛ اطلاعات را بررسی کنید.');
         }
-        $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+        $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'flows']));
     }
 
     public function update(int $id): void
@@ -52,7 +52,7 @@ final class MaterialFlowController extends Controller
             error_log('Factory Layout material flow update failed: ' . $e->getMessage());
             fl_flash_set('danger', 'به‌روزرسانی جریان انجام نشد؛ اطلاعات را بررسی کنید.');
         }
-        $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+        $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'flows']));
     }
 
     public function delete(int $id): void
@@ -76,7 +76,7 @@ final class MaterialFlowController extends Controller
             error_log('Factory Layout material flow delete failed: ' . $e->getMessage());
             fl_flash_set('danger', $e instanceof \InvalidArgumentException ? $e->getMessage() : 'حذف جریان انجام نشد.');
         }
-        $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+        $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'flows']));
     }
 
     /** @return array{from_area:string,to_area:string,load_moves:string,flow_period:string,evidence:string} */

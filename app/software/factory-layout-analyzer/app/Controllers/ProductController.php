@@ -27,7 +27,7 @@ final class ProductController extends Controller
     {
         $userId = $this->userId();
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-            $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+            $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'products']));
         }
         try {
             (new ProductRepository())->create($userId, $projectId, $this->payload());
@@ -42,7 +42,7 @@ final class ProductController extends Controller
             $_SESSION['fl_old_product'] = ['data' => $_POST, 'at' => time()];
             $this->redirect(fl_url('product', 'create', ['project_id' => $projectId]));
         }
-        $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+        $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'products']));
     }
 
     public function edit(int $id): void
@@ -88,7 +88,7 @@ final class ProductController extends Controller
             $_SESSION['fl_old_product'] = ['data' => $_POST, 'at' => time()];
             $this->redirect(fl_url('product', 'edit', ['id' => $id]));
         }
-        $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+        $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'products']));
     }
 
     public function delete(int $id): void
@@ -103,7 +103,7 @@ final class ProductController extends Controller
         }
         $projectId = (int) $product['project_id'];
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-            $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+            $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'products']));
         }
         try {
             $repository->delete($userId, $id);
@@ -112,7 +112,7 @@ final class ProductController extends Controller
             error_log('Factory Layout product delete failed: ' . $e->getMessage());
             fl_flash_set('danger', 'حذف محصول انجام نشد.');
         }
-        $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+        $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'products']));
     }
 
     /** @param array<string,mixed>|null $product */

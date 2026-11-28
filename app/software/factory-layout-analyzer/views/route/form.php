@@ -11,7 +11,7 @@ $selected = static fn(string $candidate): string => (string) ($source['activity_
             <h1><i class="fa-solid fa-route"></i> <?= $step ? 'ویرایش گام مسیر' : 'افزودن گام به مسیر' ?></h1>
             <p>محصول: <?= fl_e($product['name']) ?><?= $step ? ' · گام ' . (int) $step['step_no'] : '' ?></p>
         </div>
-        <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $product['project_id']])) ?>">بازگشت به پروژه</a>
+        <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $product['project_id'], 'step' => 'routes'])) ?>">بازگشت به پروژه</a>
     </header>
     <?php if (!empty($flash)): ?><div class="fl-alert <?= fl_e($flash['type']) ?>" role="status"><?= fl_e($flash['message']) ?></div><?php endif; ?>
 
@@ -43,7 +43,7 @@ $selected = static fn(string $candidate): string => (string) ($source['activity_
         </section>
         <div class="fl-form-actions">
             <button class="fl-button fl-button-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> ذخیرهٔ گام</button>
-            <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $product['project_id']])) ?>">انصراف</a>
+            <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $product['project_id'], 'step' => 'routes'])) ?>">انصراف</a>
         </div>
     </form>
 </main>

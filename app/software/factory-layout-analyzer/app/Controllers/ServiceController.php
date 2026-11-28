@@ -43,7 +43,7 @@ final class ServiceController extends Controller
     {
         $userId = $this->userId();
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-            $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+            $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'services']));
         }
         try {
             (new SupportServiceRepository())->create($userId, $projectId, $this->payload());
@@ -58,7 +58,7 @@ final class ServiceController extends Controller
             $_SESSION['fl_old_service'] = ['data' => $_POST, 'at' => time()];
             $this->redirect(fl_url('service', 'create', ['project_id' => $projectId]));
         }
-        $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+        $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'services']));
     }
 
     public function edit(int $id): void
@@ -104,7 +104,7 @@ final class ServiceController extends Controller
             $_SESSION['fl_old_service'] = ['data' => $_POST, 'at' => time()];
             $this->redirect(fl_url('service', 'edit', ['id' => $id]));
         }
-        $this->redirect(fl_url('project', 'show', ['id' => (int) $service['project_id']]));
+        $this->redirect(fl_url('project', 'show', ['id' => (int) $service['project_id'], 'step' => 'services']));
     }
 
     public function delete(int $id): void
@@ -118,7 +118,7 @@ final class ServiceController extends Controller
             $this->redirect(fl_url('project', 'index'));
         }
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-            $this->redirect(fl_url('project', 'show', ['id' => (int) $service['project_id']]));
+            $this->redirect(fl_url('project', 'show', ['id' => (int) $service['project_id'], 'step' => 'services']));
         }
         try {
             $projectId = $repository->delete($userId, $id);
@@ -128,7 +128,7 @@ final class ServiceController extends Controller
             fl_flash_set('danger', 'حذف خدمت پشتیبان انجام نشد.');
             $projectId = (int) $service['project_id'];
         }
-        $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+        $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'services']));
     }
 
     /** @param array<string,mixed>|null $service */

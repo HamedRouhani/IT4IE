@@ -10,7 +10,7 @@ $params = $product ? ['id' => (int) $product['id']] : ['project_id' => (int) $pr
             <h1><i class="fa-solid fa-box"></i> <?= $product ? 'ویرایش محصول' : 'ثبت محصول یا خانوادهٔ محصول' ?></h1>
             <p>پروژه: <?= fl_e($project['title']) ?> · مقدار تولید برای هر محصول جداگانه و در دورهٔ <?= fl_e($periodLabel) ?> ثبت می‌شود.</p>
         </div>
-        <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id']])) ?>">بازگشت به پروژه</a>
+        <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id'], 'step' => 'products'])) ?>">بازگشت به پروژه</a>
     </header>
     <?php if (!empty($flash)): ?><div class="fl-alert <?= fl_e($flash['type']) ?>" role="status"><?= fl_e($flash['message']) ?></div><?php endif; ?>
 
@@ -43,7 +43,7 @@ $params = $product ? ['id' => (int) $product['id']] : ['project_id' => (int) $pr
         </section>
         <div class="fl-form-actions">
             <button class="fl-button fl-button-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> ذخیرهٔ محصول</button>
-            <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id']])) ?>">انصراف</a>
+            <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id'], 'step' => 'products'])) ?>">انصراف</a>
         </div>
     </form>
 </main>

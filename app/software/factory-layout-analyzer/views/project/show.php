@@ -3,6 +3,40 @@
     <?php if (!empty($flash)): ?><div class="fl-alert <?= fl_e($flash['type']) ?>" role="status"><?= fl_e($flash['message']) ?></div><?php endif; ?>
 
     <?php
+    $workflowLabels = [
+        'overview' => ['title' => 'نمای کلی', 'description' => 'وضعیت و اطلاعات پروژه'],
+        'products' => ['title' => 'محصولات و مقدار تولید', 'description' => 'گام P–Q'],
+        'routes' => ['title' => 'مسیر عملیات', 'description' => 'گام R'],
+        'flows' => ['title' => 'جریان مواد', 'description' => 'ماتریس From-To'],
+        'services' => ['title' => 'خدمات پشتیبان', 'description' => 'گام S'],
+        'relationships' => ['title' => 'روابط فعالیت‌ها', 'description' => 'نمودار و ماتریس REL'],
+    ];
+    $workflowDone = [
+        'overview' => true,
+        'products' => count($products) > 0,
+        'routes' => count($products) > 0 && $slpReadiness['routedProducts'] === count($products),
+        'flows' => count($materialFlows) > 0,
+        'services' => count($supportServices) > 0,
+        'relationships' => count($activityRelationships) > 0,
+    ];
+    $activePosition = array_search($activeStep, $workflowSteps, true);
+    ?>
+    <nav class="fl-workflow" aria-label="مراحل طراحی چیدمان">
+        <div class="fl-workflow-heading"><div><span class="fl-eyebrow">فرایند طراحی چیدمان</span><h2><?= fl_e($workflowLabels[$activeStep]['title']) ?></h2></div><span class="fl-workflow-position">مرحلهٔ <?= (int) $activePosition + 1 ?> از <?= count($workflowSteps) ?></span></div>
+        <ol class="fl-workflow-steps">
+            <?php foreach ($workflowSteps as $index => $stepKey): ?>
+                <li class="<?= $activeStep === $stepKey ? 'is-active' : '' ?> <?= $workflowDone[$stepKey] ? 'is-done' : '' ?>">
+                    <a href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id'], 'step' => $stepKey])) ?>" <?= $activeStep === $stepKey ? 'aria-current="step"' : '' ?>>
+                        <span class="fl-workflow-number"><?= $workflowDone[$stepKey] && $stepKey !== 'overview' ? '<i class="fa-solid fa-check"></i>' : (int) $index + 1 ?></span>
+                        <span class="fl-workflow-copy"><strong><?= fl_e($workflowLabels[$stepKey]['title']) ?></strong><small><?= fl_e($workflowLabels[$stepKey]['description']) ?></small></span>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+    </nav>
+
+    <?php if ($activeStep === 'overview'): ?>
+    <?php
     $slpReadinessItems = [
         ['code' => 'P–Q', 'label' => 'محصول و مقدار تولید', 'value' => $slpReadiness['products'] . ' محصول ثبت‌شده', 'ready' => $slpReadiness['products'] > 0],
         ['code' => 'R', 'label' => 'مسیر عملیات', 'value' => $slpReadiness['routedProducts'] . ' از ' . $slpReadiness['products'] . ' محصول دارای مسیر', 'ready' => $slpReadiness['products'] > 0 && $slpReadiness['routedProducts'] === $slpReadiness['products']],
@@ -33,14 +67,17 @@
             <div class="fl-detail-wide"><dt>دامنه و هدف</dt><dd><?= nl2br(fl_e($project['scope_description'] ?: 'هنوز توضیحی ثبت نشده است.')) ?></dd></div>
         </dl>
     </section>
+    <?php endif; ?>
 
+    <?php if (in_array($activeStep, ['products', 'routes'], true)): ?>
     <section class="fl-card">
         <div class="fl-card-head">
-            <div><span class="fl-eyebrow">P · محصولات و خانواده‌ها</span><h2>مقدار تولید در دورهٔ <?= fl_e($periodLabel) ?></h2></div>
-            <a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('product', 'create', ['project_id' => (int) $project['id']])) ?>"><i class="fa-solid fa-plus"></i> افزودن محصول</a>
+            <div><span class="fl-eyebrow"><?= $activeStep === 'products' ? 'P–Q · محصول و مقدار تولید' : 'R · توالی عملیات' ?></span><h2><?= $activeStep === 'products' ? 'محصولات پروژه' : 'مسیر عملیات محصولات' ?></h2></div>
+            <?php if ($activeStep === 'products'): ?><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('product', 'create', ['project_id' => (int) $project['id']])) ?>"><i class="fa-solid fa-plus"></i> افزودن محصول</a><?php endif; ?>
         </div>
-        <p class="fl-section-intro">هر ردیف یک محصول یا خانواده و مقدار تولید آن در دورهٔ برنامه‌ریزی پروژه است. مقادیر با واحدهای متفاوت با هم جمع نمی‌شوند.</p>
+        <p class="fl-section-intro"><?= $activeStep === 'products' ? 'هر ردیف یک محصول یا خانواده و مقدار تولید آن در دورهٔ ' . fl_e($periodLabel) . ' است. مقادیر با واحدهای متفاوت با هم جمع نمی‌شوند.' : 'برای هر محصول، ایستگاه‌ها و فعالیت‌ها را به ترتیب واقعی انجام فرایند ثبت کنید.' ?></p>
         <?php if ($products): ?>
+            <?php if ($activeStep === 'products'): ?>
             <div class="fl-table-wrap"><table class="fl-table fl-product-table">
                 <thead><tr><th>کد</th><th>محصول / خانواده</th><th>مقدار در هر <?= fl_e($periodLabel) ?></th><th>یادداشت</th><th>عملیات</th></tr></thead>
                 <tbody><?php foreach ($products as $item): ?>
@@ -58,6 +95,8 @@
                     </tr>
                 <?php endforeach; ?></tbody>
             </table></div>
+            <?php endif; ?>
+            <?php if ($activeStep === 'routes'): ?>
             <div class="fl-route-area">
                 <div class="fl-route-heading"><div><span class="fl-eyebrow">R · مسیر عملیات</span><h3>توالی فعالیت‌ها برای هر محصول</h3></div><p>ترتیب واقعی حرکت و پردازش را ثبت کنید؛ جابه‌جایی گام‌ها از همین‌جا انجام می‌شود.</p></div>
                 <?php $typeLabels = ['operation' => 'عملیات', 'inspection' => 'بازرسی', 'transport' => 'حمل‌ونقل', 'storage' => 'انبارش', 'delay' => 'تأخیر']; ?>
@@ -88,11 +127,14 @@
                     </section>
                 <?php endforeach; ?>
             </div>
+            <?php endif; ?>
         <?php else: ?>
-            <div class="fl-empty"><i class="fa-solid fa-box-open"></i><strong>هنوز محصولی ثبت نشده است</strong><span>برای آغاز تحلیل مقدار تولید، محصول یا خانوادهٔ محصول را با واحد مشخص و مقدار دوره‌ای ثبت کنید.</span><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('product', 'create', ['project_id' => (int) $project['id']])) ?>">ثبت اولین محصول</a></div>
+            <div class="fl-empty"><i class="fa-solid fa-box-open"></i><strong>ابتدا محصول تعریف کنید</strong><span>ثبت مسیر عملیات پس از تعریف دست‌کم یک محصول یا خانوادهٔ محصول ممکن است.</span><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('product', 'create', ['project_id' => (int) $project['id']])) ?>">ثبت اولین محصول</a></div>
         <?php endif; ?>
     </section>
+    <?php endif; ?>
 
+    <?php if ($activeStep === 'services'): ?>
     <section class="fl-card">
         <div class="fl-card-head">
             <div><span class="fl-eyebrow">S · خدمات و فعالیت‌های پشتیبان</span><h2>نیازهای پشتیبان و برآورد فضا</h2></div>
@@ -127,7 +169,9 @@
             <div class="fl-empty"><i class="fa-solid fa-screwdriver-wrench"></i><strong>هنوز خدمت پشتیبانی ثبت نشده است</strong><span>انبار، تعمیرات، کنترل کیفیت، تأسیسات و نیازهای مشابه را با سطح الزام مشخص کنید.</span><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('service', 'create', ['project_id' => (int) $project['id']])) ?>">ثبت اولین خدمت</a></div>
         <?php endif; ?>
     </section>
+    <?php endif; ?>
 
+    <?php if ($activeStep === 'flows'): ?>
     <section class="fl-card fl-flow-section">
         <div class="fl-card-head"><div><span class="fl-eyebrow">SLP · جریان مواد</span><h2>ثبت جریان و ماتریس From-To</h2></div><span class="fl-readiness-count"><?= count($materialFlows) ?> مسیر ثبت‌شده</span></div>
         <p class="fl-section-intro">برای هر مسیر جهت‌دار، تعداد جابه‌جایی بار، دورهٔ مشاهده و مبنای داده را ثبت کنید. ردیف A به B با B به A متفاوت است و خانهٔ ثبت‌نشده به معنی صفر حرکت نیست.</p>
@@ -181,7 +225,9 @@
         <?php endif; ?>
         <p class="fl-area-caveat">اگر نام فعالیتی در مسیر محصول یا خدمات تغییر کرد، جریان‌های ثبت‌شده را بازبینی کنید؛ مبدأ و مقصد در زمان ثبت به‌صورت نام نگهداری می‌شوند.</p>
     </section>
+    <?php endif; ?>
 
+    <?php if ($activeStep === 'relationships'): ?>
     <section class="fl-card fl-relationship-section">
         <?php $relationshipLabels = ['A' => 'ضرورت مطلق', 'E' => 'اهمیت بسیار زیاد', 'I' => 'اهمیت زیاد', 'O' => 'اهمیت معمولی', 'U' => 'اهمیت ناچیز', 'X' => 'نامطلوب؛ نیازمند جدایی']; ?>
         <div class="fl-card-head"><div><span class="fl-eyebrow">REL · روابط غیرمادی</span><h2>ثبت روابط فعالیت‌ها (REL)</h2></div><span class="fl-readiness-count"><?= count($activityRelationships) ?> رابطه</span></div>
@@ -247,5 +293,8 @@
         <?php endif; ?>
         <p class="fl-area-caveat">فعالیت‌ها در این نسخه از نام ایستگاه‌های مسیر و نام خدمات پشتیبان ساخته می‌شوند. رابطه‌ها نام فعالیت را هنگام ثبت نگه می‌دارند؛ اگر نام ایستگاهی را تغییر دادید، رابطه‌های مرتبط را بازبینی کنید.</p>
     </section>
+    <?php endif; ?>
+    <?php if ($activeStep === 'overview'): ?>
     <aside class="fl-note"><i class="fa-solid fa-graduation-cap"></i><div><strong>نکتهٔ آموزشی SLP</strong><p>P محصول یا خانوادهٔ محصول و Q مقدار تولید است. واحد هر مقدار باید روشن باشد؛ برای تبدیل واحد یا مقایسهٔ محصولات ناهمگون، ضرایب و قواعد تبدیل را در مرحلهٔ جریان مواد تعریف می‌کنیم.</p><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('learn', 'show', ['lesson' => 'slp-overview'])) ?>">مرور درس مبانی SLP</a></div></aside>
+    <?php endif; ?>
 </main>

@@ -222,11 +222,27 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
 .fl-lesson-nav { margin: 18px 0 0; }
 .fl-empty { text-align: center; }
 .fl-empty > i { color: var(--fl-primary, #1d4ed8); font-size: 2rem; }
+.fl-workflow { margin: 0 0 18px; padding: clamp(14px, 2.5vw, 22px); border: 1px solid #dbe4f0; border-radius: 16px; background: #fff; box-shadow: 0 8px 22px rgb(15 23 42 / 5%); }
+.fl-workflow-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.fl-workflow-heading h2 { margin: 3px 0 0; color: var(--fl-ink, #172554); font-size: 1.15rem; }
+.fl-workflow-position { flex: 0 0 auto; padding: 6px 11px; border-radius: 999px; background: #eff6ff; color: #1d4ed8; font-size: .88rem; font-weight: 800; }
+.fl-workflow-steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.fl-workflow-steps li { min-width: 0; }
+.fl-workflow-steps a { display: flex; align-items: flex-start; gap: 9px; height: 100%; min-height: 68px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 11px; color: #334155; background: #f8fafc; text-decoration: none; transition: border-color .15s ease, background .15s ease; }
+.fl-workflow-steps a:hover { border-color: #93c5fd; background: #eff6ff; }
+.fl-workflow-steps .is-active a { border-color: #2563eb; color: #1e3a8a; background: #eff6ff; box-shadow: inset 0 0 0 1px #2563eb; }
+.fl-workflow-number { display: grid; place-items: center; flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%; color: #475569; background: #e2e8f0; font-size: .82rem; font-weight: 800; }
+.fl-workflow-steps .is-done .fl-workflow-number { color: #166534; background: #dcfce7; }
+.fl-workflow-steps .is-active .fl-workflow-number { color: #fff; background: #2563eb; }
+.fl-workflow-copy { display: grid; gap: 3px; min-width: 0; }
+.fl-workflow-copy strong { font-size: .84rem; line-height: 1.6; }
+.fl-workflow-copy small { color: #64748b; font-size: .74rem; line-height: 1.5; }
 @media (max-width: 760px) {
     .fl-flow-form { grid-template-columns: 1fr; }
     .fl-flow-evidence { grid-column: auto; }
     .fl-flow-table { min-width: 900px; }
     .fl-page-head { display: block; }
+    .fl-workflow-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .fl-page-head > .fl-button { margin-top: 12px; }
     .fl-stats { grid-template-columns: 1fr; }
     .fl-process { grid-template-columns: 1fr; }
@@ -247,6 +263,8 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
     .fl-route-actions { grid-column: 1 / -1; justify-content: flex-start; }
 }
 @media (max-width: 480px) {
+    .fl-workflow-heading { align-items: flex-start; }
+    .fl-workflow-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .fl-lesson { grid-template-columns: 30px minmax(0, 1fr) 18px; gap: 9px; padding: 11px; }
     .fl-lesson-number { width: 30px; height: 30px; }
     .fl-lesson-icon { display: none; }

@@ -104,11 +104,18 @@ final class ProjectController extends Controller
         foreach ($products as $product) {
             if (!empty($routeStepsByProduct[(int) $product['id']])) $routedProductCount++;
         }
+        $workflowSteps = ['overview', 'products', 'routes', 'services', 'flows', 'relationships'];
+        $activeStep = (string) ($_GET['step'] ?? 'overview');
+        if (!in_array($activeStep, $workflowSteps, true)) {
+            $activeStep = 'overview';
+        }
         $this->renderSoftware('project/show', [
             'pageTitle' => $project['title'],
             'title' => $project['title'] . ' - چیدمان کارخانه',
             'softwareName' => 'Factory Layout Analyzer',
             'project' => $project,
+            'activeStep' => $activeStep,
+            'workflowSteps' => $workflowSteps,
             'statuses' => self::STATUSES,
             'products' => $products,
             'routeStepsByProduct' => $routeStepsByProduct,

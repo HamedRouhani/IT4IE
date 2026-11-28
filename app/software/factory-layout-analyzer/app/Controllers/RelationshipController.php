@@ -15,7 +15,7 @@ final class RelationshipController extends Controller
     {
         $userId = $this->userId();
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-            $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+            $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'relationships']));
         }
 
         try {
@@ -27,7 +27,7 @@ final class RelationshipController extends Controller
             error_log('Factory Layout activity relationship create failed: ' . $e->getMessage());
             fl_flash_set('danger', 'ثبت رابطه انجام نشد؛ اطلاعات را بررسی کنید.');
         }
-        $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+        $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'relationships']));
     }
 
     public function delete(int $id): void
@@ -45,7 +45,7 @@ final class RelationshipController extends Controller
             fl_flash_set('danger', $e instanceof \InvalidArgumentException ? $e->getMessage() : 'حذف رابطه انجام نشد.');
             $projectId = 0;
         }
-        $this->redirect($projectId > 0 ? fl_url('project', 'show', ['id' => $projectId]) : fl_url('project', 'index'));
+        $this->redirect($projectId > 0 ? fl_url('project', 'show', ['id' => $projectId, 'step' => 'relationships']) : fl_url('project', 'index'));
     }
 
     public function update(int $id): void
@@ -82,7 +82,7 @@ final class RelationshipController extends Controller
             error_log('Factory Layout activity relationship update failed: ' . $e->getMessage());
             fl_flash_set('danger', $e instanceof \InvalidArgumentException ? $e->getMessage() : 'به‌روزرسانی رابطه انجام نشد.');
         }
-        $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+        $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'relationships']));
     }
 
     /** @return array{area_a:string,area_b:string,closeness_code:string,reason:string} */

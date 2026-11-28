@@ -33,7 +33,7 @@ final class RouteController extends Controller
     {
         $userId = $this->userId();
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-            $this->redirect(fl_url('project', 'show', ['id' => $this->projectIdForProduct($userId, $productId)]));
+            $this->redirect(fl_url('project', 'show', ['id' => $this->projectIdForProduct($userId, $productId), 'step' => 'routes']));
         }
         try {
             (new RouteStepRepository())->create($userId, $productId, $this->payload());
@@ -48,7 +48,7 @@ final class RouteController extends Controller
             $_SESSION['fl_old_route'] = ['data' => $_POST, 'at' => time()];
             $this->redirect(fl_url('route', 'create', ['product_id' => $productId]));
         }
-        $this->redirect(fl_url('project', 'show', ['id' => $this->projectIdForProduct($userId, $productId)]));
+        $this->redirect(fl_url('project', 'show', ['id' => $this->projectIdForProduct($userId, $productId), 'step' => 'routes']));
     }
 
     public function edit(int $id): void
@@ -94,7 +94,7 @@ final class RouteController extends Controller
             $_SESSION['fl_old_route'] = ['data' => $_POST, 'at' => time()];
             $this->redirect(fl_url('route', 'edit', ['id' => $id]));
         }
-        $this->redirect(fl_url('project', 'show', ['id' => (int) $step['project_id']]));
+        $this->redirect(fl_url('project', 'show', ['id' => (int) $step['project_id'], 'step' => 'routes']));
     }
 
     public function delete(int $id): void
@@ -108,16 +108,16 @@ final class RouteController extends Controller
             $this->redirect(fl_url('project', 'index'));
         }
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-            $this->redirect(fl_url('project', 'show', ['id' => (int) $step['project_id']]));
+            $this->redirect(fl_url('project', 'show', ['id' => (int) $step['project_id'], 'step' => 'routes']));
         }
         try {
             $projectId = $repository->delete($userId, $id);
             fl_flash_set('success', 'گام مسیر حذف و شمارهٔ گام‌های بعدی بازتنظیم شد.');
-            $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+            $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'routes']));
         } catch (\Throwable $e) {
             error_log('Factory Layout route step delete failed: ' . $e->getMessage());
             fl_flash_set('danger', 'حذف گام مسیر انجام نشد.');
-            $this->redirect(fl_url('project', 'show', ['id' => (int) $step['project_id']]));
+            $this->redirect(fl_url('project', 'show', ['id' => (int) $step['project_id'], 'step' => 'routes']));
         }
     }
 
@@ -132,16 +132,16 @@ final class RouteController extends Controller
             $this->redirect(fl_url('project', 'index'));
         }
         if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
-            $this->redirect(fl_url('project', 'show', ['id' => (int) $step['project_id']]));
+            $this->redirect(fl_url('project', 'show', ['id' => (int) $step['project_id'], 'step' => 'routes']));
         }
         try {
             $projectId = $repository->move($userId, $id, (string) ($_POST['direction'] ?? ''));
             fl_flash_set('success', 'ترتیب مسیر به‌روزرسانی شد.');
-            $this->redirect(fl_url('project', 'show', ['id' => $projectId]));
+            $this->redirect(fl_url('project', 'show', ['id' => $projectId, 'step' => 'routes']));
         } catch (\Throwable $e) {
             error_log('Factory Layout route step reorder failed: ' . $e->getMessage());
             fl_flash_set('danger', $e instanceof \InvalidArgumentException ? $e->getMessage() : 'تغییر ترتیب مسیر انجام نشد.');
-            $this->redirect(fl_url('project', 'show', ['id' => (int) $step['project_id']]));
+            $this->redirect(fl_url('project', 'show', ['id' => (int) $step['project_id'], 'step' => 'routes']));
         }
     }
 

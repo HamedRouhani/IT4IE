@@ -11,7 +11,7 @@ $selected = static fn(string $key, string $candidate, string $default): string =
             <h1><i class="fa-solid fa-screwdriver-wrench"></i> <?= $service ? 'ویرایش خدمت پشتیبان' : 'ثبت خدمت پشتیبان' ?></h1>
             <p>پروژه: <?= fl_e($project['title']) ?> · نیازهای خدماتی کارخانه را ثبت کنید و برای هر برآورد فضا، مبنا یا منبع آن را بنویسید.</p>
         </div>
-        <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id']])) ?>">بازگشت به پروژه</a>
+        <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id'], 'step' => 'services'])) ?>">بازگشت به پروژه</a>
     </header>
     <?php if (!empty($flash)): ?><div class="fl-alert <?= fl_e($flash['type']) ?>" role="status"><?= fl_e($flash['message']) ?></div><?php endif; ?>
 
@@ -52,7 +52,7 @@ $selected = static fn(string $key, string $candidate, string $default): string =
         </section>
         <div class="fl-form-actions">
             <button class="fl-button fl-button-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> ذخیرهٔ خدمت</button>
-            <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id']])) ?>">انصراف</a>
+            <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id'], 'step' => 'services'])) ?>">انصراف</a>
         </div>
     </form>
 </main>
