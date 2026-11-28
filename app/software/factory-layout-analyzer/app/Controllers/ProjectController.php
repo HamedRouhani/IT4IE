@@ -6,6 +6,7 @@ namespace App\Software\FactoryLayoutAnalyzer\Controllers;
 
 use App\Core\Controller;
 use App\Software\FactoryLayoutAnalyzer\Models\ActivityRelationshipRepository;
+use App\Software\FactoryLayoutAnalyzer\Models\MaterialFlowRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\ProductRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\ProjectRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\RouteStepRepository;
@@ -78,6 +79,7 @@ final class ProjectController extends Controller
         $relationshipRepository = new ActivityRelationshipRepository();
         $activityAreas = $relationshipRepository->activityAreas($userId, $id);
         $activityRelationships = $relationshipRepository->listForProject($userId, $id);
+        $materialFlows = (new MaterialFlowRepository())->listForProject($userId, $id);
         $knownServiceAreaCount = 0;
         $unknownServiceAreaCount = 0;
         $serviceAreaMilliTotal = 0;
@@ -113,6 +115,8 @@ final class ProjectController extends Controller
             'supportServices' => $supportServices,
             'activityAreas' => $activityAreas,
             'activityRelationships' => $activityRelationships,
+            'materialFlows' => $materialFlows,
+            'flowPeriods' => ['day' => 'روزانه', 'week' => 'هفتگی', 'month' => 'ماهانه', 'year' => 'سالانه'],
             'supportAreaSummary' => [
                 'knownCount' => $knownServiceAreaCount,
                 'unknownCount' => $unknownServiceAreaCount,
@@ -121,6 +125,7 @@ final class ProjectController extends Controller
             'slpReadiness' => [
                 'products' => count($products),
                 'routedProducts' => $routedProductCount,
+                'flows' => count($materialFlows),
                 'supportServices' => count($supportServices),
                 'calendarConfigured' => !empty($project['planning_period'])
                     && (int) $project['shifts_per_day'] > 0

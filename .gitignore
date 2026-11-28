@@ -10,4 +10,5 @@
 !app/software/time-study-analyzer/database/install.sql
 !app/software/engineering-economy/database/install.sql
 !app/software/factory-layout-analyzer/database/install.sql
+!app/software/factory-layout-analyzer/database/migrations/*.sql
 !app/database/migrations/*.sql

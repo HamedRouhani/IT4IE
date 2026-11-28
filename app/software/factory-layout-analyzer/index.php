@@ -31,6 +31,7 @@ $controllers = [
     'route' => 'RouteController',
     'service' => 'ServiceController',
     'relationship' => 'RelationshipController',
+    'flow' => 'MaterialFlowController',
     'learn' => 'LearnController',
 ];
 $allowedActions = [
@@ -40,6 +41,7 @@ $allowedActions = [
     'route' => ['create', 'store', 'edit', 'update', 'delete', 'move'],
     'service' => ['create', 'store', 'edit', 'update', 'delete'],
     'relationship' => ['store', 'update', 'delete'],
+    'flow' => ['store', 'update', 'delete'],
     'learn' => ['index', 'show'],
 ];
 $controllerKey = strtolower((string) ($_GET['controller'] ?? 'dashboard'));
@@ -100,13 +102,19 @@ try {
             throw new RuntimeException('Relationship not found.');
         }
         $controller->{$action}($id);
+    } elseif ($controllerKey === 'flow' && in_array($action, ['delete', 'update'], true)) {
+        if (!is_int($id) || $id < 1) {
+            http_response_code(404);
+            throw new RuntimeException('Flow not found.');
+        }
+        $controller->{$action}($id);
     } elseif ($controllerKey === 'service' && in_array($action, ['edit', 'update', 'delete'], true)) {
         if (!is_int($id) || $id < 1) {
             http_response_code(404);
             throw new RuntimeException('خدمت پشتیبان درخواستی پیدا نشد.');
         }
         $controller->{$action}($id);
-    } elseif (in_array($controllerKey, ['service', 'relationship'], true) && in_array($action, ['create', 'store'], true)) {
+    } elseif (in_array($controllerKey, ['service', 'relationship', 'flow'], true) && in_array($action, ['create', 'store'], true)) {
         if (!is_int($projectId) || $projectId < 1) {
             http_response_code(404);
             throw new RuntimeException('پروژهٔ درخواستی پیدا نشد.');
