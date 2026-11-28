@@ -10,6 +10,7 @@
         'flows' => ['title' => 'جریان مواد', 'description' => 'ماتریس From-To'],
         'services' => ['title' => 'خدمات پشتیبان', 'description' => 'گام S'],
         'relationships' => ['title' => 'روابط فعالیت‌ها', 'description' => 'نمودار و ماتریس REL'],
+        'space' => ['title' => 'نیاز فضای تولید', 'description' => 'برآورد فضای بخش‌ها'],
     ];
     $workflowDone = [
         'overview' => true,
@@ -18,6 +19,7 @@
         'flows' => count($materialFlows) > 0,
         'services' => count($supportServices) > 0,
         'relationships' => count($activityRelationships) > 0,
+        'space' => count($productionAreas) > 0 && $slpReadiness['documentedProductionAreas'] === count($productionAreas),
     ];
     $activePosition = array_search($activeStep, $workflowSteps, true);
     $previousStep = $activePosition > 0 ? $workflowSteps[$activePosition - 1] : null;
@@ -35,6 +37,7 @@
         'services' => 'خدمات پشتیبان موردنیاز کارخانه را ثبت کنید و برای برآورد فضا، مبنا را مستند کنید.',
         'flows' => 'پس از تعریف فعالیت‌ها، جابه‌جایی‌های جهت‌دار بین مبدأ و مقصد را با دوره و منبع داده ثبت کنید.',
         'relationships' => 'برای زوج فعالیت‌ها کد نزدیکی و دلیل قابل بررسی ثبت کنید؛ زوج‌های ارزیابی‌نشده را با U اشتباه نگیرید.',
+        'space' => 'برای هر بخش تولیدی، مساحت موردنیاز و اجزای منظورشده در برآورد را همراه با مبنا ثبت کنید.',
     ];
     ?>
     <nav class="fl-workflow" aria-label="مراحل طراحی چیدمان">
@@ -67,6 +70,7 @@
         ['code' => 'R', 'label' => 'مسیر عملیات', 'value' => $slpReadiness['routedProducts'] . ' از ' . $slpReadiness['products'] . ' محصول دارای مسیر', 'ready' => $slpReadiness['products'] > 0 && $slpReadiness['routedProducts'] === $slpReadiness['products']],
         ['code' => 'From-To', 'label' => 'جریان‌های جهت‌دار مواد', 'value' => $slpReadiness['flows'] . ' مسیر دارای داده', 'ready' => $slpReadiness['flows'] > 0],
         ['code' => 'S', 'label' => 'خدمات پشتیبان', 'value' => $slpReadiness['supportServices'] . ' خدمت ثبت‌شده', 'ready' => $slpReadiness['supportServices'] > 0],
+        ['code' => 'A', 'label' => 'نیاز فضای تولیدی', 'value' => $slpReadiness['documentedProductionAreas'] . ' از ' . $slpReadiness['productionAreas'] . ' بخش دارای برآورد', 'ready' => $slpReadiness['productionAreas'] > 0 && $slpReadiness['documentedProductionAreas'] === $slpReadiness['productionAreas']],
         ['code' => 'T', 'label' => 'تقویم و زمان‌بندی', 'value' => $periodLabel . ' · ' . (int) $project['shifts_per_day'] . ' شیفت، ' . $project['hours_per_shift'] . ' ساعت', 'ready' => $slpReadiness['calendarConfigured']],
     ];
     ?>
@@ -317,6 +321,47 @@
             </div>
         <?php endif; ?>
         <p class="fl-area-caveat">فعالیت‌ها در این نسخه از نام ایستگاه‌های مسیر و نام خدمات پشتیبان ساخته می‌شوند. رابطه‌ها نام فعالیت را هنگام ثبت نگه می‌دارند؛ اگر نام ایستگاهی را تغییر دادید، رابطه‌های مرتبط را بازبینی کنید.</p>
+    </section>
+    <?php endif; ?>
+    <?php if ($activeStep === 'space'): ?>
+    <section class="fl-card fl-space-section">
+        <div class="fl-card-head"><div><span class="fl-eyebrow">SLP · نیاز فضا</span><h2>برآورد فضای بخش‌های تولیدی</h2></div><span class="fl-readiness-count"><?= (int) $productionSpaceSummary['documentedCount'] ?> از <?= count($productionAreas) ?> بخش برآورد شده</span></div>
+        <p class="fl-section-intro">برای هر ناحیهٔ تولیدی که در مسیر محصول تعریف شده، مساحت موردنیاز و مبنای برآورد را ثبت کنید. اگر چند محصول از یک بخش مشترک استفاده می‌کنند، نام ایستگاه را در همهٔ مسیرها یکسان بنویسید تا بخش یک‌بار شمرده شود. در مبنا مشخص کنید چه مواردی مثل تجهیزات، فضای کار اپراتور، ذخیرهٔ بین‌فرایندی یا دسترسی تعمیرات را لحاظ کرده‌اید.</p>
+        <div class="fl-area-summary" aria-label="خلاصهٔ نیاز فضای تولید">
+            <article><span>جمع مساحت‌های ثبت‌شدهٔ تولید</span><strong><?= fl_e($productionSpaceSummary['totalM2']) ?> <small>مترمربع</small></strong><small><?= (int) $productionSpaceSummary['documentedCount'] ?> بخش برآوردشده</small></article>
+            <article class="<?= $productionSpaceSummary['missingCount'] > 0 ? 'has-unknown' : '' ?>"><span>بخش‌های نیازمند برآورد</span><strong><?= (int) $productionSpaceSummary['missingCount'] ?></strong><small>از <?= count($productionAreas) ?> بخش تولیدی</small></article>
+        </div>
+        <p class="fl-area-caveat">این جمع، برآورد اولیهٔ مساحت تولیدی است؛ مساحت خدمات پشتیبان در گام جداگانهٔ خودش می‌ماند. راهروهای اصلی، ستون‌ها، هم‌پوشانی‌ها و الزامات ایمنی را جداگانه بررسی کنید و این جمع را مساحت نهایی ساختمان تلقی نکنید.</p>
+        <?php if ($productionAreas): ?>
+            <div class="fl-table-wrap"><table class="fl-table fl-production-space-table">
+                <thead><tr><th>بخش تولیدی</th><th>مساحت موردنیاز</th><th>مبنای ثبت‌شده</th><th>ورود یا ویرایش</th><th>عملیات</th></tr></thead>
+                <tbody><?php foreach ($productionAreas as $areaName): $spaceRequirement = $productionSpacesByArea[$areaName] ?? null; ?>
+                    <tr>
+                        <td><strong><?= fl_e($areaName) ?></strong></td>
+                        <td><?= $spaceRequirement ? fl_e($spaceRequirement['area_m2']) . ' مترمربع' : '<span class="fl-space-missing">برآورد نشده</span>' ?></td>
+                        <td><?= $spaceRequirement ? fl_e($spaceRequirement['area_basis']) : '—' ?><?php if ($spaceRequirement && !empty($spaceRequirement['notes'])): ?><small><?= fl_e($spaceRequirement['notes']) ?></small><?php endif; ?></td>
+                        <td><details class="fl-space-editor"><summary><?= $spaceRequirement ? 'ویرایش برآورد' : 'ثبت برآورد' ?></summary>
+                            <form method="post" action="<?= fl_e(fl_url('space', 'store', ['project_id' => (int) $project['id']])) ?>">
+                                <?= $csrfField ?><input type="hidden" name="area_name" value="<?= fl_e($areaName) ?>">
+                                <label>مساحت موردنیاز (مترمربع) *<input name="area_m2" type="text" inputmode="decimal" pattern="[0-9۰-۹٠-٩]+([٫.][0-9۰-۹٠-٩]{1,3})?" maxlength="14" required value="<?= fl_e($spaceRequirement['area_m2'] ?? '') ?>" placeholder="مثلاً ۴۸٫۵"></label>
+                                <label>مبنای برآورد *<input name="area_basis" maxlength="500" required value="<?= fl_e($spaceRequirement['area_basis'] ?? '') ?>" placeholder="مثلاً جانمایی ماشین‌آلات به‌همراه دسترسی اپراتور"></label>
+                                <label>یادداشت تکمیلی<input name="notes" maxlength="1000" value="<?= fl_e($spaceRequirement['notes'] ?? '') ?>" placeholder="فرض‌ها یا محدودیت‌های برآورد"></label>
+                                <button class="fl-button fl-button-primary" type="submit">ذخیرهٔ برآورد</button>
+                            </form>
+                        </details></td>
+                        <td><?php if ($spaceRequirement): ?><form method="post" action="<?= fl_e(fl_url('space', 'delete', ['id' => (int) $spaceRequirement['id']])) ?>" onsubmit="return confirm('برآورد فضای این بخش حذف شود؟');"><?= $csrfField ?><button class="fl-button fl-button-danger" type="submit">حذف برآورد</button></form><?php else: ?>—<?php endif; ?></td>
+                    </tr>
+                <?php endforeach; ?></tbody>
+            </table></div>
+        <?php else: ?>
+            <div class="fl-empty"><i class="fa-solid fa-ruler-combined"></i><strong>ابتدا مسیر یک محصول را ثبت کنید</strong><span>فهرست بخش‌های تولیدی از نام ایستگاه‌های ثبت‌شده در مسیر محصولات ساخته می‌شود.</span><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id'], 'step' => 'routes'])) ?>">رفتن به مسیر عملیات</a></div>
+        <?php endif; ?>
+        <?php if ($orphanedProductionSpaces): ?>
+            <aside class="fl-inline-note"><i class="fa-solid fa-triangle-exclamation"></i><span>برای <?= count($orphanedProductionSpaces) ?> برآورد، دیگر مسیر فعالی با همان نام وجود ندارد. این برآوردها در جمع بالا منظور نشده‌اند؛ اگر نام بخش تغییر کرده، پس از بازبینی آن‌ها را حذف کنید و برای نام جدید برآورد تازه‌ای ثبت کنید.</span></aside>
+            <div class="fl-table-wrap"><table class="fl-table"><thead><tr><th>نام قبلی بخش</th><th>مساحت</th><th>مبنا</th><th>عملیات</th></tr></thead><tbody>
+                <?php foreach ($orphanedProductionSpaces as $orphanedSpace): ?><tr><td><?= fl_e($orphanedSpace['area_name']) ?></td><td><?= fl_e($orphanedSpace['area_m2']) ?> مترمربع</td><td><?= fl_e($orphanedSpace['area_basis']) ?></td><td><form method="post" action="<?= fl_e(fl_url('space', 'delete', ['id' => (int) $orphanedSpace['id']])) ?>" onsubmit="return confirm('برآورد قدیمی حذف شود؟');"><?= $csrfField ?><button class="fl-button fl-button-danger" type="submit">حذف</button></form></td></tr><?php endforeach; ?>
+            </tbody></table></div>
+        <?php endif; ?>
     </section>
     <?php endif; ?>
     <?php if ($activeStep === 'overview'): ?>

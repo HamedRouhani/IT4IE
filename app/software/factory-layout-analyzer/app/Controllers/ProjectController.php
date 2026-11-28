@@ -8,6 +8,7 @@ use App\Core\Controller;
 use App\Software\FactoryLayoutAnalyzer\Models\ActivityRelationshipRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\MaterialFlowRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\ProductRepository;
+use App\Software\FactoryLayoutAnalyzer\Models\ProductionAreaSpaceRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\ProjectRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\RouteStepRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\SupportServiceRepository;
@@ -80,6 +81,31 @@ final class ProjectController extends Controller
         $activityAreas = $relationshipRepository->activityAreas($userId, $id);
         $activityRelationships = $relationshipRepository->listForProject($userId, $id);
         $materialFlows = (new MaterialFlowRepository())->listForProject($userId, $id);
+        $spaceRepository = new ProductionAreaSpaceRepository();
+        $productionAreas = $spaceRepository->productionAreasForProject($userId, $id);
+        $productionSpaceRequirements = $spaceRepository->listForProject($userId, $id);
+        $productionSpacesByArea = [];
+        foreach ($productionSpaceRequirements as $spaceRequirement) {
+            $productionSpacesByArea[(string) $spaceRequirement['area_name']] = $spaceRequirement;
+        }
+        $documentedProductionAreas = count(array_intersect($productionAreas, array_keys($productionSpacesByArea)));
+        $orphanedProductionSpaces = array_values(array_filter(
+            $productionSpaceRequirements,
+            static fn(array $requirement): bool => !in_array((string) $requirement['area_name'], $productionAreas, true)
+        ));
+        $productionSpaceMilliTotal = 0;
+        foreach ($productionSpaceRequirements as $spaceRequirement) {
+            if (!in_array((string) $spaceRequirement['area_name'], $productionAreas, true)) continue;
+            if (preg_match('/^(\d+)(?:\.(\d{1,3}))?$/', (string) $spaceRequirement['area_m2'], $areaParts)) {
+                $productionSpaceMilliTotal += ((int) $areaParts[1] * 1000)
+                    + (int) str_pad($areaParts[2] ?? '', 3, '0');
+            }
+        }
+        $productionSpaceTotal = (string) intdiv($productionSpaceMilliTotal, 1000);
+        $productionSpaceFraction = $productionSpaceMilliTotal % 1000;
+        if ($productionSpaceFraction > 0) {
+            $productionSpaceTotal .= '.' . rtrim(str_pad((string) $productionSpaceFraction, 3, '0', STR_PAD_LEFT), '0');
+        }
         $knownServiceAreaCount = 0;
         $unknownServiceAreaCount = 0;
         $serviceAreaMilliTotal = 0;
@@ -104,7 +130,7 @@ final class ProjectController extends Controller
         foreach ($products as $product) {
             if (!empty($routeStepsByProduct[(int) $product['id']])) $routedProductCount++;
         }
-        $workflowSteps = ['overview', 'products', 'routes', 'services', 'flows', 'relationships'];
+        $workflowSteps = ['overview', 'products', 'routes', 'services', 'flows', 'relationships', 'space'];
         $activeStep = (string) ($_GET['step'] ?? 'overview');
         if (!in_array($activeStep, $workflowSteps, true)) {
             $activeStep = 'overview';
@@ -123,6 +149,14 @@ final class ProjectController extends Controller
             'activityAreas' => $activityAreas,
             'activityRelationships' => $activityRelationships,
             'materialFlows' => $materialFlows,
+            'productionAreas' => $productionAreas,
+            'productionSpacesByArea' => $productionSpacesByArea,
+            'orphanedProductionSpaces' => $orphanedProductionSpaces,
+            'productionSpaceSummary' => [
+                'documentedCount' => $documentedProductionAreas,
+                'missingCount' => max(0, count($productionAreas) - $documentedProductionAreas),
+                'totalM2' => $productionSpaceTotal,
+            ],
             'flowPeriods' => ['day' => 'روزانه', 'week' => 'هفتگی', 'month' => 'ماهانه', 'year' => 'سالانه'],
             'supportAreaSummary' => [
                 'knownCount' => $knownServiceAreaCount,
@@ -134,6 +168,8 @@ final class ProjectController extends Controller
                 'routedProducts' => $routedProductCount,
                 'flows' => count($materialFlows),
                 'supportServices' => count($supportServices),
+                'productionAreas' => count($productionAreas),
+                'documentedProductionAreas' => $documentedProductionAreas,
                 'calendarConfigured' => !empty($project['planning_period'])
                     && (int) $project['shifts_per_day'] > 0
                     && (float) $project['hours_per_shift'] > 0
