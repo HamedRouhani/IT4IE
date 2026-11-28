@@ -20,6 +20,22 @@
         'relationships' => count($activityRelationships) > 0,
     ];
     $activePosition = array_search($activeStep, $workflowSteps, true);
+    $previousStep = $activePosition > 0 ? $workflowSteps[$activePosition - 1] : null;
+    $nextStep = $activePosition < count($workflowSteps) - 1 ? $workflowSteps[$activePosition + 1] : null;
+    $recommendedStep = null;
+    foreach (array_slice($workflowSteps, 1) as $candidateStep) {
+        if (!$workflowDone[$candidateStep]) {
+            $recommendedStep = $candidateStep;
+            break;
+        }
+    }
+    $workflowGuidance = [
+        'products' => 'محصول یا خانوادهٔ محصول را همراه مقدار تولید، واحد و دورهٔ برنامه‌ریزی وارد کنید.',
+        'routes' => 'برای هر محصول، ایستگاه‌ها و فعالیت‌ها را به ترتیب واقعی فرایند ثبت کنید.',
+        'services' => 'خدمات پشتیبان موردنیاز کارخانه را ثبت کنید و برای برآورد فضا، مبنا را مستند کنید.',
+        'flows' => 'پس از تعریف فعالیت‌ها، جابه‌جایی‌های جهت‌دار بین مبدأ و مقصد را با دوره و منبع داده ثبت کنید.',
+        'relationships' => 'برای زوج فعالیت‌ها کد نزدیکی و دلیل قابل بررسی ثبت کنید؛ زوج‌های ارزیابی‌نشده را با U اشتباه نگیرید.',
+    ];
     ?>
     <nav class="fl-workflow" aria-label="مراحل طراحی چیدمان">
         <div class="fl-workflow-heading"><div><span class="fl-eyebrow">فرایند طراحی چیدمان</span><h2><?= fl_e($workflowLabels[$activeStep]['title']) ?></h2></div><span class="fl-workflow-position">مرحلهٔ <?= (int) $activePosition + 1 ?> از <?= count($workflowSteps) ?></span></div>
@@ -36,6 +52,15 @@
     </nav>
 
     <?php if ($activeStep === 'overview'): ?>
+    <section class="fl-next-action" aria-labelledby="fl-next-action-title">
+        <?php if ($recommendedStep !== null): ?>
+            <div class="fl-next-action-copy"><span class="fl-eyebrow">پیشنهاد برای ادامه · <?= fl_e($workflowLabels[$recommendedStep]['title']) ?></span><h2 id="fl-next-action-title"><?= fl_e($workflowGuidance[$recommendedStep]) ?></h2></div>
+            <a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id'], 'step' => $recommendedStep])) ?>">رفتن به این گام <i class="fa-solid fa-arrow-left"></i></a>
+        <?php else: ?>
+            <div class="fl-next-action-copy"><span class="fl-eyebrow">ورودی اولیهٔ همهٔ گام‌ها ثبت شده</span><h2 id="fl-next-action-title">چک‌لیست آمادگی را مرور کنید و داده‌ها را با منابع واقعی پروژه تطبیق دهید.</h2></div>
+            <span class="fl-workflow-position"><?= count($workflowSteps) - 1 ?> گام دارای داده</span>
+        <?php endif; ?>
+    </section>
     <?php
     $slpReadinessItems = [
         ['code' => 'P–Q', 'label' => 'محصول و مقدار تولید', 'value' => $slpReadiness['products'] . ' محصول ثبت‌شده', 'ready' => $slpReadiness['products'] > 0],
@@ -296,5 +321,11 @@
     <?php endif; ?>
     <?php if ($activeStep === 'overview'): ?>
     <aside class="fl-note"><i class="fa-solid fa-graduation-cap"></i><div><strong>نکتهٔ آموزشی SLP</strong><p>P محصول یا خانوادهٔ محصول و Q مقدار تولید است. واحد هر مقدار باید روشن باشد؛ برای تبدیل واحد یا مقایسهٔ محصولات ناهمگون، ضرایب و قواعد تبدیل را در مرحلهٔ جریان مواد تعریف می‌کنیم.</p><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('learn', 'show', ['lesson' => 'slp-overview'])) ?>">مرور درس مبانی SLP</a></div></aside>
+    <?php endif; ?>
+    <?php if ($activeStep !== 'overview'): ?>
+    <nav class="fl-workflow-controls" aria-label="ادامهٔ مراحل طراحی چیدمان">
+        <?php if ($previousStep !== null): ?><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id'], 'step' => $previousStep])) ?>"><i class="fa-solid fa-arrow-right"></i> گام قبل: <?= fl_e($workflowLabels[$previousStep]['title']) ?></a><?php else: ?><span></span><?php endif; ?>
+        <?php if ($nextStep !== null): ?><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id'], 'step' => $nextStep])) ?>">گام بعد: <?= fl_e($workflowLabels[$nextStep]['title']) ?> <i class="fa-solid fa-arrow-left"></i></a><?php else: ?><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id'], 'step' => 'overview'])) ?>">بازگشت به خلاصهٔ پروژه <i class="fa-solid fa-arrow-left"></i></a><?php endif; ?>
+    </nav>
     <?php endif; ?>
 </main>

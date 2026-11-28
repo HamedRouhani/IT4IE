@@ -237,6 +237,11 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
 .fl-workflow-copy { display: grid; gap: 3px; min-width: 0; }
 .fl-workflow-copy strong { font-size: .84rem; line-height: 1.6; }
 .fl-workflow-copy small { color: #64748b; font-size: .74rem; line-height: 1.5; }
+.fl-next-action { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 0 0 18px; padding: 18px 20px; border: 1px solid #bfdbfe; border-inline-start: 4px solid #2563eb; border-radius: 14px; background: linear-gradient(110deg, #fff 0%, #eff6ff 100%); }
+.fl-next-action-copy { min-width: 0; }
+.fl-next-action h2 { margin: 4px 0 0; color: #172554; font-size: 1rem; line-height: 1.9; }
+.fl-next-action .fl-button { flex: 0 0 auto; }
+.fl-workflow-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 4px; padding-top: 16px; border-top: 1px solid #dbe4f0; }
 @media (max-width: 760px) {
     .fl-flow-form { grid-template-columns: 1fr; }
     .fl-flow-evidence { grid-column: auto; }
@@ -247,6 +252,7 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
     .fl-stats { grid-template-columns: 1fr; }
     .fl-process { grid-template-columns: 1fr; }
     .fl-card-head { align-items: flex-start; flex-direction: column; }
+    .fl-next-action { align-items: flex-start; flex-direction: column; }
     .fl-lesson-layout { grid-template-columns: 1fr; }
     .fl-toc { position: static; }
     .fl-table-wrap { overflow-x: auto; }
@@ -265,6 +271,7 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
 @media (max-width: 480px) {
     .fl-workflow-heading { align-items: flex-start; }
     .fl-workflow-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fl-workflow-controls { align-items: stretch; flex-direction: column; }
     .fl-lesson { grid-template-columns: 30px minmax(0, 1fr) 18px; gap: 9px; padding: 11px; }
     .fl-lesson-number { width: 30px; height: 30px; }
     .fl-lesson-icon { display: none; }
