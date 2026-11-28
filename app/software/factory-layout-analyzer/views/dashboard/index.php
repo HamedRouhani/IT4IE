@@ -1,8 +1,8 @@
 <main class="fl-page" dir="rtl">
     <header class="fl-hero">
-        <span class="fl-eyebrow"><i class="fa-solid fa-industry"></i> Factory Layout Analyzer · نسخهٔ آموزشی اولیه</span>
+        <span class="fl-eyebrow"><i class="fa-solid fa-industry"></i> Factory Layout Analyzer · آموزش و ثبت داده‌های SLP</span>
         <h1>طراحی چیدمان کارخانه را از مبانی یاد بگیرید</h1>
-        <p>از شناخت محصول و جریان تا نمودار روابط، نیاز فضا و ساخت گزینه‌های چیدمان؛ با فرمول‌های روشن، مثال حل‌شده و تمرین.</p>
+        <p>محصول، مسیر، جریان مواد، روابط فعالیت‌ها و نیاز فضا را مرحله‌به‌مرحله ثبت کنید؛ همراه با آموزش SLP، فرمول‌های روشن، مثال حل‌شده و تمرین.</p>
         <div class="fl-actions">
             <a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('project', 'index')) ?>"><i class="fa-solid fa-folder-open"></i> پروژه‌های من</a>
             <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'create')) ?>"><i class="fa-solid fa-plus"></i> پروژهٔ جدید</a>
@@ -14,7 +14,7 @@
     <section class="fl-stats" aria-label="وضعیت محتوای آموزشی">
         <article><span>درس‌های آماده</span><strong><?= (int) $lessonCount ?></strong><small>مبانی تا کاربردی</small></article>
         <article><span>روش پایه</span><strong>SLP</strong><small>برنامه‌ریزی نظام‌مند چیدمان</small></article>
-        <article><span>تمرکز نسخهٔ فعلی</span><strong>آموزش</strong><small>مفهوم، فرمول، مثال و تمرین</small></article>
+        <article><span>تمرکز نسخهٔ فعلی</span><strong>داده‌های SLP</strong><small>ثبت مرحله‌ای و مستندسازی فرض‌ها</small></article>
     </section>
 
     <section class="fl-card">
@@ -27,5 +27,5 @@
         </ol>
     </section>
 
-    <aside class="fl-note"><i class="fa-solid fa-circle-info"></i><div><strong>وضعیت توسعه</strong><p>در این مرحله مشخصات پروژه و تقویم کاری ثبت می‌شود. ثبت محصولات و مقادیر تولید، مسیر عملیات، خدمات پشتیبان و تحلیل گزینه‌های چیدمان به گام‌های بعدی تعلق دارد؛ این نسخه هنوز نقشهٔ اجرایی تولید نمی‌کند.</p></div></aside>
+    <aside class="fl-note"><i class="fa-solid fa-circle-info"></i><div><strong>دامنهٔ نسخهٔ فعلی و مسیر بتا</strong><p>اکنون می‌توانید پروژه و تقویم کاری، محصولات و مقادیر تولید (P-Q)، مسیر عملیات (R)، خدمات و نیاز فضای اولیه (S)، جریان مواد و روابط فعالیت‌ها را ثبت کنید و تا سه گزینهٔ بلوکی مقدماتی را بر پایهٔ جریان، روابط و مساحت بسازید و مقایسه کنید. این گزینه‌ها بدون حدود ساختمان، راهرو، ستون و قیود ایمنی ساخته می‌شوند؛ پیش از استفادهٔ عملی، بازبینی طراح و تکمیل محدودیت‌های محل لازم است.</p></div></aside>
 </main>

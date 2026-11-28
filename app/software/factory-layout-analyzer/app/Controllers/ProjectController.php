@@ -12,6 +12,7 @@ use App\Software\FactoryLayoutAnalyzer\Models\ProductionAreaSpaceRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\ProjectRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\RouteStepRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\SupportServiceRepository;
+use App\Software\FactoryLayoutAnalyzer\Services\LayoutOptionGenerator;
 
 final class ProjectController extends Controller
 {
@@ -126,6 +127,29 @@ final class ProjectController extends Controller
         foreach ($productionSpaceRequirements as $spaceRequirement) {
             $productionSpacesByArea[(string) $spaceRequirement['area_name']] = $spaceRequirement;
         }
+        $layoutAreas = [];
+        foreach ($activityAreas as $areaName) {
+            $productionSpace = $productionSpacesByArea[$areaName] ?? null;
+            $matchingServices = array_values(array_filter(
+                $supportServices,
+                static fn(array $service): bool => (string) $service['name'] === $areaName
+            ));
+            if ($productionSpace !== null) {
+                $layoutAreas[] = ['name' => $areaName, 'area_m2' => $productionSpace['area_m2'], 'basis' => $productionSpace['area_basis']];
+            }
+            foreach ($matchingServices as $service) {
+                $layoutAreas[] = ['name' => $areaName, 'area_m2' => $service['area_m2'], 'basis' => $service['area_basis'] ?? ''];
+            }
+            if ($productionSpace === null && !$matchingServices) {
+                $layoutAreas[] = ['name' => $areaName, 'area_m2' => null, 'basis' => ''];
+            }
+        }
+        $layoutOptions = (new LayoutOptionGenerator())->generate(
+            $layoutAreas,
+            $materialFlows,
+            $activityRelationships,
+            (int) ($project['working_days_per_week'] ?? 5)
+        );
         $documentedProductionAreas = count(array_intersect($productionAreas, array_keys($productionSpacesByArea)));
         $orphanedProductionSpaces = array_values(array_filter(
             $productionSpaceRequirements,
@@ -168,7 +192,7 @@ final class ProjectController extends Controller
         foreach ($products as $product) {
             if (!empty($routeStepsByProduct[(int) $product['id']])) $routedProductCount++;
         }
-        $workflowSteps = ['overview', 'products', 'routes', 'services', 'flows', 'relationships', 'space'];
+        $workflowSteps = ['overview', 'products', 'routes', 'services', 'flows', 'relationships', 'space', 'layouts'];
         $activeStep = (string) ($_GET['step'] ?? 'overview');
         if (!in_array($activeStep, $workflowSteps, true)) {
             $activeStep = 'overview';
@@ -196,6 +220,7 @@ final class ProjectController extends Controller
                 'missingCount' => max(0, count($productionAreas) - $documentedProductionAreas),
                 'totalM2' => $productionSpaceTotal,
             ],
+            'layoutOptions' => $layoutOptions,
             'flowPeriods' => ['day' => 'روزانه', 'week' => 'هفتگی', 'month' => 'ماهانه', 'year' => 'سالانه'],
             'supportAreaSummary' => [
                 'knownCount' => $knownServiceAreaCount,

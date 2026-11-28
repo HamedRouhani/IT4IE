@@ -151,6 +151,31 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
 .fl-area-summary article > strong small { font-size: .82rem; font-weight: 600; }
 .fl-area-summary article.has-unknown { border-color: #fde68a; background: #fffbeb; }
 .fl-area-summary article.has-unknown > strong { color: #92400e; }
+.fl-layout-option-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 390px), 1fr)); gap: 16px; margin-top: 16px; }
+.fl-layout-option { min-width: 0; padding: 16px; border: 1px solid #dbe4f0; border-radius: 14px; background: #fff; }
+.fl-layout-option.is-infeasible { border-color: #fca5a5; background: #fffafa; }
+.fl-layout-option > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.fl-layout-option h3 { margin: 3px 0 0; color: var(--fl-ink, #172554); font-size: 1.08rem; }
+.fl-layout-rank { flex: 0 0 auto; padding: 6px 10px; border-radius: 999px; color: #166534; background: #dcfce7; font-size: .78rem; font-weight: 800; }
+.is-infeasible .fl-layout-rank { color: #991b1b; background: #fee2e2; }
+.fl-layout-svg { display: block; width: 100%; height: 280px; margin: 0 auto 12px; border: 1px solid #e2e8f0; border-radius: 10px; background-color: #f8fafc; }
+.fl-layout-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 12px; margin: 0 0 14px; padding: 0; list-style: none; }
+.fl-layout-legend li { display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: center; gap: 2px 7px; min-width: 0; }
+.fl-layout-legend li > span { grid-row: span 2; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: #1e3a8a; background: #dbeafe; font-size: .76rem; font-weight: 800; }
+.fl-layout-legend strong, .fl-layout-legend small { overflow-wrap: anywhere; }
+.fl-layout-legend strong { font-size: .82rem; }
+.fl-layout-legend small { color: #64748b; font-size: .74rem; }
+.fl-layout-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.fl-layout-metrics > div { padding: 9px 10px; border-radius: 9px; background: #f1f5f9; }
+.fl-layout-metrics dt { color: #64748b; font-size: .74rem; }
+.fl-layout-metrics dd { margin: 3px 0 0; color: #172554; font-size: .88rem; font-weight: 800; overflow-wrap: anywhere; }
+.fl-layout-method { margin-top: 16px; }
+.fl-layout-warnings { margin: 14px 0 0; padding: 12px 34px 12px 12px; border-radius: 10px; color: #713f12; background: #fffbeb; font-size: .86rem; }
+@media (max-width: 520px) {
+    .fl-layout-option-grid, .fl-layout-legend, .fl-layout-metrics { grid-template-columns: 1fr; }
+    .fl-layout-option { padding: 12px; }
+    .fl-layout-svg { height: 230px; }
+}
 .fl-area-caveat { margin: 8px 0 16px; padding: 10px 12px; border-right: 3px solid #f4b942; border-radius: 8px; background: #fffbeb; color: #475569; font-size: .9rem; line-height: 1.8; }
 .fl-relationship-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: end; margin: 16px 0; padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
 .fl-relationship-form label { display: grid; gap: 6px; color: #334155; font-weight: 700; }
@@ -231,7 +256,7 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
 .fl-workflow-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .fl-workflow-heading h2 { margin: 3px 0 0; color: var(--fl-ink, #172554); font-size: 1.15rem; }
 .fl-workflow-position { flex: 0 0 auto; padding: 6px 11px; border-radius: 999px; background: #eff6ff; color: #1d4ed8; font-size: .88rem; font-weight: 800; }
-.fl-workflow-steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.fl-workflow-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
 .fl-workflow-steps li { min-width: 0; }
 .fl-workflow-steps a { display: flex; align-items: flex-start; gap: 9px; height: 100%; min-height: 68px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 11px; color: #334155; background: #f8fafc; text-decoration: none; transition: border-color .15s ease, background .15s ease; }
 .fl-workflow-steps a:hover { border-color: #93c5fd; background: #eff6ff; }

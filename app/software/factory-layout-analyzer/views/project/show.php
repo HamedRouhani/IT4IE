@@ -11,6 +11,7 @@
         'services' => ['title' => 'خدمات پشتیبان', 'description' => 'گام S'],
         'relationships' => ['title' => 'روابط فعالیت‌ها', 'description' => 'نمودار و ماتریس REL'],
         'space' => ['title' => 'نیاز فضای تولید', 'description' => 'برآورد فضای بخش‌ها'],
+        'layouts' => ['title' => 'گزینه‌های چیدمان', 'description' => 'تولید بلوکی و رتبه‌بندی'],
     ];
     $workflowDone = [
         'overview' => true,
@@ -20,6 +21,7 @@
         'services' => count($supportServices) > 0,
         'relationships' => $slpReadiness['relationshipsComplete'],
         'space' => count($productionAreas) > 0 && $slpReadiness['documentedProductionAreas'] === count($productionAreas),
+        'layouts' => !empty($layoutOptions['ready']) && count(array_filter($layoutOptions['options'], static fn(array $option): bool => $option['feasible'])) > 0,
     ];
     $activePosition = array_search($activeStep, $workflowSteps, true);
     $previousStep = $activePosition > 0 ? $workflowSteps[$activePosition - 1] : null;
@@ -38,6 +40,7 @@
         'flows' => 'پس از تعریف فعالیت‌ها، جابه‌جایی‌های جهت‌دار بین مبدأ و مقصد را با دوره و منبع داده ثبت کنید.',
         'relationships' => 'برای زوج فعالیت‌ها کد نزدیکی و دلیل قابل بررسی ثبت کنید؛ زوج‌های ارزیابی‌نشده را با U اشتباه نگیرید.',
         'space' => 'برای هر بخش تولیدی، مساحت موردنیاز و اجزای منظورشده در برآورد را همراه با مبنا ثبت کنید.',
+        'layouts' => 'پس از ثبت مساحت همهٔ فعالیت‌ها، گزینه‌های بلوکی مقدماتی را بسازید و معیارهای جریان، روابط و تعارض X را مقایسه کنید.',
     ];
     ?>
     <nav class="fl-workflow" aria-label="مراحل طراحی چیدمان">
@@ -371,6 +374,57 @@
             <div class="fl-table-wrap"><table class="fl-table"><thead><tr><th>نام قبلی بخش</th><th>مساحت</th><th>مبنا</th><th>عملیات</th></tr></thead><tbody>
                 <?php foreach ($orphanedProductionSpaces as $orphanedSpace): ?><tr><td><?= fl_e($orphanedSpace['area_name']) ?></td><td><?= fl_e($orphanedSpace['area_m2']) ?> مترمربع</td><td><?= fl_e($orphanedSpace['area_basis']) ?></td><td><form method="post" action="<?= fl_e(fl_url('space', 'delete', ['id' => (int) $orphanedSpace['id']])) ?>" onsubmit="return confirm('برآورد قدیمی حذف شود؟');"><?= $csrfField ?><button class="fl-button fl-button-danger" type="submit">حذف</button></form></td></tr><?php endforeach; ?>
             </tbody></table></div>
+        <?php endif; ?>
+    </section>
+    <?php endif; ?>
+    <?php if ($activeStep === 'layouts'): ?>
+    <section class="fl-card fl-layout-options">
+        <div class="fl-card-head"><div><span class="fl-eyebrow">SLP · گزینه‌سازی مقدماتی</span><h2>تولید و مقایسهٔ گزینه‌های بلوکی</h2></div><span class="fl-readiness-count"><?= count($layoutOptions['options']) ?> گزینه</span></div>
+        <p class="fl-section-intro">سامانه سه ترتیب سازندهٔ متفاوت را امتحان و تا سه گزینهٔ هندسیِ متمایز تولید می‌کند. رتبه‌بندی، فاصلهٔ بار و مساحت قاب را کمینه و همجواری‌های A/E/I را بیشینه می‌کند؛ معیارها جدا می‌مانند و کدهای REL به امتیاز ساختگی تبدیل نمی‌شوند.</p>
+        <?php if ($layoutOptions['issues']): ?>
+            <div class="fl-alert danger" role="alert"><strong>برای تولید گزینه‌ها این موارد را تکمیل کنید:</strong><ul><?php foreach ($layoutOptions['issues'] as $issue): ?><li><?= fl_e($issue) ?></li><?php endforeach; ?></ul></div>
+        <?php elseif ($layoutOptions['options']): ?>
+            <div class="fl-area-summary" aria-label="خلاصهٔ ورودی گزینه‌سازی">
+                <article><span>فعالیت‌های دارای مساحت</span><strong><?= (int) $layoutOptions['area_count'] ?></strong><small>مجموع خالص <?= fl_e(number_format((float) $layoutOptions['total_area'], 2)) ?> مترمربع</small></article>
+                <article><span>پوشش روابط ثبت‌شده</span><strong><?= (int) $layoutOptions['rated_pair_count'] ?> از <?= (int) $layoutOptions['possible_pair_count'] ?></strong><small>زوج بدون رابطه، ارزیابی‌نشده است؛ U فرض نمی‌شود.</small></article>
+            </div>
+            <?php if (!array_filter($layoutOptions['options'], static fn(array $option): bool => $option['feasible'])): ?>
+                <div class="fl-alert danger" role="alert">هیچ گزینه‌ای همهٔ روابط X را رعایت نکرده است. این گزینه‌ها را به‌عنوان طرح مجاز انتخاب نکنید؛ روابط X یا داده‌های فعالیت‌ها را بازبینی کنید.</div>
+            <?php endif; ?>
+            <div class="fl-layout-option-grid">
+                <?php foreach ($layoutOptions['options'] as $optionIndex => $option): ?>
+                    <?php
+                    $colors = ['#dbeafe', '#dcfce7', '#fef3c7', '#f3e8ff', '#ffe4e6', '#cffafe', '#e2e8f0', '#ffedd5', '#ede9fe', '#ecfccb', '#fae8ff', '#d1fae5'];
+                    $blockNumber = 0;
+                    $paretoBadge = !$option['feasible'] ? 'ناسازگار با X' : ($option['pareto_rank'] === 1 ? 'جبههٔ ۱ · غیرمغلوب' : 'جبههٔ ' . (int) $option['pareto_rank']);
+                    ?>
+                    <article class="fl-layout-option <?= $option['feasible'] ? '' : 'is-infeasible' ?>">
+                        <header><div><span class="fl-eyebrow">گزینهٔ <?= $optionIndex + 1 ?></span><h3><?= fl_e($option['label']) ?></h3></div><span class="fl-layout-rank"><?= fl_e($paretoBadge) ?></span></header>
+                        <svg class="fl-layout-svg" viewBox="0 0 <?= fl_e(number_format((float) $option['width'], 4, '.', '')) ?> <?= fl_e(number_format((float) $option['height'], 4, '.', '')) ?>" role="img" aria-label="نمای بلوکی گزینهٔ <?= $optionIndex + 1 ?>؛ مستطیل‌ها مساحت نسبی فعالیت‌ها را نشان می‌دهند">
+                            <?php foreach ($option['rectangles'] as $areaName => $rectangle): $blockNumber++; $fontSize = max(0.45, min($rectangle['width'], $rectangle['height']) * 0.22); ?>
+                                <rect x="<?= fl_e(number_format((float) $rectangle['x'], 4, '.', '')) ?>" y="<?= fl_e(number_format((float) $rectangle['y'], 4, '.', '')) ?>" width="<?= fl_e(number_format((float) $rectangle['width'], 4, '.', '')) ?>" height="<?= fl_e(number_format((float) $rectangle['height'], 4, '.', '')) ?>" fill="<?= $colors[($blockNumber - 1) % count($colors)] ?>" stroke="#334155" stroke-width="0.12" vector-effect="non-scaling-stroke" />
+                                <text x="<?= fl_e(number_format((float) ($rectangle['x'] + $rectangle['width'] / 2), 4, '.', '')) ?>" y="<?= fl_e(number_format((float) ($rectangle['y'] + $rectangle['height'] / 2), 4, '.', '')) ?>" text-anchor="middle" dominant-baseline="middle" font-size="<?= fl_e(number_format($fontSize, 3, '.', '')) ?>" fill="#0f172a"><?= $blockNumber ?></text>
+                            <?php endforeach; ?>
+                        </svg>
+                        <ol class="fl-layout-legend">
+                            <?php $legendNumber = 0; foreach ($option['rectangles'] as $areaName => $rectangle): $legendNumber++; ?>
+                                <li><span><?= $legendNumber ?></span><strong><?= fl_e($areaName) ?></strong><small><?= fl_e(number_format((float) $rectangle['area_m2'], 2)) ?> مترمربع · مبنا: <?= fl_e($rectangle['basis']) ?></small></li>
+                            <?php endforeach; ?>
+                        </ol>
+                        <dl class="fl-layout-metrics">
+                            <div><dt>فاصلهٔ بار هفتگی</dt><dd><?= fl_e(number_format((float) $option['flow_distance'], 2)) ?> بار‌ـ‌متر/هفته</dd></div>
+                            <div><dt>مساحت قاب مستطیلی گزینه</dt><dd><?= fl_e(number_format((float) $option['envelope_area'], 2)) ?> مترمربع</dd></div>
+                            <div><dt>همجواری A / E / I</dt><dd><?= (int) $option['adjacent']['A'] ?> / <?= (int) $option['adjacent']['E'] ?> / <?= (int) $option['adjacent']['I'] ?></dd></div>
+                            <div><dt>تعارض همجواری X</dt><dd><?= (int) $option['x_violations'] ?></dd></div>
+                            <div><dt>ابعاد قاب هندسی</dt><dd><?= fl_e(number_format((float) $option['width'], 2)) ?> × <?= fl_e(number_format((float) $option['height'], 2)) ?> متر</dd></div>
+                        </dl>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+            <aside class="fl-note fl-layout-method"><i class="fa-solid fa-graduation-cap"></i><div><strong>روش ساخت و رتبه‌بندی</strong><p>ترتیب‌های جریان‌محور، رابطه‌محور و مساحت‌محور با جانمایی سازنده تولید می‌شوند. فاصلهٔ بار برابر مجموع جریان هفتگی هر زوج ضرب‌در فاصلهٔ منهتن مراکز بلوک‌هاست. گزینه‌ای برتر است که در همهٔ معیارها بدتر نباشد و دست‌کم در یک معیار بهتر باشد؛ X نیز شرط امکان‌پذیری است. رتبه‌های برابر، سازش‌های غیرمغلوب را نشان می‌دهند.</p></div></aside>
+            <?php if ($layoutOptions['warnings']): ?><ul class="fl-layout-warnings"><?php foreach ($layoutOptions['warnings'] as $warning): ?><li><?= fl_e($warning) ?></li><?php endforeach; ?></ul><?php endif; ?>
+        <?php else: ?>
+            <div class="fl-empty"><i class="fa-solid fa-draw-polygon"></i><strong>هنوز فعالیتی برای چیدمان وجود ندارد</strong><span>ابتدا مسیر عملیات یا خدمات پشتیبان را تعریف کنید تا فعالیت‌ها در این گام شناسایی شوند.</span><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id'], 'step' => 'routes'])) ?>">رفتن به مسیر عملیات</a></div>
         <?php endif; ?>
     </section>
     <?php endif; ?>
