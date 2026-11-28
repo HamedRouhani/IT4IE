@@ -72,6 +72,26 @@ final class ProjectController extends Controller
             $routeStepsByProduct[(int) $routeStep['product_id']][] = $routeStep;
         }
         $supportServices = (new SupportServiceRepository())->listForProject($userId, $id);
+        $knownServiceAreaCount = 0;
+        $unknownServiceAreaCount = 0;
+        $serviceAreaMilliTotal = 0;
+        foreach ($supportServices as $service) {
+            if ($service['area_m2'] === null || $service['area_m2'] === '') {
+                $unknownServiceAreaCount++;
+                continue;
+            }
+            if (preg_match('/^(\d+)(?:\.(\d{1,3}))?$/', (string) $service['area_m2'], $areaParts)) {
+                $knownServiceAreaCount++;
+                $serviceAreaMilliTotal += ((int) $areaParts[1] * 1000)
+                    + (int) str_pad($areaParts[2] ?? '', 3, '0');
+            }
+        }
+        $serviceAreaWhole = intdiv($serviceAreaMilliTotal, 1000);
+        $serviceAreaFraction = $serviceAreaMilliTotal % 1000;
+        $serviceAreaTotal = (string) $serviceAreaWhole;
+        if ($serviceAreaFraction > 0) {
+            $serviceAreaTotal .= '.' . rtrim(str_pad((string) $serviceAreaFraction, 3, '0', STR_PAD_LEFT), '0');
+        }
         $routedProductCount = 0;
         foreach ($products as $product) {
             if (!empty($routeStepsByProduct[(int) $product['id']])) $routedProductCount++;
@@ -84,6 +104,11 @@ final class ProjectController extends Controller
             'products' => $products,
             'routeStepsByProduct' => $routeStepsByProduct,
             'supportServices' => $supportServices,
+            'supportAreaSummary' => [
+                'knownCount' => $knownServiceAreaCount,
+                'unknownCount' => $unknownServiceAreaCount,
+                'documentedTotalM2' => $serviceAreaTotal,
+            ],
             'slpReadiness' => [
                 'products' => count($products),
                 'routedProducts' => $routedProductCount,

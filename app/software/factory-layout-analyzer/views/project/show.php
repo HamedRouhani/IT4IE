@@ -97,6 +97,11 @@
             <a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('service', 'create', ['project_id' => (int) $project['id']])) ?>"><i class="fa-solid fa-plus"></i> افزودن خدمت</a>
         </div>
         <p class="fl-section-intro">خدمات موردنیاز را از فضای تولیدی جدا ثبت کنید. برای مساحت برآوردی، واحد مترمربع و مبنای محاسبه ذخیره می‌شود؛ مقدار نامعلوم خالی می‌ماند.</p>
+        <div class="fl-area-summary" aria-label="خلاصه برآورد فضای خدمات پشتیبان">
+            <article><span>جمع مساحت‌های ثبت‌شده</span><strong><?= fl_e($supportAreaSummary['documentedTotalM2']) ?> <small>مترمربع</small></strong><small><?= (int) $supportAreaSummary['knownCount'] ?> خدمت دارای برآورد</small></article>
+            <article class="<?= $supportAreaSummary['unknownCount'] > 0 ? 'has-unknown' : '' ?>"><span>نیازمند برآورد فضا</span><strong><?= (int) $supportAreaSummary['unknownCount'] ?></strong><small>خدمت بدون مقدار مساحت</small></article>
+        </div>
+        <p class="fl-area-caveat">این جمع فقط مجموع اعداد ثبت‌شده برای خدمات پشتیبان است؛ مساحت نهایی کارخانه یا مساحت ناخالص موردنیاز را نشان نمی‌دهد. هم‌پوشانی، مسیرهای دسترسی و الزامات اختصاصی باید جداگانه بررسی شوند.</p>
         <?php if ($supportServices): ?>
             <?php $serviceCategories = ['storage' => 'انبارش و انبار', 'maintenance' => 'تعمیرات و نگهداری', 'quality' => 'کنترل کیفیت و آزمایشگاه', 'utilities' => 'تأسیسات و انرژی', 'office' => 'اداری و سرپرستی', 'welfare' => 'رفاهی و خدمات کارکنان', 'safety' => 'ایمنی و محیط زیست', 'shipping' => 'دریافت و ارسال', 'other' => 'سایر خدمات']; ?>
             <?php $serviceRequirements = ['required' => 'الزامی', 'preferred' => 'ترجیحی', 'optional' => 'اختیاری']; ?>
