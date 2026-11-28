@@ -73,5 +73,35 @@
         <?php endif; ?>
     </section>
 
+    <section class="fl-card">
+        <div class="fl-card-head">
+            <div><span class="fl-eyebrow">S · خدمات و فعالیت‌های پشتیبان</span><h2>نیازهای پشتیبان و برآورد فضا</h2></div>
+            <a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('service', 'create', ['project_id' => (int) $project['id']])) ?>"><i class="fa-solid fa-plus"></i> افزودن خدمت</a>
+        </div>
+        <p class="fl-section-intro">خدمات موردنیاز را از فضای تولیدی جدا ثبت کنید. برای مساحت برآوردی، واحد مترمربع و مبنای محاسبه ذخیره می‌شود؛ مقدار نامعلوم خالی می‌ماند.</p>
+        <?php if ($supportServices): ?>
+            <?php $serviceCategories = ['storage' => 'انبارش و انبار', 'maintenance' => 'تعمیرات و نگهداری', 'quality' => 'کنترل کیفیت و آزمایشگاه', 'utilities' => 'تأسیسات و انرژی', 'office' => 'اداری و سرپرستی', 'welfare' => 'رفاهی و خدمات کارکنان', 'safety' => 'ایمنی و محیط زیست', 'shipping' => 'دریافت و ارسال', 'other' => 'سایر خدمات']; ?>
+            <?php $serviceRequirements = ['required' => 'الزامی', 'preferred' => 'ترجیحی', 'optional' => 'اختیاری']; ?>
+            <div class="fl-table-wrap"><table class="fl-table fl-service-table">
+                <thead><tr><th>خدمت پشتیبان</th><th>دسته</th><th>سطح الزام</th><th>مساحت</th><th>مبنا و ملاحظات</th><th>عملیات</th></tr></thead>
+                <tbody><?php foreach ($supportServices as $service): ?>
+                    <tr>
+                        <td><strong><?= fl_e($service['name']) ?></strong></td>
+                        <td><?= fl_e($serviceCategories[$service['category']] ?? 'سایر خدمات') ?></td>
+                        <td><span class="fl-requirement <?= fl_e($service['requirement_level']) ?>"><?= fl_e($serviceRequirements[$service['requirement_level']] ?? 'نامشخص') ?></span></td>
+                        <td><?= $service['area_m2'] === null ? 'برآورد نشده' : fl_e($service['area_m2']) . ' مترمربع' ?></td>
+                        <td><?= fl_e($service['area_basis'] ?: $service['notes'] ?: '—') ?><?php if ($service['area_basis'] && $service['notes']): ?><small><?= fl_e($service['notes']) ?></small><?php endif; ?></td>
+                        <td><div class="fl-row-actions">
+                            <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('service', 'edit', ['id' => (int) $service['id']])) ?>">ویرایش</a>
+                            <form method="post" action="<?= fl_e(fl_url('service', 'delete', ['id' => (int) $service['id']])) ?>" onsubmit="return confirm('این خدمت پشتیبان از پروژه حذف شود؟');"><?= $csrfField ?><button class="fl-button fl-button-danger" type="submit">حذف</button></form>
+                        </div></td>
+                    </tr>
+                <?php endforeach; ?></tbody>
+            </table></div>
+        <?php else: ?>
+            <div class="fl-empty"><i class="fa-solid fa-screwdriver-wrench"></i><strong>هنوز خدمت پشتیبانی ثبت نشده است</strong><span>انبار، تعمیرات، کنترل کیفیت، تأسیسات و نیازهای مشابه را با سطح الزام مشخص کنید.</span><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('service', 'create', ['project_id' => (int) $project['id']])) ?>">ثبت اولین خدمت</a></div>
+        <?php endif; ?>
+    </section>
+
     <aside class="fl-note"><i class="fa-solid fa-graduation-cap"></i><div><strong>نکتهٔ آموزشی SLP</strong><p>P محصول یا خانوادهٔ محصول و Q مقدار تولید است. واحد هر مقدار باید روشن باشد؛ برای تبدیل واحد یا مقایسهٔ محصولات ناهمگون، ضرایب و قواعد تبدیل را در مرحلهٔ جریان مواد تعریف می‌کنیم.</p><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('learn', 'show', ['lesson' => 'slp-overview'])) ?>">مرور درس مبانی SLP</a></div></aside>
 </main>

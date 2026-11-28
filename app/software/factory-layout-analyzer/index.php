@@ -29,6 +29,7 @@ $controllers = [
     'project' => 'ProjectController',
     'product' => 'ProductController',
     'route' => 'RouteController',
+    'service' => 'ServiceController',
     'learn' => 'LearnController',
 ];
 $allowedActions = [
@@ -36,6 +37,7 @@ $allowedActions = [
     'project' => ['index', 'create', 'store', 'show', 'edit', 'update', 'delete'],
     'product' => ['create', 'store', 'edit', 'update', 'delete'],
     'route' => ['create', 'store', 'edit', 'update', 'delete', 'move'],
+    'service' => ['create', 'store', 'edit', 'update', 'delete'],
     'learn' => ['index', 'show'],
 ];
 $controllerKey = strtolower((string) ($_GET['controller'] ?? 'dashboard'));
@@ -90,6 +92,18 @@ try {
             throw new RuntimeException('محصول درخواستی پیدا نشد.');
         }
         $controller->{$action}($productId);
+    } elseif ($controllerKey === 'service' && in_array($action, ['edit', 'update', 'delete'], true)) {
+        if (!is_int($id) || $id < 1) {
+            http_response_code(404);
+            throw new RuntimeException('خدمت پشتیبان درخواستی پیدا نشد.');
+        }
+        $controller->{$action}($id);
+    } elseif ($controllerKey === 'service' && in_array($action, ['create', 'store'], true)) {
+        if (!is_int($projectId) || $projectId < 1) {
+            http_response_code(404);
+            throw new RuntimeException('پروژهٔ درخواستی پیدا نشد.');
+        }
+        $controller->{$action}($projectId);
     } else {
         $controller->{$action}();
     }

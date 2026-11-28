@@ -8,6 +8,7 @@ use App\Core\Controller;
 use App\Software\FactoryLayoutAnalyzer\Models\ProductRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\ProjectRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\RouteStepRepository;
+use App\Software\FactoryLayoutAnalyzer\Models\SupportServiceRepository;
 
 final class ProjectController extends Controller
 {
@@ -76,6 +77,7 @@ final class ProjectController extends Controller
             'project' => $project,
             'products' => (new ProductRepository())->listForProject($userId, $id),
             'routeStepsByProduct' => $routeStepsByProduct,
+            'supportServices' => (new SupportServiceRepository())->listForProject($userId, $id),
             'periodLabel' => self::PERIODS[$project['planning_period']] ?? 'نامشخص',
             'flash' => fl_flash_get(),
             'csrfField' => $this->csrfField(),
