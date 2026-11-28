@@ -66,18 +66,33 @@ final class ProjectController extends Controller
             fl_flash_set('danger', 'پروژه پیدا نشد یا دسترسی به آن ندارید.');
             $this->redirect(fl_url('project', 'index'));
         }
+        $products = (new ProductRepository())->listForProject($userId, $id);
         $routeStepsByProduct = [];
         foreach ((new RouteStepRepository())->listForProject($userId, $id) as $routeStep) {
             $routeStepsByProduct[(int) $routeStep['product_id']][] = $routeStep;
+        }
+        $supportServices = (new SupportServiceRepository())->listForProject($userId, $id);
+        $routedProductCount = 0;
+        foreach ($products as $product) {
+            if (!empty($routeStepsByProduct[(int) $product['id']])) $routedProductCount++;
         }
         $this->renderSoftware('project/show', [
             'pageTitle' => $project['title'],
             'title' => $project['title'] . ' - چیدمان کارخانه',
             'softwareName' => 'Factory Layout Analyzer',
             'project' => $project,
-            'products' => (new ProductRepository())->listForProject($userId, $id),
+            'products' => $products,
             'routeStepsByProduct' => $routeStepsByProduct,
-            'supportServices' => (new SupportServiceRepository())->listForProject($userId, $id),
+            'supportServices' => $supportServices,
+            'slpReadiness' => [
+                'products' => count($products),
+                'routedProducts' => $routedProductCount,
+                'supportServices' => count($supportServices),
+                'calendarConfigured' => !empty($project['planning_period'])
+                    && (int) $project['shifts_per_day'] > 0
+                    && (float) $project['hours_per_shift'] > 0
+                    && (int) $project['working_days_per_week'] > 0,
+            ],
             'periodLabel' => self::PERIODS[$project['planning_period']] ?? 'نامشخص',
             'flash' => fl_flash_get(),
             'csrfField' => $this->csrfField(),

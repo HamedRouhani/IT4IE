@@ -2,6 +2,24 @@
     <header class="fl-page-head"><div><span class="fl-eyebrow">پروژهٔ چیدمان · <?= fl_e($project['project_code'] ?: 'بدون کد') ?></span><h1><i class="fa-solid fa-industry"></i> <?= fl_e($project['title']) ?></h1><p><?= fl_e($project['facility_name'] ?: 'نام کارخانه ثبت نشده') ?><?= $project['industry'] ? ' · ' . fl_e($project['industry']) : '' ?></p></div><div class="fl-actions"><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('project', 'edit', ['id' => (int) $project['id']])) ?>"><i class="fa-solid fa-pen"></i> ویرایش مشخصات</a><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'index')) ?>">همهٔ پروژه‌ها</a></div></header>
     <?php if (!empty($flash)): ?><div class="fl-alert <?= fl_e($flash['type']) ?>" role="status"><?= fl_e($flash['message']) ?></div><?php endif; ?>
 
+    <?php
+    $slpReadinessItems = [
+        ['code' => 'P–Q', 'label' => 'محصول و مقدار تولید', 'value' => $slpReadiness['products'] . ' محصول ثبت‌شده', 'ready' => $slpReadiness['products'] > 0],
+        ['code' => 'R', 'label' => 'مسیر عملیات', 'value' => $slpReadiness['routedProducts'] . ' از ' . $slpReadiness['products'] . ' محصول دارای مسیر', 'ready' => $slpReadiness['products'] > 0 && $slpReadiness['routedProducts'] === $slpReadiness['products']],
+        ['code' => 'S', 'label' => 'خدمات پشتیبان', 'value' => $slpReadiness['supportServices'] . ' خدمت ثبت‌شده', 'ready' => $slpReadiness['supportServices'] > 0],
+        ['code' => 'T', 'label' => 'تقویم و زمان‌بندی', 'value' => $periodLabel . ' · ' . (int) $project['shifts_per_day'] . ' شیفت، ' . $project['hours_per_shift'] . ' ساعت', 'ready' => $slpReadiness['calendarConfigured']],
+    ];
+    ?>
+    <section class="fl-card fl-readiness" aria-labelledby="slp-readiness-title">
+        <div class="fl-card-head"><div><span class="fl-eyebrow">SLP · کنترل ورودی‌ها</span><h2 id="slp-readiness-title">آمادگی داده‌های پروژه</h2></div><span class="fl-readiness-count"><?= count(array_filter($slpReadinessItems, static fn(array $item): bool => $item['ready'])) ?> از <?= count($slpReadinessItems) ?></span></div>
+        <p class="fl-section-intro">این مرور، فقط وضعیت ثبت داده‌ها را نشان می‌دهد؛ کامل‌بودن فهرست خدمات را با مناسب‌بودن آن برای طرح نهایی اشتباه نگیرید.</p>
+        <ul class="fl-readiness-list">
+            <?php foreach ($slpReadinessItems as $item): ?>
+                <li class="<?= $item['ready'] ? 'is-ready' : 'is-pending' ?>"><span class="fl-readiness-code"><?= fl_e($item['code']) ?></span><span class="fl-readiness-copy"><strong><?= fl_e($item['label']) ?></strong><small><?= fl_e($item['value']) ?></small></span><span class="fl-readiness-state"><?= $item['ready'] ? 'ثبت شده' : 'نیازمند بررسی' ?></span></li>
+            <?php endforeach; ?>
+        </ul>
+    </section>
+
     <section class="fl-card"><div class="fl-card-head"><div><span class="fl-eyebrow">مبنای مطالعه</span><h2>اطلاعات ثبت‌شده</h2></div><span class="fl-status">پیش‌نویس</span></div>
         <dl class="fl-details">
             <div><dt>کارخانه یا سایت</dt><dd><?= fl_e($project['facility_name'] ?: 'ثبت نشده') ?></dd></div>
