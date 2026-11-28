@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Software\FactoryLayoutAnalyzer\Controllers;
 
 use App\Core\Controller;
+use App\Software\FactoryLayoutAnalyzer\Models\ActivityRelationshipRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\ProductRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\ProjectRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\RouteStepRepository;
@@ -72,6 +73,9 @@ final class ProjectController extends Controller
             $routeStepsByProduct[(int) $routeStep['product_id']][] = $routeStep;
         }
         $supportServices = (new SupportServiceRepository())->listForProject($userId, $id);
+        $relationshipRepository = new ActivityRelationshipRepository();
+        $activityAreas = $relationshipRepository->activityAreas($userId, $id);
+        $activityRelationships = $relationshipRepository->listForProject($userId, $id);
         $knownServiceAreaCount = 0;
         $unknownServiceAreaCount = 0;
         $serviceAreaMilliTotal = 0;
@@ -104,6 +108,8 @@ final class ProjectController extends Controller
             'products' => $products,
             'routeStepsByProduct' => $routeStepsByProduct,
             'supportServices' => $supportServices,
+            'activityAreas' => $activityAreas,
+            'activityRelationships' => $activityRelationships,
             'supportAreaSummary' => [
                 'knownCount' => $knownServiceAreaCount,
                 'unknownCount' => $unknownServiceAreaCount,

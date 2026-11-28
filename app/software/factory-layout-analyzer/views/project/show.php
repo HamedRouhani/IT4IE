@@ -126,5 +126,34 @@
         <?php endif; ?>
     </section>
 
+    <section class="fl-card fl-relationship-section">
+        <?php $relationshipLabels = ['A' => 'ضرورت مطلق', 'E' => 'اهمیت بسیار زیاد', 'I' => 'اهمیت زیاد', 'O' => 'اهمیت معمولی', 'U' => 'اهمیت ناچیز', 'X' => 'نامطلوب؛ نیازمند جدایی']; ?>
+        <div class="fl-card-head"><div><span class="fl-eyebrow">REL · روابط غیرمادی</span><h2>ثبت روابط فعالیت‌ها (REL)</h2></div><span class="fl-readiness-count"><?= count($activityRelationships) ?> رابطه</span></div>
+        <p class="fl-section-intro">برای هر زوج، کد نزدیکی و دلیل قابل‌بررسی ثبت کنید. کدها امتیاز عددی نیستند و زوج‌های ثبت‌نشده هنوز ارزیابی نشده‌اند (معادل U نیستند). رابطهٔ X را با دلیل روشن و ملاحظهٔ ایمنی مستند کنید.</p>
+        <?php if (count($activityAreas) >= 2): ?>
+            <form class="fl-relationship-form" method="post" action="<?= fl_e(fl_url('relationship', 'store', ['project_id' => (int) $project['id']])) ?>">
+                <?= $csrfField ?>
+                <label>فعالیت اول<select name="area_a" required><option value="">انتخاب کنید</option><?php foreach ($activityAreas as $activityArea): ?><option value="<?= fl_e($activityArea) ?>"><?= fl_e($activityArea) ?></option><?php endforeach; ?></select></label>
+                <label>فعالیت دوم<select name="area_b" required><option value="">انتخاب کنید</option><?php foreach ($activityAreas as $activityArea): ?><option value="<?= fl_e($activityArea) ?>"><?= fl_e($activityArea) ?></option><?php endforeach; ?></select></label>
+                <label>کد نزدیکی<select name="closeness_code" required><?php foreach ($relationshipLabels as $code => $label): ?><option value="<?= fl_e($code) ?>"><?= fl_e($code . ' · ' . $label) ?></option><?php endforeach; ?></select></label>
+                <label class="fl-relationship-reason">دلیل رابطه *<input name="reason" maxlength="500" required placeholder="مثلاً تکرار انتقال مواد یا محدودیت ایمنی"></label>
+                <button class="fl-button fl-button-primary" type="submit"><i class="fa-solid fa-plus"></i> ثبت رابطه</button>
+            </form>
+        <?php else: ?>
+            <div class="fl-empty"><strong>برای ساخت نمودار، دست‌کم دو فعالیت لازم است</strong><span>فعالیت‌ها از مسیر محصولات و فهرست خدمات پشتیبان این پروژه گردآوری می‌شوند.</span></div>
+        <?php endif; ?>
+        <?php if ($activityRelationships): ?>
+            <div class="fl-table-wrap"><table class="fl-table fl-relationship-table">
+                <thead><tr><th>فعالیت اول</th><th>کد</th><th>فعالیت دوم</th><th>دلیل ثبت‌شده</th><th>عملیات</th></tr></thead>
+                <tbody><?php foreach ($activityRelationships as $relationship): ?>
+                    <tr><td><?= fl_e($relationship['area_a']) ?></td><td><span class="fl-rel-code rel-<?= fl_e($relationship['closeness_code']) ?>"><?= fl_e($relationship['closeness_code']) ?> · <?= fl_e($relationshipLabels[$relationship['closeness_code']] ?? 'نامشخص') ?></span></td><td><?= fl_e($relationship['area_b']) ?></td><td><?= fl_e($relationship['reason']) ?></td>
+                        <td><form method="post" action="<?= fl_e(fl_url('relationship', 'delete', ['id' => (int) $relationship['id']])) ?>" onsubmit="return confirm('این رابطه حذف شود؟');"><?= $csrfField ?><button class="fl-button fl-button-danger" type="submit">حذف</button></form></td></tr>
+                <?php endforeach; ?></tbody>
+            </table></div>
+        <?php else: ?>
+            <p class="fl-relationship-empty">هنوز رابطه‌ای ثبت نشده است. هر زوج فعالیت فقط یک‌بار وارد نمودار می‌شود.</p>
+        <?php endif; ?>
+        <p class="fl-area-caveat">فعالیت‌ها در این نسخه از نام ایستگاه‌های مسیر و نام خدمات پشتیبان ساخته می‌شوند. رابطه‌ها نام فعالیت را هنگام ثبت نگه می‌دارند؛ اگر نام ایستگاهی را تغییر دادید، رابطه‌های مرتبط را بازبینی کنید.</p>
+    </section>
     <aside class="fl-note"><i class="fa-solid fa-graduation-cap"></i><div><strong>نکتهٔ آموزشی SLP</strong><p>P محصول یا خانوادهٔ محصول و Q مقدار تولید است. واحد هر مقدار باید روشن باشد؛ برای تبدیل واحد یا مقایسهٔ محصولات ناهمگون، ضرایب و قواعد تبدیل را در مرحلهٔ جریان مواد تعریف می‌کنیم.</p><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('learn', 'show', ['lesson' => 'slp-overview'])) ?>">مرور درس مبانی SLP</a></div></aside>
 </main>

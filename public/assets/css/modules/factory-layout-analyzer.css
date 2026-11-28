@@ -149,6 +149,19 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
 .fl-area-summary article.has-unknown { border-color: #fde68a; background: #fffbeb; }
 .fl-area-summary article.has-unknown > strong { color: #92400e; }
 .fl-area-caveat { margin: 8px 0 16px; padding: 10px 12px; border-right: 3px solid #f4b942; border-radius: 8px; background: #fffbeb; color: #475569; font-size: .9rem; line-height: 1.8; }
+.fl-relationship-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: end; margin: 16px 0; padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
+.fl-relationship-form label { display: grid; gap: 6px; color: #334155; font-weight: 700; }
+.fl-relationship-form select, .fl-relationship-form input { width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #172554; }
+.fl-relationship-reason { grid-column: 1 / -1; }
+.fl-relationship-form > button { justify-self: start; }
+.fl-rel-code { display: inline-flex; padding: 4px 9px; border-radius: 999px; background: #e2e8f0; color: #334155; font-weight: 800; white-space: nowrap; }
+.fl-rel-code.rel-A, .fl-rel-code.rel-E { background: #fee2e2; color: #991b1b; }
+.fl-rel-code.rel-I { background: #ffedd5; color: #9a3412; }
+.fl-rel-code.rel-O { background: #dbeafe; color: #1e40af; }
+.fl-rel-code.rel-X { background: #7f1d1d; color: #fff; }
+.fl-relationship-table td { vertical-align: middle; }
+.fl-relationship-table td:nth-child(4) { min-width: 220px; overflow-wrap: anywhere; }
+.fl-relationship-empty { color: #64748b; }
 .fl-requirement { display: inline-flex; padding: 4px 9px; border-radius: 999px; font-size: .84rem; font-weight: 700; white-space: nowrap; }
 .fl-requirement.required { color: #991b1b; background: #fee2e2; }
 .fl-requirement.preferred { color: #854d0e; background: #fef3c7; }
@@ -177,6 +190,9 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
     .fl-service-table { min-width: 850px; }
     .fl-route-heading, .fl-route-product-head { align-items: flex-start; flex-direction: column; }
     .fl-area-summary { grid-template-columns: 1fr; }
+    .fl-relationship-form { grid-template-columns: 1fr; }
+    .fl-relationship-reason { grid-column: auto; }
+    .fl-relationship-table { min-width: 850px; }
     .fl-route-steps > li { grid-template-columns: 34px minmax(0, 1fr); }
     .fl-route-actions { grid-column: 1 / -1; justify-content: flex-start; }
 }
