@@ -14,5 +14,34 @@
         </dl>
     </section>
 
-    <aside class="fl-note"><i class="fa-solid fa-arrow-left"></i><div><strong>گام بعدی این پروژه</strong><p>ثبت خانواده‌های محصول و مقدار تولید هرکدام در دورهٔ «<?= fl_e($periodLabel) ?>»، سپس تعریف فعالیت‌های عملیاتی و خدمات پشتیبان و مسیر ساخت هر محصول. این داده‌ها هستهٔ P، Q، R و S در SLP هستند.</p><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('learn', 'show', ['lesson' => 'slp-overview'])) ?>">مرور درس مبانی SLP</a></div></aside>
+    <section class="fl-card">
+        <div class="fl-card-head">
+            <div><span class="fl-eyebrow">P · محصولات و خانواده‌ها</span><h2>مقدار تولید در دورهٔ <?= fl_e($periodLabel) ?></h2></div>
+            <a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('product', 'create', ['project_id' => (int) $project['id']])) ?>"><i class="fa-solid fa-plus"></i> افزودن محصول</a>
+        </div>
+        <p class="fl-section-intro">هر ردیف یک محصول یا خانواده و مقدار تولید آن در دورهٔ برنامه‌ریزی پروژه است. مقادیر با واحدهای متفاوت با هم جمع نمی‌شوند.</p>
+        <?php if ($products): ?>
+            <div class="fl-table-wrap"><table class="fl-table fl-product-table">
+                <thead><tr><th>کد</th><th>محصول / خانواده</th><th>مقدار در هر <?= fl_e($periodLabel) ?></th><th>یادداشت</th><th>عملیات</th></tr></thead>
+                <tbody><?php foreach ($products as $item): ?>
+                    <tr>
+                        <td><?= fl_e($item['product_code'] ?: '—') ?></td>
+                        <td><strong><?= fl_e($item['name']) ?></strong></td>
+                        <td><strong><?= fl_e($item['production_quantity']) ?></strong> <?= fl_e($item['production_unit']) ?></td>
+                        <td><?= fl_e($item['notes'] ?: '—') ?></td>
+                        <td><div class="fl-row-actions">
+                            <a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('product', 'edit', ['id' => (int) $item['id']])) ?>">ویرایش</a>
+                            <form method="post" action="<?= fl_e(fl_url('product', 'delete', ['id' => (int) $item['id']])) ?>" onsubmit="return confirm('این محصول از پروژه حذف شود؟');">
+                                <?= $csrfField ?><button class="fl-button fl-button-danger" type="submit">حذف</button>
+                            </form>
+                        </div></td>
+                    </tr>
+                <?php endforeach; ?></tbody>
+            </table></div>
+        <?php else: ?>
+            <div class="fl-empty"><i class="fa-solid fa-box-open"></i><strong>هنوز محصولی ثبت نشده است</strong><span>برای آغاز تحلیل مقدار تولید، محصول یا خانوادهٔ محصول را با واحد مشخص و مقدار دوره‌ای ثبت کنید.</span><a class="fl-button fl-button-primary" href="<?= fl_e(fl_url('product', 'create', ['project_id' => (int) $project['id']])) ?>">ثبت اولین محصول</a></div>
+        <?php endif; ?>
+    </section>
+
+    <aside class="fl-note"><i class="fa-solid fa-graduation-cap"></i><div><strong>نکتهٔ آموزشی SLP</strong><p>P محصول یا خانوادهٔ محصول و Q مقدار تولید است. واحد هر مقدار باید روشن باشد؛ برای تبدیل واحد یا مقایسهٔ محصولات ناهمگون، ضرایب و قواعد تبدیل را در مرحلهٔ جریان مواد تعریف می‌کنیم.</p><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('learn', 'show', ['lesson' => 'slp-overview'])) ?>">مرور درس مبانی SLP</a></div></aside>
 </main>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Software\FactoryLayoutAnalyzer\Controllers;
 
 use App\Core\Controller;
+use App\Software\FactoryLayoutAnalyzer\Models\ProductRepository;
 use App\Software\FactoryLayoutAnalyzer\Models\ProjectRepository;
 
 final class ProjectController extends Controller
@@ -56,7 +57,8 @@ final class ProjectController extends Controller
 
     public function show(int $id): void
     {
-        $project = (new ProjectRepository())->findForUser($this->userId(), $id);
+        $userId = $this->userId();
+        $project = (new ProjectRepository())->findForUser($userId, $id);
         if (!$project) {
             http_response_code(404);
             fl_flash_set('danger', 'پروژه پیدا نشد یا دسترسی به آن ندارید.');
@@ -67,8 +69,10 @@ final class ProjectController extends Controller
             'title' => $project['title'] . ' - چیدمان کارخانه',
             'softwareName' => 'Factory Layout Analyzer',
             'project' => $project,
+            'products' => (new ProductRepository())->listForProject($userId, $id),
             'periodLabel' => self::PERIODS[$project['planning_period']] ?? 'نامشخص',
             'flash' => fl_flash_get(),
+            'csrfField' => $this->csrfField(),
         ], 'factory-layout-analyzer');
     }
 
