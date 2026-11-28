@@ -14,6 +14,7 @@ use App\Software\FactoryLayoutAnalyzer\Models\SupportServiceRepository;
 final class ProjectController extends Controller
 {
     private const PERIODS = ['day' => 'روز', 'week' => 'هفته', 'month' => 'ماه', 'year' => 'سال'];
+    private const STATUSES = ['draft' => 'پیش‌نویس', 'active' => 'در حال انجام', 'completed' => 'تکمیل‌شده', 'archived' => 'بایگانی‌شده'];
 
     public function index(): void
     {
@@ -24,6 +25,7 @@ final class ProjectController extends Controller
             'title' => 'پروژه‌های چیدمان کارخانه - IT4IE',
             'softwareName' => 'Factory Layout Analyzer',
             'projects' => $repository->listForUser($userId),
+            'statuses' => self::STATUSES,
             'stats' => $repository->stats($userId),
             'flash' => fl_flash_get(),
             'csrfField' => $this->csrfField(),
@@ -105,6 +107,7 @@ final class ProjectController extends Controller
             'title' => $project['title'] . ' - چیدمان کارخانه',
             'softwareName' => 'Factory Layout Analyzer',
             'project' => $project,
+            'statuses' => self::STATUSES,
             'products' => $products,
             'routeStepsByProduct' => $routeStepsByProduct,
             'supportServices' => $supportServices,
@@ -195,6 +198,7 @@ final class ProjectController extends Controller
             'project' => $project,
             'old' => $old,
             'periods' => self::PERIODS,
+            'statuses' => self::STATUSES,
             'flash' => fl_flash_get(),
             'csrfField' => $this->csrfField(),
         ], 'factory-layout-analyzer');
@@ -208,6 +212,10 @@ final class ProjectController extends Controller
 
         $period = (string) ($_POST['planning_period'] ?? '');
         if (!isset(self::PERIODS[$period])) throw new \InvalidArgumentException('دورهٔ برنامه‌ریزی معتبر نیست.');
+        $status = $_POST['status'] ?? 'draft';
+        if (!is_string($status) || !isset(self::STATUSES[$status])) {
+            throw new \InvalidArgumentException('وضعیت انتخاب‌شده معتبر نیست.');
+        }
 
         $shifts = $this->integer('shifts_per_day', 1, 4, 'تعداد شیفت روزانه');
         $hours = $this->decimal('hours_per_shift', 0.25, 24, 'ساعت هر شیفت');
@@ -220,6 +228,7 @@ final class ProjectController extends Controller
             'site_location' => $this->text('site_location', 180, false),
             'scope_description' => $this->text('scope_description', 5000, false),
             'planning_period' => $period,
+            'status' => $status,
             'shifts_per_day' => $shifts,
             'hours_per_shift' => $hours,
             'working_days_per_week' => $days,

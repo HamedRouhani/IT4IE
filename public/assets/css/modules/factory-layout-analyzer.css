@@ -80,6 +80,9 @@ body.software-mode[data-module="factory-layout-analyzer"] .software-nav a.active
 .fl-table td strong { color: var(--fl-primary-dark, #1e3a8a); }
 .fl-table td small { display: block; margin-top: 4px; color: #64748b; }
 .fl-tag, .fl-status { display: inline-flex; align-items: center; padding: 5px 10px; border-radius: 999px; color: #1e3a8a; background: #dbeafe; font-size: .85rem; font-weight: 700; white-space: nowrap; }
+.fl-status.status-active { color: #166534; background: #dcfce7; }
+.fl-status.status-completed { color: #075985; background: #e0f2fe; }
+.fl-status.status-archived { color: #475569; background: #e2e8f0; }
 .fl-row-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .fl-row-actions form { margin: 0; }
 .fl-button-danger { min-height: 38px; padding: 7px 11px; color: #991b1b; border-color: #fecaca; background: #fff; }

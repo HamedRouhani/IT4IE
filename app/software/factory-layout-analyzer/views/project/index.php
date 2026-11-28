@@ -22,7 +22,7 @@
                         <td><?= fl_e($project['facility_name'] ?: '—') ?><small><?= fl_e($project['industry'] ?: 'صنعت ثبت نشده') ?></small></td>
                         <td><?= fl_e(['day'=>'روزانه','week'=>'هفتگی','month'=>'ماهانه','year'=>'سالانه'][$project['planning_period']] ?? '—') ?></td>
                         <td><?= (int) $project['shifts_per_day'] ?> شیفت × <?= fl_e($project['hours_per_shift']) ?> ساعت<small><?= (int) $project['working_days_per_week'] ?> روز کاری در هفته</small></td>
-                        <td><span class="fl-status"><?= $project['status'] === 'draft' ? 'پیش‌نویس' : fl_e($project['status']) ?></span></td>
+                        <?php $projectStatus = (string) ($project['status'] ?? 'draft'); ?><td><span class="fl-status status-<?= fl_e($projectStatus) ?>"><?= fl_e($statuses[$projectStatus] ?? 'نامشخص') ?></span></td>
                         <td><div class="fl-row-actions"><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'show', ['id' => (int) $project['id']])) ?>">مشاهده</a><a class="fl-button fl-button-ghost" href="<?= fl_e(fl_url('project', 'edit', ['id' => (int) $project['id']])) ?>" aria-label="ویرایش پروژه">ویرایش</a><form method="post" action="<?= fl_e(fl_url('project', 'delete', ['id' => (int) $project['id']])) ?>" onsubmit="return confirm('این پروژه حذف می‌شود. ادامه می‌دهید؟');"><?= $csrfField ?><button class="fl-button fl-button-danger" type="submit" aria-label="حذف پروژه">حذف</button></form></div></td>
                     </tr>
                 <?php endforeach; ?>

@@ -20,7 +20,8 @@
         </ul>
     </section>
 
-    <section class="fl-card"><div class="fl-card-head"><div><span class="fl-eyebrow">مبنای مطالعه</span><h2>اطلاعات ثبت‌شده</h2></div><span class="fl-status">پیش‌نویس</span></div>
+    <?php $projectStatus = (string) ($project['status'] ?? 'draft'); ?>
+    <section class="fl-card"><div class="fl-card-head"><div><span class="fl-eyebrow">مبنای مطالعه</span><h2>اطلاعات ثبت‌شده</h2></div><span class="fl-status status-<?= fl_e($projectStatus) ?>"><?= fl_e($statuses[$projectStatus] ?? 'نامشخص') ?></span></div>
         <dl class="fl-details">
             <div><dt>کارخانه یا سایت</dt><dd><?= fl_e($project['facility_name'] ?: 'ثبت نشده') ?></dd></div>
             <div><dt>صنعت</dt><dd><?= fl_e($project['industry'] ?: 'ثبت نشده') ?></dd></div>

@@ -85,13 +85,13 @@ final class ProjectRepository
         $stmt = $this->db->prepare(
             'UPDATE SLP_projects
              SET title = ?, facility_name = ?, industry = ?, site_location = ?, scope_description = ?,
-                 planning_period = ?, shifts_per_day = ?, hours_per_shift = ?, working_days_per_week = ?
+                 planning_period = ?, shifts_per_day = ?, hours_per_shift = ?, working_days_per_week = ?, status = ?
              WHERE user_id = ? AND id = ?'
         );
         $stmt->execute([
             $data['title'], $data['facility_name'], $data['industry'], $data['site_location'],
             $data['scope_description'], $data['planning_period'], $data['shifts_per_day'],
-            $data['hours_per_shift'], $data['working_days_per_week'], $userId, $projectId,
+            $data['hours_per_shift'], $data['working_days_per_week'], $data['status'], $userId, $projectId,
         ]);
         if ($stmt->rowCount() < 1 && !$this->findForUser($userId, $projectId)) {
             throw new \InvalidArgumentException('پروژه پیدا نشد یا دسترسی به آن ندارید.');
